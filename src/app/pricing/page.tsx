@@ -25,7 +25,7 @@ export default function PricingPage() {
 
         <section className="pb-20 md:pb-32">
           <div className="container">
-            <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4">
+            <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
               {subscriptionTiers.map((tier) => (
                 <Card
                   key={tier.id}
@@ -42,7 +42,7 @@ export default function PricingPage() {
                   <CardHeader>
                     <CardTitle className="font-headline text-2xl">{tier.name}</CardTitle>
                     <div className="flex items-baseline gap-1">
-                      <span className="text-4xl font-bold">${tier.price}</span>
+                      <span className="text-4xl font-bold">${tier.price.toFixed(2)}</span>
                       <span className="text-muted-foreground">/ day</span>
                     </div>
                     <CardDescription>{tier.description}</CardDescription>
