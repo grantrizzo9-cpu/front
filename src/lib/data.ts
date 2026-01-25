@@ -6,13 +6,15 @@ export const subscriptionTiers: SubscriptionTier[] = [
     name: 'Starter',
     price: 4.95,
     priceId: 'price_starter_daily',
-    description: 'Perfect for getting started.',
+    description: 'Launch your affiliate journey with essential tools and incredible value.',
     features: [
       '3 Websites',
       '20 GB NVMe Storage',
+      'Free SSL Certificates',
+      'Daily Backups',
       'Basic AI Content Tools (Blog posts, social updates)',
-      '75% Affiliate Commission',
       'Standard Support',
+      '75% Affiliate Commission',
     ],
   },
   {
@@ -20,10 +22,11 @@ export const subscriptionTiers: SubscriptionTier[] = [
     name: 'Plus',
     price: 19.95,
     priceId: 'price_plus_daily',
-    description: 'All Starter features, plus more tools for growing affiliates.',
+    description: 'All Starter features, plus more power for growing affiliates.',
     features: [
       '10 Websites',
       '50 GB NVMe Storage',
+      'Global CDN for faster loading speeds',
       'Standard AI Suite (adds basic image generation)',
       'Standard Support',
     ],
@@ -37,6 +40,7 @@ export const subscriptionTiers: SubscriptionTier[] = [
     features: [
       '25 Websites',
       '100 GB NVMe Storage',
+      '1-Click Staging Environment',
       'Advanced AI Suite (adds logos & marketing copy)',
       'Priority Support',
     ],
@@ -51,6 +55,7 @@ export const subscriptionTiers: SubscriptionTier[] = [
     features: [
       '75 Websites',
       '250 GB NVMe Storage',
+      'Dedicated IP Address',
       'Pro AI Suite (adds AI analytics & advanced image editing)',
       'Priority Support',
     ],
