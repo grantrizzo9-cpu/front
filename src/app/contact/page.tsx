@@ -24,7 +24,7 @@ export default function ContactPage() {
     const body = `Name: ${name || ''}\nFrom: ${email || ''}\n\nMessage:\n${message || ''}`;
     
     // This will open the user's default email client
-    window.location.href = `mailto:support@affiliateai.host?subject=${encodeURIComponent(
+    window.location.href = `mailto:support@rentahost.shop?subject=${encodeURIComponent(
       subject || 'Contact Form Submission'
     )}&body=${encodeURIComponent(body)}`;
 
