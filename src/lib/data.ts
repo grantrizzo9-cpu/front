@@ -8,7 +8,7 @@ export const subscriptionTiers: SubscriptionTier[] = [
     priceId: 'price_bronze_daily',
     description: 'For serious affiliates getting started.',
     features: [
-      '25 Websites',
+      '3 Websites',
       '100 GB NVMe Storage',
       'Advanced AI Tools',
       '75% Affiliate Commission',
@@ -21,7 +21,7 @@ export const subscriptionTiers: SubscriptionTier[] = [
     priceId: 'price_silver_daily',
     description: 'For affiliates scaling their business.',
     features: [
-      '100 Websites',
+      '10 Websites',
       '250 GB NVMe Storage',
       'Pro AI Suite',
       'Priority Support',
@@ -36,7 +36,7 @@ export const subscriptionTiers: SubscriptionTier[] = [
     priceId: 'price_gold_daily',
     description: 'For high-earning individuals and teams.',
     features: [
-      'Unlimited Websites',
+      '50 Websites',
       '500 GB NVMe Storage',
       'Pro AI Suite',
       'Dedicated Support',
@@ -50,7 +50,7 @@ export const subscriptionTiers: SubscriptionTier[] = [
     priceId: 'price_platinum_daily',
     description: 'For power-affiliates and agencies.',
     features: [
-      'Unlimited Websites',
+      '100 Websites',
       '1 TB NVMe Storage',
       'Enterprise AI Suite',
       'Dedicated Account Manager',
@@ -64,7 +64,7 @@ export const subscriptionTiers: SubscriptionTier[] = [
     priceId: 'price_diamond_daily',
     description: 'For elite marketers managing large portfolios.',
     features: [
-      'Custom Infrastructure',
+      'Unlimited Websites',
       '2 TB NVMe Storage',
       'Custom AI Models',
       '24/7/365 Support',
@@ -78,7 +78,7 @@ export const subscriptionTiers: SubscriptionTier[] = [
     priceId: 'price_whale_daily',
     description: 'The ultimate package for industry leaders.',
     features: [
-      'Fully Managed Infrastructure',
+      'Unlimited Websites',
       '5 TB NVMe Storage',
       'Bespoke AI Development',
       'Dedicated Engineering Team',
