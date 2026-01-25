@@ -3,7 +3,7 @@
 /**
  * @fileOverview An AI flow for generating video from a text prompt.
  *
- * - generateVideo - A function that generates a video based on a prompt and aspect ratio.
+ * - generateVideo - A function that generates a video based on a prompt.
  * - GenerateVideoInput - The input type for the generateVideo function.
  * - GenerateVideoOutput - The return type for the generateVideo function.
  */
@@ -15,7 +15,6 @@ import { Readable } from 'stream';
 
 const GenerateVideoInputSchema = z.object({
   prompt: z.string().describe('A detailed description of the video to generate.'),
-  aspectRatio: z.enum(['16:9', '9:16']).default('16:9').describe('The aspect ratio of the video.'),
 });
 export type GenerateVideoInput = z.infer<typeof GenerateVideoInputSchema>;
 
@@ -67,7 +66,7 @@ const videoGeneratorFlow = ai.defineFlow(
       model: 'googleai/veo-3.0-generate-preview',
       prompt: input.prompt,
       config: {
-        aspectRatio: input.aspectRatio,
+        aspectRatio: '16:9',
       },
     });
 

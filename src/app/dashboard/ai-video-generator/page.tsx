@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { generateVideo } from '@/ai/flows/video-generator';
@@ -13,7 +12,6 @@ import { Loader2, Clapperboard, Download } from 'lucide-react';
 export default function AiVideoGeneratorPage() {
   const { toast } = useToast();
   const [prompt, setPrompt] = useState('');
-  const [aspectRatio, setAspectRatio] = useState('16:9');
   const [generatedVideo, setGeneratedVideo] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
@@ -24,8 +22,7 @@ export default function AiVideoGeneratorPage() {
 
     try {
       const result = await generateVideo({ 
-          prompt, 
-          aspectRatio: aspectRatio as '16:9' | '9:16'
+          prompt,
       });
       setGeneratedVideo(result.videoDataUri);
       toast({
@@ -74,18 +71,9 @@ export default function AiVideoGeneratorPage() {
                   rows={5}
                 />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="aspect-ratio">Aspect Ratio</Label>
-                <Select value={aspectRatio} onValueChange={setAspectRatio}>
-                  <SelectTrigger id="aspect-ratio">
-                    <SelectValue placeholder="Select an aspect ratio" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="16:9">16:9 (Widescreen)</SelectItem>
-                    <SelectItem value="9:16">9:16 (Portrait)</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+               <p className="text-xs text-muted-foreground">
+                Note: Videos are generated in 16:9 widescreen format.
+              </p>
               <Button type="submit" className="w-full" disabled={isLoading}>
                 {isLoading ? (
                   <>
