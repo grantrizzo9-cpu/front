@@ -11,13 +11,13 @@
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
 
-export const GenerateContentInputSchema = z.object({
+const GenerateContentInputSchema = z.object({
   topic: z.string().describe('The topic or subject for the content.'),
   contentType: z.string().describe('The type of content to generate (e.g., blog post intro, social media post).'),
 });
 export type GenerateContentInput = z.infer<typeof GenerateContentInputSchema>;
 
-export const GenerateContentOutputSchema = z.object({
+const GenerateContentOutputSchema = z.object({
   content: z.string().describe('The generated text content.'),
 });
 export type GenerateContentOutput = z.infer<typeof GenerateContentOutputSchema>;
