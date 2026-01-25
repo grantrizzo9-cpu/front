@@ -62,36 +62,44 @@ const videoGeneratorFlow = ai.defineFlow(
     outputSchema: GenerateVideoOutputSchema,
   },
   async (input) => {
-    let { operation } = await ai.generate({
-      model: 'googleai/veo-3.0-generate-preview',
-      prompt: input.prompt,
-      config: {
-        aspectRatio: '16:9',
-      },
-    });
+    try {
+      let { operation } = await ai.generate({
+        model: 'googleai/veo-3.0-generate-preview',
+        prompt: input.prompt,
+        config: {
+          aspectRatio: '16:9',
+        },
+      });
 
-    if (!operation) {
-      throw new Error('Expected the model to return an operation');
+      if (!operation) {
+        throw new Error('Expected the model to return an operation');
+      }
+
+      // Wait until the operation completes.
+      while (!operation.done) {
+        operation = await ai.checkOperation(operation);
+        // Sleep for 5 seconds before checking again.
+        await new Promise((resolve) => setTimeout(resolve, 5000));
+      }
+
+      if (operation.error) {
+        throw new Error('The video generation process failed: ' + operation.error.message);
+      }
+
+      const video = operation.output?.message?.content.find((p) => !!p.media);
+      if (!video) {
+        throw new Error('Failed to find the generated video in the AI response.');
+      }
+
+      const videoDataUri = await downloadVideo(video);
+      
+      return { videoDataUri };
+    } catch (e: any) {
+        console.error(e);
+        if (e.message && (e.message.includes('404 Not Found') || e.message.includes('is not found for API version'))) {
+            throw new Error('The selected AI video model is not available for your account. This may be due to account status or regional restrictions. Please try again after your billing is fully activated.');
+        }
+        throw new Error('An unexpected error occurred while trying to generate the video.');
     }
-
-    // Wait until the operation completes.
-    while (!operation.done) {
-      operation = await ai.checkOperation(operation);
-      // Sleep for 5 seconds before checking again.
-      await new Promise((resolve) => setTimeout(resolve, 5000));
-    }
-
-    if (operation.error) {
-      throw new Error('failed to generate video: ' + operation.error.message);
-    }
-
-    const video = operation.output?.message?.content.find((p) => !!p.media);
-    if (!video) {
-      throw new Error('Failed to find the generated video');
-    }
-
-    const videoDataUri = await downloadVideo(video);
-    
-    return { videoDataUri };
   }
 );
