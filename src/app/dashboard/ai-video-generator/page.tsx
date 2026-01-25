@@ -9,12 +9,10 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { generateVideo } from '@/ai/flows/video-generator';
 import { Loader2, Clapperboard, Download } from 'lucide-react';
-import { Slider } from '@/components/ui/slider';
 
 export default function AiVideoGeneratorPage() {
   const { toast } = useToast();
   const [prompt, setPrompt] = useState('');
-  const [duration, setDuration] = useState([5]);
   const [aspectRatio, setAspectRatio] = useState('16:9');
   const [generatedVideo, setGeneratedVideo] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -27,7 +25,6 @@ export default function AiVideoGeneratorPage() {
     try {
       const result = await generateVideo({ 
           prompt, 
-          durationSeconds: duration[0],
           aspectRatio: aspectRatio as '16:9' | '9:16'
       });
       setGeneratedVideo(result.videoDataUri);
@@ -75,19 +72,6 @@ export default function AiVideoGeneratorPage() {
                   placeholder="e.g., 'A majestic dragon soaring over a mystical forest at dawn.'"
                   required
                   rows={5}
-                />
-              </div>
-              <div className="space-y-4">
-                <div className='flex justify-between items-center'>
-                    <Label>Duration (seconds)</Label>
-                    <span className='text-sm font-medium'>{duration[0]}s</span>
-                </div>
-                <Slider
-                  value={duration}
-                  onValueChange={setDuration}
-                  min={1}
-                  max={8}
-                  step={1}
                 />
               </div>
               <div className="space-y-2">
