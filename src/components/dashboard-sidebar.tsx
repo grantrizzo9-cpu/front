@@ -22,6 +22,7 @@ import {
   Undo2,
   LayoutGrid,
   BrainCircuit,
+  Clapperboard,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -48,7 +49,8 @@ export function DashboardSidebar() {
 
   const menuItems = [
     { path: "/dashboard", icon: <LayoutDashboard />, label: "Dashboard" },
-    { path: "/dashboard/ai-tools", icon: <BrainCircuit />, label: "AI Tools" },
+    { path: "/dashboard/ai-tools", icon: <BrainCircuit />, label: "AI Content" },
+    { path: "/dashboard/ai-video-generator", icon: <Clapperboard />, label: "AI Video" },
     { path: "/dashboard/referrals", icon: <Users />, label: "Referrals" },
     { path: "/dashboard/payouts", icon: <Wallet />, label: "Payouts" },
     { path: "/dashboard/settings", icon: <Settings />, label: "Settings" },

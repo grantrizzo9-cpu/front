@@ -14,6 +14,7 @@ import { z } from 'genkit';
 const GenerateContentInputSchema = z.object({
   topic: z.string().describe('The topic or subject for the content.'),
   contentType: z.string().describe('The type of content to generate (e.g., blog post intro, social media post).'),
+  wordCount: z.number().optional().describe('The desired word count for the generated content.'),
 });
 export type GenerateContentInput = z.infer<typeof GenerateContentInputSchema>;
 
@@ -33,7 +34,9 @@ const prompt = ai.definePrompt({
     input: { schema: GenerateContentInputSchema },
     output: { schema: GenerateContentOutputSchema },
     prompt: `You are an expert content creator and copywriter. Your task is to generate a compelling "{{contentType}}" about the following topic: "{{topic}}".
-
+    {{#if wordCount}}
+    The content should be approximately {{wordCount}} words long.
+    {{/if}}
     The output should be just the generated content, ready to be copied and pasted.`,
 });
 

@@ -15,6 +15,7 @@ export default function AiToolsPage() {
   const { toast } = useToast();
   const [topic, setTopic] = useState('');
   const [contentType, setContentType] = useState('blog-intro');
+  const [wordCount, setWordCount] = useState<number | undefined>(undefined);
   const [generatedContent, setGeneratedContent] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
@@ -24,7 +25,7 @@ export default function AiToolsPage() {
     setGeneratedContent('');
 
     try {
-      const result = await generateContent({ topic, contentType });
+      const result = await generateContent({ topic, contentType, wordCount: wordCount ? Number(wordCount) : undefined });
       setGeneratedContent(result.content);
     } catch (error) {
       console.error(error);
@@ -68,7 +69,7 @@ export default function AiToolsPage() {
           </CardHeader>
           <CardContent>
             <form className="space-y-4" onSubmit={handleSubmit}>
-              <div className="space-y-2">
+               <div className="space-y-2">
                 <Label htmlFor="topic">Topic / Subject</Label>
                 <Input
                   id="topic"
@@ -78,19 +79,31 @@ export default function AiToolsPage() {
                   required
                 />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="content-type">Content Type</Label>
-                <Select value={contentType} onValueChange={setContentType}>
-                  <SelectTrigger id="content-type">
-                    <SelectValue placeholder="Select a content type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="blog-intro">Blog Post Intro</SelectItem>
-                    <SelectItem value="social-media-post">Social Media Post</SelectItem>
-                    <SelectItem value="product-description">Product Description</SelectItem>
-                    <SelectItem value="email-subject-line">Email Subject Line</SelectItem>
-                  </SelectContent>
-                </Select>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="content-type">Content Type</Label>
+                  <Select value={contentType} onValueChange={setContentType}>
+                    <SelectTrigger id="content-type">
+                      <SelectValue placeholder="Select a content type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="blog-intro">Blog Post Intro</SelectItem>
+                      <SelectItem value="social-media-post">Social Media Post</SelectItem>
+                      <SelectItem value="product-description">Product Description</SelectItem>
+                      <SelectItem value="email-subject-line">Email Subject Line</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                 <div className="space-y-2">
+                    <Label htmlFor="word-count">Word Count (Optional)</Label>
+                    <Input
+                        id="word-count"
+                        type="number"
+                        value={wordCount || ''}
+                        onChange={(e) => setWordCount(e.target.value ? parseInt(e.target.value) : undefined)}
+                        placeholder="e.g., 250"
+                    />
+                </div>
               </div>
               <Button type="submit" className="w-full" disabled={isLoading}>
                 {isLoading ? (
