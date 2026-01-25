@@ -8,9 +8,6 @@ import {
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
-  SidebarMenuSub,
-  SidebarMenuSubItem,
-  SidebarMenuSubButton,
 } from "@/components/ui/sidebar";
 import { Logo } from "@/components/logo";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -20,7 +17,6 @@ import {
   Wallet,
   Settings,
   Shield,
-  LifeBuoy,
   LogOut,
   MoreVertical,
   Undo2,
@@ -69,14 +65,15 @@ export function DashboardSidebar() {
         <SidebarMenu>
           {menuItems.map((item) => (
             <SidebarMenuItem key={item.path}>
-              <Link href={item.path} legacyBehavior passHref>
-                <SidebarMenuButton
-                  isActive={isActive(item.path)}
-                  icon={item.icon}
-                >
-                  {item.label}
-                </SidebarMenuButton>
-              </Link>
+              <SidebarMenuButton
+                asChild
+                isActive={isActive(item.path)}
+              >
+                <Link href={item.path}>
+                  {item.icon}
+                  <span>{item.label}</span>
+                </Link>
+              </SidebarMenuButton>
             </SidebarMenuItem>
           ))}
           {isAdmin && (
@@ -86,14 +83,15 @@ export function DashboardSidebar() {
               </SidebarMenuItem>
               {adminMenuItems.map((item) => (
                 <SidebarMenuItem key={item.path}>
-                  <Link href={item.path} legacyBehavior passHref>
-                    <SidebarMenuButton
-                      isActive={isActive(item.path)}
-                      icon={item.icon}
-                    >
-                      {item.label}
-                    </SidebarMenuButton>
-                  </Link>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={isActive(item.path)}
+                  >
+                    <Link href={item.path}>
+                      {item.icon}
+                      <span>{item.label}</span>
+                    </Link>
+                  </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
             </>
