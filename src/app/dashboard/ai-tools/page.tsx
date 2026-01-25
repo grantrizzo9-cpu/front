@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { generateContent } from '@/ai/flows/content-generator';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Copy } from 'lucide-react';
 
 export default function AiToolsPage() {
   const { toast } = useToast();
@@ -38,9 +38,20 @@ export default function AiToolsPage() {
     }
   };
 
+  const handleCopy = () => {
+    if (generatedContent) {
+      navigator.clipboard.writeText(generatedContent);
+      toast({
+        title: 'Content Copied!',
+        description: 'The generated content has been copied to your clipboard.',
+      });
+    }
+  };
+
+
   return (
-    <div className="space-y-8 max-w-4xl">
-      <div>
+    <div className="space-y-8 max-w-4xl mx-auto">
+      <div className="text-center">
         <h1 className="text-3xl font-bold font-headline">AI Content Generator</h1>
         <p className="text-muted-foreground">
           Create compelling content for your websites, blogs, and social media in seconds.
@@ -95,19 +106,29 @@ export default function AiToolsPage() {
           </CardContent>
         </Card>
 
-        <Card className="flex flex-col">
+        <Card className="flex flex-col relative">
           <CardHeader>
             <CardTitle>Generated Content</CardTitle>
             <CardDescription>Your AI-generated text will appear below. Copy and use it anywhere!</CardDescription>
           </CardHeader>
           <CardContent className="flex-1">
             <Textarea
-              className="h-full resize-none"
+              className="h-full resize-none bg-secondary/50"
               placeholder="Your content will be generated here."
               value={generatedContent}
               readOnly
             />
           </CardContent>
+          {generatedContent && (
+             <Button
+                variant="ghost"
+                size="icon"
+                className="absolute top-4 right-4"
+                onClick={handleCopy}
+              >
+                <Copy className="h-4 w-4" />
+              </Button>
+          )}
         </Card>
       </div>
     </div>
