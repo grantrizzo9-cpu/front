@@ -63,7 +63,7 @@ export default function Home() {
     { q: "How and when do I get paid?", a: "We process all commission payouts daily. All your earned commissions from the previous day are automatically sent to the PayPal account you have on file. It's fully automated." },
     { q: "What am I selling?", a: "You are promoting our subscription plans which include high-quality web hosting and a suite of powerful AI tools designed to help users build and grow their online businesses." },
     { q: "Is there a limit to how much I can earn?", a: "Absolutely not! There is no cap on your potential earnings. The more customers you refer, the more you earn. With our 75% commission rate, the sky is the limit." },
-    { q: "What is your refund and success-guarantee policy?", a: "We're confident in the value of our platform and the potential of our affiliate program. Our 75% commission rate is structured so that referring just two new members on the same plan can cover your own daily subscription cost and generate a profit. To back this up, we offer a 24-hour success guarantee: if you don't make at least two referrals within your first 24 hours, you are eligible for a full refund. This policy ensures you can join risk-free while protecting the program's integrity." },
+    { q: "What is your refund and success-guarantee policy?", a: "We want you to be profitable. Our affiliate program is designed so just two referrals can cover your daily subscription and put you in profit. We stand by this with a simple, powerful guarantee: if you have fewer than two referrals, you are eligible to request a refund on your daily subscription fees. This ensures you can build your referral base without financial pressure, because you don't pay until you're earning." },
   ];
 
   return (

@@ -10,23 +10,19 @@ export default function RefundPage() {
   const { toast } = useToast();
   
   // In a real app, this data would come from the user's record in Firestore
-  const signupDate = new Date(new Date().getTime() - (12 * 60 * 60 * 1000)); // Signed up 12 hours ago
-  const referralCount = 1;
+  const referralCount = 1; // Example value
 
-  const hoursSinceSignup = (new Date().getTime() - signupDate.getTime()) / (1000 * 60 * 60);
-  const isWithin24Hours = hoursSinceSignup <= 24;
   const hasLessThan2Referrals = referralCount < 2;
-  const isEligible = isWithin24Hours && hasLessThan2Referrals;
+  const isEligible = hasLessThan2Referrals;
 
   const handleRefundRequest = () => {
-    // Here you would trigger a server action or API call to:
-    // 1. Verify eligibility on the server-side.
-    // 2. Mark the user's account for refund processing.
-    // 3. Deactivate their subscription.
-    // 4. Notify admins.
+    // This would trigger a server action to:
+    // 1. Verify eligibility (fewer than 2 referrals).
+    // 2. Process a refund for the most recent daily charge via PayPal.
+    // 3. Log the refund event.
     toast({
       title: "Refund Request Submitted",
-      description: "Your request is being processed. You will be notified via email.",
+      description: "Your request for today's fee is being processed. You will be notified via email.",
       variant: "default",
     });
   };
@@ -35,14 +31,14 @@ export default function RefundPage() {
     <div className="space-y-8 max-w-2xl">
       <div>
         <h1 className="text-3xl font-bold font-headline">Request a Refund</h1>
-        <p className="text-muted-foreground">Manage your subscription and request a refund if eligible.</p>
+        <p className="text-muted-foreground">Review our success guarantee and request a refund if eligible.</p>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Refund Policy</CardTitle>
+          <CardTitle>Success Guarantee & Refund Policy</CardTitle>
           <CardDescription>
-            Our refund policy is designed to be fair while protecting the integrity of our affiliate program.
+            Our guarantee ensures you don't pay until you're profitable.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -51,21 +47,14 @@ export default function RefundPage() {
             <AlertTitle>Eligibility Criteria</AlertTitle>
             <AlertDescription>
               <ul className="list-disc pl-5 space-y-1 mt-2">
-                <li>You must be within <strong>24 hours</strong> of your initial sign-up and payment.</li>
-                <li>You must have made <strong>fewer than 2</strong> successful referrals.</li>
+                <li>You are eligible for a refund of your daily fee as long as you have made <strong>fewer than 2</strong> successful referrals.</li>
               </ul>
             </AlertDescription>
           </Alert>
 
           <Card className="bg-secondary/50">
             <CardContent className="pt-6">
-                <div className="grid grid-cols-2 gap-4">
-                    <div className="text-center">
-                        <p className="text-sm text-muted-foreground">Time Since Signup</p>
-                        <p className={`text-lg font-bold ${isWithin24Hours ? 'text-green-600' : 'text-destructive'}`}>
-                            {hoursSinceSignup.toFixed(1)} / 24 hours
-                        </p>
-                    </div>
+                <div className="grid grid-cols-1 gap-4">
                     <div className="text-center">
                         <p className="text-sm text-muted-foreground">Referrals Made</p>
                         <p className={`text-lg font-bold ${hasLessThan2Referrals ? 'text-green-600' : 'text-destructive'}`}>
@@ -83,14 +72,13 @@ export default function RefundPage() {
           size="lg"
           onClick={handleRefundRequest}
           disabled={!isEligible}
-          variant={isEligible ? "destructive" : "secondary"}
+          variant={isEligible ? "default" : "secondary"}
         >
-          {isEligible ? "Request Full Refund" : "Not Eligible for Refund"}
+          {isEligible ? "Request Daily Refund" : "Not Eligible for Refund"}
         </Button>
         {!isEligible && (
             <p className="text-sm text-muted-foreground mt-2">
-                { !isWithin24Hours && "The 24-hour refund window has passed."}
-                { isWithin24Hours && !hasLessThan2Referrals && "You have 2 or more referrals."}
+                You have 2 or more referrals and are now profitable!
             </p>
         )}
       </div>
