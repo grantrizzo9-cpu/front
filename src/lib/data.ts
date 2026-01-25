@@ -10,7 +10,7 @@ export const subscriptionTiers: SubscriptionTier[] = [
     features: [
       '3 Websites',
       '20 GB NVMe Storage',
-      'Basic AI Tools',
+      'Basic AI Content Tools (Blog posts, social updates)',
       '75% Affiliate Commission',
     ],
   },
@@ -23,7 +23,7 @@ export const subscriptionTiers: SubscriptionTier[] = [
     features: [
       '10 Websites',
       '50 GB NVMe Storage',
-      'Basic AI Tools',
+      'Standard AI Suite (Content & basic image generation)',
       '75% Affiliate Commission',
     ],
   },
@@ -36,7 +36,7 @@ export const subscriptionTiers: SubscriptionTier[] = [
     features: [
       '25 Websites',
       '100 GB NVMe Storage',
-      'Advanced AI Tools',
+      'Advanced AI Suite (Enhanced content, logos, marketing copy)',
       '75% Affiliate Commission',
     ],
   },
@@ -49,7 +49,7 @@ export const subscriptionTiers: SubscriptionTier[] = [
     features: [
       '75 Websites',
       '250 GB NVMe Storage',
-      'Advanced AI Tools',
+      'Pro AI Suite (AI-powered analytics, advanced image editing)',
       'Priority Support',
       '75% Affiliate Commission',
     ],
@@ -64,7 +64,7 @@ export const subscriptionTiers: SubscriptionTier[] = [
     features: [
       '200 Websites',
       '750 GB NVMe Storage',
-      'Pro AI Suite',
+      'Business AI Suite (Workflow automation, predictive analytics)',
       'Dedicated Support',
       '75% Affiliate Commission',
     ],
@@ -78,7 +78,7 @@ export const subscriptionTiers: SubscriptionTier[] = [
     features: [
       'Unlimited Websites',
       '2 TB NVMe Storage',
-      'Enterprise AI Suite',
+      'Enterprise AI Suite (Full API access, custom model training)',
       'Dedicated Account Manager',
       '75% Affiliate Commission',
     ],
