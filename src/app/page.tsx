@@ -59,7 +59,7 @@ export default function Home() {
   ];
 
   const faqs = [
-    { q: "How does the referral tracking work?", a: "When someone clicks your unique affiliate link, a cookie is stored in their browser. If they sign up within 90 days, they are permanently linked to your account, and you will receive a 75% commission on all their payments." },
+    { q: "How does the referral tracking work?", a: "When someone clicks your unique affiliate link, a cookie is stored in their browser that lasts forever. When they sign up, they are permanently linked to your account, and you will receive a 75% commission on all their payments." },
     { q: "How and when do I get paid?", a: "We process all commission payouts daily. All your earned commissions from the previous day are automatically sent to the PayPal account you have on file. It's fully automated." },
     { q: "What am I selling?", a: "You are promoting our subscription plans which include high-quality web hosting and a suite of powerful AI tools designed to help users build and grow their online businesses." },
     { q: "Is there a limit to how much I can earn?", a: "Absolutely not! There is no cap on your potential earnings. The more customers you refer, the more you earn. With our 75% commission rate, the sky is the limit." },
