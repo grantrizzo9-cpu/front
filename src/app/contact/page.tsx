@@ -14,11 +14,24 @@ export default function ContactPage() {
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    const form = event.currentTarget;
+    const formData = new FormData(form);
+    const subject = formData.get('subject') as string | null;
+    const message = formData.get('message') as string | null;
+    const name = formData.get('name') as string | null;
+    const email = formData.get('email') as string | null;
+
+    const body = `Name: ${name || ''}\nFrom: ${email || ''}\n\nMessage:\n${message || ''}`;
+    
+    // This will open the user's default email client
+    window.location.href = `mailto:support@affiliateai.host?subject=${encodeURIComponent(
+      subject || 'Contact Form Submission'
+    )}&body=${encodeURIComponent(body)}`;
+
     toast({
-      title: "Message Sent!",
-      description: "Thanks for reaching out. We'll get back to you as soon as possible.",
+      title: "Opening Email Client",
+      description: "Your message has been prepared in your default email application.",
     });
-    (event.target as HTMLFormElement).reset();
   };
 
   return (
@@ -30,7 +43,7 @@ export default function ContactPage() {
             <CardHeader>
               <CardTitle className="font-headline text-3xl">Contact Us</CardTitle>
               <CardDescription>
-                Have a question or need support? Fill out the form below and we'll get back to you.
+                Have a question or need support? Fill out the form below to open a pre-filled email in your default email client.
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -38,23 +51,23 @@ export default function ContactPage() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="name">Name</Label>
-                    <Input id="name" type="text" placeholder="Your Name" required />
+                    <Input id="name" name="name" type="text" placeholder="Your Name" required />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="email">Email</Label>
-                    <Input id="email" type="email" placeholder="you@example.com" required />
+                    <Input id="email" name="email" type="email" placeholder="you@example.com" required />
                   </div>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="subject">Subject</Label>
-                  <Input id="subject" type="text" placeholder="How can we help?" required />
+                  <Input id="subject" name="subject" type="text" placeholder="How can we help?" required />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="message">Message</Label>
-                  <Textarea id="message" placeholder="Your message..." required rows={6} />
+                  <Textarea id="message" name="message" placeholder="Your message..." required rows={6} />
                 </div>
                 <Button type="submit" className="w-full">
-                  Send Message
+                  Prepare Email
                 </Button>
               </form>
             </CardContent>
