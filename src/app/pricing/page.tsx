@@ -2,26 +2,41 @@
 
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { CheckCircle } from "lucide-react";
-import Link from "next/link";
-import { subscriptionTiers } from "@/lib/data";
-import { cn } from "@/lib/utils";
-import { useSearchParams } from "next/navigation";
+import { Suspense } from "react";
+import { PricingCards } from "./pricing-cards";
+import { Card } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+
+function LoadingPricingCards() {
+  return (
+    <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
+      {[...Array(3)].map((_, i) => (
+        <Card key={i} className="flex flex-col">
+          <div className="p-6 space-y-4">
+             <Skeleton className="h-6 w-1/2" />
+             <Skeleton className="h-8 w-1/3" />
+             <Skeleton className="h-4 w-3/4" />
+          </div>
+          <div className="p-6 pt-0 flex-1">
+             <div className="space-y-3">
+              {[...Array(5)].map((_, j) => (
+                <div key={j} className="flex items-center gap-2">
+                    <Skeleton className="w-5 h-5 rounded-full" />
+                    <Skeleton className="h-4 w-full" />
+                </div>
+              ))}
+             </div>
+          </div>
+          <div className="p-6 pt-0">
+            <Skeleton className="h-10 w-full" />
+          </div>
+        </Card>
+      ))}
+    </div>
+  )
+}
 
 export default function PricingPage() {
-  const searchParams = useSearchParams();
-  const refCode = searchParams.get("ref");
-
-  const getSignupLink = (tierId: string) => {
-    let link = `/signup?plan=${tierId}`;
-    if (refCode) {
-      link += `&ref=${refCode}`;
-    }
-    return link;
-  };
-
   return (
     <div className="flex flex-col min-h-screen">
       <Header />
@@ -39,46 +54,9 @@ export default function PricingPage() {
 
         <section className="pb-20 md:pb-32">
           <div className="container">
-            <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
-              {subscriptionTiers.map((tier) => (
-                <Card
-                  key={tier.id}
-                  className={cn(
-                    "flex flex-col",
-                    tier.isMostPopular ? "border-primary ring-2 ring-primary shadow-lg" : ""
-                  )}
-                >
-                  {tier.isMostPopular && (
-                    <div className="bg-primary text-primary-foreground text-center py-1.5 text-sm font-semibold rounded-t-lg">
-                      Most Popular
-                    </div>
-                  )}
-                  <CardHeader>
-                    <CardTitle className="font-headline text-2xl">{tier.name}</CardTitle>
-                    <div className="flex items-baseline gap-1">
-                      <span className="text-4xl font-bold">${tier.price.toFixed(2)}</span>
-                      <span className="text-muted-foreground">/ day</span>
-                    </div>
-                    <CardDescription>{tier.description}</CardDescription>
-                  </CardHeader>
-                  <CardContent className="flex-1">
-                    <ul className="space-y-3">
-                      {tier.features.map((feature) => (
-                        <li key={feature} className="flex items-center gap-2">
-                          <CheckCircle className="w-5 h-5 text-green-500" />
-                          <span className="text-sm">{feature}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </CardContent>
-                  <CardFooter>
-                    <Button asChild className="w-full" variant={tier.isMostPopular ? "default" : "outline"}>
-                      <Link href={getSignupLink(tier.id)}>Sign Up Now</Link>
-                    </Button>
-                  </CardFooter>
-                </Card>
-              ))}
-            </div>
+            <Suspense fallback={<LoadingPricingCards />}>
+                <PricingCards />
+            </Suspense>
           </div>
         </section>
       </main>
