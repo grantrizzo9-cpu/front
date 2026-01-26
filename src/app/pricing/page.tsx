@@ -1,3 +1,5 @@
+"use client";
+
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { Button } from "@/components/ui/button";
@@ -6,8 +8,20 @@ import { CheckCircle } from "lucide-react";
 import Link from "next/link";
 import { subscriptionTiers } from "@/lib/data";
 import { cn } from "@/lib/utils";
+import { useSearchParams } from "next/navigation";
 
 export default function PricingPage() {
+  const searchParams = useSearchParams();
+  const refCode = searchParams.get("ref");
+
+  const getSignupLink = (tierId: string) => {
+    let link = `/signup?plan=${tierId}`;
+    if (refCode) {
+      link += `&ref=${refCode}`;
+    }
+    return link;
+  };
+
   return (
     <div className="flex flex-col min-h-screen">
       <Header />
@@ -59,7 +73,7 @@ export default function PricingPage() {
                   </CardContent>
                   <CardFooter>
                     <Button asChild className="w-full" variant={tier.isMostPopular ? "default" : "outline"}>
-                      <Link href={`/signup?plan=${tier.id}`}>Sign Up Now</Link>
+                      <Link href={getSignupLink(tier.id)}>Sign Up Now</Link>
                     </Button>
                   </CardFooter>
                 </Card>
