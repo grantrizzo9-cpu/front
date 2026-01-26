@@ -9,6 +9,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { subscriptionTiers } from "@/lib/data";
 import { useEffect, useState } from "react";
+import { Users } from "lucide-react";
 
 export function SignupForm() {
   const router = useRouter();
@@ -73,8 +74,11 @@ export function SignupForm() {
             <Input id="password" type="password" required />
           </div>
           {referralCode && (
-             <div className="text-sm text-muted-foreground p-3 bg-secondary rounded-md">
-                You were referred by: <span className="font-semibold text-foreground">{referralCode}</span>
+             <div className="flex items-center gap-3 text-sm text-primary border border-primary/20 bg-primary/5 p-3 rounded-lg">
+                <Users className="h-5 w-5 flex-shrink-0" />
+                <span>
+                    You were referred by: <span className="font-semibold">{referralCode}</span>
+                </span>
              </div>
           )}
           <Button type="submit" className="w-full">
