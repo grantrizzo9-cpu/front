@@ -15,6 +15,12 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        {/* 
+          SITE VERIFICATION: 
+          Paste your site verification meta tag here.
+          For example, from Google Search Console:
+          <meta name="google-site-verification" content="Your_Verification_Code" />
+        */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
