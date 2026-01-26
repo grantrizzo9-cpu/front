@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { generateContent } from '@/ai/flows/content-generator';
-import { Loader2, Copy } from 'lucide-react';
+import { Loader2, Copy, AlertTriangle, BrainCircuit } from 'lucide-react';
 
 export default function AiToolsPage() {
   const { toast } = useToast();
@@ -18,22 +18,27 @@ export default function AiToolsPage() {
   const [wordCount, setWordCount] = useState<number | undefined>(undefined);
   const [generatedContent, setGeneratedContent] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setIsLoading(true);
     setGeneratedContent('');
+    setError(null);
 
     try {
       const result = await generateContent({ topic, contentType, wordCount: wordCount ? Number(wordCount) : undefined });
-      setGeneratedContent(result.content);
-    } catch (error) {
-      console.error(error);
-      toast({
-        variant: 'destructive',
-        title: 'Uh oh! Something went wrong.',
-        description: 'There was a problem with the AI content generator.',
-      });
+      if (result.error) {
+        setError(result.error);
+      } else if (result.content) {
+        setGeneratedContent(result.content);
+      } else {
+        setError('The AI model returned an empty response.');
+      }
+    } catch (e) {
+      console.error(e);
+      const errorMessage = e instanceof Error ? e.message : 'An unexpected problem occurred.';
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -83,7 +88,7 @@ export default function AiToolsPage() {
                 <div className="space-y-2">
                   <Label htmlFor="content-type">Content Type</Label>
                   <Select value={contentType} onValueChange={setContentType}>
-                    <SelectTrigger id="content-type">
+                    <SelectTrigger id="content-type" suppressHydrationWarning>
                       <SelectValue placeholder="Select a content type" />
                     </SelectTrigger>
                     <SelectContent>
@@ -124,15 +129,36 @@ export default function AiToolsPage() {
             <CardTitle>Generated Content</CardTitle>
             <CardDescription>Your AI-generated text will appear below. Copy and use it anywhere!</CardDescription>
           </CardHeader>
-          <CardContent className="flex-1">
-            <Textarea
-              className="h-full resize-none bg-secondary/50"
-              placeholder="Your content will be generated here."
-              value={generatedContent}
-              readOnly
-            />
+          <CardContent className="flex-1 flex items-center justify-center bg-secondary/50 rounded-b-lg p-4 min-h-[200px]">
+            {isLoading && (
+                <div className='flex flex-col items-center gap-4 text-muted-foreground text-center'>
+                    <Loader2 className='w-12 h-12 animate-spin' />
+                    <p>Generating content...</p>
+                </div>
+            )}
+            {!isLoading && error && (
+                <div className='flex flex-col items-center gap-4 text-destructive text-center'>
+                    <AlertTriangle className='w-12 h-12' />
+                    <p className='font-semibold'>Content Generation Failed</p>
+                    <p className='text-sm'>{error}</p>
+                </div>
+            )}
+            {!isLoading && !error && !generatedContent && (
+                <div className='flex flex-col items-center gap-2 text-muted-foreground text-center'>
+                    <BrainCircuit className='w-16 h-16' />
+                    <p>Your content will appear here.</p>
+                </div>
+            )}
+            {!isLoading && !error && generatedContent && (
+                 <Textarea
+                    className="h-full flex-1 resize-none bg-background"
+                    placeholder="Your content will be generated here."
+                    value={generatedContent}
+                    readOnly
+                />
+            )}
           </CardContent>
-          {generatedContent && (
+          {generatedContent && !error && (
              <Button
                 variant="ghost"
                 size="icon"
