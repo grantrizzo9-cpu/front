@@ -9,9 +9,9 @@ import { Copy } from "lucide-react";
 
 export default function SettingsPage() {
   // This would come from the logged-in user's data
-  const username = "affiliate-user";
+  const username = "rentahost";
   const affiliateLink = `https://affiliateai.host/?ref=${username}`;
-  const paypalEmail = "user@example.com";
+  const paypalEmail = "hello@rentahost.shop";
 
   const { toast } = useToast();
 

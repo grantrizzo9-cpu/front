@@ -108,11 +108,11 @@ export function DashboardSidebar() {
         <div className="flex items-center gap-3">
           <Avatar>
             <AvatarImage src="https://picsum.photos/seed/user-avatar/100/100" />
-            <AvatarFallback>A</AvatarFallback>
+            <AvatarFallback>R</AvatarFallback>
           </Avatar>
           <div className="flex-1 overflow-hidden">
-            <p className="font-semibold text-sm truncate">Admin</p>
-            <p className="text-xs text-muted-foreground truncate">rentapog@gmail.com</p>
+            <p className="font-semibold text-sm truncate">rentahost</p>
+            <p className="text-xs text-muted-foreground truncate">hello@rentahost.shop</p>
           </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
