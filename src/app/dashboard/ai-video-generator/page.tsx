@@ -7,35 +7,39 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { generateVideo } from '@/ai/flows/video-generator';
-import { Loader2, Clapperboard, Download } from 'lucide-react';
+import { Loader2, Clapperboard, Download, AlertTriangle } from 'lucide-react';
 
 export default function AiVideoGeneratorPage() {
   const { toast } = useToast();
   const [prompt, setPrompt] = useState('');
   const [generatedVideo, setGeneratedVideo] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setIsLoading(true);
     setGeneratedVideo('');
+    setError(null);
 
     try {
       const result = await generateVideo({ 
           prompt,
       });
-      setGeneratedVideo(result.videoDataUri);
-      toast({
-        title: 'Video Generated!',
-        description: 'Your AI-generated video is ready.',
-      });
-    } catch (error) {
-      console.error(error);
-      toast({
-        variant: 'destructive',
-        title: 'Uh oh! Something went wrong.',
-        description: error instanceof Error ? error.message : 'There was a problem with the AI video generator.',
-      });
+
+      if (result.error) {
+        setError(result.error);
+      } else if (result.videoDataUri) {
+        setGeneratedVideo(result.videoDataUri);
+        toast({
+          title: 'Video Generated!',
+          description: 'Your AI-generated video is ready.',
+        });
+      }
+    } catch (e) {
+      console.error(e);
+      const errorMessage = e instanceof Error ? e.message : 'An unexpected problem occurred.';
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -93,19 +97,26 @@ export default function AiVideoGeneratorPage() {
             <CardTitle>Generated Video</CardTitle>
             <CardDescription>Your video will appear here. This can take a few minutes.</CardDescription>
           </CardHeader>
-          <CardContent className="flex-1 flex items-center justify-center bg-secondary/50 rounded-b-md">
-            {isLoading && !generatedVideo && (
-                <div className='flex flex-col items-center gap-4 text-muted-foreground'>
+          <CardContent className="flex-1 flex items-center justify-center bg-secondary/50 rounded-b-md p-4">
+            {isLoading && (
+                <div className='flex flex-col items-center gap-4 text-muted-foreground text-center'>
                     <Clapperboard className='w-16 h-16 animate-pulse' />
                     <p>Generating, please wait...</p>
                     <p className='text-xs'>(This may take a minute or two)</p>
                 </div>
             )}
-            {generatedVideo && (
+            {!isLoading && generatedVideo && (
               <video src={generatedVideo} controls autoPlay loop className="w-full rounded-md" />
             )}
-            {!isLoading && !generatedVideo && (
-                <div className='flex flex-col items-center gap-2 text-muted-foreground'>
+            {!isLoading && error && (
+                <div className='flex flex-col items-center gap-4 text-destructive text-center'>
+                    <AlertTriangle className='w-12 h-12' />
+                    <p className='font-semibold'>Video Generation Failed</p>
+                    <p className='text-sm'>{error}</p>
+                </div>
+            )}
+            {!isLoading && !generatedVideo && !error && (
+                <div className='flex flex-col items-center gap-2 text-muted-foreground text-center'>
                     <Clapperboard className='w-16 h-16' />
                     <p>Your video will appear here.</p>
                 </div>

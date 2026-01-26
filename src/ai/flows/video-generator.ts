@@ -19,7 +19,8 @@ const GenerateVideoInputSchema = z.object({
 export type GenerateVideoInput = z.infer<typeof GenerateVideoInputSchema>;
 
 const GenerateVideoOutputSchema = z.object({
-  videoDataUri: z.string().describe("The generated video as a data URI in video/mp4 format."),
+  videoDataUri: z.string().optional().describe("The generated video as a data URI in video/mp4 format."),
+  error: z.string().optional().describe("An error message if video generation failed."),
 });
 export type GenerateVideoOutput = z.infer<typeof GenerateVideoOutputSchema>;
 
@@ -61,7 +62,7 @@ const videoGeneratorFlow = ai.defineFlow(
     inputSchema: GenerateVideoInputSchema,
     outputSchema: GenerateVideoOutputSchema,
   },
-  async (input) => {
+  async (input): Promise<GenerateVideoOutput> => {
     try {
       let { operation } = await ai.generate({
         model: 'googleai/veo-3.0-generate-preview',
@@ -72,7 +73,7 @@ const videoGeneratorFlow = ai.defineFlow(
       });
 
       if (!operation) {
-        throw new Error('Expected the model to return an operation');
+        return { error: 'Expected the model to return an operation, but it did not.' };
       }
 
       // Wait until the operation completes.
@@ -83,23 +84,27 @@ const videoGeneratorFlow = ai.defineFlow(
       }
 
       if (operation.error) {
-        throw new Error('The video generation process failed: ' + operation.error.message);
+        const errorMessage = operation.error.message || '';
+        if (errorMessage.includes('404 Not Found') || errorMessage.includes('is not found for API version')) {
+            return { error: 'The selected AI video model is not available for your account. This may be due to account status or regional restrictions. Please try again after your billing is fully activated.' };
+        }
+        return { error: `Video generation failed: ${errorMessage}` };
       }
 
       const video = operation.output?.message?.content.find((p) => !!p.media);
       if (!video) {
-        throw new Error('Failed to find the generated video in the AI response.');
+        return { error: 'Failed to find the generated video in the AI response.' };
       }
 
       const videoDataUri = await downloadVideo(video);
       
       return { videoDataUri };
     } catch (e: any) {
-        console.error(e);
-        if (e.message && (e.message.includes('404 Not Found') || e.message.includes('is not found for API version'))) {
-            throw new Error('The selected AI video model is not available for your account. This may be due to account status or regional restrictions. Please try again after your billing is fully activated.');
+        const errorMessage = e.message || 'An unknown error occurred.';
+         if (errorMessage.includes('404 Not Found') || errorMessage.includes('is not found for API version')) {
+            return { error: 'The selected AI video model is not available for your account. This may be due to account status or regional restrictions. Please try again after your billing is fully activated.' };
         }
-        throw new Error('An unexpected error occurred while trying to generate the video.');
+        return { error: 'An unexpected error occurred while trying to generate the video.' };
     }
   }
 );
