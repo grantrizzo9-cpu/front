@@ -45,7 +45,7 @@ export default function DashboardPage() {
   // --- Admin-specific calculation to show 100% of sale value for personal referrals ---
   const adminPersonalTotalSaleValue = referrals?.reduce((sum, r) => sum + (r.commission / 0.75), 0) ?? 0;
   
-  // Conditionally set the value for the "Total Earnings" card
+  // Conditionally set the value for the "Total Earnings" card based on admin status
   const totalEarningsValue = isAdmin ? adminPersonalTotalSaleValue : personalTotalCommission;
   
   const recentReferrals = referrals
