@@ -1,4 +1,4 @@
-
+'use client';
 
 import { Header } from '@/components/header';
 import { Button } from '@/components/ui/button';
@@ -12,9 +12,11 @@ import { Logo } from '@/components/logo';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { NewsletterForm } from '@/components/newsletter-form';
+import { useSearchParams } from 'next/navigation';
 
-export default function Home({ searchParams }: { searchParams?: { ref?: string } }) {
-  const refCode = searchParams?.ref;
+export default function Home() {
+  const searchParams = useSearchParams();
+  const refCode = searchParams.get('ref');
   const pricingLink = refCode ? `/pricing?ref=${refCode}` : '/pricing';
 
   const heroImage = PlaceHolderImages.find((img) => img.id === 'hero');
