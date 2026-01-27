@@ -61,12 +61,12 @@ export function SignupForm() {
         // 3. Create user document in Firestore
         const userDocRef = doc(firestore, "users", user.uid);
         const userData = {
-            id: user.uid, // FIX: Use `id` to match security rules
+            id: user.uid,
             email: user.email,
             username: username,
             referredBy: referralCode || null,
             isAffiliate: true, // All signups are affiliates
-            createdAt: serverTimestamp(), // Use server timestamp for consistency
+            createdAt: serverTimestamp(),
             subscription: planId ? {
                 tierId: planId,
                 status: 'active', // Simulate active subscription
@@ -76,7 +76,6 @@ export function SignupForm() {
             paypalEmail: '' // User needs to set this in settings
         };
         
-        // This non-blocking call will now succeed with the corrected data.
         setDocumentNonBlocking(userDocRef, userData, { merge: false });
 
         toast({
@@ -86,7 +85,6 @@ export function SignupForm() {
         router.push("/dashboard");
 
     } catch (error: any) {
-        console.error("Signup failed:", error);
         let description = error.message || "An unknown error occurred while creating your account.";
         if (error.code === 'auth/email-already-in-use') {
             description = "This email address is already in use. Please log in or use a different email.";
