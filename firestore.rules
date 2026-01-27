@@ -87,18 +87,6 @@ service cloud.firestore {
         allow update: if isOwnerOrAdmin(userId) && request.resource.data.userId == resource.data.userId;
         allow delete: if isOwnerOrAdmin(userId);
       }
-
-      /**
-       * @description Manages refund requests, nested under a user's document.
-       * @principle Users can manage their own requests, while admins can update them
-       * to process refunds.
-       */
-      match /refundRequests/{requestId} {
-        allow get, list: if isOwner(userId);
-        allow create: if isOwner(userId) && request.resource.data.userId == userId;
-        allow update: if isAdmin();
-        allow delete: if false;
-      }
     }
     
     /**
@@ -127,14 +115,6 @@ service cloud.firestore {
      * for platform-wide reporting. This is a collection group query rule.
      */
     match /{path=**}/referrals/{referralId} {
-        allow list: if isAdmin();
-    }
-    
-    /**
-     * @description Allows admins to query across all refund request subcollections
-     * for platform-wide management. This is a collection group query rule.
-     */
-    match /{path=**}/refundRequests/{requestId} {
         allow list: if isAdmin();
     }
     

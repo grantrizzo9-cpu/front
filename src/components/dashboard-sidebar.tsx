@@ -1,3 +1,4 @@
+
 "use client";
 
 import {
@@ -19,7 +20,6 @@ import {
   Shield,
   LogOut,
   MoreVertical,
-  Undo2,
   LayoutGrid,
   BrainCircuit,
   ShieldQuestion,
@@ -61,13 +61,11 @@ export function DashboardSidebar() {
     { path: "/dashboard/referrals", icon: <Users />, label: "Referrals" },
     { path: "/dashboard/payouts", icon: <Wallet />, label: "Payouts" },
     { path: "/dashboard/settings", icon: <Settings />, label: "Settings" },
-    { path: "/dashboard/refund", icon: <Undo2 />, label: "Refund" },
   ];
 
   const adminMenuItems = [
     { path: "/admin/dashboard", icon: <LayoutGrid />, label: "Packages" },
     { path: "/admin/payouts", icon: <Shield />, label: "Manage Payouts" },
-    { path: "/admin/refunds", icon: <ShieldQuestion />, label: "Refund Requests" },
   ];
 
   return (

@@ -1,3 +1,4 @@
+
 import { Header } from '@/components/header';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -67,7 +68,7 @@ export default function Home({ searchParams }: { searchParams?: { ref?: string }
     { q: "How and when do I get paid?", a: "We process all commission payouts daily. All your earned commissions from the previous day are automatically sent to the PayPal account you have on file. It's fully automated." },
     { q: "What am I selling?", a: "You are promoting our subscription plans which include high-quality web hosting and a suite of powerful AI tools designed to help users build and grow their online businesses." },
     { q: "Is there a limit to how much I can earn?", a: "Absolutely not! There is no cap on your potential earnings. The more customers you refer, the more you earn. With a base 70% commission rate that rises to 75% for top affiliates, the sky is the limit." },
-    { q: "What is your refund and success-guarantee policy?", a: "We want you to be profitable. Our affiliate program is designed so just two referrals can cover your daily subscription and put you in profit. We stand by this with a simple, powerful guarantee: if you have fewer than two referrals, you are eligible to request a refund on your daily subscription fees. This ensures you can build your referral base without financial pressure, because you don't pay until you're earning." },
+    { q: "What is your trial and refund policy?", a: "We offer an incredible risk-free trial. You pay only for your first day of service, and then you get the next 30 days completely free to explore the platform, use the AI tools, and start making referrals. This gives you a full month to see the value and start earning before your daily billing begins." },
   ];
 
   return (
@@ -81,7 +82,7 @@ export default function Home({ searchParams }: { searchParams?: { ref?: string }
               Earn 70%-75% Daily Commissions with <span className="text-primary">AI-Powered Hosting</span>
             </h1>
             <p className="mt-6 max-w-2xl mx-auto text-lg text-muted-foreground md:text-xl">
-              Promote a product people love and get paid every single day. Our automated system handles everything from tracking to payouts. You just focus on earning.
+              Pay for your first day, get a 30-day free trial, and get paid daily for every referral you make. Our automated system handles everything.
             </p>
             <div className="mt-10 flex justify-center gap-4">
               <Button size="lg" asChild>

@@ -13,7 +13,7 @@ import { useEffect, useState } from "react";
 import { Loader2, Users } from "lucide-react";
 import { useAuth, useFirestore } from "@/firebase";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
-import { doc, serverTimestamp, setDoc, getDoc, collection, addDoc } from "firebase/firestore";
+import { doc, serverTimestamp, setDoc, getDoc, collection, addDoc, Timestamp } from "firebase/firestore";
 
 export function SignupForm() {
   const router = useRouter();
@@ -80,6 +80,10 @@ export function SignupForm() {
         // 4. Create user document in Firestore. THIS MUST HAPPEN BEFORE CREATING THE REFERRAL.
         const userDocRef = doc(firestore, "users", user.uid);
         const plan = planId ? subscriptionTiers.find(p => p.id === planId) : null;
+        
+        const trialEndDate = new Date();
+        trialEndDate.setDate(trialEndDate.getDate() + 30);
+
         const userData = {
             id: user.uid,
             email: user.email,
@@ -91,7 +95,8 @@ export function SignupForm() {
                 tierId: plan.id,
                 status: 'active',
                 startDate: serverTimestamp(),
-                endDate: null
+                endDate: null,
+                trialEndDate: Timestamp.fromDate(trialEndDate),
             } : null,
             paypalEmail: ''
         };

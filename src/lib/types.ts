@@ -24,6 +24,7 @@ export type User = {
     status: 'active' | 'inactive' | 'cancelled';
     startDate: Timestamp;
     endDate: Timestamp | null;
+    trialEndDate?: Timestamp | null;
   };
   paypalEmail?: string;
 };
@@ -57,13 +58,3 @@ export type AdminPayout = {
     unpaidCommissions: number;
     totalUnpaid: number;
 }
-
-export type RefundRequest = {
-  id: string;
-  userId: string;
-  userUsername: string;
-  userEmail: string | null;
-  requestDate: Timestamp;
-  status: 'pending' | 'processed' | 'denied';
-  referralCountAtRequest: number;
-};

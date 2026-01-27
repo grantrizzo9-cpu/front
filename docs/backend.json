@@ -59,6 +59,14 @@
                 "null"
               ],
               "format": "date-time"
+            },
+            "trialEndDate": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "format": "date-time",
+              "description": "The date when the initial 30-day trial period ends."
             }
           }
         },
@@ -131,9 +139,20 @@
           "format": "date-time"
         },
         "endDate": {
-          "type": "string",
+          "type": [
+            "string",
+            "null"
+          ],
           "description": "Date when the subscription ends (or null if ongoing).",
           "format": "date-time"
+        },
+        "trialEndDate": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time",
+          "description": "The date when the initial 30-day trial period ends."
         },
         "paypalSubscriptionId": {
           "type": "string",
@@ -264,21 +283,6 @@
       "required": [
         "uid"
       ]
-    },
-    "RefundRequest": {
-        "title": "Refund Request",
-        "type": "object",
-        "description": "Represents a user's request for a refund based on the success guarantee.",
-        "properties": {
-            "id": { "type": "string", "description": "Unique ID for the refund request." },
-            "userId": { "type": "string", "description": "The UID of the user requesting the refund." },
-            "userUsername": { "type": "string", "description": "The username of the user requesting the refund." },
-            "userEmail": { "type": "string", "format": "email", "description": "The email of the user requesting the refund." },
-            "requestDate": { "type": "string", "format": "date-time", "description": "Timestamp when the request was made." },
-            "status": { "type": "string", "enum": ["pending", "processed", "denied"], "description": "The current status of the refund request." },
-            "referralCountAtRequest": { "type": "number", "description": "The number of referrals the user had at the time of the request." }
-        },
-        "required": ["userId", "userUsername", "userEmail", "requestDate", "status", "referralCountAtRequest"]
     }
   },
   "auth": {
@@ -377,26 +381,6 @@
             {
               "name": "paymentId",
               "description": "The unique identifier for the payment."
-            }
-          ]
-        }
-      },
-      {
-        "path": "/users/{userId}/refundRequests/{requestId}",
-        "definition": {
-          "entityName": "RefundRequest",
-          "schema": {
-            "$ref": "#/backend/entities/RefundRequest"
-          },
-          "description": "Stores a user's refund requests. Path-based ownership: Only the user with the matching {userId} can manage their requests. Admins can access them via collection group query.",
-          "params": [
-            {
-              "name": "userId",
-              "description": "The unique identifier for the user."
-            },
-            {
-              "name": "requestId",
-              "description": "The unique identifier for the refund request."
             }
           ]
         }

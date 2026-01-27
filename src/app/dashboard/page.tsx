@@ -5,19 +5,26 @@ import { StatCard } from "@/components/stat-card";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { format } from "date-fns";
-import { DollarSign, Users, BarChart, BrainCircuit, ArrowRight, Loader2, TrendingUp } from "lucide-react";
+import { DollarSign, Users, BarChart, BrainCircuit, ArrowRight, Loader2, TrendingUp, Info } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import Link from 'next/link';
 import { Button } from "@/components/ui/button";
-import type { Referral } from "@/lib/types";
-import { useUser, useFirestore, useCollection, useMemoFirebase } from "@/firebase";
-import { collection, collectionGroup } from "firebase/firestore";
+import type { Referral, User as UserType } from "@/lib/types";
+import { useUser, useFirestore, useCollection, useMemoFirebase, useDoc } from "@/firebase";
+import { collection, collectionGroup, doc } from "firebase/firestore";
 import { useAdmin } from "@/hooks/use-admin";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export default function DashboardPage() {
   const { user, isUserLoading } = useUser();
   const firestore = useFirestore();
   const { isAdmin, isLoading: isAdminLoading } = useAdmin();
+
+  const userDocRef = useMemoFirebase(() => {
+    if (!user) return null;
+    return doc(firestore, 'users', user.uid);
+  }, [firestore, user]);
+  const { data: userData, isLoading: isUserDataLoading } = useDoc<UserType>(userDocRef);
 
   // Fetch referrals for the current user (for their personal dashboard view)
   const referralsRef = useMemoFirebase(() => {
@@ -36,7 +43,7 @@ export default function DashboardPage() {
   const { data: allReferrals, isLoading: allReferralsLoading } = useCollection<Referral>(allReferralsQuery);
   // --- END ADMIN ONLY ---
 
-  const isLoading = isUserLoading || referralsLoading || (isAdmin && allReferralsLoading) || isAdminLoading;
+  const isLoading = isUserLoading || isUserDataLoading || referralsLoading || (isAdmin && allReferralsLoading) || isAdminLoading;
 
   // --- Calculations for the personal affiliate stats ---
   const personalTotalCommission = referrals?.reduce((sum, r) => sum + r.commission, 0) ?? 0;
@@ -61,6 +68,9 @@ export default function DashboardPage() {
   const platformRevenue = totalAffiliatePayouts * (30 / 70);
   // --- END ADMIN ONLY ---
 
+  const trialEndDate = userData?.subscription?.trialEndDate?.toDate();
+  const isTrialActive = trialEndDate && trialEndDate > new Date();
+
 
   if (isLoading) {
       return (
@@ -76,6 +86,16 @@ export default function DashboardPage() {
         <h1 className="text-3xl font-bold font-headline">Dashboard</h1>
         <p className="text-muted-foreground">Welcome back! Here's a summary of your affiliate activity.</p>
       </div>
+
+      {isTrialActive && (
+        <Alert className="border-accent/50 bg-accent/5">
+          <Info className="h-4 w-4 text-accent" />
+          <AlertTitle className="text-accent">You're on a Trial!</AlertTitle>
+          <AlertDescription>
+            Your 30-day free trial is active and will end on {format(trialEndDate, 'PP')}. Start referring to keep the momentum going!
+          </AlertDescription>
+        </Alert>
+      )}
 
       {/* Conditionally render the admin-only revenue card */}
       {isAdmin && (
