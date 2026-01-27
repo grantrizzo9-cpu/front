@@ -5,12 +5,15 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, ShieldQuestion, CheckCircle } from "lucide-react";
+import { Loader2, ShieldQuestion, Info } from "lucide-react";
 import { useUser, useFirestore, useCollection, useMemoFirebase, addDocumentNonBlocking } from "@/firebase";
-import { collection, query, where, serverTimestamp } from "firebase/firestore";
+import { collection, query, serverTimestamp, orderBy } from "firebase/firestore";
 import type { RefundRequest } from "@/lib/types";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { format } from "date-fns";
 
 export default function RequestRefundPage() {
   const { user, isUserLoading } = useUser();
@@ -20,20 +23,23 @@ export default function RequestRefundPage() {
   const [reason, setReason] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Check for existing pending refund requests for the current user in their own subcollection
+  // Fetch ALL refund requests for the current user, ordered by date
   const refundRequestQuery = useMemoFirebase(() => {
     if (!user) return null;
-    // Path is now /users/{userId}/refundRequests
     return query(
         collection(firestore, 'users', user.uid, 'refundRequests'), 
-        where('status', '==', 'pending')
+        orderBy('requestedAt', 'desc')
     );
   }, [firestore, user]);
 
-  const { data: existingRequests, isLoading: isLoadingRequests } = useCollection<RefundRequest>(refundRequestQuery);
-  const hasPendingRequest = existingRequests && existingRequests.length > 0;
+  const { data: refundRequests, isLoading: isLoadingRequests } = useCollection<RefundRequest>(refundRequestQuery);
+  
+  // Check if there's a pending request to decide if the form should be shown
+  const hasPendingRequest = useMemo(() => {
+      return refundRequests?.some(r => r.status === 'pending') ?? false;
+  }, [refundRequests]);
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!firestore || !user || !user.email || !user.displayName) {
         toast({ variant: "destructive", title: "Error", description: "You must be logged in to submit a request." });
@@ -46,7 +52,6 @@ export default function RequestRefundPage() {
 
     setIsSubmitting(true);
     
-    // The collection ref now points to the user's subcollection
     const refundRef = collection(firestore, 'users', user.uid, 'refundRequests');
     const newRefundRequest = {
         userId: user.uid,
@@ -57,52 +62,92 @@ export default function RequestRefundPage() {
         requestedAt: serverTimestamp(),
     };
 
-    try {
-        await addDocumentNonBlocking(refundRef, newRefundRequest);
-        toast({
-            title: "Request Submitted",
-            description: "Your refund request has been received. We will review it shortly.",
+    // Use the non-blocking function and handle the result with .then() to manage UI state
+    addDocumentNonBlocking(refundRef, newRefundRequest)
+        .then(() => {
+            toast({
+                title: "Request Submitted",
+                description: "Your refund request has been received. You can see its status below.",
+            });
+            setReason("");
+        })
+        .catch((error) => {
+            // This is for unexpected client-side errors, not security rules
+            toast({
+                variant: "destructive",
+                title: "Submission Failed",
+                description: "An unexpected client error occurred.",
+            });
+        })
+        .finally(() => {
+            setIsSubmitting(false);
         });
-        setReason(""); // Clear the textarea after submission
-    } catch (error) {
-        toast({
-            variant: "destructive",
-            title: "Submission Failed",
-            description: "An error occurred while submitting your request. Please try again.",
-        });
-    } finally {
-        setIsSubmitting(false);
-    }
   };
 
   const isLoading = isUserLoading || isLoadingRequests;
+  const showForm = !hasPendingRequest && !isLoading;
 
   return (
-    <div className="space-y-8 max-w-2xl">
+    <div className="space-y-8 max-w-3xl">
       <div>
         <h1 className="text-3xl font-bold font-headline">Request a Refund</h1>
-        <p className="text-muted-foreground">We're sorry to see you go. Please let us know why you're requesting a refund.</p>
+        <p className="text-muted-foreground">Submit a refund request or view the status of your existing requests.</p>
       </div>
-
-      <Card>
-        {isLoading ? (
-            <div className="flex justify-center items-center h-40">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            </div>
-        ) : hasPendingRequest ? (
+      
+      {isLoading && (
+        <Card>
             <CardContent className="pt-6">
-                <Alert variant="default" className="border-green-600/50 bg-green-50 text-green-900">
-                    <CheckCircle className="h-4 w-4 !text-green-600" />
-                    <AlertTitle className="font-semibold">Request Pending</AlertTitle>
-                    <AlertDescription>
-                        You already have a refund request being processed. Our team will get back to you soon.
-                    </AlertDescription>
-                </Alert>
+                <div className="flex justify-center items-center h-40">
+                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                </div>
             </CardContent>
-        ) : (
+        </Card>
+      )}
+
+      {refundRequests && refundRequests.length > 0 && !isLoading && (
+         <Card>
+            <CardHeader>
+                <CardTitle>Your Refund Requests</CardTitle>
+                <CardDescription>A history of all your submitted refund requests.</CardDescription>
+            </CardHeader>
+            <CardContent>
+                <Table>
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead>Date Requested</TableHead>
+                            <TableHead>Reason</TableHead>
+                            <TableHead className="text-right">Status</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {refundRequests.map(request => (
+                            <TableRow key={request.id}>
+                                <TableCell>{format(request.requestedAt.toDate(), 'PP')}</TableCell>
+                                <TableCell className="max-w-xs truncate">{request.reason}</TableCell>
+                                <TableCell className="text-right">
+                                    <Badge variant={
+                                        request.status === 'processed' ? 'secondary' 
+                                        : request.status === 'pending' ? 'default' 
+                                        : 'destructive'
+                                    }
+                                    className={request.status === 'pending' ? 'bg-amber-500 hover:bg-amber-600 text-white' : ''}
+                                    >
+                                        {request.status}
+                                    </Badge>
+                                </TableCell>
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>
+            </CardContent>
+        </Card>
+      )}
+
+      {showForm && (
+        <Card>
             <form onSubmit={handleSubmit}>
               <CardHeader>
-                <CardTitle>Refund Request Form</CardTitle>
+                <CardTitle>New Refund Request</CardTitle>
                 <CardDescription>
                   Your refund will be for your initial one-day payment. Please provide a reason below.
                 </CardDescription>
@@ -135,10 +180,18 @@ export default function RequestRefundPage() {
                 </Button>
               </CardFooter>
             </form>
-        )}
-      </Card>
+        </Card>
+      )}
+      
+       {!isLoading && (!refundRequests || refundRequests.length === 0) && (
+         <Card>
+            <CardHeader>
+                 <CardTitle>No Requests Found</CardTitle>
+                 <CardDescription>You have not submitted any refund requests. Use the form below if you need to request one.</CardDescription>
+            </CardHeader>
+         </Card>
+       )}
+
     </div>
   );
 }
-
-    
