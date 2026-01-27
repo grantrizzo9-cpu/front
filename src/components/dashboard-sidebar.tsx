@@ -35,14 +35,14 @@ import { Button } from "./ui/button";
 import { useAuth, useUser } from "@/firebase";
 import { signOut } from "firebase/auth";
 import { Skeleton } from "./ui/skeleton";
-
-const isAdmin = true; // In a real app, this would come from user data
+import { useAdmin } from "@/hooks/use-admin";
 
 export function DashboardSidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const { user, isUserLoading } = useUser();
   const auth = useAuth();
+  const { isAdmin, isLoading: isAdminLoading } = useAdmin();
 
   const isActive = (path: string) => pathname === path;
 
@@ -86,7 +86,7 @@ export function DashboardSidebar() {
               </SidebarMenuButton>
             </SidebarMenuItem>
           ))}
-          {isAdmin && (
+          {!isAdminLoading && isAdmin && (
             <>
               <SidebarMenuItem className="mt-4">
                 <span className="px-2 text-xs font-semibold text-muted-foreground">Admin</span>
