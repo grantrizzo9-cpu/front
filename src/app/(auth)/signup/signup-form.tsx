@@ -141,6 +141,8 @@ export function SignupForm() {
             description = "The password is too weak. Please use at least 6 characters.";
         } else if (error.code === 'permission-denied') {
             description = "A security rule prevented signup. This might be due to an invalid referral code or system misconfiguration."
+        } else if (error.message) {
+            description = error.message;
         }
         toast({
             variant: "destructive",
