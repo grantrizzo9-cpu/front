@@ -12,6 +12,7 @@ export type SubscriptionTier = {
 };
 
 export type User = {
+  id: string; // This should be uid from auth
   uid: string;
   email: string | null;
   username: string;
@@ -51,6 +52,7 @@ export type Payout = {
 export type AdminPayout = {
     affiliateId: string;
     affiliateUsername: string;
+    affiliateEmail: string;
     paypalEmail: string;
     unpaidCommissions: number;
     totalUnpaid: number;
