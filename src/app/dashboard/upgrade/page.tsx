@@ -2,7 +2,7 @@
 
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Loader2, CheckCircle } from "lucide-react";
+import { Loader2, CheckCircle, ArrowUpCircle, BadgeCheck } from "lucide-react";
 import { useUser, useFirestore, useDoc, useMemoFirebase, updateDocumentNonBlocking } from "@/firebase";
 import { doc, serverTimestamp, Timestamp } from "firebase/firestore";
 import type { User as UserType } from "@/lib/types";
@@ -32,8 +32,8 @@ export default function UpgradePage() {
     });
 
     toast({
-      title: "Plan Changed!",
-      description: `Your plan has been successfully changed.`,
+      title: "Plan Upgraded!",
+      description: `Your plan has been successfully upgraded.`,
     });
   };
 
@@ -121,66 +121,78 @@ export default function UpgradePage() {
       )
   }
 
-  // SCENARIO 2: User HAS a subscription. Show ALL plans to upgrade/downgrade.
-  const currentTierId = userData.subscription.tierId;
-  
+  // SCENARIO 2: User HAS a subscription. Show only UPGRADES.
+  const currentTier = subscriptionTiers.find(t => t.id === userData.subscription?.tierId);
+  const availableUpgrades = currentTier 
+    ? subscriptionTiers.filter(tier => tier.price > currentTier.price) 
+    : [];
+
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-3xl font-bold font-headline">Upgrade Plan</h1>
+        <h1 className="text-3xl font-bold font-headline">Upgrade Your Plan</h1>
         <p className="text-muted-foreground">
-            You can upgrade or change your plan at any time.
+            You are currently on the <span className="font-semibold text-primary">{currentTier?.name}</span> plan. Unlock more features by upgrading.
         </p>
       </div>
       
-      <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-          {subscriptionTiers.map((tier) => (
-            <Card 
-                key={tier.id} 
-                className={cn(
-                    "flex flex-col",
-                    tier.id === currentTierId ? "border-primary ring-2 ring-primary" : "",
-                    tier.isMostPopular && tier.id !== currentTierId ? "shadow-lg" : ""
+      {availableUpgrades.length > 0 ? (
+        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+            {availableUpgrades.map((tier) => (
+              <Card 
+                  key={tier.id} 
+                  className={cn(
+                      "flex flex-col",
+                      tier.isMostPopular ? "border-primary ring-2 ring-primary shadow-lg" : ""
+                  )}
+              >
+                {tier.isMostPopular && (
+                  <div className="bg-primary text-primary-foreground text-center py-1.5 text-sm font-semibold rounded-t-lg">
+                    Most Popular
+                  </div>
                 )}
-            >
-              {tier.isMostPopular && (
-                <div className={cn(
-                    "text-primary-foreground text-center py-1.5 text-sm font-semibold rounded-t-lg",
-                    tier.id === currentTierId ? "bg-primary/80" : "bg-primary"
-                )}>
-                  Most Popular
-                </div>
-              )}
-              <CardHeader className={cn(!tier.isMostPopular && "pt-6")}>
-                <CardTitle className="font-headline text-xl">{tier.name}</CardTitle>
-                <div className="flex items-baseline gap-1">
-                  <span className="text-3xl font-bold">${tier.price.toFixed(2)}</span>
-                  <span className="text-muted-foreground">/ day</span>
-                </div>
-                <CardDescription>{tier.description}</CardDescription>
-              </CardHeader>
-              <CardContent className="flex-1">
-                <ul className="space-y-3">
-                  {tier.features.map((feature, index) => (
-                    <li key={index} className="flex items-start gap-2">
-                      <CheckCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-green-500" />
-                      <span className="text-sm">{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-              </CardContent>
-              <CardFooter>
-                {tier.id === currentTierId ? (
-                    <Button className="w-full" disabled>Current Plan</Button>
-                ) : (
+                <CardHeader>
+                  <CardTitle className="font-headline text-xl">{tier.name}</CardTitle>
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-3xl font-bold">${tier.price.toFixed(2)}</span>
+                    <span className="text-muted-foreground">/ day</span>
+                  </div>
+                  <CardDescription>{tier.description}</CardDescription>
+                </CardHeader>
+                <CardContent className="flex-1">
+                  <ul className="space-y-3">
+                    {tier.features.map((feature, index) => (
+                      <li key={index} className="flex items-start gap-2">
+                        <CheckCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-green-500" />
+                        <span className="text-sm">{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </CardContent>
+                <CardFooter>
                     <Button className="w-full" variant={tier.isMostPopular ? "default" : "outline"} onClick={() => handlePlanChange(tier.id)}>
-                        Switch to {tier.name}
+                        <ArrowUpCircle className="mr-2" />
+                        Upgrade to {tier.name}
                     </Button>
-                )}
-              </CardFooter>
-            </Card>
-          ))}
-        </div>
+                </CardFooter>
+              </Card>
+            ))}
+          </div>
+      ) : (
+        <Card className="max-w-md">
+            <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                    <BadgeCheck className="h-6 w-6 text-green-500" />
+                    <span>You're on the Top Plan!</span>
+                </CardTitle>
+            </CardHeader>
+            <CardContent>
+                <p className="text-muted-foreground">
+                    You already have the best plan available. Thank you for being a valued customer!
+                </p>
+            </CardContent>
+        </Card>
+      )}
     </div>
   );
 }
