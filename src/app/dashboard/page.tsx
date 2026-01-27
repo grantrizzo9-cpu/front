@@ -1,21 +1,22 @@
 import { StatCard } from "@/components/stat-card";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { mockReferrals } from "@/lib/data";
 import { format } from "date-fns";
 import { DollarSign, Users, BarChart, BrainCircuit, ArrowRight } from "lucide-react";
 import { Badge as BadgeComponent } from "@/components/ui/badge";
 import Link from 'next/link';
 import { Button } from "@/components/ui/button";
+import type { Referral } from "@/lib/types";
 
 export default function DashboardPage() {
-  // In a real app, these values would be fetched for the logged-in user.
-  const totalEarnings = 5234.89;
-  const totalReferrals = 128;
-  const totalSales = 150; // Could be different from referrals if users upgrade
-  const unpaidCommissions = 5.23;
+  // These values will soon be replaced with live data from Firebase.
+  // For now, they are set to 0 to reflect a new user's account.
+  const totalEarnings = 0;
+  const totalReferrals = 0;
+  const totalSales = 0;
+  const unpaidCommissions = 0;
 
-  const recentReferrals = mockReferrals.slice(0, 5);
+  const recentReferrals: Referral[] = [];
 
   return (
     <div className="space-y-8">
@@ -58,32 +59,39 @@ export default function DashboardPage() {
             <CardDescription>A quick look at your latest sign-ups.</CardDescription>
           </CardHeader>
           <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Username</TableHead>
-                  <TableHead>Plan</TableHead>
-                  <TableHead>Commission</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Date</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {recentReferrals.map((referral) => (
-                  <TableRow key={referral.id}>
-                    <TableCell className="font-medium">{referral.referredUserUsername}</TableCell>
-                    <TableCell>{referral.planPurchased}</TableCell>
-                    <TableCell>${referral.commission.toFixed(2)}</TableCell>
-                    <TableCell>
-                      <BadgeComponent variant={referral.status === 'paid' ? 'secondary' : 'default'} className={referral.status === 'unpaid' ? 'bg-green-500 text-white' : ''}>
-                        {referral.status}
-                      </BadgeComponent>
-                    </TableCell>
-                    <TableCell className="text-right">{format(referral.date, 'MMM d, yyyy')}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+            {recentReferrals.length > 0 ? (
+                <Table>
+                <TableHeader>
+                    <TableRow>
+                    <TableHead>Username</TableHead>
+                    <TableHead>Plan</TableHead>
+                    <TableHead>Commission</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="text-right">Date</TableHead>
+                    </TableRow>
+                </TableHeader>
+                <TableBody>
+                    {recentReferrals.map((referral) => (
+                    <TableRow key={referral.id}>
+                        <TableCell className="font-medium">{referral.referredUserUsername}</TableCell>
+                        <TableCell>{referral.planPurchased}</TableCell>
+                        <TableCell>${referral.commission.toFixed(2)}</TableCell>
+                        <TableCell>
+                        <BadgeComponent variant={referral.status === 'paid' ? 'secondary' : 'default'} className={referral.status === 'unpaid' ? 'bg-green-500 text-white' : ''}>
+                            {referral.status}
+                        </BadgeComponent>
+                        </TableCell>
+                        <TableCell className="text-right">{format(referral.date, 'MMM d, yyyy')}</TableCell>
+                    </TableRow>
+                    ))}
+                </TableBody>
+                </Table>
+            ) : (
+                <div className="text-center text-muted-foreground py-10">
+                    <p>No recent referrals to show.</p>
+                    <p className="text-sm">Share your affiliate link to get started!</p>
+                </div>
+            )}
           </CardContent>
         </Card>
 
