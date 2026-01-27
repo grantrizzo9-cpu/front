@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -9,42 +10,26 @@ import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/firebase";
 import { signInWithEmailAndPassword } from "firebase/auth";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Loader2, AlertTriangle } from "lucide-react";
 import { firebaseConfig } from "@/firebase/config";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function LoginPage() {
   const router = useRouter();
   const { toast } = useToast();
   const auth = useAuth();
   const [isLoading, setIsLoading] = useState(false);
+  const [isClientReady, setIsClientReady] = useState(false);
+  const [showConfigError, setShowConfigError] = useState(false);
 
-  if (firebaseConfig.apiKey.startsWith("REPLACE_WITH")) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="font-headline text-2xl flex items-center gap-2">
-            <AlertTriangle className="text-destructive" />
-            Firebase Not Configured
-          </CardTitle>
-          <CardDescription>
-            The application is not connected to Firebase. Please follow the instructions
-            in the code file below to resolve this issue.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4 bg-muted/50 p-4 rounded-lg">
-            <p className="text-sm font-semibold">Action Required:</p>
-            <p className="text-sm">
-                1. Open the file: <code className="bg-background p-1 rounded">src/firebase/config.ts</code>
-            </p>
-            <p className="text-sm">
-                2. Follow the instructions in the comments at the top of the file to add your
-                   Firebase project configuration.
-            </p>
-        </CardContent>
-      </Card>
-    );
-  }
+  useEffect(() => {
+    // This effect runs only on the client, after initial mount.
+    if (firebaseConfig.apiKey.startsWith("REPLACE_WITH")) {
+      setShowConfigError(true);
+    }
+    setIsClientReady(true);
+  }, []);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -80,6 +65,61 @@ export default function LoginPage() {
     }
   };
 
+  // On the server, and on the initial client render, show a skeleton UI.
+  // This ensures the server and client render the same content initially.
+  if (!isClientReady) {
+    return (
+        <Card>
+            <CardHeader>
+                <CardTitle className="font-headline text-2xl">Welcome Back</CardTitle>
+                <CardDescription>Enter your credentials to access your dashboard.</CardDescription>
+            </CardHeader>
+            <CardContent>
+                <div className="space-y-4">
+                    <div className="space-y-2">
+                        <Label htmlFor="email">Email</Label>
+                        <Skeleton className="h-10 w-full" />
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="password">Password</Label>
+                        <Skeleton className="h-10 w-full" />
+                    </div>
+                    <Skeleton className="h-10 w-full" />
+                </div>
+            </CardContent>
+        </Card>
+    );
+  }
+  
+  // After the client is ready, check if we need to show the config error.
+  if (showConfigError) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="font-headline text-2xl flex items-center gap-2">
+            <AlertTriangle className="text-destructive" />
+            Firebase Not Configured
+          </CardTitle>
+          <CardDescription>
+            The application is not connected to Firebase. Please follow the instructions
+            in the code file below to resolve this issue.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4 bg-muted/50 p-4 rounded-lg">
+            <p className="text-sm font-semibold">Action Required:</p>
+            <p className="text-sm">
+                1. Open the file: <code className="bg-background p-1 rounded">src/firebase/config.ts</code>
+            </p>
+            <p className="text-sm">
+                2. Follow the instructions in the comments at the top of the file to add your
+                   Firebase project configuration.
+            </p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // If the client is ready and there's no config error, show the real login form.
   return (
     <Card>
       <CardHeader>
