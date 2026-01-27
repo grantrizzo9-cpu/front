@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Button } from "@/components/ui/button";
@@ -6,8 +5,8 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, ShieldQuestion, Info } from "lucide-react";
-import { useUser, useFirestore, useCollection, useMemoFirebase, addDocumentNonBlocking } from "@/firebase";
-import { collection, query, serverTimestamp, orderBy } from "firebase/firestore";
+import { useUser, useFirestore, useCollection, useMemoFirebase, addDocumentNonBlocking, updateDocumentNonBlocking } from "@/firebase";
+import { collection, query, serverTimestamp, orderBy, doc, Timestamp } from "firebase/firestore";
 import type { RefundRequest } from "@/lib/types";
 import { useState, useMemo } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -62,12 +61,17 @@ export default function RequestRefundPage() {
         requestedAt: serverTimestamp(),
     };
 
+    const userDocRef = doc(firestore, 'users', user.uid);
+
     // Use the non-blocking function and handle the result with .then() to manage UI state
     addDocumentNonBlocking(refundRef, newRefundRequest)
         .then(() => {
+            // Also cancel their subscription upon successful refund request
+            updateDocumentNonBlocking(userDocRef, { subscription: null });
+
             toast({
                 title: "Request Submitted",
-                description: "Your refund request has been received. You can see its status below.",
+                description: "Your subscription has been cancelled. You can choose a new plan from the 'Upgrade' page.",
             });
             setReason("");
         })
