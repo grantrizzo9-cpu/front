@@ -55,7 +55,7 @@ const imageGeneratorFlow = ai.defineFlow(
              if (errorMessage.includes('blocked') || errorMessage.includes('SAFETY')) {
                 return { error: 'The prompt was blocked by the safety filter. Please try a different prompt.' };
             }
-            return { error: 'An unexpected error occurred while trying to generate the image.' };
+            return { error: errorMessage };
         }
     }
 );
