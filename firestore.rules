@@ -72,7 +72,7 @@ service cloud.firestore {
        * complex and potentially problematic `get()` calls.
        */
       match /referrals/{referralId} {
-        allow get, list, update, delete: if isOwner(userId);
+        allow read, update, delete: if isOwner(userId);
         allow create: if isSignedIn()
                         && request.resource.data.referredUserId == request.auth.uid
                         && request.resource.data.triggeringUserReferredBy == userId;
