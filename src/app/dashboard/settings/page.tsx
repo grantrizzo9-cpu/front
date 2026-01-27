@@ -5,31 +5,59 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Copy } from "lucide-react";
+import { Copy, Loader2 } from "lucide-react";
+import { useUser, useFirestore, useDoc, updateDocumentNonBlocking, useMemoFirebase } from "@/firebase";
+import { doc } from "firebase/firestore";
+import type { User as UserType } from "@/lib/types";
 
 export default function SettingsPage() {
-  // This would come from the logged-in user's data
-  const username = "rentahost";
-  const affiliateLink = `https://affiliateai.host/?ref=${username}`;
-  const paypalEmail = "hello@rentahost.shop";
-
+  const { user, isUserLoading } = useUser();
+  const firestore = useFirestore();
   const { toast } = useToast();
 
+  const userDocRef = useMemoFirebase(() => {
+    if (!user) return null;
+    return doc(firestore, 'users', user.uid);
+  }, [firestore, user]);
+
+  const { data: userData, isLoading: isUserDataLoading } = useDoc<UserType>(userDocRef);
+
+  const affiliateLink = userData ? `https://affiliateai.host/?ref=${userData.username}` : '';
+  
   const handleCopyLink = () => {
-    navigator.clipboard.writeText(affiliateLink);
-    toast({
-      title: "Copied to Clipboard!",
-      description: "Your affiliate link has been copied.",
-    });
+    if (affiliateLink) {
+      navigator.clipboard.writeText(affiliateLink);
+      toast({
+        title: "Copied to Clipboard!",
+        description: "Your affiliate link has been copied.",
+      });
+    }
   };
   
-  const handleSaveChanges = (e: React.FormEvent) => {
+  const handleSaveChanges = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (!userDocRef) return;
+    
+    const formData = new FormData(e.currentTarget);
+    const newPaypalEmail = formData.get('paypal-email') as string;
+
+    updateDocumentNonBlocking(userDocRef, { paypalEmail: newPaypalEmail });
+    
     toast({
       title: "Changes Saved",
-      description: "Your settings have been updated.",
+      description: "Your PayPal email has been updated.",
     });
   };
+
+  const isLoading = isUserLoading || isUserDataLoading;
+
+  if (isLoading) {
+    return (
+        <div className="flex justify-center items-center h-full p-8">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+    )
+  }
 
   return (
     <div className="space-y-8 max-w-2xl">
@@ -46,7 +74,7 @@ export default function SettingsPage() {
         <CardContent>
           <div className="flex items-center space-x-2">
             <Input type="text" value={affiliateLink} readOnly />
-            <Button variant="outline" size="icon" onClick={handleCopyLink}>
+            <Button variant="outline" size="icon" onClick={handleCopyLink} disabled={!affiliateLink}>
               <Copy className="h-4 w-4" />
             </Button>
           </div>
@@ -62,7 +90,7 @@ export default function SettingsPage() {
           <CardContent>
             <div className="space-y-2">
               <Label htmlFor="paypal-email">PayPal Email</Label>
-              <Input id="paypal-email" type="email" defaultValue={paypalEmail} required />
+              <Input id="paypal-email" name="paypal-email" type="email" defaultValue={userData?.paypalEmail || ''} required />
             </div>
           </CardContent>
           <CardFooter>

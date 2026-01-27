@@ -4,15 +4,26 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { ShieldCheck } from "lucide-react";
+import { ShieldCheck, Loader2 } from "lucide-react";
+import { useUser, useFirestore, useCollection, useMemoFirebase } from "@/firebase";
+import { collection } from "firebase/firestore";
+import type { Referral } from "@/lib/types";
 
 export default function RefundPage() {
   const { toast } = useToast();
-  
-  // In a real app, this data would come from the user's record in Firestore
-  const referralCount = 0; // Set to 0 for a new user
+  const { user, isUserLoading } = useUser();
+  const firestore = useFirestore();
 
+  const referralsRef = useMemoFirebase(() => {
+    if (!user) return null;
+    return collection(firestore, 'users', user.uid, 'referrals');
+  }, [firestore, user]);
+
+  const { data: referrals, isLoading: referralsLoading } = useCollection<Referral>(referralsRef);
+  
+  const referralCount = referrals?.length ?? 0;
   const isEligible = referralCount < 2;
+  const isLoading = isUserLoading || referralsLoading;
 
   const handleRefundRequest = () => {
     // This would trigger a server action to:
@@ -25,6 +36,14 @@ export default function RefundPage() {
       variant: "default",
     });
   };
+
+  if (isLoading) {
+    return (
+        <div className="flex justify-center items-center h-full p-8">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+    )
+  }
 
   return (
     <div className="space-y-8 max-w-2xl">

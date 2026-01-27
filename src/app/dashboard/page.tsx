@@ -1,22 +1,51 @@
+'use client';
+
 import { StatCard } from "@/components/stat-card";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { format } from "date-fns";
-import { DollarSign, Users, BarChart, BrainCircuit, ArrowRight } from "lucide-react";
-import { Badge as BadgeComponent } from "@/components/ui/badge";
+import { DollarSign, Users, BarChart, BrainCircuit, ArrowRight, Loader2 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import Link from 'next/link';
 import { Button } from "@/components/ui/button";
-import type { Referral } from "@/lib/types";
+import type { Referral, Commission } from "@/lib/types";
+import { useUser, useFirestore, useCollection, useMemoFirebase } from "@/firebase";
+import { collection } from "firebase/firestore";
 
 export default function DashboardPage() {
-  // These values will soon be replaced with live data from Firebase.
-  // For now, they are set to 0 to reflect a new user's account.
-  const totalEarnings = 0;
-  const totalReferrals = 0;
-  const totalSales = 0;
-  const unpaidCommissions = 0;
+  const { user, isUserLoading } = useUser();
+  const firestore = useFirestore();
 
-  const recentReferrals: Referral[] = [];
+  const commissionsRef = useMemoFirebase(() => {
+    if (!user) return null;
+    return collection(firestore, 'users', user.uid, 'commissions');
+  }, [firestore, user]);
+
+  const referralsRef = useMemoFirebase(() => {
+    if (!user) return null;
+    return collection(firestore, 'users', user.uid, 'referrals');
+  }, [firestore, user]);
+
+  const { data: commissions, isLoading: commissionsLoading } = useCollection<Commission>(commissionsRef);
+  const { data: referrals, isLoading: referralsLoading } = useCollection<Referral>(referralsRef);
+
+  const isLoading = isUserLoading || commissionsLoading || referralsLoading;
+
+  const totalEarnings = commissions?.reduce((sum, c) => sum + c.amount, 0) ?? 0;
+  const totalReferrals = referrals?.length ?? 0;
+  const unpaidCommissions = commissions?.filter(c => c.status === 'unpaid').reduce((sum, c) => sum + c.amount, 0) ?? 0;
+
+  const recentReferrals = referrals
+    ?.sort((a, b) => b.date.toMillis() - a.date.toMillis())
+    .slice(0, 5) ?? [];
+
+  if (isLoading) {
+      return (
+          <div className="flex justify-center items-center h-full p-8">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </div>
+      )
+  }
 
   return (
     <div className="space-y-8">
@@ -40,9 +69,9 @@ export default function DashboardPage() {
         />
         <StatCard
           title="Total Sales"
-          value={`+${totalSales}`}
+          value={`+${totalReferrals}`}
           icon={<BarChart className="h-5 w-5 text-muted-foreground" />}
-          description="Total initial sales and upgrades."
+          description="Total initial sales from your referrals."
         />
          <StatCard
           title="Unpaid Commissions"
@@ -77,11 +106,11 @@ export default function DashboardPage() {
                         <TableCell>{referral.planPurchased}</TableCell>
                         <TableCell>${referral.commission.toFixed(2)}</TableCell>
                         <TableCell>
-                        <BadgeComponent variant={referral.status === 'paid' ? 'secondary' : 'default'} className={referral.status === 'unpaid' ? 'bg-green-500 text-white' : ''}>
+                        <Badge variant={referral.status === 'paid' ? 'secondary' : 'default'} className={referral.status === 'unpaid' ? 'bg-green-500 text-white' : ''}>
                             {referral.status}
-                        </BadgeComponent>
+                        </Badge>
                         </TableCell>
-                        <TableCell className="text-right">{format(referral.date, 'MMM d, yyyy')}</TableCell>
+                        <TableCell className="text-right">{format(referral.date.toDate(), 'MMM d, yyyy')}</TableCell>
                     </TableRow>
                     ))}
                 </TableBody>

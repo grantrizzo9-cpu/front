@@ -1,13 +1,34 @@
+'use client';
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { format } from "date-fns";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Loader2 } from "lucide-react";
 import Link from "next/link";
 import type { Payout } from "@/lib/types";
+import { useUser, useFirestore, useCollection, useMemoFirebase } from "@/firebase";
+import { collection } from "firebase/firestore";
 
 export default function PayoutsPage() {
-  // This will be replaced with a real-time fetch from Firestore
-  const payouts: Payout[] = [];
+  const { user, isUserLoading } = useUser();
+  const firestore = useFirestore();
+
+  const payoutsRef = useMemoFirebase(() => {
+    if (!user) return null;
+    return collection(firestore, 'users', user.uid, 'payments');
+  }, [firestore, user]);
+
+  const { data: payouts, isLoading: payoutsLoading } = useCollection<Payout>(payoutsRef);
+
+  const isLoading = isUserLoading || payoutsLoading;
+
+  if (isLoading) {
+      return (
+          <div className="flex justify-center items-center h-full p-8">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </div>
+      )
+  }
 
   return (
     <div className="space-y-8">
@@ -24,7 +45,7 @@ export default function PayoutsPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {payouts.length > 0 ? (
+          {payouts && payouts.length > 0 ? (
             <Table>
               <TableHeader>
                 <TableRow>
@@ -34,15 +55,19 @@ export default function PayoutsPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {payouts.map((payout) => (
+                {payouts.sort((a,b) => b.date.toMillis() - a.date.toMillis()).map((payout) => (
                   <TableRow key={payout.id}>
                     <TableCell className="font-medium text-green-600">${payout.amount.toFixed(2)}</TableCell>
-                    <TableCell>{format(payout.date, 'PPpp')}</TableCell>
+                    <TableCell>{format(payout.date.toDate(), 'PPpp')}</TableCell>
                     <TableCell className="text-right font-mono text-xs">
-                      <Link href={`https://www.paypal.com/activity/payment/${payout.transactionId}`} target="_blank" rel="noopener noreferrer" className="flex items-center justify-end gap-2 hover:text-primary">
-                          {payout.transactionId}
-                          <ArrowRight className="h-3 w-3" />
-                      </Link>
+                      {payout.transactionId ? (
+                        <Link href={`https://www.paypal.com/activity/payment/${payout.transactionId}`} target="_blank" rel="noopener noreferrer" className="flex items-center justify-end gap-2 hover:text-primary">
+                            {payout.transactionId}
+                            <ArrowRight className="h-3 w-3" />
+                        </Link>
+                      ): (
+                        <span>Processing</span>
+                      )}
                     </TableCell>
                   </TableRow>
                 ))}

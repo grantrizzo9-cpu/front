@@ -1,12 +1,34 @@
+'use client';
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
 import type { Referral } from "@/lib/types";
+import { useUser, useFirestore, useCollection, useMemoFirebase } from "@/firebase";
+import { collection } from "firebase/firestore";
+import { Loader2 } from "lucide-react";
 
 export default function ReferralsPage() {
-  // This will be replaced with a real-time fetch from Firestore
-  const referrals: Referral[] = [];
+  const { user, isUserLoading } = useUser();
+  const firestore = useFirestore();
+
+  const referralsRef = useMemoFirebase(() => {
+    if (!user) return null;
+    return collection(firestore, 'users', user.uid, 'referrals');
+  }, [firestore, user]);
+
+  const { data: referrals, isLoading: referralsLoading } = useCollection<Referral>(referralsRef);
+  
+  const isLoading = isUserLoading || referralsLoading;
+  
+  if (isLoading) {
+      return (
+          <div className="flex justify-center items-center h-full p-8">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </div>
+      )
+  }
 
   return (
     <div className="space-y-8">
@@ -19,11 +41,11 @@ export default function ReferralsPage() {
         <CardHeader>
           <CardTitle>All Referrals</CardTitle>
           <CardDescription>
-            You have a total of {referrals.length} referrals.
+            You have a total of {referrals?.length ?? 0} referrals.
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {referrals.length > 0 ? (
+          {referrals && referrals.length > 0 ? (
             <Table>
               <TableHeader>
                 <TableRow>
@@ -35,7 +57,7 @@ export default function ReferralsPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {referrals.map((referral) => (
+                {referrals.sort((a,b) => b.date.toMillis() - a.date.toMillis()).map((referral) => (
                   <TableRow key={referral.id}>
                     <TableCell className="font-medium">{referral.referredUserUsername}</TableCell>
                     <TableCell>{referral.planPurchased}</TableCell>
@@ -45,7 +67,7 @@ export default function ReferralsPage() {
                         {referral.status}
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-right">{format(referral.date, 'PPpp')}</TableCell>
+                    <TableCell className="text-right">{format(referral.date.toDate(), 'PPpp')}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>

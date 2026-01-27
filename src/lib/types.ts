@@ -1,3 +1,5 @@
+import type { Timestamp } from 'firebase/firestore';
+
 export type SubscriptionTier = {
   id: string;
   name: string;
@@ -14,12 +16,12 @@ export type User = {
   username: string;
   referredBy: string | null;
   isAffiliate: boolean;
-  createdAt: Date;
+  createdAt: Timestamp;
   subscription?: {
     tierId: string;
     status: 'active' | 'inactive' | 'cancelled';
-    startDate: Date;
-    endDate: Date | null;
+    startDate: Timestamp;
+    endDate: Timestamp | null;
   };
   paypalEmail?: string;
 };
@@ -31,15 +33,26 @@ export type Referral = {
   planPurchased: string;
   commission: number;
   status: 'paid' | 'unpaid';
-  date: Date;
+  date: Timestamp;
 };
 
 export type Payout = {
   id: string;
   amount: number;
-  date: Date;
-  transactionId: string;
+  date: Timestamp;
+  transactionId?: string;
 };
+
+export type Commission = {
+  id: string;
+  affiliateId: string;
+  referralId: string;
+  amount: number;
+  status: 'paid' | 'unpaid';
+  subscriptionId: string;
+  commissionDate: Timestamp;
+};
+
 
 export type AdminPayout = {
     affiliateId: string;
