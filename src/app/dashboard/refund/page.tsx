@@ -20,12 +20,12 @@ export default function RequestRefundPage() {
   const [reason, setReason] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Check for existing pending refund requests for the current user
+  // Check for existing pending refund requests for the current user in their own subcollection
   const refundRequestQuery = useMemoFirebase(() => {
     if (!user) return null;
+    // Path is now /users/{userId}/refundRequests
     return query(
-        collection(firestore, 'refundRequests'), 
-        where('userId', '==', user.uid),
+        collection(firestore, 'users', user.uid, 'refundRequests'), 
         where('status', '==', 'pending')
     );
   }, [firestore, user]);
@@ -46,7 +46,8 @@ export default function RequestRefundPage() {
 
     setIsSubmitting(true);
     
-    const refundRef = collection(firestore, 'refundRequests');
+    // The collection ref now points to the user's subcollection
+    const refundRef = collection(firestore, 'users', user.uid, 'refundRequests');
     const newRefundRequest = {
         userId: user.uid,
         userEmail: user.email,
@@ -62,6 +63,7 @@ export default function RequestRefundPage() {
             title: "Request Submitted",
             description: "Your refund request has been received. We will review it shortly.",
         });
+        setReason(""); // Clear the textarea after submission
     } catch (error) {
         toast({
             variant: "destructive",

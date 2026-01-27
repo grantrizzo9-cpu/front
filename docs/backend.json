@@ -401,6 +401,26 @@
           ]
         }
       },
+       {
+        "path": "/users/{userId}/refundRequests/{requestId}",
+        "definition": {
+          "entityName": "RefundRequest",
+          "schema": {
+            "$ref": "#/backend/entities/RefundRequest"
+          },
+          "description": "Stores a user's refund requests. Path-based ownership: Only the user with the matching {userId} can manage their requests. Admins can list and update all requests via a collection group query.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier for the user."
+            },
+            {
+              "name": "requestId",
+              "description": "The unique identifier for the refund request."
+            }
+          ]
+        }
+      },
       {
         "path": "/roles_admin/{userId}",
         "definition": {
@@ -432,25 +452,9 @@
             }
           ]
         }
-      },
-      {
-        "path": "/refundRequests/{requestId}",
-        "definition": {
-          "entityName": "RefundRequest",
-          "schema": {
-            "$ref": "#/backend/entities/RefundRequest"
-          },
-          "description": "Stores all user refund requests. Users can create their own, admins can read and update all.",
-          "params": [
-            {
-              "name": "requestId",
-              "description": "The unique identifier for the refund request."
-            }
-          ]
-        }
       }
     ],
-    "reasoning": "The Firestore structure is designed to support Affiliate AI Host's affiliate marketing and subscription management features, prioritizing security, scalability, and ease of debugging. The key principle is Authorization Independence, achieved through denormalization of authorization data, eliminating the need for `get()` calls in security rules where possible. This ensures atomic operations and simplifies security rule logic. Data is segregated into collections with homogeneous security postures, enabling secure list operations. User-owned data is organized under user-specific paths for simplified ownership-based security. The use of DBAC (database-based access control) via the `/roles_admin` collection eliminates the need for custom claims."
+    "reasoning": "The Firestore structure is designed to support Affiliate AI Host's affiliate marketing and subscription management features, prioritizing security, scalability, and ease of debugging. The key principle is Authorization Independence, achieved through denormalization of authorization data, eliminating the need for `get()` calls in security rules where possible. Data is segregated into collections with homogeneous security postures, enabling secure list operations. User-owned data is organized under user-specific paths for simplified ownership-based security. The use of DBAC (database-based access control) via the `/roles_admin` collection eliminates the need for custom claims."
   }
 }
 

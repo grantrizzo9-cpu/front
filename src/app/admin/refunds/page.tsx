@@ -10,7 +10,7 @@ import { Loader2, ShieldCheck, AlertTriangle } from "lucide-react";
 import type { RefundRequest } from "@/lib/types";
 import { useAdmin } from "@/hooks/use-admin";
 import { useCollection, useFirestore, useMemoFirebase, updateDocumentNonBlocking } from "@/firebase";
-import { collection, query, where, doc } from "firebase/firestore";
+import { collectionGroup, query, where, doc } from "firebase/firestore";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 
@@ -20,10 +20,10 @@ export default function AdminRefundsPage() {
   const { isAdmin, isLoading: isAdminLoading } = useAdmin();
   const [processingId, setProcessingId] = useState<string | null>(null);
 
-  // 1. Fetch all pending refund requests
+  // 1. Fetch all pending refund requests using a collection group query
   const refundRequestsQuery = useMemoFirebase(() => {
     if (!firestore || !isAdmin) return null;
-    return query(collection(firestore, 'refundRequests'));
+    return query(collectionGroup(firestore, 'refundRequests'));
   }, [firestore, isAdmin]);
   const { data: refundRequests, isLoading: requestsLoading } = useCollection<RefundRequest>(refundRequestsQuery);
 
@@ -33,9 +33,8 @@ export default function AdminRefundsPage() {
     if (!firestore) return;
     setProcessingId(request.id);
     
-    // In a real app, this would trigger a PayPal refund API call.
-    // For now, we'll simulate the process and just update the status.
-    const requestDocRef = doc(firestore, 'refundRequests', request.id);
+    // The request is in a subcollection, so we need the full path to its document.
+    const requestDocRef = doc(firestore, 'users', request.userId, 'refundRequests', request.id);
     
     updateDocumentNonBlocking(requestDocRef, { status: 'processed' });
     

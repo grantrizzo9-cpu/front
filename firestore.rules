@@ -87,6 +87,15 @@ service cloud.firestore {
         allow update: if isOwnerOrAdmin(userId) && request.resource.data.userId == resource.data.userId;
         allow delete: if isOwnerOrAdmin(userId);
       }
+
+      /**
+       * @description Stores a user's refund requests. Path-based ownership.
+       */
+      match /refundRequests/{requestId} {
+        allow read, create: if isOwner(userId);
+        allow update: if isAdmin();
+        allow delete: if isAdmin();
+      }
     }
     
     /**
@@ -109,22 +118,20 @@ service cloud.firestore {
       allow get, list: if true;
       allow create, update, delete: if false;
     }
-
-    /**
-     * @description Stores user refund requests. Users can query for their own, admins can read/update all.
-     */
-    match /refundRequests/{requestId} {
-      allow read: if isAdmin() || isOwner(request.resource.data.userId);
-      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
-      allow update: if isAdmin();
-      allow delete: if false;
-    }
     
     /**
      * @description Allows admins to query across all referral subcollections
      * for platform-wide reporting. This is a collection group query rule.
      */
     match /{path=**}/referrals/{referralId} {
+        allow list: if isAdmin();
+    }
+
+    /**
+     * @description Allows admins to query across all refundRequest subcollections
+     * for platform-wide reporting. This is a collection group query rule.
+     */
+    match /{path=**}/refundRequests/{requestId} {
         allow list: if isAdmin();
     }
     
@@ -138,3 +145,5 @@ service cloud.firestore {
     }
   }
 }
+
+    
