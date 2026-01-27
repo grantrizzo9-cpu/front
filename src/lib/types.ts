@@ -10,6 +10,7 @@ export type SubscriptionTier = {
   description: string;
   features: string[];
   isMostPopular?: boolean;
+  guideAccessLevel: 'starter' | 'plus' | 'pro' | 'business' | 'scale' | 'enterprise';
 };
 
 export type User = {

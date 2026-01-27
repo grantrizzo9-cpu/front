@@ -1,9 +1,10 @@
 
+
 import { Header } from '@/components/header';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { CheckCircle, Zap, Users, Shield, ArrowRight, DollarSign, BrainCircuit, BarChart } from 'lucide-react';
+import { CheckCircle, Zap, Users, Shield, ArrowRight, DollarSign, BrainCircuit, BarChart, BookOpen } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Footer } from '@/components/footer';
@@ -18,7 +19,7 @@ export default function Home({ searchParams }: { searchParams?: { ref?: string }
 
   const heroImage = PlaceHolderImages.find((img) => img.id === 'hero');
   const featureImage1 = PlaceHolderImages.find((img) => img.id === 'feature-1');
-  const featureImage2 = PlaceHolderImages.find((img) => img.id === 'feature-2');
+  const guidesImage = PlaceHolderImages.find((img) => img.id === 'feature-2');
   const featureImage3 = PlaceHolderImages.find((img) => img.id === 'feature-3');
   const avatar1 = PlaceHolderImages.find((img) => img.id === 'testimonial-1');
   const avatar2 = PlaceHolderImages.find((img) => img.id === 'testimonial-2');
@@ -46,9 +47,9 @@ export default function Home({ searchParams }: { searchParams?: { ref?: string }
       description: 'Our subscription plans include access to powerful AI tools designed to help you and your referrals build and grow businesses faster.',
     },
     {
-      icon: <BarChart className="w-8 h-8 text-primary" />,
-      title: 'Advanced Affiliate Dashboard',
-      description: 'Track your clicks, referrals, and earnings in real-time with our state-of-the-art dashboard, giving you all the data you need to succeed.',
+        icon: <BookOpen className="w-8 h-8 text-primary" />,
+        title: 'Exclusive Marketing Guides',
+        description: 'Access a library of expert-written guides. The more you upgrade, the more advanced strategies you unlock to boost your sales.',
     },
     {
       icon: <Shield className="w-8 h-8 text-primary" />,
@@ -160,9 +161,55 @@ export default function Home({ searchParams }: { searchParams?: { ref?: string }
           </div>
         </section>
 
+        {/* Marketing Guides Section */}
+        <section id="guides" className="w-full py-20 md:py-32">
+          <div className="container grid gap-12 lg:grid-cols-2 items-center">
+             <div className="relative h-80 lg:h-full w-full">
+              {guidesImage && (
+                <Image
+                  src={guidesImage.imageUrl}
+                  alt={guidesImage.description}
+                  data-ai-hint={guidesImage.imageHint}
+                  fill
+                  className="object-cover rounded-lg shadow-lg"
+                />
+              )}
+            </div>
+            <div>
+              <h2 className="font-headline text-3xl font-bold tracking-tight sm:text-4xl">From Beginner to Pro: Your Marketing Playbook</h2>
+              <p className="mt-4 text-lg text-muted-foreground">
+                  Our subscription tiers come with a tiered library of marketing guides. The higher your plan, the more you learn, and the more you earn.
+              </p>
+              <ul className="mt-8 space-y-4">
+                <li className="flex items-start gap-3">
+                  <CheckCircle className="w-5 h-5 text-primary flex-shrink-0 mt-1" />
+                  <div>
+                    <h3 className="font-semibold">Starter Guides</h3>
+                    <p className="text-muted-foreground text-sm">Learn the fundamentals of affiliate marketing, SEO basics, and social media promotion.</p>
+                  </div>
+                </li>
+                 <li className="flex items-start gap-3">
+                  <CheckCircle className="w-5 h-5 text-primary flex-shrink-0 mt-1" />
+                  <div>
+                    <h3 className="font-semibold">Plus Guides</h3>
+                    <p className="text-muted-foreground text-sm">Dive into content creation, email marketing, and web analytics to grow your audience.</p>
+                  </div>
+                </li>
+                <li className="flex items-start gap-3">
+                  <CheckCircle className="w-5 h-5 text-primary flex-shrink-0 mt-1" />
+                  <div>
+                    <h3 className="font-semibold">Pro &amp; Enterprise Guides</h3>
+                    <p className="text-muted-foreground text-sm">Master advanced SEO, PPC advertising, conversion optimization, and strategic partnerships to scale your income.</p>
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
 
         {/* Testimonials */}
-        <section id="testimonials" className="py-20 md:py-32">
+        <section id="testimonials" className="py-20 md:py-32 bg-card">
           <div className="container">
             <div className="text-center">
               <h2 className="font-headline text-3xl font-bold tracking-tight sm:text-4xl">Trusted by Top Earners</h2>
@@ -195,7 +242,7 @@ export default function Home({ searchParams }: { searchParams?: { ref?: string }
         </section>
 
         {/* FAQ Section */}
-        <section id="faq" className="w-full py-20 md:py-32 bg-card">
+        <section id="faq" className="w-full py-20 md:py-32">
           <div className="container max-w-4xl mx-auto">
             <div className="text-center">
               <h2 className="font-headline text-3xl font-bold tracking-tight sm:text-4xl">Frequently Asked Questions</h2>
@@ -217,7 +264,7 @@ export default function Home({ searchParams }: { searchParams?: { ref?: string }
         </section>
 
         {/* Newsletter Section */}
-        <section className="w-full py-20 md:py-32">
+        <section className="w-full py-20 md:py-32 bg-card">
           <div className="container text-center max-w-3xl">
             <h2 className="font-headline text-3xl font-bold tracking-tight sm:text-4xl">
               Stay Ahead of the Curve
@@ -232,7 +279,7 @@ export default function Home({ searchParams }: { searchParams?: { ref?: string }
         </section>
         
         {/* CTA Section */}
-        <section className="w-full py-20 md:py-32 bg-card">
+        <section className="w-full py-20 md:py-32">
           <div className="container text-center">
             <h2 className="font-headline text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl">Ready to Start Earning?</h2>
             <p className="mt-4 max-w-2xl mx-auto text-lg text-muted-foreground">
