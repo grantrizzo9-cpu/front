@@ -12,7 +12,7 @@ import { useEffect, useState } from "react";
 import { Loader2, Users } from "lucide-react";
 import { useAuth, useFirestore, setDocumentNonBlocking } from "@/firebase";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
-import { doc } from "firebase/firestore";
+import { doc, serverTimestamp } from "firebase/firestore";
 
 export function SignupForm() {
   const router = useRouter();
@@ -61,22 +61,22 @@ export function SignupForm() {
         // 3. Create user document in Firestore
         const userDocRef = doc(firestore, "users", user.uid);
         const userData = {
-            uid: user.uid,
+            id: user.uid, // FIX: Use `id` to match security rules
             email: user.email,
             username: username,
             referredBy: referralCode || null,
             isAffiliate: true, // All signups are affiliates
-            createdAt: new Date(),
+            createdAt: serverTimestamp(), // Use server timestamp for consistency
             subscription: planId ? {
                 tierId: planId,
                 status: 'active', // Simulate active subscription
-                startDate: new Date(),
+                startDate: serverTimestamp(),
                 endDate: null
             } : null,
             paypalEmail: '' // User needs to set this in settings
         };
         
-        // Using the non-blocking version as per guidelines
+        // This non-blocking call will now succeed with the corrected data.
         setDocumentNonBlocking(userDocRef, userData, { merge: false });
 
         toast({

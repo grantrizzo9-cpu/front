@@ -8,8 +8,7 @@
       "properties": {
         "id": {
           "type": "string",
-          "description": "Unique identifier for the user.",
-          "format": "uuid"
+          "description": "Unique identifier for the user, matches Firebase Auth UID."
         },
         "email": {
           "type": "string",
@@ -21,13 +20,50 @@
           "description": "User's username."
         },
         "referredBy": {
-          "type": "string",
-          "description": "ID of the affiliate who referred this user. (Relationship: User 1:N User (as referred))",
-          "format": "uuid"
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "ID of the affiliate who referred this user."
         },
         "isAffiliate": {
           "type": "boolean",
           "description": "Indicates whether the user is an affiliate."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The timestamp when the user account was created."
+        },
+        "subscription": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "description": "The user's current subscription details.",
+          "properties": {
+            "tierId": {
+              "type": "string"
+            },
+            "status": {
+              "type": "string"
+            },
+            "startDate": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "endDate": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "format": "date-time"
+            }
+          }
+        },
+        "paypalEmail": {
+          "type": "string",
+          "description": "The user's PayPal email for receiving payouts."
         }
       },
       "required": [
