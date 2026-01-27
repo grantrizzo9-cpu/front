@@ -79,10 +79,10 @@ export default function DashboardPage() {
           <CardContent>
             <div className="grid gap-4 md:grid-cols-2">
                 <StatCard
-                  title="Total Platform Revenue"
+                  title="Your Revenue (Platform Cut)"
                   value={`$${platformRevenue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                   icon={<TrendingUp className="h-5 w-5 text-muted-foreground" />}
-                  description="Your 25% cut from all affiliate sales."
+                  description="The 25% platform cut from every sale, credited to you."
                 />
                 <StatCard
                   title="Total Affiliate Payouts"
@@ -151,7 +151,7 @@ export default function DashboardPage() {
                             {referral.status}
                         </Badge>
                         </TableCell>
-                        <TableCell className="text-right">{format(referral.date.toDate(), 'MMM d, yyyy')}</TableCell>
+                        <TableCell className="text-right">{format(referral.date.toDate(), 'PP')}</TableCell>
                     </TableRow>
                     ))}
                 </TableBody>
