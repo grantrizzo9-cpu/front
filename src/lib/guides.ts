@@ -1,4 +1,5 @@
 
+
 export type Guide = {
   title: string;
   level: 'starter' | 'plus' | 'pro' | 'business' | 'scale' | 'enterprise';
@@ -90,6 +91,38 @@ export const allGuides: Guide[] = [
   },
 
   // Pro Guides
+  {
+    title: "Using Your Own Domain: The Professional Touch",
+    level: "pro",
+    content: `
+      <p>Using a custom domain name (e.g., <code>www.yourbrand.com</code>) instead of a generic subdomain is one of the most important steps to building a professional online presence. Here's why it's crucial and how to set it up.</p>
+      
+      <strong>Why You NEED a Custom Domain:</strong>
+      <ul>
+        <li><strong>Builds Trust:</strong> A custom domain shows you are serious and professional. It inspires confidence in your visitors.</li>
+        <li><strong>Brand Control:</strong> It's your brand, not ours. A custom domain strengthens your brand identity and makes you memorable.</li>
+        <li><strong>Better SEO:</strong> Search engines like Google favor websites with custom domains, which can lead to higher rankings and more free traffic over time.</li>
+      </ul>
+
+      <strong>How to Connect Your Domain:</strong>
+      <p>You can connect a domain you already own from a registrar like GoDaddy, Namecheap, or Google Domains. The process involves pointing your domain to our servers. Your site is hosted on Google's high-performance cloud infrastructure.</p>
+      
+      <ol>
+        <li>Go to the <a href="/dashboard/hosting" class="text-primary hover:underline">Hosting</a> page in your dashboard.</li>
+        <li>Enter your domain name (e.g., <code>your-awesome-site.com</code>) in the input field and click "Save".</li>
+        <li>The page will show you two DNS records you need to add at your domain registrar: an <strong>A record</strong> and a <strong>CNAME record</strong>.</li>
+        <li>Log in to your domain registrar's website (where you bought your domain).</li>
+        <li>Find the DNS management or advanced DNS settings for your domain.</li>
+        <li>Copy the values from your hosting dashboard and create the new A and CNAME records. Delete any old "A" records for your main domain.</li>
+        <li>Save your changes. It can take anywhere from a few minutes to 24 hours for the changes to take effect across the internet.</li>
+      </ol>
+      <p>Once connected, your website will be live at your custom domain name!</p>
+
+      <strong>What About Domain Forwarding?</strong>
+      <p>Domain forwarding is a simpler option where you redirect traffic from your custom domain to another URL. For example, you could forward <code>www.yourbrand.com</code> directly to your main affiliate link. This is quick and easy but has downsides: the user will see the affiliate link in their browser bar, and it offers no SEO benefits.</p>
+      <p><strong>Our recommendation:</strong> Always use the DNS method above to properly connect your domain. It's the professional choice for building a long-term business.</p>
+    `
+  },
   {
     title: "Pay-Per-Click (PPC) Advertising for Affiliates",
     level: "pro",

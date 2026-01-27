@@ -29,6 +29,10 @@ export type User = {
     trialEndDate?: Timestamp | null;
   };
   paypalEmail?: string;
+  customDomain?: {
+    name: string;
+    status: 'unconfigured' | 'pending' | 'connected' | 'error';
+  } | null;
 };
 
 export type Referral = {

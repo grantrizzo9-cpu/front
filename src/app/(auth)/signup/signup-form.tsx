@@ -98,7 +98,8 @@ export function SignupForm() {
                 endDate: null,
                 trialEndDate: Timestamp.fromDate(trialEndDate),
             } : null,
-            paypalEmail: ''
+            paypalEmail: '',
+            customDomain: null
         };
         await setDoc(userDocRef, userData);
 

@@ -73,6 +73,29 @@
         "paypalEmail": {
           "type": "string",
           "description": "The user's PayPal email for receiving payouts."
+        },
+        "customDomain": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "description": "Details for the user's custom domain.",
+          "properties": {
+            "name": {
+              "type": "string",
+              "description": "The custom domain name (e.g., my-awesome-site.com)."
+            },
+            "status": {
+              "type": "string",
+              "description": "The connection status of the domain.",
+              "enum": [
+                "unconfigured",
+                "pending",
+                "connected",
+                "error"
+              ]
+            }
+          }
         }
       },
       "required": [
