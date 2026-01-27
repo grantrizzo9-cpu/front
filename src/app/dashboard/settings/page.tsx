@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -11,12 +12,16 @@ import { doc, setDoc } from "firebase/firestore";
 import type { User as UserType } from "@/lib/types";
 import { useState } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { useAdmin } from "@/hooks/use-admin";
 
 export default function SettingsPage() {
   const { user, isUserLoading } = useUser();
   const firestore = useFirestore();
   const { toast } = useToast();
+  const { isAdmin, isLoading: isAdminLoading } = useAdmin();
+
   const [isRepairing, setIsRepairing] = useState(false);
+  const [isMakingAdmin, setIsMakingAdmin] = useState(false);
 
   const userDocRef = useMemoFirebase(() => {
     if (!user) return null;
@@ -79,7 +84,6 @@ export default function SettingsPage() {
         const publicUsernameRef = doc(firestore, 'usernames', userData.username);
         await setDoc(publicUsernameRef, { uid: user.uid });
         toast({ title: 'Success!', description: 'Your affiliate link has been repaired and is now active.' });
-        // The useDoc hook will automatically re-fetch and update the UI.
     } catch (error: any) {
         toast({ variant: 'destructive', title: 'Repair Failed', description: error.message || 'An unknown error occurred.' });
     } finally {
@@ -87,7 +91,25 @@ export default function SettingsPage() {
     }
   };
 
-  const isLoading = isUserLoading || isUserDataLoading || isUsernameDocLoading;
+  const handleMakeAdmin = async () => {
+    if (!firestore || !user) {
+        toast({ variant: 'destructive', title: 'Error', description: 'Could not grant admin privileges. User not found.' });
+        return;
+    }
+    setIsMakingAdmin(true);
+    try {
+        const adminRoleRef = doc(firestore, 'roles_admin', user.uid);
+        await setDoc(adminRoleRef, {}); // Create an empty document
+        toast({ title: 'Success!', description: 'Admin privileges granted. The page will now reload.' });
+        setTimeout(() => window.location.reload(), 1500);
+    } catch (error: any) {
+        toast({ variant: 'destructive', title: 'Operation Failed', description: error.message || 'An unknown error occurred.' });
+    } finally {
+        setIsMakingAdmin(false);
+    }
+  };
+
+  const isLoading = isUserLoading || isUserDataLoading || isUsernameDocLoading || isAdminLoading;
 
   if (isLoading) {
     return (
@@ -103,6 +125,25 @@ export default function SettingsPage() {
         <h1 className="text-3xl font-bold font-headline">Settings</h1>
         <p className="text-muted-foreground">Manage your account and affiliate settings.</p>
       </div>
+
+      {userData?.username === 'rentahost' && !isAdmin && (
+        <Card className="border-accent">
+          <CardHeader>
+            <CardTitle>Admin Privileges</CardTitle>
+            <CardDescription>Grant administrative rights to this account.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground">
+              This section is only visible to the 'rentahost' user. Click the button below to grant your account full administrative privileges. You will only need to do this once.
+            </p>
+          </CardContent>
+          <CardFooter>
+            <Button onClick={handleMakeAdmin} disabled={isMakingAdmin}>
+              {isMakingAdmin ? <Loader2 className="animate-spin" /> : "Grant Admin Privileges"}
+            </Button>
+          </CardFooter>
+        </Card>
+      )}
 
       <Card>
         <CardHeader>

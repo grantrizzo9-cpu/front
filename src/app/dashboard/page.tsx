@@ -1,3 +1,4 @@
+
 'use client';
 
 import { StatCard } from "@/components/stat-card";
@@ -43,6 +44,7 @@ export default function DashboardPage() {
   const unpaidCommissions = referrals?.filter(r => r.status === 'unpaid').reduce((sum, r) => sum + r.commission, 0) ?? 0;
   
   // --- Admin-specific calculation to show 100% of sale value for personal referrals ---
+  // If commission is 75%, then 100% is commission / 0.75
   const adminPersonalTotalSaleValue = referrals?.reduce((sum, r) => sum + (r.commission / 0.75), 0) ?? 0;
   
   // Conditionally set the value for the "Total Earnings" card based on admin status
