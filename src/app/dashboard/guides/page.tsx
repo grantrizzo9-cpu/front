@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useMemo } from 'react';
@@ -6,9 +7,10 @@ import { doc } from 'firebase/firestore';
 import type { User as UserType } from '@/lib/types';
 import { subscriptionTiers } from '@/lib/data';
 import { allGuides, Guide } from '@/lib/guides';
-import { Loader2, BookOpen, Lock } from 'lucide-react';
+import { Loader2, BookOpen, Lock, Download } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { Button } from '@/components/ui/button';
 
 export default function GuidesPage() {
   const { user, isUserLoading } = useUser();
@@ -43,6 +45,29 @@ export default function GuidesPage() {
 
     return { currentTier: tier, accessibleGuides: guides };
   }, [userData]);
+
+  const handleDownload = (guide: Guide) => {
+    // This function creates a temporary div to parse the HTML and extract the text content.
+    const stripHtml = (html: string) => {
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = html;
+        return tempDiv.textContent || tempDiv.innerText || "";
+    }
+
+    const textContent = stripHtml(guide.content)
+                            .replace(/(\n\s*){3,}/g, '\n\n') // Reduce multiple newlines to max of two
+                            .trim();
+
+    const blob = new Blob([`Guide: ${guide.title}\n\n---\n\n${textContent}`], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${guide.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.txt`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
 
 
   if (isLoading) {
@@ -87,8 +112,15 @@ export default function GuidesPage() {
                                     <span>{guide.title}</span>
                                 </div>
                             </AccordionTrigger>
-                            <AccordionContent className="text-base text-muted-foreground prose dark:prose-invert max-w-none">
-                                <p>{guide.content}</p>
+                            <AccordionContent className="space-y-4">
+                                <div 
+                                    className="text-base text-muted-foreground [&_a]:text-primary [&_a:hover]:underline [&_strong]:text-foreground [&_code]:bg-muted [&_code]:p-1 [&_code]:rounded-sm [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 [&_blockquote]:pl-4 [&_blockquote]:border-l-4 [&_blockquote]:border-border [&_blockquote]:italic"
+                                    dangerouslySetInnerHTML={{ __html: guide.content }} 
+                                />
+                                <Button variant="outline" size="sm" onClick={() => handleDownload(guide)}>
+                                    <Download className="mr-2 h-4 w-4" />
+                                    Download as .txt
+                                </Button>
                             </AccordionContent>
                         </AccordionItem>
                     ))}
@@ -126,3 +158,5 @@ export default function GuidesPage() {
     </div>
   );
 }
+
+    
