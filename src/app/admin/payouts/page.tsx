@@ -82,4 +82,11 @@ export default function AdminPayoutsPage() {
             ) : (
                 <div className="text-center text-muted-foreground py-10">
                     <p>No pending payouts.</p>
-                    <p className="text-sm">When affiliates have unpaid commissions, they will appear here.</
+                    <p className="text-sm">When affiliates have unpaid commissions, they will appear here.</p>
+                </div>
+            )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
