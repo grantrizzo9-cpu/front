@@ -28,17 +28,9 @@ service cloud.firestore {
     function isSignedIn() {
       return request.auth != null;
     }
-
-    function isOwner(userId) {
-      return isSignedIn() && request.auth.uid == userId;
-    }
     
     function isAdmin() {
       return isSignedIn() && exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
-    }
-
-    function isOwnerOrAdmin(userId) {
-      return isOwner(userId) || isAdmin();
     }
     
     // =====================================================================
@@ -49,20 +41,17 @@ service cloud.firestore {
      * @description Controls access to user profile documents.
      */
     match /users/{userId} {
-      allow read: if isOwner(userId);
+      allow read: if request.auth.uid == userId;
       allow list: if isAdmin();
-      allow create: if isOwner(userId) && request.resource.data.id == userId;
-      allow update: if isOwner(userId) && request.resource.data.id == resource.data.id;
-      allow delete: if isOwner(userId);
+      allow create: if request.auth.uid == userId && request.resource.data.id == userId;
+      allow update: if request.auth.uid == userId && request.resource.data.id == resource.data.id;
+      allow delete: if request.auth.uid == userId;
 
       /**
        * @description Manages user subscriptions, nested under the user's document.
        */
       match /subscriptions/{subscriptionId} {
-        allow read: if isOwner(userId);
-        allow create: if isOwner(userId) && request.resource.data.userId == userId;
-        allow update: if isOwner(userId) && request.resource.data.userId == resource.data.userId;
-        allow delete: if isOwner(userId);
+        allow read, create, update, delete: if request.auth.uid == userId;
       }
 
       /**
@@ -72,7 +61,7 @@ service cloud.firestore {
        * complex and potentially problematic `get()` calls.
        */
       match /referrals/{referralId} {
-        allow read, update, delete: if isOwner(userId);
+        allow read, update, delete: if request.auth.uid == userId;
         allow create: if isSignedIn()
                         && request.resource.data.referredUserId == request.auth.uid
                         && request.resource.data.triggeringUserReferredBy == userId;
@@ -82,17 +71,14 @@ service cloud.firestore {
        * @description Contains payment history for a user, accessible by the user and admins.
        */
       match /payments/{paymentId} {
-        allow read: if isOwnerOrAdmin(userId);
-        allow create: if isOwnerOrAdmin(userId) && request.resource.data.userId == userId;
-        allow update: if isOwnerOrAdmin(userId) && request.resource.data.userId == resource.data.userId;
-        allow delete: if isOwnerOrAdmin(userId);
+        allow read, create, update, delete: if request.auth.uid == userId || isAdmin();
       }
 
       /**
        * @description Stores a user's refund requests. Path-based ownership.
        */
       match /refundRequests/{requestId} {
-        allow read, create: if isOwner(userId);
+        allow read, create: if request.auth.uid == userId;
         allow update: if isAdmin();
         allow delete: if isAdmin();
       }
@@ -139,8 +125,8 @@ service cloud.firestore {
      * @description Lookup collection for admin roles. Existence of a doc grants admin rights.
      */
     match /roles_admin/{userId} {
-      allow read: if isOwner(userId);
-      allow create: if isOwner(userId);
+      allow read: if request.auth.uid == userId;
+      allow create: if request.auth.uid == userId;
       allow list, update, delete: if false;
     }
   }
