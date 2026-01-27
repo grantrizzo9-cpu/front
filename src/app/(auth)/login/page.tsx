@@ -10,7 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/firebase";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { useState } from "react";
-import { Loader2 } from "lucide-react";
+import { Loader2, AlertTriangle } from "lucide-react";
 import { firebaseConfig } from "@/firebase/config";
 
 export default function LoginPage() {
@@ -18,6 +18,33 @@ export default function LoginPage() {
   const { toast } = useToast();
   const auth = useAuth();
   const [isLoading, setIsLoading] = useState(false);
+
+  if (firebaseConfig.apiKey.startsWith("REPLACE_WITH")) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="font-headline text-2xl flex items-center gap-2">
+            <AlertTriangle className="text-destructive" />
+            Firebase Not Configured
+          </CardTitle>
+          <CardDescription>
+            The application is not connected to Firebase. Please follow the instructions
+            in the code file below to resolve this issue.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4 bg-muted/50 p-4 rounded-lg">
+            <p className="text-sm font-semibold">Action Required:</p>
+            <p className="text-sm">
+                1. Open the file: <code className="bg-background p-1 rounded">src/firebase/config.ts</code>
+            </p>
+            <p className="text-sm">
+                2. Follow the instructions in the comments at the top of the file to add your
+                   Firebase project configuration.
+            </p>
+        </CardContent>
+      </Card>
+    );
+  }
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
