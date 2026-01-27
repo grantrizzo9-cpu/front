@@ -47,4 +47,24 @@ export default function RefundPage() {
               <AlertTitle className="text-primary">Your Risk-Free Guarantee</AlertTitle>
               <AlertDescription>
                   We stand by our promise. If you haven&apos;t made at least two referrals, you are eligible for a refund of your daily subscription fee. You can continue to request a refund each day until you reach this goal.
-              </Aler
+              </AlertDescription>
+            </Alert>
+            <div className="text-center p-4 bg-muted/50 rounded-lg">
+                <p className="font-semibold text-lg">Your Current Referrals: {referralCount}</p>
+                {isEligible ? (
+                    <p className="text-green-600">You are eligible for a refund.</p>
+                ) : (
+                    <p className="text-destructive">You are not eligible for a refund (2 or more referrals).</p>
+                )}
+            </div>
+          </div>
+        </CardContent>
+        <CardFooter>
+            <Button onClick={handleRefundRequest} disabled={!isEligible} className="w-full">
+              Request Refund for Today
+            </Button>
+        </CardFooter>
+      </Card>
+    </div>
+  );
+}
