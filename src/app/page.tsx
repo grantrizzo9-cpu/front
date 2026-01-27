@@ -69,7 +69,7 @@ export default function Home({ searchParams }: { searchParams?: { ref?: string }
     { q: "How and when do I get paid?", a: "We process all commission payouts daily. All your earned commissions from the previous day are automatically sent to the PayPal account you have on file. It's fully automated." },
     { q: "What am I selling?", a: "You are promoting our subscription plans which include high-quality web hosting, a suite of powerful AI tools, and access to an exclusive, tiered library of marketing guides designed to help users build and grow their online businesses and make more sales." },
     { q: "Is there a limit to how much I can earn?", a: "Absolutely not! There is no cap on your potential earnings. The more customers you refer, the more you earn. With a base 70% commission rate that rises to 75% for top affiliates, the sky is the limit." },
-    { q: "What is your trial and refund policy?", a: "We offer an incredible risk-free trial. You pay only for your first day of service, and then you get the next 3 days completely free to explore the platform, use the AI tools, and start making referrals. This gives you a few days to see the value and start earning before your daily billing begins." },
+    { q: "What is your trial and refund policy?", a: "We aim to please and want you to be happy. We offer an incredible risk-free trial: pay for your first day of service, and get the next 3 days completely free to explore the platform. If you're not happy for any reason, you can cancel your membership at any time during the trial with no hard feelings. This gives you a few days to see the value and start earning before your daily billing begins. Even after the trial, you can cancel at any time if you're not satisfied." },
   ];
 
   return (
