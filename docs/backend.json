@@ -261,6 +261,12 @@
         "amount",
         "status"
       ]
+    },
+    "AdminRole": {
+      "title": "Admin Role",
+      "type": "object",
+      "description": "An empty document whose existence at /roles_admin/{userId} grants a user admin privileges.",
+      "properties": {}
     }
   },
   "auth": {
@@ -386,11 +392,11 @@
       {
         "path": "/roles_admin/{userId}",
         "definition": {
-          "entityName": "roles_admin",
+          "entityName": "AdminRole",
           "schema": {
-            "$ref": "#/backend/entities/User"
+            "$ref": "#/backend/entities/AdminRole"
           },
-          "description": "Documents in this collection indicate admin privileges. Existence of a document for a given {userId} grants admin access.",
+          "description": "Documents in this collection indicate admin privileges. Existence of a document for a given {userId} grants that user admin access. A user can read their own document here to check for admin status, but cannot list other admins.",
           "params": [
             {
               "name": "userId",

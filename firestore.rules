@@ -180,12 +180,13 @@ service cloud.firestore {
     /**
      * @description Lookup collection for admin roles. Existence of a doc grants admin rights.
      * @path /roles_admin/{userId}
-     * @allow (get) No client is ever allowed to read this collection, to prevent enumeration of admins.
+     * @allow (get) A user can check for their own admin document, but cannot read others'.
+     * @deny (list) Listing documents is denied to prevent enumerating admins.
      * @deny (create) No client is allowed to write to this collection. Admin roles are granted via the Firebase Console or an Admin SDK.
-     * @principle Implements database-based access control (DBAC) by denying all client access. It is used only by other rules via `exists()`.
+     * @principle Implements database-based access control (DBAC). Admin status is checked by reading a user-specific document.
      */
     match /roles_admin/{userId} {
-      allow get: if false;
+      allow get: if isOwner(userId);
       allow list: if false;
       allow create: if false;
       allow update: if false;
