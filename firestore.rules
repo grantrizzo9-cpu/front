@@ -139,7 +139,7 @@ service cloud.firestore {
      * @description Lookup collection for admin roles. Existence of a doc grants admin rights.
      */
     match /roles_admin/{userId} {
-      allow get: if isOwner(userId);
+      allow read: if isOwner(userId);
       allow create: if isOwner(userId);
       allow list, update, delete: if false;
     }
