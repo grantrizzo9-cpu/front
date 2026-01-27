@@ -5,15 +5,18 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Copy, Loader2, PartyPopper } from "lucide-react";
+import { Copy, Loader2, PartyPopper, Info } from "lucide-react";
 import { useUser, useFirestore, useDoc, updateDocumentNonBlocking, useMemoFirebase } from "@/firebase";
-import { doc } from "firebase/firestore";
+import { doc, setDoc } from "firebase/firestore";
 import type { User as UserType } from "@/lib/types";
+import { useState } from "react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export default function SettingsPage() {
   const { user, isUserLoading } = useUser();
   const firestore = useFirestore();
   const { toast } = useToast();
+  const [isRepairing, setIsRepairing] = useState(false);
 
   const userDocRef = useMemoFirebase(() => {
     if (!user) return null;
@@ -22,7 +25,15 @@ export default function SettingsPage() {
 
   const { data: userData, isLoading: isUserDataLoading } = useDoc<UserType>(userDocRef);
 
+  // Check if the public username document exists
+  const usernameDocRef = useMemoFirebase(() => {
+    if (!userData?.username) return null;
+    return doc(firestore, "usernames", userData.username);
+  }, [firestore, userData?.username]);
+  const { data: usernameDoc, isLoading: isUsernameDocLoading } = useDoc(usernameDocRef);
+
   const affiliateLink = userData?.username ? `https://affiliateai.host/?ref=${userData.username}` : '';
+  const isLinkPubliclyActive = !!usernameDoc;
   
   const handleCopyLink = () => {
     if (affiliateLink) {
@@ -58,7 +69,25 @@ export default function SettingsPage() {
       });
   }
 
-  const isLoading = isUserLoading || isUserDataLoading;
+  const handleRepairLink = async () => {
+    if (!firestore || !user || !userData?.username) {
+        toast({ variant: 'destructive', title: 'Error', description: 'Could not repair link. User data is missing.' });
+        return;
+    }
+    setIsRepairing(true);
+    try {
+        const publicUsernameRef = doc(firestore, 'usernames', userData.username);
+        await setDoc(publicUsernameRef, { uid: user.uid });
+        toast({ title: 'Success!', description: 'Your affiliate link has been repaired and is now active.' });
+        // The useDoc hook will automatically re-fetch and update the UI.
+    } catch (error: any) {
+        toast({ variant: 'destructive', title: 'Repair Failed', description: error.message || 'An unknown error occurred.' });
+    } finally {
+        setIsRepairing(false);
+    }
+  };
+
+  const isLoading = isUserLoading || isUserDataLoading || isUsernameDocLoading;
 
   if (isLoading) {
     return (
@@ -117,6 +146,22 @@ export default function SettingsPage() {
               <Copy className="h-4 w-4" />
             </Button>
           </div>
+          {userData?.isAffiliate && !isLinkPubliclyActive && !isLoading && (
+            <Alert variant="destructive" className="mt-4">
+                <Info className="h-4 w-4" />
+                <AlertTitle>Your Affiliate Link is Inactive!</AlertTitle>
+                <AlertDescription>
+                    Your public affiliate username is not linked correctly. This will prevent you from receiving credit for referrals. Click the button below to fix it.
+                    <Button 
+                        onClick={handleRepairLink} 
+                        className="mt-2 w-full"
+                        disabled={isRepairing}
+                    >
+                        {isRepairing ? <Loader2 className="animate-spin" /> : "Repair Affiliate Link"}
+                    </Button>
+                </AlertDescription>
+            </Alert>
+          )}
         </CardContent>
       </Card>
 
