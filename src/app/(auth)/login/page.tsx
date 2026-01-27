@@ -11,8 +11,10 @@ import { useAuth } from "@/firebase";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { useState } from "react";
 import { Loader2 } from "lucide-react";
+import { firebaseConfig } from "@/firebase/config";
 
 export default function LoginPage() {
+  console.log("Current Firebase Config:", firebaseConfig);
   const router = useRouter();
   const { toast } = useToast();
   const auth = useAuth();
