@@ -9,6 +9,7 @@ import { Footer } from '@/components/footer';
 import { Logo } from '@/components/logo';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { NewsletterForm } from '@/components/newsletter-form';
 
 export default function Home({ searchParams }: { searchParams?: { ref?: string } }) {
   const refCode = searchParams?.ref;
@@ -214,8 +215,23 @@ export default function Home({ searchParams }: { searchParams?: { ref?: string }
           </div>
         </section>
 
-        {/* CTA Section */}
+        {/* Newsletter Section */}
         <section className="w-full py-20 md:py-32">
+          <div className="container text-center max-w-3xl">
+            <h2 className="font-headline text-3xl font-bold tracking-tight sm:text-4xl">
+              Stay Ahead of the Curve
+            </h2>
+            <p className="mt-4 max-w-2xl mx-auto text-lg text-muted-foreground">
+              Join our newsletter to get the latest updates on affiliate strategies, AI tools, and platform features delivered straight to your inbox.
+            </p>
+            <div className="mt-8 flex justify-center">
+              <NewsletterForm />
+            </div>
+          </div>
+        </section>
+        
+        {/* CTA Section */}
+        <section className="w-full py-20 md:py-32 bg-card">
           <div className="container text-center">
             <h2 className="font-headline text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl">Ready to Start Earning?</h2>
             <p className="mt-4 max-w-2xl mx-auto text-lg text-muted-foreground">
