@@ -18,37 +18,37 @@ export default function LoginPage() {
   const auth = useAuth();
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setIsLoading(true);
     const formData = new FormData(event.currentTarget);
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
 
-    try {
-      await signInWithEmailAndPassword(auth, email, password);
-      toast({
-        title: "Login Successful",
-        description: "Redirecting to your dashboard...",
-      });
-      router.push("/dashboard");
-    } catch (error: any) {
-      console.error("Login failed:", error);
-      let description = "An unknown error occurred.";
-      if (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found') {
-        description = "Invalid email or password. Please check your credentials and try again.";
-      } else {
-        description = error.message;
-      }
+    signInWithEmailAndPassword(auth, email, password)
+      .then(() => {
+        toast({
+          title: "Login Successful",
+          description: "Redirecting to your dashboard...",
+        });
+        router.push("/dashboard");
+      })
+      .catch((error: any) => {
+        console.error("Login failed:", error);
+        let description = "An unknown error occurred.";
+        if (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found') {
+          description = "Invalid email or password. Please check your credentials and try again.";
+        } else {
+          description = error.message;
+        }
 
-      toast({
-        variant: "destructive",
-        title: "Login Failed",
-        description: description,
+        toast({
+          variant: "destructive",
+          title: "Login Failed",
+          description: description,
+        });
+        setIsLoading(false);
       });
-    } finally {
-      setIsLoading(false);
-    }
   };
 
   return (
