@@ -109,7 +109,7 @@ export default function AdminRefundsPage() {
                     <TableRow key={request.id}>
                       <TableCell className="font-medium">{request.userUsername}</TableCell>
                       <TableCell>{request.userEmail}</TableCell>
-                      <TableCell>${request.amount.toFixed(2)}</TableCell>
+                      <TableCell>${(request.amount ?? 0).toFixed(2)}</TableCell>
                       <TableCell className="max-w-xs truncate">{request.reason}</TableCell>
                       <TableCell>{format(request.requestedAt.toDate(), 'PP')}</TableCell>
                       <TableCell className="text-right">
