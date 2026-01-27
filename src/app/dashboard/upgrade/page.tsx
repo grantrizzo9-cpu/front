@@ -3,7 +3,6 @@
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Loader2, CheckCircle } from "lucide-react";
-import Link from 'next/link';
 import { useUser, useFirestore, useDoc, useMemoFirebase, updateDocumentNonBlocking } from "@/firebase";
 import { doc, serverTimestamp, Timestamp } from "firebase/firestore";
 import type { User as UserType } from "@/lib/types";
@@ -25,7 +24,7 @@ export default function UpgradePage() {
 
   const isLoading = isUserLoading || isUserDataLoading;
 
-  const handleDowngradeClick = (tierId: string) => {
+  const handlePlanChange = (tierId: string) => {
     if (!user) return;
     const userDocRef = doc(firestore, 'users', user.uid);
     updateDocumentNonBlocking(userDocRef, {
@@ -46,7 +45,7 @@ export default function UpgradePage() {
 
     const newSubscription = {
       tierId: tierId,
-      status: 'active',
+      status: 'active' as 'active',
       startDate: serverTimestamp(),
       endDate: null,
       trialEndDate: Timestamp.fromDate(trialEndDate),
@@ -58,7 +57,7 @@ export default function UpgradePage() {
 
     toast({
       title: "Plan Activated!",
-      description: "You've successfully subscribed to a new plan.",
+      description: "You've successfully subscribed. Your 3-day trial starts now!",
     });
   };
 
@@ -70,6 +69,7 @@ export default function UpgradePage() {
     );
   }
   
+  // SCENARIO 1: User has NO subscription. Show all plans for purchase.
   if (!userData?.subscription) {
       return (
           <div className="space-y-8">
@@ -121,34 +121,33 @@ export default function UpgradePage() {
       )
   }
 
+  // SCENARIO 2: User HAS a subscription. Show current plan and cheaper options for downgrade.
   const currentTierId = userData.subscription.tierId;
   const currentTier = subscriptionTiers.find(t => t.id === currentTierId);
-  const currentPrice = currentTier?.price ?? 0;
+  const currentPrice = currentTier?.price ?? Infinity;
 
-  const downgradeableTiers = subscriptionTiers.filter(tier => tier.price < currentPrice);
+  const availableTiers = subscriptionTiers
+    .filter(tier => tier.price <= currentPrice)
+    .sort((a, b) => b.price - a.price); // Sort from most to least expensive
   
-  const isLowestTier = downgradeableTiers.length === 0;
-
   return (
     <div className="space-y-8">
       <div>
         <h1 className="text-3xl font-bold font-headline">Change Plan</h1>
         <p className="text-muted-foreground">
-            You are currently on the <span className="font-semibold text-primary">{currentTier?.name}</span> plan. You can downgrade to a cheaper plan below.
+            You are currently on the <span className="font-semibold text-primary">{currentTier?.name}</span> plan. You can select a different plan below.
         </p>
       </div>
-
-      {isLowestTier ? (
-         <Card>
-            <CardHeader>
-                <CardTitle>You're on our most affordable plan!</CardTitle>
-                <CardDescription>There are no cheaper plans available to downgrade to.</CardDescription>
-            </CardHeader>
-         </Card>
-      ) : (
-        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-2">
-          {downgradeableTiers.map((tier) => (
-            <Card key={tier.id} className="flex flex-col">
+      
+      <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+          {availableTiers.map((tier) => (
+            <Card 
+                key={tier.id} 
+                className={cn(
+                    "flex flex-col",
+                    tier.id === currentTierId ? "border-primary ring-2 ring-primary" : ""
+                )}
+            >
               <CardHeader>
                 <CardTitle className="font-headline text-xl">{tier.name}</CardTitle>
                 <div className="flex items-baseline gap-1">
@@ -168,14 +167,17 @@ export default function UpgradePage() {
                 </ul>
               </CardContent>
               <CardFooter>
-                 <Button className="w-full" variant="outline" onClick={() => handleDowngradeClick(tier.id)}>
-                    Downgrade to {tier.name}
-                </Button>
+                {tier.id === currentTierId ? (
+                    <Button className="w-full" disabled>Current Plan</Button>
+                ) : (
+                    <Button className="w-full" variant="outline" onClick={() => handlePlanChange(tier.id)}>
+                        Downgrade to {tier.name}
+                    </Button>
+                )}
               </CardFooter>
             </Card>
           ))}
         </div>
-      )}
     </div>
   );
 }
