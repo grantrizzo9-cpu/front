@@ -142,7 +142,7 @@ export default function RequestRefundPage() {
                     <TableBody>
                         {refundRequests.map(request => (
                             <TableRow key={request.id}>
-                                <TableCell>{format(request.requestedAt.toDate(), 'PP')}</TableCell>
+                                <TableCell>{request.requestedAt ? format(request.requestedAt.toDate(), 'PP') : "Pending..."}</TableCell>
                                 <TableCell className="max-w-xs truncate">{request.reason}</TableCell>
                                 <TableCell className="text-right">
                                     <Badge variant={
@@ -203,11 +203,11 @@ export default function RequestRefundPage() {
         </Card>
       )}
       
-       {!isLoading && (!refundRequests || refundRequests.length === 0) && (
+       {!isLoading && (!refundRequests || refundRequests.length === 0) && !showForm && (
          <Card>
             <CardHeader>
-                 <CardTitle>No Requests Found</CardTitle>
-                 <CardDescription>You have not submitted any refund requests. Use the form below if you need to request one.</CardDescription>
+                 <CardTitle>No New Requests</CardTitle>
+                 <CardDescription>You can submit a new refund request once your pending request has been processed.</CardDescription>
             </CardHeader>
          </Card>
        )}
