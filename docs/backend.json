@@ -1,0 +1,369 @@
+{
+  "entities": {
+    "User": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "User",
+      "type": "object",
+      "description": "Represents a user in the Affiliate AI Host platform.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the user.",
+          "format": "uuid"
+        },
+        "email": {
+          "type": "string",
+          "description": "User's email address.",
+          "format": "email"
+        },
+        "username": {
+          "type": "string",
+          "description": "User's username."
+        },
+        "referredBy": {
+          "type": "string",
+          "description": "ID of the affiliate who referred this user. (Relationship: User 1:N User (as referred))",
+          "format": "uuid"
+        },
+        "isAffiliate": {
+          "type": "boolean",
+          "description": "Indicates whether the user is an affiliate."
+        }
+      },
+      "required": [
+        "id",
+        "email",
+        "username"
+      ]
+    },
+    "SubscriptionTier": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "SubscriptionTier",
+      "type": "object",
+      "description": "Represents a subscription tier with its associated features and pricing.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the subscription tier."
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the subscription tier (e.g., Starter, Growth, Pro, Enterprise)."
+        },
+        "dailyPrice": {
+          "type": "number",
+          "description": "Daily price of the subscription tier."
+        },
+        "hostingResources": {
+          "type": "string",
+          "description": "Description of the web hosting resources included in this tier."
+        },
+        "aiToolsAccess": {
+          "type": "string",
+          "description": "Description of the AI tools access included in this tier."
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "dailyPrice"
+      ]
+    },
+    "Subscription": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Subscription",
+      "type": "object",
+      "description": "Represents a user's subscription to a specific tier.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the subscription."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to User. (Relationship: User 1:N Subscription)",
+          "format": "uuid"
+        },
+        "subscriptionTierId": {
+          "type": "string",
+          "description": "Reference to SubscriptionTier. (Relationship: SubscriptionTier 1:N Subscription)"
+        },
+        "startDate": {
+          "type": "string",
+          "description": "Date when the subscription started.",
+          "format": "date-time"
+        },
+        "endDate": {
+          "type": "string",
+          "description": "Date when the subscription ends (or null if ongoing).",
+          "format": "date-time"
+        },
+        "paypalSubscriptionId": {
+          "type": "string",
+          "description": "The id of the user's subscription with paypal."
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "subscriptionTierId",
+        "startDate"
+      ]
+    },
+    "Referral": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Referral",
+      "type": "object",
+      "description": "Represents a referral made by a user.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the referral."
+        },
+        "referrerId": {
+          "type": "string",
+          "description": "Reference to User who made the referral. (Relationship: User 1:N Referral (as referrer))",
+          "format": "uuid"
+        },
+        "referredUserId": {
+          "type": "string",
+          "description": "Reference to User who was referred. (Relationship: User 1:N Referral (as referred))",
+          "format": "uuid"
+        },
+        "referralDate": {
+          "type": "string",
+          "description": "Date when the referral was made.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "referrerId",
+        "referredUserId",
+        "referralDate"
+      ]
+    },
+    "Payment": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Payment",
+      "type": "object",
+      "description": "Represents a payment made to an affiliate or by a user.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the payment."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to User who received the payment. (Relationship: User 1:N Payment)",
+          "format": "uuid"
+        },
+        "amount": {
+          "type": "number",
+          "description": "Amount of the payment."
+        },
+        "paymentDate": {
+          "type": "string",
+          "description": "Date when the payment was made.",
+          "format": "date-time"
+        },
+        "description": {
+          "type": "string",
+          "description": "A description of the payment."
+        },
+        "type": {
+          "type": "string",
+          "description": "The type of the payment - usually 'commission' or 'payout'.",
+          "format": "string"
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "amount",
+        "paymentDate"
+      ]
+    },
+    "Commission": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Commission",
+      "type": "object",
+      "description": "Represents a commission earned by an affiliate.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the commission."
+        },
+        "affiliateId": {
+          "type": "string",
+          "description": "Reference to User (as affiliate) who earned the commission. (Relationship: User 1:N Commission (as affiliate))",
+          "format": "uuid"
+        },
+        "referralId": {
+          "type": "string",
+          "description": "Reference to Referral that generated this commission. (Relationship: Referral 1:1 Commission)",
+          "format": "uuid"
+        },
+        "amount": {
+          "type": "number",
+          "description": "Amount of the commission."
+        },
+        "status": {
+          "type": "string",
+          "description": "Status of the commission (e.g., 'paid', 'unpaid')."
+        },
+        "subscriptionId": {
+          "type": "string",
+          "description": "Reference to Subscription that generated this commission. (Relationship: Subscriptions 1:1 Commission)",
+          "format": "uuid"
+        }
+      },
+      "required": [
+        "id",
+        "affiliateId",
+        "referralId",
+        "amount",
+        "status"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/users/{userId}",
+        "definition": {
+          "entityName": "User",
+          "schema": {
+            "$ref": "#/backend/entities/User"
+          },
+          "description": "Stores user profiles.  Path-based ownership: Only the user with the matching {userId} can read/write their profile.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier for the user."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/subscriptionTiers/{subscriptionTierId}",
+        "definition": {
+          "entityName": "SubscriptionTier",
+          "schema": {
+            "$ref": "#/backend/entities/SubscriptionTier"
+          },
+          "description": "Stores subscription tier details (publicly readable).",
+          "params": [
+            {
+              "name": "subscriptionTierId",
+              "description": "The unique identifier for the subscription tier."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/subscriptions/{subscriptionId}",
+        "definition": {
+          "entityName": "Subscription",
+          "schema": {
+            "$ref": "#/backend/entities/Subscription"
+          },
+          "description": "Stores a user's subscriptions. Path-based ownership: Only the user with the matching {userId} can manage their subscriptions.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier for the user."
+            },
+            {
+              "name": "subscriptionId",
+              "description": "The unique identifier for the subscription."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/referrals/{referralId}",
+        "definition": {
+          "entityName": "Referral",
+          "schema": {
+            "$ref": "#/backend/entities/Referral"
+          },
+          "description": "Stores referrals made by a user. Path-based ownership: Only the user with the matching {userId} can manage their referrals.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier for the user (the referrer)."
+            },
+            {
+              "name": "referralId",
+              "description": "The unique identifier for the referral."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/payments/{paymentId}",
+        "definition": {
+          "entityName": "Payment",
+          "schema": {
+            "$ref": "#/backend/entities/Payment"
+          },
+          "description": "Stores payment history for a user. Path-based ownership: Only the user with the matching {userId} can view their payment history.  The admin also has access to the payments, since this is required for payouts.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier for the user."
+            },
+            {
+              "name": "paymentId",
+              "description": "The unique identifier for the payment."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{affiliateId}/commissions/{commissionId}",
+        "definition": {
+          "entityName": "Commission",
+          "schema": {
+            "$ref": "#/backend/entities/Commission"
+          },
+          "description": "Stores commissions earned by an affiliate. Path-based ownership: Only the affiliate with the matching {affiliateId} can view their commissions.  The admin also needs access, since this is how they will payout commissions.",
+          "params": [
+            {
+              "name": "affiliateId",
+              "description": "The unique identifier for the affiliate."
+            },
+            {
+              "name": "commissionId",
+              "description": "The unique identifier for the commission."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/roles_admin/{userId}",
+        "definition": {
+          "entityName": "roles_admin",
+          "schema": {
+            "$ref": "#/backend/entities/User"
+          },
+          "description": "Documents in this collection indicate admin privileges. Existence of a document for a given {userId} grants admin access.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier for the admin user."
+            }
+          ]
+        }
+      }
+    ],
+    "reasoning": "The Firestore structure is designed to support Affiliate AI Host's affiliate marketing and subscription management features, prioritizing security, scalability, and ease of debugging. The key principle is Authorization Independence, achieved through denormalization of authorization data, eliminating the need for `get()` calls in security rules.  This ensures atomic operations and simplifies security rule logic.  Data is segregated into collections with homogeneous security postures, enabling secure list operations (QAPs). User-owned data is organized under user-specific paths for simplified ownership-based security. The use of DBAC (database-based access control) eliminates custom claims.  Specifically: \n\n*   **Authorization Independence:** The structure avoids hierarchical authorization dependencies.  For instance, access to a user's subscriptions, referrals, and payments is controlled by the user's ID in the path (`/users/{userId}/subscriptions/{subscriptionId}`).  Since all documents under `/users/{userId}` are owned by that user, authorization is determined solely by matching `request.auth.uid` with the `userId` path parameter. \n\n*   **QAPs (Rules are not Filters):** The segregation of user data into subcollections ensures that listing operations are secure and efficient. Listing `/users/{userId}/subscriptions` only returns subscriptions owned by that user.\n\n*   **Affiliate Tracking & Commission:** When a new user signs up via an affiliate link, the `referredBy` field in the `/users` collection records the referring affiliate's ID. When the new user subscribes, the commission is generated in the commissions collection under the affiliates user ID path."
+  }
+}
