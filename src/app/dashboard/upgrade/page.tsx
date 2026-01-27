@@ -25,7 +25,7 @@ export default function UpgradePage() {
 
   const isLoading = isUserLoading || isUserDataLoading;
 
-  const handleUpgradeClick = (tierId: string) => {
+  const handleDowngradeClick = (tierId: string) => {
     if (!user) return;
     const userDocRef = doc(firestore, 'users', user.uid);
     updateDocumentNonBlocking(userDocRef, {
@@ -33,8 +33,8 @@ export default function UpgradePage() {
     });
 
     toast({
-      title: "Upgrade Successful!",
-      description: `Your plan has been upgraded.`,
+      title: "Plan Changed!",
+      description: `Your plan has been successfully changed.`,
     });
   };
 
@@ -125,29 +125,29 @@ export default function UpgradePage() {
   const currentTier = subscriptionTiers.find(t => t.id === currentTierId);
   const currentPrice = currentTier?.price ?? 0;
 
-  const upgradeableTiers = subscriptionTiers.filter(tier => tier.price > currentPrice);
+  const downgradeableTiers = subscriptionTiers.filter(tier => tier.price < currentPrice);
   
-  const isHighestTier = upgradeableTiers.length === 0;
+  const isLowestTier = downgradeableTiers.length === 0;
 
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-3xl font-bold font-headline">Upgrade Your Plan</h1>
+        <h1 className="text-3xl font-bold font-headline">Change Plan</h1>
         <p className="text-muted-foreground">
-            You are currently on the <span className="font-semibold text-primary">{currentTier?.name}</span> plan.
+            You are currently on the <span className="font-semibold text-primary">{currentTier?.name}</span> plan. You can downgrade to a cheaper plan below.
         </p>
       </div>
 
-      {isHighestTier ? (
+      {isLowestTier ? (
          <Card>
             <CardHeader>
-                <CardTitle>You're at the top!</CardTitle>
-                <CardDescription>You are already on our highest available plan. Thank you for being a top-tier member!</CardDescription>
+                <CardTitle>You're on our most affordable plan!</CardTitle>
+                <CardDescription>There are no cheaper plans available to downgrade to.</CardDescription>
             </CardHeader>
          </Card>
       ) : (
-        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-          {upgradeableTiers.map((tier) => (
+        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-2">
+          {downgradeableTiers.map((tier) => (
             <Card key={tier.id} className="flex flex-col">
               <CardHeader>
                 <CardTitle className="font-headline text-xl">{tier.name}</CardTitle>
@@ -168,8 +168,8 @@ export default function UpgradePage() {
                 </ul>
               </CardContent>
               <CardFooter>
-                 <Button className="w-full" onClick={() => handleUpgradeClick(tier.id)}>
-                    Upgrade
+                 <Button className="w-full" variant="outline" onClick={() => handleDowngradeClick(tier.id)}>
+                    Downgrade to {tier.name}
                 </Button>
               </CardFooter>
             </Card>
