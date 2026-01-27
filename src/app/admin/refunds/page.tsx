@@ -10,18 +10,22 @@ import type { RefundRequest } from "@/lib/types";
 import { useCollection, useFirestore, useMemoFirebase, updateDocumentNonBlocking } from "@/firebase";
 import { collection, query, where, doc } from "firebase/firestore";
 import { format } from "date-fns";
+import { useAdmin } from "@/hooks/use-admin";
 
 export default function AdminRefundsPage() {
   const { toast } = useToast();
   const firestore = useFirestore();
+  const { isAdmin, isLoading: isAdminLoading } = useAdmin();
 
-  // Fetch all pending refund requests
+  // Fetch all pending refund requests only if the user is an admin
   const pendingRequestsQuery = useMemoFirebase(() => {
-    if (!firestore) return null;
+    if (!firestore || !isAdmin) return null;
     return query(collection(firestore, 'refundRequests'), where('status', '==', 'pending'));
-  }, [firestore]);
+  }, [firestore, isAdmin]);
 
-  const { data: requests, isLoading } = useCollection<RefundRequest>(pendingRequestsQuery);
+  const { data: requests, isLoading: requestsLoading } = useCollection<RefundRequest>(pendingRequestsQuery);
+
+  const isLoading = isAdminLoading || requestsLoading;
 
   const handleProcessRefund = (requestId: string) => {
     if (!firestore) return;
