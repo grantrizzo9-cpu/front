@@ -8,7 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Loader2, ShieldCheck } from "lucide-react";
 import type { RefundRequest } from "@/lib/types";
 import { useCollection, useFirestore, useMemoFirebase, updateDocumentNonBlocking } from "@/firebase";
-import { collection, query, where, doc } from "firebase/firestore";
+import { collectionGroup, query, where, doc } from "firebase/firestore";
 import { format } from "date-fns";
 import { useAdmin } from "@/hooks/use-admin";
 
@@ -17,20 +17,21 @@ export default function AdminRefundsPage() {
   const firestore = useFirestore();
   const { isAdmin, isLoading: isAdminLoading } = useAdmin();
 
-  // Fetch all pending refund requests only if the user is an admin
+  // Fetch all pending refund requests from the 'refundRequests' collection group
   const pendingRequestsQuery = useMemoFirebase(() => {
     if (!firestore || !isAdmin) return null;
-    return query(collection(firestore, 'refundRequests'), where('status', '==', 'pending'));
+    return query(collectionGroup(firestore, 'refundRequests'), where('status', '==', 'pending'));
   }, [firestore, isAdmin]);
 
   const { data: requests, isLoading: requestsLoading } = useCollection<RefundRequest>(pendingRequestsQuery);
 
   const isLoading = isAdminLoading || requestsLoading;
 
-  const handleProcessRefund = (requestId: string) => {
+  const handleProcessRefund = (request: RefundRequest) => {
     if (!firestore) return;
 
-    const requestDocRef = doc(firestore, 'refundRequests', requestId);
+    // Construct the full path to the document in the user's subcollection
+    const requestDocRef = doc(firestore, 'users', request.userId, 'refundRequests', request.id);
     updateDocumentNonBlocking(requestDocRef, { status: 'processed' });
     
     toast({
@@ -82,7 +83,7 @@ export default function AdminRefundsPage() {
                     <TableCell>{format(request.requestDate.toDate(), 'PPpp')}</TableCell>
                     <TableCell>{request.referralCountAtRequest}</TableCell>
                     <TableCell className="text-right">
-                        <Button size="sm" onClick={() => handleProcessRefund(request.id)}>
+                        <Button size="sm" onClick={() => handleProcessRefund(request)}>
                             <ShieldCheck className="mr-2 h-4 w-4" />
                             Process Refund
                         </Button>

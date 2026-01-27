@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -23,10 +24,10 @@ export default function RefundPage() {
   }, [firestore, user]);
   const { data: referrals, isLoading: referralsLoading } = useCollection<Referral>(referralsRef);
   
-  // Fetch pending refund requests for this user
+  // Fetch pending refund requests for this user from their own subcollection
   const refundRequestsRef = useMemoFirebase(() => {
     if (!user) return null;
-    return query(collection(firestore, 'refundRequests'), where('userId', '==', user.uid), where('status', '==', 'pending'));
+    return query(collection(firestore, 'users', user.uid, 'refundRequests'), where('status', '==', 'pending'));
   }, [firestore, user]);
   const { data: pendingRequests, isLoading: requestsLoading } = useCollection<RefundRequest>(refundRequestsRef);
 
@@ -52,7 +53,7 @@ export default function RefundPage() {
     };
 
     try {
-        const requestsCollection = collection(firestore, 'refundRequests');
+        const requestsCollection = collection(firestore, 'users', user.uid, 'refundRequests');
         await addDocumentNonBlocking(requestsCollection, requestData);
 
         toast({
