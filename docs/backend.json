@@ -66,7 +66,7 @@
                 "null"
               ],
               "format": "date-time",
-              "description": "The date when the initial 30-day trial period ends."
+              "description": "The date when the initial 3-day trial period ends."
             }
           }
         },
@@ -152,7 +152,7 @@
             "null"
           ],
           "format": "date-time",
-          "description": "The date when the initial 30-day trial period ends."
+          "description": "The date when the initial 3-day trial period ends."
         },
         "paypalSubscriptionId": {
           "type": "string",
@@ -263,6 +263,22 @@
         "amount",
         "paymentDate"
       ]
+    },
+    "RefundRequest": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "title": "RefundRequest",
+        "type": "object",
+        "description": "Represents a user's request for a refund.",
+        "properties": {
+          "id": { "type": "string" },
+          "userId": { "type": "string" },
+          "userEmail": { "type": "string" },
+          "userUsername": { "type": "string" },
+          "reason": { "type": "string" },
+          "status": { "type": "string", "enum": ["pending", "processed", "denied"] },
+          "requestedAt": { "type": "string", "format": "date-time" }
+        },
+        "required": ["userId", "userEmail", "userUsername", "reason", "status", "requestedAt"]
     },
     "AdminRole": {
       "title": "Admin Role",
@@ -416,8 +432,26 @@
             }
           ]
         }
+      },
+      {
+        "path": "/refundRequests/{requestId}",
+        "definition": {
+          "entityName": "RefundRequest",
+          "schema": {
+            "$ref": "#/backend/entities/RefundRequest"
+          },
+          "description": "Stores all user refund requests. Users can create their own, admins can read and update all.",
+          "params": [
+            {
+              "name": "requestId",
+              "description": "The unique identifier for the refund request."
+            }
+          ]
+        }
       }
     ],
     "reasoning": "The Firestore structure is designed to support Affiliate AI Host's affiliate marketing and subscription management features, prioritizing security, scalability, and ease of debugging. The key principle is Authorization Independence, achieved through denormalization of authorization data, eliminating the need for `get()` calls in security rules where possible. This ensures atomic operations and simplifies security rule logic. Data is segregated into collections with homogeneous security postures, enabling secure list operations. User-owned data is organized under user-specific paths for simplified ownership-based security. The use of DBAC (database-based access control) via the `/roles_admin` collection eliminates the need for custom claims."
   }
 }
+
+    

@@ -58,3 +58,15 @@ export type AdminPayout = {
     unpaidCommissions: number;
     totalUnpaid: number;
 }
+
+export type RefundRequest = {
+  id: string;
+  userId: string;
+  userEmail: string;
+  userUsername: string;
+  reason: string;
+  status: 'pending' | 'processed' | 'denied';
+  requestedAt: Timestamp;
+};
+
+    

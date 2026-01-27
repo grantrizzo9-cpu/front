@@ -50,7 +50,7 @@ service cloud.firestore {
      */
     match /users/{userId} {
       allow get: if isOwner(userId);
-      allow list: if isAdmin();
+      allow list: if false;
       allow create: if isOwner(userId) && request.resource.data.id == userId;
       allow update: if isOwner(userId) && request.resource.data.id == resource.data.id;
       allow delete: if isOwner(userId);
@@ -109,6 +109,16 @@ service cloud.firestore {
       allow get, list: if true;
       allow create, update, delete: if false;
     }
+
+    /**
+     * @description Stores user refund requests.
+     */
+    match /refundRequests/{requestId} {
+      allow get: if isOwner(request.resource.data.userId);
+      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+      allow list, update: if isAdmin();
+      allow delete: if false;
+    }
     
     /**
      * @description Allows admins to query across all referral subcollections
@@ -128,3 +138,5 @@ service cloud.firestore {
     }
   }
 }
+
+    

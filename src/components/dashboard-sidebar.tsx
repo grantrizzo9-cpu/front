@@ -24,6 +24,7 @@ import {
   BrainCircuit,
   ShieldQuestion,
   ArrowUpCircle,
+  ShieldCheck,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -60,12 +61,13 @@ export function DashboardSidebar() {
     { path: "/dashboard/upgrade", icon: <ArrowUpCircle />, label: "Upgrade" },
     { path: "/dashboard/referrals", icon: <Users />, label: "Referrals" },
     { path: "/dashboard/payouts", icon: <Wallet />, label: "Payouts" },
+    { path: "/dashboard/refund", icon: <ShieldQuestion />, label: "Request Refund" },
     { path: "/dashboard/settings", icon: <Settings />, label: "Settings" },
   ];
 
   const adminMenuItems = [
     { path: "/admin/dashboard", icon: <LayoutGrid />, label: "Packages" },
-    { path: "/admin/payouts", icon: <Shield />, label: "Manage Payouts" },
+    { path: "/admin/refunds", icon: <ShieldCheck />, label: "Manage Refunds" },
   ];
 
   return (
@@ -155,3 +157,5 @@ export function DashboardSidebar() {
     </Sidebar>
   );
 }
+
+    
