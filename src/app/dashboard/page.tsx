@@ -8,7 +8,7 @@ import { DollarSign, Users, BarChart, BrainCircuit, ArrowRight, Loader2 } from "
 import { Badge } from "@/components/ui/badge";
 import Link from 'next/link';
 import { Button } from "@/components/ui/button";
-import type { Referral, Commission } from "@/lib/types";
+import type { Referral } from "@/lib/types";
 import { useUser, useFirestore, useCollection, useMemoFirebase } from "@/firebase";
 import { collection } from "firebase/firestore";
 
@@ -16,25 +16,21 @@ export default function DashboardPage() {
   const { user, isUserLoading } = useUser();
   const firestore = useFirestore();
 
-  const commissionsRef = useMemoFirebase(() => {
-    if (!user) return null;
-    return collection(firestore, 'users', user.uid, 'commissions');
-  }, [firestore, user]);
-
   const referralsRef = useMemoFirebase(() => {
     if (!user) return null;
+    // We query the referrals subcollection under the current user's ID
     return collection(firestore, 'users', user.uid, 'referrals');
   }, [firestore, user]);
 
-  const { data: commissions, isLoading: commissionsLoading } = useCollection<Commission>(commissionsRef);
   const { data: referrals, isLoading: referralsLoading } = useCollection<Referral>(referralsRef);
 
-  const isLoading = isUserLoading || commissionsLoading || referralsLoading;
+  const isLoading = isUserLoading || referralsLoading;
 
-  const totalEarnings = commissions?.reduce((sum, c) => sum + c.amount, 0) ?? 0;
+  // Calculations are now derived from the single 'referrals' collection
+  const totalEarnings = referrals?.reduce((sum, r) => sum + r.commission, 0) ?? 0;
   const totalReferrals = referrals?.length ?? 0;
-  const unpaidCommissions = commissions?.filter(c => c.status === 'unpaid').reduce((sum, c) => sum + c.amount, 0) ?? 0;
-
+  const unpaidCommissions = referrals?.filter(r => r.status === 'unpaid').reduce((sum, r) => sum + r.commission, 0) ?? 0;
+  
   const recentReferrals = referrals
     ?.sort((a, b) => b.date.toMillis() - a.date.toMillis())
     .slice(0, 5) ?? [];
@@ -76,7 +72,7 @@ export default function DashboardPage() {
          <StatCard
           title="Unpaid Commissions"
           value={`$${unpaidCommissions.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
-          icon={<DollarSign className="h-5 w-5 text-muted-foreground text-green-500" />}
+          icon={<DollarSign className="h-5 w-5 text-green-500" />}
           description="To be paid out tomorrow."
         />
       </div>

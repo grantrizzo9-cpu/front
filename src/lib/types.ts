@@ -28,12 +28,14 @@ export type User = {
 
 export type Referral = {
   id: string;
+  affiliateId: string;
   referredUserId: string;
   referredUserUsername: string;
   planPurchased: string;
   commission: number;
   status: 'paid' | 'unpaid';
   date: Timestamp;
+  subscriptionId: string;
 };
 
 export type Payout = {
@@ -43,15 +45,16 @@ export type Payout = {
   transactionId?: string;
 };
 
-export type Commission = {
-  id: string;
-  affiliateId: string;
-  referralId: string;
-  amount: number;
-  status: 'paid' | 'unpaid';
-  subscriptionId: string;
-  commissionDate: Timestamp;
-};
+// This type is no longer needed as Commission data is merged into Referral
+// export type Commission = {
+//   id: string;
+//   affiliateId: string;
+//   referralId: string;
+//   amount: number;
+//   status: 'paid' | 'unpaid';
+//   subscriptionId: string;
+//   commissionDate: Timestamp;
+// };
 
 
 export type AdminPayout = {

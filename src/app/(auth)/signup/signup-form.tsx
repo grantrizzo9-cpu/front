@@ -43,6 +43,10 @@ export function SignupForm() {
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    if (!firestore) {
+      toast({ variant: "destructive", title: "Signup Failed", description: "Database service is not available." });
+      return;
+    }
     setIsLoading(true);
 
     const formData = new FormData(event.currentTarget);
@@ -58,24 +62,21 @@ export function SignupForm() {
         // 2. Update user profile with username
         await updateProfile(user, { displayName: username });
 
-        // --- NEW LOGIC STARTS HERE ---
-
         let referrerId: string | null = null;
         let referrerUsername: string | null = referralCode || null;
 
         // 3. Find referrer if one exists
-        if (referrerUsername && firestore) {
+        if (referrerUsername) {
             const referrerUsernameRef = doc(firestore, "usernames", referrerUsername);
             const referrerUsernameSnap = await getDoc(referrerUsernameRef);
             if (referrerUsernameSnap.exists()) {
                 referrerId = referrerUsernameSnap.data().uid;
             } else {
                 console.warn(`Referrer with username "${referrerUsername}" not found.`);
-                referrerUsername = null; 
             }
         }
 
-        // 4. Create user document in Firestore
+        // 4. Create user document in Firestore. THIS MUST HAPPEN BEFORE CREATING THE REFERRAL.
         const userDocRef = doc(firestore, "users", user.uid);
         const plan = planId ? subscriptionTiers.find(p => p.id === planId) : null;
         const userData = {
@@ -93,43 +94,29 @@ export function SignupForm() {
             } : null,
             paypalEmail: ''
         };
-        // This MUST complete before we create the username mapping for security rules
         await setDoc(userDocRef, userData);
 
-        // 5. Create the public username-to-UID mapping for the new user
+        // 5. Create the public username-to-UID mapping for the new user. THIS MUST HAPPEN BEFORE OTHER USERS CAN REFER.
         const usernameDocRef = doc(firestore, "usernames", username);
         await setDoc(usernameDocRef, { uid: user.uid });
 
-        // 6. If referral is valid, create referral and commission docs for the referrer
-        if (referrerId && plan && firestore) {
-            // Create Referral Doc
+        // 6. If referral is valid, create ONE referral doc for the referrer
+        if (referrerId && plan) {
             const referralRef = collection(firestore, 'users', referrerId, 'referrals');
-            const commissionAmount = plan.price * 0.75; // 75% commission
+            const commissionAmount = plan.price * 0.75;
             const newReferralData = {
+                affiliateId: referrerId,
                 referredUserId: user.uid,
                 referredUserUsername: username,
                 planPurchased: plan.name,
                 commission: commissionAmount,
-                status: 'unpaid',
+                status: 'unpaid' as 'unpaid',
                 date: serverTimestamp(),
+                subscriptionId: "simulated_sub_id_" + user.uid,
             };
-            const referralDoc = await addDoc(referralRef, newReferralData);
-
-            // Create Commission Doc
-            const commissionRef = collection(firestore, 'users', referrerId, 'commissions');
-            const newCommissionData = {
-                affiliateId: referrerId,
-                referralId: referralDoc.id, // Link to the referral doc
-                amount: commissionAmount,
-                status: 'unpaid',
-                // In a real app, this would be the actual subscription ID from a payment gateway
-                subscriptionId: "simulated_sub_id", 
-                commissionDate: serverTimestamp(),
-            };
-            await addDoc(commissionRef, newCommissionData);
+            // This write is secured by the new security rule.
+            await addDoc(referralRef, newReferralData);
         }
-
-        // --- NEW LOGIC ENDS HERE ---
 
         toast({
           title: "Account Created!",
@@ -143,12 +130,15 @@ export function SignupForm() {
             description = "This email address is already in use. Please log in or use a different email.";
         } else if (error.code === 'auth/weak-password') {
             description = "The password is too weak. Please use at least 6 characters.";
+        } else if (error.code === 'permission-denied') {
+            description = "A security rule prevented signup. This might be due to an invalid referral code or system misconfiguration."
         }
         toast({
             variant: "destructive",
             title: "Signup Failed",
             description: description,
         });
+        console.error("Signup error details:", error);
     } finally {
         setIsLoading(false);
     }
@@ -207,5 +197,3 @@ export function SignupForm() {
     </Card>
   );
 }
-
-    

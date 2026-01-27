@@ -150,33 +150,53 @@
       "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "Referral",
       "type": "object",
-      "description": "Represents a referral made by a user.",
+      "description": "Represents a referral made by an affiliate, which also contains commission details.",
       "properties": {
         "id": {
           "type": "string",
-          "description": "Unique identifier for the referral."
+          "description": "Unique identifier for the referral record."
         },
-        "referrerId": {
+        "affiliateId": {
           "type": "string",
-          "description": "Reference to User who made the referral. (Relationship: User 1:N Referral (as referrer))",
-          "format": "uuid"
+          "description": "Reference to the User (affiliate) who made the referral."
         },
         "referredUserId": {
           "type": "string",
-          "description": "Reference to User who was referred. (Relationship: User 1:N Referral (as referred))",
-          "format": "uuid"
+          "description": "Reference to the User who was referred."
         },
-        "referralDate": {
+        "referredUserUsername": {
+          "type": "string",
+          "description": "Username of the referred user."
+        },
+        "planPurchased": {
+            "type": "string",
+            "description": "The name of the subscription plan purchased by the referred user."
+        },
+        "date": {
           "type": "string",
           "description": "Date when the referral was made.",
           "format": "date-time"
+        },
+        "commission": {
+          "type": "number",
+          "description": "Amount of the commission earned from this referral."
+        },
+        "status": {
+          "type": "string",
+          "description": "Status of the commission (e.g., 'paid', 'unpaid')."
+        },
+        "subscriptionId": {
+            "type": "string",
+            "description": "The ID of the subscription that generated this commission."
         }
       },
       "required": [
         "id",
-        "referrerId",
+        "affiliateId",
         "referredUserId",
-        "referralDate"
+        "date",
+        "commission",
+        "status"
       ]
     },
     "Payment": {
@@ -218,48 +238,6 @@
         "userId",
         "amount",
         "paymentDate"
-      ]
-    },
-    "Commission": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "Commission",
-      "type": "object",
-      "description": "Represents a commission earned by an affiliate.",
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the commission."
-        },
-        "affiliateId": {
-          "type": "string",
-          "description": "Reference to User (as affiliate) who earned the commission. (Relationship: User 1:N Commission (as affiliate))",
-          "format": "uuid"
-        },
-        "referralId": {
-          "type": "string",
-          "description": "Reference to Referral that generated this commission. (Relationship: Referral 1:1 Commission)",
-          "format": "uuid"
-        },
-        "amount": {
-          "type": "number",
-          "description": "Amount of the commission."
-        },
-        "status": {
-          "type": "string",
-          "description": "Status of the commission (e.g., 'paid', 'unpaid')."
-        },
-        "subscriptionId": {
-          "type": "string",
-          "description": "Reference to Subscription that generated this commission. (Relationship: Subscriptions 1:1 Commission)",
-          "format": "uuid"
-        }
-      },
-      "required": [
-        "id",
-        "affiliateId",
-        "referralId",
-        "amount",
-        "status"
       ]
     },
     "AdminRole": {
@@ -350,7 +328,7 @@
           "schema": {
             "$ref": "#/backend/entities/Referral"
           },
-          "description": "Stores referrals made by a user. Path-based ownership: Only the user with the matching {userId} can manage their referrals.",
+          "description": "Stores referrals made by a user. The user who was referred is allowed to create this document. The referrer (owner of the subcollection) can then manage it.",
           "params": [
             {
               "name": "userId",
@@ -379,26 +357,6 @@
             {
               "name": "paymentId",
               "description": "The unique identifier for the payment."
-            }
-          ]
-        }
-      },
-      {
-        "path": "/users/{affiliateId}/commissions/{commissionId}",
-        "definition": {
-          "entityName": "Commission",
-          "schema": {
-            "$ref": "#/backend/entities/Commission"
-          },
-          "description": "Stores commissions earned by an affiliate. Path-based ownership: Only the affiliate with the matching {affiliateId} can view their commissions.  The admin also needs access, since this is how they will payout commissions.",
-          "params": [
-            {
-              "name": "affiliateId",
-              "description": "The unique identifier for the affiliate."
-            },
-            {
-              "name": "commissionId",
-              "description": "The unique identifier for the commission."
             }
           ]
         }
@@ -436,8 +394,6 @@
         }
       }
     ],
-    "reasoning": "The Firestore structure is designed to support Affiliate AI Host's affiliate marketing and subscription management features, prioritizing security, scalability, and ease of debugging. The key principle is Authorization Independence, achieved through denormalization of authorization data, eliminating the need for `get()` calls in security rules.  This ensures atomic operations and simplifies security rule logic.  Data is segregated into collections with homogeneous security postures, enabling secure list operations (QAPs). User-owned data is organized under user-specific paths for simplified ownership-based security. The use of DBAC (database-based access control) eliminates custom claims.  Specifically: \n\n*   **Authorization Independence:** The structure avoids hierarchical authorization dependencies.  For instance, access to a user's subscriptions, referrals, and payments is controlled by the user's ID in the path (`/users/{userId}/subscriptions/{subscriptionId}`).  Since all documents under `/users/{userId}` are owned by that user, authorization is determined solely by matching `request.auth.uid` with the `userId` path parameter. \n\n*   **QAPs (Rules are not Filters):** The segregation of user data into subcollections ensures that listing operations are secure and efficient. Listing `/users/{userId}/subscriptions` only returns subscriptions owned by that user.\n\n*   **Affiliate Tracking & Commission:** When a new user signs up via an affiliate link, the `referredBy` field in the `/users` collection records the referring affiliate's ID. When the new user subscribes, the commission is generated in the commissions collection under the affiliates user ID path."
+    "reasoning": "The Firestore structure is designed to support Affiliate AI Host's affiliate marketing and subscription management features, prioritizing security, scalability, and ease of debugging. The key principle is Authorization Independence, achieved through denormalization of authorization data, eliminating the need for `get()` calls in security rules.  This ensures atomic operations and simplifies security rule logic.  Data is segregated into collections with homogeneous security postures, enabling secure list operations (QAPs). User-owned data is organized under user-specific paths for simplified ownership-based security. The use of DBAC (database-based access control) eliminates custom claims.  Specifically: \n\n*   **Authorization Independence:** The structure avoids hierarchical authorization dependencies.  For instance, access to a user's subscriptions, referrals, and payments is controlled by the user's ID in the path (`/users/{userId}/subscriptions/{subscriptionId}`).  Since all documents under `/users/{userId}` are owned by that user, authorization is determined solely by matching `request.auth.uid` with the `userId` path parameter. \n\n*   **QAPs (Rules are not Filters):** The segregation of user data into subcollections ensures that listing operations are secure and efficient. Listing `/users/{userId}/subscriptions` only returns subscriptions owned by that user.\n\n*   **Affiliate Tracking & Commission:** When a new user signs up via an affiliate link, the `referredBy` field in the `/users` collection records the referring affiliate's ID. When the new user subscribes, a referral document is created in the referrer's `referrals` subcollection. This is accomplished via a security rule that allows a newly signed-up user to write to their referrer's subcollection one time."
   }
 }
-
-    

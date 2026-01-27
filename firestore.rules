@@ -19,15 +19,15 @@ service cloud.firestore {
      * - User data is strictly segregated. Users can only access documents within
      *   their own `/users/{userId}` path. Listing other users is disallowed.
      * - An `isAdmin()` function checks for a document in `/roles_admin` to grant
-     *   elevated privileges, primarily for managing payouts and commissions.
-     * - Subscription tiers are public for read operations but cannot be modified
-     *   by any client, ensuring data integrity.
+     *   elevated privileges, primarily for managing payouts.
+     * - A special rule allows a new user to write a referral document into their
+     *   referrer's subcollection, enabling the affiliate system to work securely.
      *
      * Denormalization for Authorization:
-     * Path-based ownership (`/users/{userId}/...`) is the primary strategy,
-     * avoiding the need for `get()` calls to check parent documents. The admin
-     * role is managed through a dedicated `/roles_admin/{userId}` collection, a
-     * highly performant pattern for checking roles without custom claims.
+     * Path-based ownership (`/users/{userId}/...`) is the primary strategy. The admin
+     * role is managed through a dedicated `/roles_admin/{userId}` collection. The
+     * referral creation uses a `get()` call to verify the relationship between
+     * the new user and the referrer.
      *
      * Structural Segregation:
      * Private user data (e.g., `/users/{userId}/subscriptions`) is structurally
@@ -154,16 +154,19 @@ service cloud.firestore {
     /**
      * @description Stores referrals made by a user (the referrer).
      * @path /users/{userId}/referrals/{referralId}
-     * @allow (create) A referrer creating a referral record under their own user ID.
-     * @deny (update) Any user trying to change the `referrerId` of an existing referral.
-     * @principle Enforces path-based ownership for the user who made the referral.
+     * @allow (create) Allows a NEWLY signed-up user to create a referral record in their referrer's subcollection.
+     * @allow (get, list, update, delete) The referrer (owner) can manage their own referral records.
+     * @principle This is the key rule that enables the client-side affiliate system.
      */
     match /users/{userId}/referrals/{referralId} {
-      allow get: if isOwner(userId);
-      allow list: if isOwner(userId);
-      allow create: if isOwner(userId) && request.resource.data.referrerId == userId;
-      allow update: if isOwner(userId) && isExistingDoc() && request.resource.data.referrerId == resource.data.referrerId;
-      allow delete: if isOwner(userId) && isExistingDoc();
+      allow get, list, update, delete: if isOwner(userId);
+      // A new user can create a referral in their referrer's subcollection if:
+      // 1. They are signed in.
+      // 2. The referral data's `referredUserId` is their own UID.
+      // 3. Their own user document's `referredBy` field points to the referrer (`userId` in the path).
+      allow create: if isSignedIn()
+                      && request.resource.data.referredUserId == request.auth.uid
+                      && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.referredBy == userId;
     }
 
     /**
@@ -180,22 +183,7 @@ service cloud.firestore {
       allow update: if isExistingOwnerOrAdmin(userId) && request.resource.data.userId == resource.data.userId;
       allow delete: if isExistingOwnerOrAdmin(userId);
     }
-
-    /**
-     * @description Stores commissions earned by an affiliate, accessible by the affiliate and admins.
-     * @path /users/{affiliateId}/commissions/{commissionId}
-     * @allow (list) An affiliate listing their own earned commissions.
-     * @deny (list) An affiliate trying to list another user's commissions.
-     * @principle Grants access to either the document owner (the affiliate) or an administrator.
-     */
-    match /users/{affiliateId}/commissions/{commissionId} {
-      allow get: if isOwnerOrAdmin(affiliateId);
-      allow list: if isOwnerOrAdmin(affiliateId);
-      allow create: if isOwnerOrAdmin(affiliateId) && request.resource.data.affiliateId == affiliateId;
-      allow update: if isExistingOwnerOrAdmin(affiliateId) && request.resource.data.affiliateId == resource.data.affiliateId;
-      allow delete: if isExistingOwnerOrAdmin(affiliateId);
-    }
-
+    
     /**
      * @description Lookup collection for admin roles. Existence of a doc grants admin rights.
      * @path /roles_admin/{userId}
@@ -213,5 +201,3 @@ service cloud.firestore {
     }
   }
 }
-
-    
