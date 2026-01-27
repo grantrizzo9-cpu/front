@@ -1,3 +1,4 @@
+
 import type { Timestamp } from 'firebase/firestore';
 
 export type SubscriptionTier = {
@@ -36,6 +37,8 @@ export type Referral = {
   status: 'paid' | 'unpaid';
   date: Timestamp;
   subscriptionId: string;
+  // This property is added for security rule validation during creation.
+  triggeringUserReferredBy?: string;
 };
 
 export type Payout = {
@@ -44,18 +47,6 @@ export type Payout = {
   date: Timestamp;
   transactionId?: string;
 };
-
-// This type is no longer needed as Commission data is merged into Referral
-// export type Commission = {
-//   id: string;
-//   affiliateId: string;
-//   referralId: string;
-//   amount: number;
-//   status: 'paid' | 'unpaid';
-//   subscriptionId: string;
-//   commissionDate: Timestamp;
-// };
-
 
 export type AdminPayout = {
     affiliateId: string;

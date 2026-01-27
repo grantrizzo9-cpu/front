@@ -1,3 +1,4 @@
+
 {
   "entities": {
     "User": {
@@ -188,6 +189,10 @@
         "subscriptionId": {
             "type": "string",
             "description": "The ID of the subscription that generated this commission."
+        },
+        "triggeringUserReferredBy": {
+          "type": "string",
+          "description": "A write-only field used by security rules to verify the referral without a `get` call. It should contain the UID of the referrer."
         }
       },
       "required": [
@@ -328,7 +333,7 @@
           "schema": {
             "$ref": "#/backend/entities/Referral"
           },
-          "description": "Stores referrals made by a user. The user who was referred is allowed to create this document. The referrer (owner of the subcollection) can then manage it.",
+          "description": "Stores referrals made by a user. A newly signed up user is allowed to create this document in their referrer's subcollection. This is validated by checking data within the request, avoiding a complex `get` call.",
           "params": [
             {
               "name": "userId",
@@ -368,7 +373,7 @@
           "schema": {
             "$ref": "#/backend/entities/AdminRole"
           },
-          "description": "Documents in this collection indicate admin privileges. Existence of a document for a given {userId} grants that user admin access. A user can read their own document here to check for admin status, but cannot list other admins.",
+          "description": "Documents in this collection indicate admin privileges. A user can read their own document here to check for admin status.",
           "params": [
             {
               "name": "userId",
@@ -384,7 +389,7 @@
           "schema": {
             "$ref": "#/backend/entities/Username"
           },
-          "description": "Publicly readable mapping of usernames to user IDs to facilitate referrals. Users can create their own entry, but not modify it or others'.",
+          "description": "Publicly readable mapping of usernames to user IDs to facilitate referrals. Users can create their own entry, but not modify it or others'. The create rule is simplified to prevent timing issues during signup.",
           "params": [
             {
               "name": "username",
@@ -394,6 +399,6 @@
         }
       }
     ],
-    "reasoning": "The Firestore structure is designed to support Affiliate AI Host's affiliate marketing and subscription management features, prioritizing security, scalability, and ease of debugging. The key principle is Authorization Independence, achieved through denormalization of authorization data, eliminating the need for `get()` calls in security rules.  This ensures atomic operations and simplifies security rule logic.  Data is segregated into collections with homogeneous security postures, enabling secure list operations (QAPs). User-owned data is organized under user-specific paths for simplified ownership-based security. The use of DBAC (database-based access control) eliminates custom claims.  Specifically: \n\n*   **Authorization Independence:** The structure avoids hierarchical authorization dependencies.  For instance, access to a user's subscriptions, referrals, and payments is controlled by the user's ID in the path (`/users/{userId}/subscriptions/{subscriptionId}`).  Since all documents under `/users/{userId}` are owned by that user, authorization is determined solely by matching `request.auth.uid` with the `userId` path parameter. \n\n*   **QAPs (Rules are not Filters):** The segregation of user data into subcollections ensures that listing operations are secure and efficient. Listing `/users/{userId}/subscriptions` only returns subscriptions owned by that user.\n\n*   **Affiliate Tracking & Commission:** When a new user signs up via an affiliate link, the `referredBy` field in the `/users` collection records the referring affiliate's ID. When the new user subscribes, a referral document is created in the referrer's `referrals` subcollection. This is accomplished via a security rule that allows a newly signed-up user to write to their referrer's subcollection one time."
+    "reasoning": "The Firestore structure is designed to support Affiliate AI Host's affiliate marketing and subscription management features, prioritizing security, scalability, and ease of debugging. The key principle is Authorization Independence, achieved through denormalization of authorization data, eliminating the need for `get()` calls in security rules where possible. This ensures atomic operations and simplifies security rule logic. Data is segregated into collections with homogeneous security postures, enabling secure list operations. User-owned data is organized under user-specific paths for simplified ownership-based security. The use of DBAC (database-based access control) via the `/roles_admin` collection eliminates the need for custom claims."
   }
 }

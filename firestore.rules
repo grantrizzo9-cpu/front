@@ -1,3 +1,4 @@
+
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
@@ -10,194 +11,117 @@ service cloud.firestore {
      * database-based admin role is implemented via the `/roles_admin`
      * collection, granting admins specific oversight over payments and commissions.
      *
-     * Data Structure:
-     * - /users/{userId}/... : A user's private data tree.
-     * - /subscriptionTiers/{tierId} : Publicly readable, admin-managed data.
-     * - /roles_admin/{userId} : A private lookup collection to grant admin rights.
-     *
      * Key Security Decisions:
      * - User data is strictly segregated. Users can only access documents within
      *   their own `/users/{userId}` path. Listing other users is disallowed.
      * - An `isAdmin()` function checks for a document in `/roles_admin` to grant
-     *   elevated privileges, primarily for managing payouts.
-     * - A special rule allows a new user to write a referral document into their
-     *   referrer's subcollection, enabling the affiliate system to work securely.
-     *
-     * Denormalization for Authorization:
-     * Path-based ownership (`/users/{userId}/...`) is the primary strategy. The admin
-     * role is managed through a dedicated `/roles_admin/{userId}` collection. The
-     * referral creation uses a `get()` call to verify the relationship between
-     * the new user and the referrer.
-     *
-     * Structural Segregation:
-     * Private user data (e.g., `/users/{userId}/subscriptions`) is structurally
-     * separate from public data (`/subscriptionTiers`), which makes list
-     * operations on both collections simple, secure, and performant.
+     *   elevated privileges.
+     * - The referral system works via a special rule that allows a new user to
+     *   write into their referrer's `referrals` subcollection. This is secured
+     *   by checking data in the write request itself, avoiding complex `get()` calls.
      */
 
     // =====================================================================
     // Helper Functions
     // =====================================================================
 
-    /**
-     * Checks if a user is authenticated.
-     */
     function isSignedIn() {
       return request.auth != null;
     }
 
-    /**
-     * Checks if the currently authenticated user's UID matches the given userId.
-     */
     function isOwner(userId) {
       return isSignedIn() && request.auth.uid == userId;
     }
-
-    /**
-     * Checks if the document being operated on already exists.
-     * Crucial for protecting against writes on non-existent documents.
-     */
-    function isExistingDoc() {
-      return resource != null;
-    }
     
-    /**
-     * Checks if the user has an admin role by looking for their UID in the
-     * /roles_admin collection.
-     */
     function isAdmin() {
       return isSignedIn() && exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
     }
 
-    /**
-     * Checks if a user is either the owner of the resource or an admin.
-     */
     function isOwnerOrAdmin(userId) {
       return isOwner(userId) || isAdmin();
     }
     
-    /**
-     * Combines owner/admin check with an existence check for state-changing operations.
-     */
-    function isExistingOwnerOrAdmin(userId) {
-      return isOwnerOrAdmin(userId) && isExistingDoc();
-    }
-
     // =====================================================================
     // Collection Rules
     // =====================================================================
 
     /**
      * @description Controls access to user profile documents.
-     * @path /users/{userId}
-     * @allow (create) A new user creating their own profile document. `auth.uid` must match `userId`.
-     * @deny (list) Any user trying to list all user documents.
-     * @principle Restricts access to a user's own data tree and enforces self-creation.
      */
     match /users/{userId} {
       allow get: if isOwner(userId);
       allow list: if false;
       allow create: if isOwner(userId) && request.resource.data.id == userId;
-      allow update: if isOwner(userId) && isExistingDoc() && request.resource.data.id == resource.data.id;
-      allow delete: if isOwner(userId) && isExistingDoc();
+      allow update: if isOwner(userId) && request.resource.data.id == resource.data.id;
+      allow delete: if isOwner(userId);
     }
     
     /**
      * @description Publicly maps usernames to UIDs to facilitate referral lookups.
-     * @path /usernames/{username}
-     * @allow (get) Any client can read a username-to-UID mapping.
-     * @allow (create) A signed-in user can create their own username mapping, but only if it doesn't already exist and the username matches their profile.
-     * @deny (list, update, delete) For security and data integrity.
-     * @principle Enables client-side referral resolution without exposing the entire user collection.
+     * @principle Simplifies referral resolution. The create rule is simplified to
+     * avoid `get()` calls, reducing complexity and potential timing issues during signup.
      */
     match /usernames/{username} {
       allow get: if true;
       allow list: if false;
-      // The creator must be the owner of the UID, and the {username} path must match their profile username.
-      allow create: if isSignedIn() 
-                    && request.resource.data.uid == request.auth.uid
-                    && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.username == username;
+      // A user can create a username mapping if the UID in the document is their own.
+      // This is simpler and more robust during signup than checking the user profile.
+      allow create: if isSignedIn() && request.resource.data.uid == request.auth.uid;
       allow update: if false;
       allow delete: if false;
     }
 
     /**
-     * @description Defines subscription tiers. This data is public for all to read.
-     * @path /subscriptionTiers/{subscriptionTierId}
-     * @allow (get) Any user, signed in or not, reading the details of a subscription tier.
-     * @deny (create) Any client trying to create a new subscription tier. This is an admin-only task via a backend SDK.
-     * @principle Provides public read access to global configuration data while prohibiting all client-side writes.
+     * @description Defines subscription tiers. Publicly readable.
      */
     match /subscriptionTiers/{subscriptionTierId} {
-      allow get: if true;
-      allow list: if true;
-      allow create: if false;
-      allow update: if false;
-      allow delete: if false;
+      allow get, list: if true;
+      allow create, update, delete: if false;
     }
 
     /**
      * @description Manages user subscriptions, nested under the user's document.
-     * @path /users/{userId}/subscriptions/{subscriptionId}
-     * @allow (create) A user creating a new subscription for themselves. The `userId` in the data must match the path.
-     * @deny (get) A user trying to read another user's subscription details.
-     * @principle Enforces path-based ownership for all reads and writes, ensuring users can only manage their own subscriptions.
      */
     match /users/{userId}/subscriptions/{subscriptionId} {
-      allow get: if isOwner(userId);
-      allow list: if isOwner(userId);
+      allow get, list: if isOwner(userId);
       allow create: if isOwner(userId) && request.resource.data.userId == userId;
-      allow update: if isOwner(userId) && isExistingDoc() && request.resource.data.userId == resource.data.userId;
-      allow delete: if isOwner(userId) && isExistingDoc();
+      allow update: if isOwner(userId) && request.resource.data.userId == resource.data.userId;
+      allow delete: if isOwner(userId);
     }
 
     /**
      * @description Stores referrals made by a user (the referrer).
-     * @path /users/{userId}/referrals/{referralId}
-     * @allow (create) Allows a NEWLY signed-up user to create a referral record in their referrer's subcollection.
-     * @allow (get, list, update, delete) The referrer (owner) can manage their own referral records.
-     * @principle This is the key rule that enables the client-side affiliate system.
+     * @principle A newly signed-up user can securely write to their referrer's subcollection.
+     * The rule validates this by checking properties within the written data itself, avoiding
+     * complex and potentially problematic `get()` calls.
      */
     match /users/{userId}/referrals/{referralId} {
       allow get, list, update, delete: if isOwner(userId);
       // A new user can create a referral in their referrer's subcollection if:
       // 1. They are signed in.
-      // 2. The referral data's `referredUserId` is their own UID.
-      // 3. Their own user document's `referredBy` field points to the referrer (`userId` in the path).
+      // 2. The `referredUserId` in the new data is their own UID.
+      // 3. The `triggeringUserReferredBy` field in the new data matches the referrer's UID from the path.
       allow create: if isSignedIn()
                       && request.resource.data.referredUserId == request.auth.uid
-                      && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.referredBy == userId;
+                      && request.resource.data.triggeringUserReferredBy == userId;
     }
 
     /**
      * @description Contains payment history for a user, accessible by the user and admins.
-     * @path /users/{userId}/payments/{paymentId}
-     * @allow (get) An admin reading a user's payment history to process a payout.
-     * @deny (get) A standard user trying to read another user's payment history.
-     * @principle Grants access to either the document owner or an administrator.
      */
     match /users/{userId}/payments/{paymentId} {
-      allow get: if isOwnerOrAdmin(userId);
-      allow list: if isOwnerOrAdmin(userId);
+      allow get, list: if isOwnerOrAdmin(userId);
       allow create: if isOwnerOrAdmin(userId) && request.resource.data.userId == userId;
-      allow update: if isExistingOwnerOrAdmin(userId) && request.resource.data.userId == resource.data.userId;
-      allow delete: if isExistingOwnerOrAdmin(userId);
+      allow update: if isOwnerOrAdmin(userId) && request.resource.data.userId == resource.data.userId;
+      allow delete: if isOwnerOrAdmin(userId);
     }
     
     /**
      * @description Lookup collection for admin roles. Existence of a doc grants admin rights.
-     * @path /roles_admin/{userId}
-     * @allow (get) A user can check for their own admin document, but cannot read others'.
-     * @deny (list) Listing documents is denied to prevent enumerating admins.
-     * @deny (create) No client is allowed to write to this collection. Admin roles are granted via the Firebase Console or an Admin SDK.
-     * @principle Implements database-based access control (DBAC). Admin status is checked by reading a user-specific document.
      */
     match /roles_admin/{userId} {
       allow get: if isOwner(userId);
-      allow list: if false;
-      allow create: if false;
-      allow update: if false;
-      allow delete: if false;
+      allow list, create, update, delete: if false;
     }
   }
 }

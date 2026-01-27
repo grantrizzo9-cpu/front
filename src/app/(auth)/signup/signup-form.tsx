@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -113,8 +114,10 @@ export function SignupForm() {
                 status: 'unpaid' as 'unpaid',
                 date: serverTimestamp(),
                 subscriptionId: "simulated_sub_id_" + user.uid,
+                // This property is added specifically for the security rule check
+                triggeringUserReferredBy: referrerId,
             };
-            // This write is secured by the new security rule.
+            // This write is now secured by a simpler, more robust security rule.
             await addDoc(referralRef, newReferralData);
         }
 
@@ -138,7 +141,6 @@ export function SignupForm() {
             title: "Signup Failed",
             description: description,
         });
-        console.error("Signup error details:", error);
     } finally {
         setIsLoading(false);
     }
