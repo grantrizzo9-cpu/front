@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Copy, Loader2 } from "lucide-react";
+import { Copy, Loader2, PartyPopper } from "lucide-react";
 import { useUser, useFirestore, useDoc, updateDocumentNonBlocking, useMemoFirebase } from "@/firebase";
 import { doc } from "firebase/firestore";
 import type { User as UserType } from "@/lib/types";
@@ -22,7 +22,7 @@ export default function SettingsPage() {
 
   const { data: userData, isLoading: isUserDataLoading } = useDoc<UserType>(userDocRef);
 
-  const affiliateLink = userData ? `https://affiliateai.host/?ref=${userData.username}` : '';
+  const affiliateLink = userData?.username ? `https://affiliateai.host/?ref=${userData.username}` : '';
   
   const handleCopyLink = () => {
     if (affiliateLink) {
@@ -48,6 +48,15 @@ export default function SettingsPage() {
       description: "Your PayPal email has been updated.",
     });
   };
+  
+  const handleBecomeAffiliate = () => {
+      if (!userDocRef) return;
+      updateDocumentNonBlocking(userDocRef, { isAffiliate: true });
+      toast({
+          title: "Congratulations!",
+          description: "You are now an affiliate. Your referral link is active."
+      });
+  }
 
   const isLoading = isUserLoading || isUserDataLoading;
 
@@ -68,13 +77,43 @@ export default function SettingsPage() {
 
       <Card>
         <CardHeader>
+          <CardTitle>Affiliate Status</CardTitle>
+          <CardDescription>Check if your account is enabled for the affiliate program.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {userData?.isAffiliate ? (
+             <div className="flex items-center gap-4 p-4 bg-green-50 border border-green-200 rounded-lg dark:bg-green-950 dark:border-green-800">
+                <PartyPopper className="h-8 w-8 text-green-600 dark:text-green-400" />
+                <div>
+                    <p className="font-semibold text-green-800 dark:text-green-200">Your affiliate account is active.</p>
+                    <p className="text-sm text-green-700 dark:text-green-300">You are ready to earn commissions.</p>
+                </div>
+            </div>
+          ) : (
+             <div className="flex items-center gap-4 p-4 bg-amber-50 border border-amber-200 rounded-lg dark:bg-amber-950 dark:border-amber-800">
+                 <div>
+                    <p className="font-semibold text-amber-800 dark:text-amber-200">Your affiliate account is not active.</p>
+                    <p className="text-sm text-amber-700 dark:text-amber-300">Enable it below to start earning referrals.</p>
+                </div>
+            </div>
+          )}
+        </CardContent>
+        {!userData?.isAffiliate && (
+            <CardFooter>
+                <Button onClick={handleBecomeAffiliate}>Become an Affiliate</Button>
+            </CardFooter>
+        )}
+      </Card>
+
+      <Card>
+        <CardHeader>
           <CardTitle>Your Affiliate Link</CardTitle>
           <CardDescription>Share this link to refer new users and earn commissions.</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex items-center space-x-2">
-            <Input type="text" value={affiliateLink} readOnly />
-            <Button variant="outline" size="icon" onClick={handleCopyLink} disabled={!affiliateLink}>
+            <Input type="text" value={affiliateLink} readOnly disabled={!userData?.isAffiliate} placeholder={userData?.isAffiliate ? '' : 'Enable affiliate account to get your link'} />
+            <Button variant="outline" size="icon" onClick={handleCopyLink} disabled={!affiliateLink || !userData?.isAffiliate}>
               <Copy className="h-4 w-4" />
             </Button>
           </div>
