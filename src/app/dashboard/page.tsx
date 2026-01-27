@@ -37,10 +37,16 @@ export default function DashboardPage() {
 
   const isLoading = isUserLoading || referralsLoading || (isAdmin && allReferralsLoading) || isAdminLoading;
 
-  // Calculations for the personal dashboard
-  const totalEarnings = referrals?.reduce((sum, r) => sum + r.commission, 0) ?? 0;
+  // --- Calculations for the personal affiliate stats ---
+  const personalTotalCommission = referrals?.reduce((sum, r) => sum + r.commission, 0) ?? 0;
   const totalReferrals = referrals?.length ?? 0;
   const unpaidCommissions = referrals?.filter(r => r.status === 'unpaid').reduce((sum, r) => sum + r.commission, 0) ?? 0;
+  
+  // --- Admin-specific calculation to show 100% of sale value for personal referrals ---
+  const adminPersonalTotalSaleValue = referrals?.reduce((sum, r) => sum + (r.commission / 0.75), 0) ?? 0;
+  
+  // Conditionally set the value for the "Total Earnings" card
+  const totalEarningsValue = isAdmin ? adminPersonalTotalSaleValue : personalTotalCommission;
   
   const recentReferrals = referrals
     ?.sort((a, b) => b.date.toMillis() - a.date.toMillis())
@@ -98,9 +104,9 @@ export default function DashboardPage() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <StatCard
           title="Total Earnings"
-          value={`$${totalEarnings.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+          value={`$${totalEarningsValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
           icon={<DollarSign className="h-5 w-5 text-muted-foreground" />}
-          description="All-time earnings from commissions."
+          description={isAdmin ? "Gross value of sales you personally referred (100%)." : "Your 75% commission from all-time sales."}
         />
         <StatCard
           title="Total Referrals"
@@ -118,7 +124,7 @@ export default function DashboardPage() {
           title="Unpaid Commissions"
           value={`$${unpaidCommissions.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
           icon={<DollarSign className="h-5 w-5 text-green-500" />}
-          description="To be paid out tomorrow."
+          description="Your 75% share to be paid out tomorrow."
         />
       </div>
 
