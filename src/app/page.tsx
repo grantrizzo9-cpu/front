@@ -68,7 +68,7 @@ export default function Home({ searchParams }: { searchParams?: { ref?: string }
     { q: "How and when do I get paid?", a: "We process all commission payouts daily. All your earned commissions from the previous day are automatically sent to the PayPal account you have on file. It's fully automated." },
     { q: "What am I selling?", a: "You are promoting our subscription plans which include high-quality web hosting and a suite of powerful AI tools designed to help users build and grow their online businesses." },
     { q: "Is there a limit to how much I can earn?", a: "Absolutely not! There is no cap on your potential earnings. The more customers you refer, the more you earn. With a base 70% commission rate that rises to 75% for top affiliates, the sky is the limit." },
-    { q: "What is your trial and refund policy?", a: "We offer an incredible risk-free trial. You pay only for your first day of service, and then you get the next 30 days completely free to explore the platform, use the AI tools, and start making referrals. This gives you a full month to see the value and start earning before your daily billing begins." },
+    { q: "What is your trial and refund policy?", a: "We offer an incredible risk-free trial. You pay only for your first day of service, and then you get the next 7 days completely free to explore the platform, use the AI tools, and start making referrals. This gives you a full week to see the value and start earning before your daily billing begins." },
   ];
 
   return (
@@ -82,7 +82,7 @@ export default function Home({ searchParams }: { searchParams?: { ref?: string }
               Earn 70%-75% Daily Commissions with <span className="text-primary">AI-Powered Hosting</span>
             </h1>
             <p className="mt-6 max-w-2xl mx-auto text-lg text-muted-foreground md:text-xl">
-              Pay for your first day, get a 30-day free trial, and get paid daily for every referral you make. Our automated system handles everything.
+              Pay for your first day, get a 7-day free trial, and get paid daily for every referral you make. Our automated system handles everything.
             </p>
             <div className="mt-10 flex justify-center gap-4">
               <Button size="lg" asChild>

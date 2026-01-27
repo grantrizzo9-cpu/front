@@ -48,7 +48,7 @@ export default function PricingPage() {
               Find the Perfect Plan
             </h1>
             <p className="mt-6 max-w-2xl mx-auto text-lg text-muted-foreground md:text-xl">
-              Choose a plan to get started. Pay for your first day, and your next 30 days are on us. All plans come with a 70% affiliate commission.
+              Choose a plan to get started. Pay for your first day, and your next 7 days are on us. All plans come with a 70% affiliate commission.
             </p>
           </div>
         </section>

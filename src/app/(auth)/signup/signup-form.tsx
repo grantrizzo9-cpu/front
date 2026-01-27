@@ -82,7 +82,7 @@ export function SignupForm() {
         const plan = planId ? subscriptionTiers.find(p => p.id === planId) : null;
         
         const trialEndDate = new Date();
-        trialEndDate.setDate(trialEndDate.getDate() + 30);
+        trialEndDate.setDate(trialEndDate.getDate() + 7);
 
         const userData = {
             id: user.uid,
