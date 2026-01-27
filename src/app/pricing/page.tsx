@@ -47,7 +47,7 @@ export default function PricingPage() {
               Find the Perfect Plan
             </h1>
             <p className="mt-6 max-w-2xl mx-auto text-lg text-muted-foreground md:text-xl">
-              Choose a plan to get started. All plans come with a 75% affiliate commission rate. Become an affiliate by signing up.
+              Choose a plan to get started. All plans start with a 70% affiliate commission rate, which can increase to 75% with performance. Become an affiliate by signing up.
             </p>
           </div>
         </section>

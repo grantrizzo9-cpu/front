@@ -104,7 +104,7 @@ export function SignupForm() {
         // 6. If referral is valid, create ONE referral doc for the referrer
         if (referrerId && plan) {
             const referralRef = collection(firestore, 'users', referrerId, 'referrals');
-            const commissionAmount = plan.price * 0.75;
+            const commissionAmount = plan.price * 0.70;
             const newReferralData = {
                 affiliateId: referrerId,
                 referredUserId: user.uid,

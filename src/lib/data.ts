@@ -14,7 +14,7 @@ export const subscriptionTiers: SubscriptionTier[] = [
       'Daily Backups',
       'Basic AI Content Tools',
       'Standard Support',
-      '75% Affiliate Commission',
+      '70% Affiliate Commission',
     ],
   },
   {
@@ -31,7 +31,7 @@ export const subscriptionTiers: SubscriptionTier[] = [
       'Daily Backups',
       'Standard AI Suite',
       'Standard Support',
-      '75% Affiliate Commission',
+      '70% Affiliate Commission',
     ],
   },
   {
@@ -49,7 +49,7 @@ export const subscriptionTiers: SubscriptionTier[] = [
       'Daily Backups',
       'Advanced AI Suite',
       'Priority Support',
-      '75% Affiliate Commission',
+      '70% Affiliate Commission (75% after 10 referrals)',
     ],
     isMostPopular: true,
   },
@@ -69,7 +69,7 @@ export const subscriptionTiers: SubscriptionTier[] = [
       'Daily Backups',
       'Pro AI Suite',
       'Priority Support',
-      '75% Affiliate Commission',
+      '70% Affiliate Commission (75% after 10 referrals)',
     ],
   },
   {
@@ -88,7 +88,7 @@ export const subscriptionTiers: SubscriptionTier[] = [
       'Daily Backups',
       'Business AI Suite',
       'Dedicated Support',
-      '75% Affiliate Commission',
+      '70% Affiliate Commission (75% after 10 referrals)',
     ],
   },
   {
@@ -107,7 +107,7 @@ export const subscriptionTiers: SubscriptionTier[] = [
       'Daily Backups',
       'Enterprise AI Suite',
       'Dedicated Account Manager',
-      '75% Affiliate Commission',
+      '70% Affiliate Commission (75% after 10 referrals)',
     ],
   },
 ];

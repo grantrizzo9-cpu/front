@@ -46,7 +46,7 @@ export default function AboutPage() {
               <ul className="space-y-3 pt-4">
                 <li className="flex items-center gap-2">
                   <CheckCircle className="w-5 h-5 text-primary" />
-                  <span>Unbeatable 75% Commissions</span>
+                  <span>Generous 70%-75% Commissions</span>
                 </li>
                 <li className="flex items-center gap-2">
                   <CheckCircle className="w-5 h-5 text-primary" />

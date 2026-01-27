@@ -44,8 +44,8 @@ export default function DashboardPage() {
   const unpaidCommissions = referrals?.filter(r => r.status === 'unpaid').reduce((sum, r) => sum + r.commission, 0) ?? 0;
   
   // --- Admin-specific calculation to show 100% of sale value for personal referrals ---
-  // If commission is 75%, then 100% is commission / 0.75
-  const adminPersonalTotalSaleValue = referrals?.reduce((sum, r) => sum + (r.commission / 0.75), 0) ?? 0;
+  // If commission is 70%, then 100% is commission / 0.70
+  const adminPersonalTotalSaleValue = referrals?.reduce((sum, r) => sum + (r.commission / 0.70), 0) ?? 0;
   
   // Conditionally set the value for the "Total Earnings" card based on admin status
   const totalEarningsValue = isAdmin ? adminPersonalTotalSaleValue : personalTotalCommission;
@@ -55,10 +55,10 @@ export default function DashboardPage() {
     .slice(0, 5) ?? [];
 
   // --- ADMIN ONLY ---
-  // Calculation for the platform revenue (the 25% cut)
+  // Calculation for the platform revenue (the 30% cut)
   const totalAffiliatePayouts = allReferrals?.reduce((sum, r) => sum + r.commission, 0) ?? 0;
-  // Commission is 75% of a sale, so platform cut (25%) is 1/3 of the commission.
-  const platformRevenue = totalAffiliatePayouts / 3;
+  // Commission is 70% of a sale, so platform cut (30%) is (30/70) of the commission.
+  const platformRevenue = totalAffiliatePayouts * (30 / 70);
   // --- END ADMIN ONLY ---
 
 
@@ -90,13 +90,13 @@ export default function DashboardPage() {
                   title="Your Revenue (Platform Cut)"
                   value={`$${platformRevenue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                   icon={<TrendingUp className="h-5 w-5 text-muted-foreground" />}
-                  description="The 25% platform cut from every sale, credited to you."
+                  description="The 30% platform cut from every sale, credited to you."
                 />
                 <StatCard
                   title="Total Affiliate Payouts"
                   value={`$${totalAffiliatePayouts.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                   icon={<DollarSign className="h-5 w-5 text-muted-foreground" />}
-                  description="Total 75% commissions paid to all affiliates."
+                  description="Total 70% commissions paid to all affiliates."
                 />
             </div>
           </CardContent>
@@ -108,7 +108,7 @@ export default function DashboardPage() {
           title="Total Earnings"
           value={`$${totalEarningsValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
           icon={<DollarSign className="h-5 w-5 text-muted-foreground" />}
-          description={isAdmin ? "Gross value of sales you personally referred (100%)." : "Your 75% commission from all-time sales."}
+          description={isAdmin ? "Gross value of sales you personally referred (100%)." : "Your 70% base commission from all-time sales."}
         />
         <StatCard
           title="Total Referrals"
@@ -126,7 +126,7 @@ export default function DashboardPage() {
           title="Unpaid Commissions"
           value={`$${unpaidCommissions.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
           icon={<DollarSign className="h-5 w-5 text-green-500" />}
-          description="Your 75% share to be paid out tomorrow."
+          description="Your 70% share to be paid out tomorrow."
         />
       </div>
 

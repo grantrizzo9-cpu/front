@@ -25,9 +25,9 @@ export default function Home({ searchParams }: { searchParams?: { ref?: string }
 
   const features = [
     {
-      icon: <DollarSign className="w-8 h-8 text-primary" />,
-      title: 'Lucrative 75% Commissions',
-      description: 'Earn a massive 75% commission on every single sale. Our high-conversion platform is your ticket to substantial daily earnings.',
+        icon: <DollarSign className="w-8 h-8 text-primary" />,
+        title: 'Generous 70% Commissions',
+        description: 'Earn a massive 70% commission on every sale. Super affiliates who refer over 10 customers unlock an even higher 75% commission rate!',
     },
     {
       icon: <Zap className="w-8 h-8 text-primary" />,
@@ -57,16 +57,16 @@ export default function Home({ searchParams }: { searchParams?: { ref?: string }
   ];
 
   const testimonials = [
-    { name: 'Sarah J.', role: 'Super Affiliate', avatar: avatar1, text: "I've never seen daily payouts this reliable. Affiliate AI Host has completely changed my financial outlook. The 75% commission is just unbeatable." },
+    { name: 'Sarah J.', role: 'Super Affiliate', avatar: avatar1, text: "I've never seen daily payouts this reliable. Affiliate AI Host has completely changed my financial outlook. The 70% commission is just unbeatable." },
     { name: 'Mike R.', role: 'Tech Blogger', avatar: avatar2, text: "The combination of web hosting and AI tools is genius. It's an incredibly easy sell, and my audience loves it. My earnings have skyrocketed." },
     { name: 'Emily C.', role: 'Digital Marketer', avatar: avatar3, text: "The affiliate dashboard is a dream. All the stats I need are right there. This is the most transparent and profitable program I've ever been a part of." },
   ];
 
   const faqs = [
-    { q: "How does the referral tracking work?", a: "When someone clicks your unique affiliate link, a cookie is stored in their browser that lasts forever. When they sign up, they are permanently linked to your account, and you will receive a 75% commission on all their payments." },
+    { q: "How does the referral tracking work?", a: "When someone clicks your unique affiliate link, a cookie is stored in their browser that lasts forever. When they sign up, they are permanently linked to your account, and you will receive a 70% commission on their payments, rising to 75% after your 10th referral." },
     { q: "How and when do I get paid?", a: "We process all commission payouts daily. All your earned commissions from the previous day are automatically sent to the PayPal account you have on file. It's fully automated." },
     { q: "What am I selling?", a: "You are promoting our subscription plans which include high-quality web hosting and a suite of powerful AI tools designed to help users build and grow their online businesses." },
-    { q: "Is there a limit to how much I can earn?", a: "Absolutely not! There is no cap on your potential earnings. The more customers you refer, the more you earn. With our 75% commission rate, the sky is the limit." },
+    { q: "Is there a limit to how much I can earn?", a: "Absolutely not! There is no cap on your potential earnings. The more customers you refer, the more you earn. With a base 70% commission rate that rises to 75% for top affiliates, the sky is the limit." },
     { q: "What is your refund and success-guarantee policy?", a: "We want you to be profitable. Our affiliate program is designed so just two referrals can cover your daily subscription and put you in profit. We stand by this with a simple, powerful guarantee: if you have fewer than two referrals, you are eligible to request a refund on your daily subscription fees. This ensures you can build your referral base without financial pressure, because you don't pay until you're earning." },
   ];
 
@@ -78,7 +78,7 @@ export default function Home({ searchParams }: { searchParams?: { ref?: string }
         <section className="relative w-full pt-20 pb-24 md:pt-32 md:pb-40 text-center bg-card">
           <div className="container z-10 relative">
             <h1 className="font-headline text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl">
-              Earn 75% Daily Commissions with <span className="text-primary">AI-Powered Hosting</span>
+              Earn 70%-75% Daily Commissions with <span className="text-primary">AI-Powered Hosting</span>
             </h1>
             <p className="mt-6 max-w-2xl mx-auto text-lg text-muted-foreground md:text-xl">
               Promote a product people love and get paid every single day. Our automated system handles everything from tracking to payouts. You just focus on earning.
@@ -140,7 +140,7 @@ export default function Home({ searchParams }: { searchParams?: { ref?: string }
                   <div className="flex-shrink-0 w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-bold">3</div>
                   <div>
                     <h3 className="font-semibold text-lg">Get Paid Daily</h3>
-                    <p className="text-muted-foreground">Earn a 75% commission for every sale, paid out automatically to your PayPal every single day.</p>
+                    <p className="text-muted-foreground">Earn a 70-75% commission for every sale, paid out automatically to your PayPal every single day.</p>
                   </div>
                 </li>
               </ul>
@@ -240,7 +240,7 @@ export default function Home({ searchParams }: { searchParams?: { ref?: string }
             <div className="mt-8">
               <Button size="lg" asChild className="text-lg py-7 px-10">
                 <Link href={pricingLink}>
-                  Claim Your 75% Commission Rate
+                  Claim Your 70% Commission Rate
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
               </Button>
