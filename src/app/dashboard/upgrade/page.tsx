@@ -4,14 +4,16 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from "@/components/ui/button";
 import { Loader2, CheckCircle } from "lucide-react";
 import Link from 'next/link';
-import { useUser, useFirestore, useDoc, useMemoFirebase } from "@/firebase";
+import { useUser, useFirestore, useDoc, useMemoFirebase, updateDocumentNonBlocking } from "@/firebase";
 import { doc } from "firebase/firestore";
 import type { User as UserType } from "@/lib/types";
 import { subscriptionTiers } from "@/lib/data";
+import { useToast } from "@/hooks/use-toast";
 
 export default function UpgradePage() {
   const { user, isUserLoading } = useUser();
   const firestore = useFirestore();
+  const { toast } = useToast();
 
   const userDocRef = useMemoFirebase(() => {
     if (!user) return null;
@@ -21,6 +23,19 @@ export default function UpgradePage() {
   const { data: userData, isLoading: isUserDataLoading } = useDoc<UserType>(userDocRef);
 
   const isLoading = isUserLoading || isUserDataLoading;
+
+  const handleUpgradeClick = (tierId: string) => {
+    if (!user) return;
+    const userDocRef = doc(firestore, 'users', user.uid);
+    updateDocumentNonBlocking(userDocRef, {
+        'subscription.tierId': tierId,
+    });
+
+    toast({
+      title: "Upgrade Successful!",
+      description: `Your plan has been upgraded.`,
+    });
+  };
 
   if (isLoading) {
     return (
@@ -91,9 +106,8 @@ export default function UpgradePage() {
                 </ul>
               </CardContent>
               <CardFooter>
-                 <Button asChild className="w-full">
-                    {/* In a real app, this would link to a checkout page with the priceId */}
-                    <Link href={`/dashboard/checkout?plan=${tier.id}&priceId=${tier.priceId}`}>Upgrade</Link>
+                 <Button className="w-full" onClick={() => handleUpgradeClick(tier.id)}>
+                    Upgrade
                 </Button>
               </CardFooter>
             </Card>
