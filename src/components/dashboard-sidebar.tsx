@@ -32,18 +32,24 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "./ui/button";
+import { useAuth, useUser } from "@/firebase";
+import { signOut } from "firebase/auth";
+import { Skeleton } from "./ui/skeleton";
 
 const isAdmin = true; // In a real app, this would come from user data
 
 export function DashboardSidebar() {
   const pathname = usePathname();
   const router = useRouter();
+  const { user, isUserLoading } = useUser();
+  const auth = useAuth();
 
   const isActive = (path: string) => pathname === path;
 
   const handleLogout = () => {
-    // Handle logout logic
-    router.push("/");
+    signOut(auth).then(() => {
+      router.push("/");
+    });
   };
 
   const menuItems = [
@@ -104,17 +110,34 @@ export function DashboardSidebar() {
       </SidebarContent>
       <SidebarFooter>
         <div className="flex items-center gap-3">
-          <Avatar>
-            <AvatarImage src="https://picsum.photos/seed/user-avatar/100/100" />
-            <AvatarFallback>R</AvatarFallback>
+           <Avatar>
+            {isUserLoading ? (
+              <Skeleton className="h-10 w-10 rounded-full" />
+            ) : (
+              <>
+                <AvatarImage src={user?.photoURL ?? `https://picsum.photos/seed/${user?.uid}/100/100`} />
+                <AvatarFallback>
+                  {user?.email?.[0]?.toUpperCase() || 'U'}
+                </AvatarFallback>
+              </>
+            )}
           </Avatar>
           <div className="flex-1 overflow-hidden">
-            <p className="font-semibold text-sm truncate">rentahost</p>
-            <p className="text-xs text-muted-foreground truncate">hello@rentahost.shop</p>
+            {isUserLoading ? (
+              <div className="space-y-1">
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-3 w-32" />
+              </div>
+            ) : (
+              <>
+                <p className="font-semibold text-sm truncate">{user?.displayName || user?.email}</p>
+                <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
+              </>
+            )}
           </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8">
+              <Button variant="ghost" size="icon" className="h-8 w-8" disabled={isUserLoading}>
                 <MoreVertical className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>

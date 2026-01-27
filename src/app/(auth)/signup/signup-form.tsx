@@ -9,22 +9,31 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { subscriptionTiers } from "@/lib/data";
 import { useEffect, useState } from "react";
-import { Users } from "lucide-react";
+import { Loader2, Users } from "lucide-react";
+import { useAuth, useFirestore, setDocumentNonBlocking } from "@/firebase";
+import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
+import { doc } from "firebase/firestore";
 
 export function SignupForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { toast } = useToast();
+  const auth = useAuth();
+  const firestore = useFirestore();
+
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
+  const [planId, setPlanId] = useState<string | null>(null);
   const [referralCode, setReferralCode] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    const planId = searchParams.get("plan");
+    const planIdParam = searchParams.get("plan");
     const refCode = searchParams.get("ref");
-    if (planId) {
-        const plan = subscriptionTiers.find(p => p.id === planId);
+    if (planIdParam) {
+        const plan = subscriptionTiers.find(p => p.id === planIdParam);
         if (plan) {
             setSelectedPlan(plan.name);
+            setPlanId(plan.id);
         }
     }
     if (refCode) {
@@ -32,20 +41,60 @@ export function SignupForm() {
     }
   }, [searchParams]);
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    // Here you would:
-    // 1. Create user in Firebase Auth
-    // 2. Create user document in Firestore, saving `referralCode`
-    // 3. Trigger a (simulated) PayPal payment for the `planId`
-    // 4. On success, activate subscription and credit referrer
-    // 5. Redirect to dashboard
+    setIsLoading(true);
+
+    const formData = new FormData(event.currentTarget);
+    const username = formData.get("username") as string;
+    const email = formData.get("email") as string;
+    const password = formData.get("password") as string;
     
-    toast({
-      title: "Account Created!",
-      description: "Simulating payment and redirecting to your dashboard...",
-    });
-    router.push("/dashboard");
+    try {
+        // 1. Create user in Firebase Auth
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+
+        // 2. Update user profile with username
+        await updateProfile(user, { displayName: username });
+
+        // 3. Create user document in Firestore
+        const userDocRef = doc(firestore, "users", user.uid);
+        const userData = {
+            uid: user.uid,
+            email: user.email,
+            username: username,
+            referredBy: referralCode || null,
+            isAffiliate: true, // All signups are affiliates
+            createdAt: new Date(),
+            subscription: planId ? {
+                tierId: planId,
+                status: 'active', // Simulate active subscription
+                startDate: new Date(),
+                endDate: null
+            } : null,
+            paypalEmail: '' // User needs to set this in settings
+        };
+        
+        // Using the non-blocking version as per guidelines
+        setDocumentNonBlocking(userDocRef, userData, { merge: false });
+
+        toast({
+          title: "Account Created!",
+          description: "Redirecting to your dashboard...",
+        });
+        router.push("/dashboard");
+
+    } catch (error: any) {
+        console.error("Signup failed:", error);
+        toast({
+            variant: "destructive",
+            title: "Signup Failed",
+            description: error.message || "An unknown error occurred.",
+        });
+    } finally {
+        setIsLoading(false);
+    }
   };
 
   return (
@@ -63,15 +112,15 @@ export function SignupForm() {
         <form className="space-y-4" onSubmit={handleSubmit}>
           <div className="space-y-2">
             <Label htmlFor="username">Username</Label>
-            <Input id="username" type="text" placeholder="your-username" required />
+            <Input id="username" name="username" type="text" placeholder="your-username" required disabled={isLoading} />
           </div>
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
-            <Input id="email" type="email" placeholder="you@example.com" required />
+            <Input id="email" name="email" type="email" placeholder="you@example.com" required disabled={isLoading} />
           </div>
           <div className="space-y-2">
             <Label htmlFor="password">Password</Label>
-            <Input id="password" type="password" required />
+            <Input id="password" name="password" type="password" required disabled={isLoading} />
           </div>
           {referralCode && (
              <div className="flex items-center gap-3 text-sm text-primary border border-primary/20 bg-primary/5 p-3 rounded-lg">
@@ -81,8 +130,14 @@ export function SignupForm() {
                 </span>
              </div>
           )}
-          <Button type="submit" className="w-full">
-            {selectedPlan ? `Sign Up & Pay with PayPal` : `Create Account`}
+          <Button type="submit" className="w-full" disabled={isLoading}>
+            {isLoading ? (
+                <Loader2 className="animate-spin" />
+            ) : selectedPlan ? (
+                `Sign Up & Start Earning`
+            ) : (
+                `Create Account`
+            )}
           </Button>
         </form>
         <div className="mt-4 text-center text-sm">
