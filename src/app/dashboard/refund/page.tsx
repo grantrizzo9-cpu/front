@@ -10,7 +10,7 @@ export default function RefundPage() {
   const { toast } = useToast();
   
   // In a real app, this data would come from the user's record in Firestore
-  const referralCount = 1; // Example value
+  const referralCount = 0; // Set to 0 for a new user
 
   const isEligible = referralCount < 2;
 
@@ -47,42 +47,4 @@ export default function RefundPage() {
               <AlertTitle className="text-primary">Your Risk-Free Guarantee</AlertTitle>
               <AlertDescription>
                   We stand by our promise. If you haven&apos;t made at least two referrals, you are eligible for a refund of your daily subscription fee. You can continue to request a refund each day until you reach this goal.
-              </AlertDescription>
-            </Alert>
-
-            <Card className="bg-secondary/50">
-              <CardHeader className="flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Current Status</CardTitle>
-                   <p className={`text-sm font-bold ${isEligible ? 'text-green-600' : 'text-destructive'}`}>
-                      {isEligible ? "Eligible for Refund" : "In Profit! 🎉"}
-                  </p>
-              </CardHeader>
-              <CardContent>
-                  <div className="text-2xl font-bold">{referralCount}</div>
-                  <p className="text-xs text-muted-foreground">
-                      successful referrals made
-                  </p>
-              </CardContent>
-            </Card>
-          </div>
-        </CardContent>
-        <CardFooter className="flex-col items-stretch gap-4">
-           <Button
-              size="lg"
-              onClick={handleRefundRequest}
-              disabled={!isEligible}
-              variant={isEligible ? "default" : "secondary"}
-              >
-              {isEligible ? "Request Refund for Today's Fee" : "You're Profitable!"}
-          </Button>
-          {!isEligible && (
-              <p className="text-sm text-muted-foreground text-center">
-                  Congratulations! With 2 or more referrals, you&apos;re earning more than your daily fee.
-              </p>
-          )}
-        </CardFooter>
-      </Card>
-      
-    </div>
-  );
-}
+              </Aler

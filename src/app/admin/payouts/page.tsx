@@ -3,15 +3,15 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { mockAdminPayouts } from "@/lib/data";
 import { useToast } from "@/hooks/use-toast";
-import { DollarSign, Send } from "lucide-react";
+import { Send } from "lucide-react";
+import type { AdminPayout } from "@/lib/types";
 
 export default function AdminPayoutsPage() {
   const { toast } = useToast();
 
   // In a real app, this would be fetched from a server action that aggregates data
-  const payouts = mockAdminPayouts;
+  const payouts: AdminPayout[] = [];
   const totalPayoutAmount = payouts.reduce((sum, p) => sum + p.totalUnpaid, 0);
 
   const handleProcessPayouts = () => {
@@ -45,7 +45,11 @@ export default function AdminPayoutsPage() {
             <div>
                 <CardTitle>Daily Payout Summary</CardTitle>
                 <CardDescription>
-                    Total of <span className="font-bold text-primary">${totalPayoutAmount.toFixed(2)}</span> to be paid to <span className="font-bold text-primary">{payouts.length}</span> affiliates.
+                    {payouts.length > 0 ? (
+                        <>Total of <span className="font-bold text-primary">${totalPayoutAmount.toFixed(2)}</span> to be paid to <span className="font-bold text-primary">{payouts.length}</span> affiliates.</>
+                    ) : (
+                        "There are no pending payouts to process."
+                    )}
                 </CardDescription>
             </div>
             <Button size="lg" onClick={handleProcessPayouts} disabled={payouts.length === 0}>
@@ -54,28 +58,28 @@ export default function AdminPayoutsPage() {
             </Button>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Affiliate</TableHead>
-                <TableHead>PayPal Email</TableHead>
-                <TableHead>Unpaid Commissions</TableHead>
-                <TableHead className="text-right">Total Payout</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {payouts.map((payout) => (
-                <TableRow key={payout.affiliateId}>
-                  <TableCell className="font-medium">{payout.affiliateUsername}</TableCell>
-                  <TableCell>{payout.paypalEmail}</TableCell>
-                  <TableCell>{payout.unpaidCommissions}</TableCell>
-                  <TableCell className="text-right font-semibold text-green-600">${payout.totalUnpaid.toFixed(2)}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
-    </div>
-  );
-}
+            {payouts.length > 0 ? (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Affiliate</TableHead>
+                    <TableHead>PayPal Email</TableHead>
+                    <TableHead>Unpaid Commissions</TableHead>
+                    <TableHead className="text-right">Total Payout</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {payouts.map((payout) => (
+                    <TableRow key={payout.affiliateId}>
+                      <TableCell className="font-medium">{payout.affiliateUsername}</TableCell>
+                      <TableCell>{payout.paypalEmail}</TableCell>
+                      <TableCell>{payout.unpaidCommissions}</TableCell>
+                      <TableCell className="text-right font-semibold text-green-600">${payout.totalUnpaid.toFixed(2)}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            ) : (
+                <div className="text-center text-muted-foreground py-10">
+                    <p>No pending payouts.</p>
+                    <p className="text-sm">When affiliates have unpaid commissions, they will appear here.</
