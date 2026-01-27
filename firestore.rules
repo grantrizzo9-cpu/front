@@ -4,26 +4,11 @@ service cloud.firestore {
   match /databases/{database}/documents {
 
     /**
-     * Core Philosophy: This ruleset enforces a strict user-ownership model, where
-     * all user-generated data (subscriptions, referrals, etc.) is stored in
-     * subcollections under that user's own document. This approach simplifies
-     * security logic by tying access control directly to the document path. A
-     * database-based admin role is implemented via the `/roles_admin`
-     * collection, granting admins specific oversight over payments and commissions.
-     *
-     * Key Security Decisions:
-     * - User data is strictly segregated. Users can only access documents within
-     *   their own `/users/{userId}` path. Listing other users is disallowed.
-     * - An `isAdmin()` function checks for a document in `/roles_admin` to grant
-     *   elevated privileges.
-     * - The referral system works via a special rule that allows a new user to
-     *   write into their referrer's `referrals` subcollection. This is secured
-     *   by checking data in the write request itself, avoiding complex `get()` calls.
+     * This ruleset prioritizes clear, direct user ownership. A user can always
+     * manage data under their own `/users/{userId}` path. Rules have been
+     * standardized to a simple `read, write` pattern for owned data to ensure
+     * compatibility with real-time listeners.
      */
-
-    // =====================================================================
-    // Helper Functions
-    // =====================================================================
 
     function isSignedIn() {
       return request.auth != null;
@@ -38,97 +23,83 @@ service cloud.firestore {
     // =====================================================================
 
     /**
-     * @description Controls access to user profile documents.
+     * @description Controls access to user profile documents and their subcollections.
      */
     match /users/{userId} {
-      allow read: if request.auth.uid == userId;
-      allow list: if isAdmin();
-      allow create: if request.auth.uid == userId && request.resource.data.id == userId;
-      allow update: if request.auth.uid == userId && request.resource.data.id == resource.data.id;
-      allow delete: if request.auth.uid == userId;
+      // Users can read and write their own profile and associated data.
+      allow read, write: if request.auth.uid == userId;
+      allow list: if isAdmin(); // Admins can list users.
 
       /**
-       * @description Manages user subscriptions, nested under the user's document.
+       * @description Manages a user's subscriptions.
        */
       match /subscriptions/{subscriptionId} {
-        allow read, create, update, delete: if request.auth.uid == userId;
+        allow read, write: if request.auth.uid == userId;
       }
 
       /**
-       * @description Stores referrals made by a user (the referrer).
-       * @principle A newly signed-up user can securely write to their referrer's subcollection.
-       * The rule validates this by checking properties within the written data itself, avoiding
-       * complex and potentially problematic `get()` calls.
+       * @description Stores referrals made by a user.
+       * A new user can create a referral in their referrer's subcollection.
        */
       match /referrals/{referralId} {
-        allow read: if request.auth.uid == userId;
-        allow update, delete: if request.auth.uid == userId;
+        allow read, write: if request.auth.uid == userId;
         allow create: if isSignedIn()
                         && request.resource.data.referredUserId == request.auth.uid
                         && request.resource.data.triggeringUserReferredBy == userId;
       }
       
       /**
-       * @description Contains payment history for a user, accessible by the user and admins.
+       * @description Contains payment history for a user.
        */
       match /payments/{paymentId} {
-        allow read, create, update, delete: if (request.auth.uid == userId) || isAdmin();
+        allow read, write: if request.auth.uid == userId || isAdmin();
       }
 
       /**
-       * @description Stores a user's refund requests. Path-based ownership.
+       * @description Stores a user's refund requests.
        */
       match /refundRequests/{requestId} {
         allow read, create: if request.auth.uid == userId;
-        allow update: if isAdmin();
-        allow delete: if isAdmin();
+        allow update, delete: if isAdmin();
       }
     }
     
     /**
-     * @description Publicly maps usernames to UIDs to facilitate referral lookups.
-     * @principle Simplifies referral resolution. The create rule is simplified to
-     * avoid `get()` calls, reducing complexity and potential timing issues during signup.
+     * @description Publicly maps usernames to UIDs for referral lookups.
      */
     match /usernames/{username} {
       allow get: if true;
-      allow list: if false;
       allow create: if isSignedIn() && request.resource.data.uid == request.auth.uid;
-      allow update: if false;
-      allow delete: if false;
+      allow list, update, delete: if false;
     }
 
     /**
-     * @description Defines subscription tiers. Publicly readable.
+     * @description Publicly readable subscription tier definitions.
      */
     match /subscriptionTiers/{subscriptionTierId} {
       allow get, list: if true;
-      allow create, update, delete: if false;
+      allow write: if false;
     }
     
     /**
-     * @description Allows admins to query across all referral subcollections
-     * for platform-wide reporting. This is a collection group query rule.
+     * @description Lookup collection for admin roles. Standardized to the
+     * same ownership rule as other user data for consistency.
      */
+    match /roles_admin/{userId} {
+      allow read, write: if request.auth.uid == userId;
+      allow list: if false;
+    }
+
+    // =====================================================================
+    // Collection Group Queries for Admins
+    // =====================================================================
+    
     match /{path=**}/referrals/{referralId} {
         allow list: if isAdmin();
     }
 
-    /**
-     * @description Allows admins to query across all refundRequest subcollections
-     * for platform-wide reporting. This is a collection group query rule.
-     */
     match /{path=**}/refundRequests/{requestId} {
         allow list: if isAdmin();
-    }
-    
-    /**
-     * @description Lookup collection for admin roles. Existence of a doc grants admin rights.
-     */
-    match /roles_admin/{userId} {
-      allow read: if request.auth.uid == userId;
-      allow create: if request.auth.uid == userId;
-      allow list, update, delete: if false;
     }
   }
 }
