@@ -10,7 +10,10 @@ import { Logo } from '@/components/logo';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
-export default function Home() {
+export default function Home({ searchParams }: { searchParams?: { ref?: string } }) {
+  const refCode = searchParams?.ref;
+  const pricingLink = refCode ? `/pricing?ref=${refCode}` : '/pricing';
+
   const heroImage = PlaceHolderImages.find((img) => img.id === 'hero');
   const featureImage1 = PlaceHolderImages.find((img) => img.id === 'feature-1');
   const featureImage2 = PlaceHolderImages.find((img) => img.id === 'feature-2');
@@ -81,7 +84,7 @@ export default function Home() {
             </p>
             <div className="mt-10 flex justify-center gap-4">
               <Button size="lg" asChild>
-                <Link href="/pricing">Become an Affiliate Now</Link>
+                <Link href={pricingLink}>Become an Affiliate Now</Link>
               </Button>
               <Button size="lg" variant="outline" asChild>
                 <Link href="#features">Learn More</Link>
@@ -220,7 +223,7 @@ export default function Home() {
             </p>
             <div className="mt-8">
               <Button size="lg" asChild className="text-lg py-7 px-10">
-                <Link href="/pricing">
+                <Link href={pricingLink}>
                   Claim Your 75% Commission Rate
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>

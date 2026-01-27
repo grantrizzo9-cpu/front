@@ -1,12 +1,26 @@
+"use client";
+
 import Link from 'next/link';
 import { Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Logo } from '@/components/logo';
+import { useSearchParams } from 'next/navigation';
 
 export function Header() {
+  const searchParams = useSearchParams();
+  const refCode = searchParams.get('ref');
+
+  const getPricingLink = () => {
+    let link = '/pricing';
+    if (refCode) {
+      link += `?ref=${refCode}`;
+    }
+    return link;
+  };
+  
   const navLinks = [
-    { href: '/pricing', label: 'Pricing' },
+    { href: getPricingLink(), label: 'Pricing' },
     { href: '/#features', label: 'Features' },
     { href: '/#faq', label: 'FAQ' },
   ];
@@ -59,7 +73,7 @@ export function Header() {
             <Link href="/login">Log In</Link>
           </Button>
           <Button asChild>
-            <Link href="/pricing">Sign Up</Link>
+            <Link href={getPricingLink()}>Sign Up</Link>
           </Button>
         </div>
       </div>
