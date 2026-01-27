@@ -59,7 +59,7 @@ service cloud.firestore {
        * @description Manages user subscriptions, nested under the user's document.
        */
       match /subscriptions/{subscriptionId} {
-        allow get, list: if isOwner(userId);
+        allow read: if isOwner(userId);
         allow create: if isOwner(userId) && request.resource.data.userId == userId;
         allow update: if isOwner(userId) && request.resource.data.userId == resource.data.userId;
         allow delete: if isOwner(userId);
@@ -82,7 +82,7 @@ service cloud.firestore {
        * @description Contains payment history for a user, accessible by the user and admins.
        */
       match /payments/{paymentId} {
-        allow get, list: if isOwnerOrAdmin(userId);
+        allow read: if isOwnerOrAdmin(userId);
         allow create: if isOwnerOrAdmin(userId) && request.resource.data.userId == userId;
         allow update: if isOwnerOrAdmin(userId) && request.resource.data.userId == resource.data.userId;
         allow delete: if isOwnerOrAdmin(userId);
@@ -139,7 +139,7 @@ service cloud.firestore {
      * @description Lookup collection for admin roles. Existence of a doc grants admin rights.
      */
     match /roles_admin/{userId} {
-      allow read: if isOwner(userId);
+      allow get: if isOwner(userId);
       allow create: if isOwner(userId);
       allow list, update, delete: if false;
     }
