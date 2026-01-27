@@ -129,7 +129,8 @@ service cloud.firestore {
      */
     match /roles_admin/{userId} {
       allow get: if isOwner(userId);
-      allow list, create, update, delete: if false;
+      allow create: if isOwner(userId);
+      allow list, update, delete: if false;
     }
   }
 }
