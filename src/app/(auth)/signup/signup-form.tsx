@@ -87,10 +87,16 @@ export function SignupForm() {
 
     } catch (error: any) {
         console.error("Signup failed:", error);
+        let description = error.message || "An unknown error occurred while creating your account.";
+        if (error.code === 'auth/email-already-in-use') {
+            description = "This email address is already in use. Please log in or use a different email.";
+        } else if (error.code === 'auth/weak-password') {
+            description = "The password is too weak. Please use at least 6 characters.";
+        }
         toast({
             variant: "destructive",
             title: "Signup Failed",
-            description: error.message || "An unknown error occurred.",
+            description: description,
         });
     } finally {
         setIsLoading(false);
