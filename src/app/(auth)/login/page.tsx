@@ -38,7 +38,10 @@ export default function LoginPage() {
         description = "Invalid email or password. Please check your credentials and try again.";
       } else if (error.code === 'auth/too-many-requests') {
         description = "Access to this account has been temporarily disabled due to many failed login attempts. You can reset your password or try again later.";
+      } else if (error.message) {
+        description = error.message;
       }
+      
       toast({
         variant: "destructive",
         title: "Login Failed",
