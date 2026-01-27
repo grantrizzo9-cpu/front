@@ -117,6 +117,14 @@ service cloud.firestore {
     }
     
     /**
+     * @description Allows admins to query across all referral subcollections
+     * for platform-wide reporting. This is a collection group query rule.
+     */
+    match /{path=**}/referrals/{referralId} {
+        allow list: if isAdmin();
+    }
+    
+    /**
      * @description Lookup collection for admin roles. Existence of a doc grants admin rights.
      */
     match /roles_admin/{userId} {

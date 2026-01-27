@@ -4,29 +4,40 @@ import { StatCard } from "@/components/stat-card";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { format } from "date-fns";
-import { DollarSign, Users, BarChart, BrainCircuit, ArrowRight, Loader2 } from "lucide-react";
+import { DollarSign, Users, BarChart, BrainCircuit, ArrowRight, Loader2, TrendingUp } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import Link from 'next/link';
 import { Button } from "@/components/ui/button";
 import type { Referral } from "@/lib/types";
 import { useUser, useFirestore, useCollection, useMemoFirebase } from "@/firebase";
-import { collection } from "firebase/firestore";
+import { collection, collectionGroup } from "firebase/firestore";
+import { useAdmin } from "@/hooks/use-admin";
 
 export default function DashboardPage() {
   const { user, isUserLoading } = useUser();
   const firestore = useFirestore();
+  const { isAdmin, isLoading: isAdminLoading } = useAdmin();
 
+  // Fetch referrals for the current user (for their personal dashboard view)
   const referralsRef = useMemoFirebase(() => {
     if (!user) return null;
-    // We query the referrals subcollection under the current user's ID
     return collection(firestore, 'users', user.uid, 'referrals');
   }, [firestore, user]);
 
   const { data: referrals, isLoading: referralsLoading } = useCollection<Referral>(referralsRef);
+  
+  // --- ADMIN ONLY ---
+  // Fetch all referrals across the entire platform if the user is an admin
+  const allReferralsQuery = useMemoFirebase(() => {
+    if (!isAdmin) return null; // Only run this query if the user is an admin
+    return collectionGroup(firestore, 'referrals');
+  }, [firestore, isAdmin]);
+  const { data: allReferrals, isLoading: allReferralsLoading } = useCollection<Referral>(allReferralsQuery);
+  // --- END ADMIN ONLY ---
 
-  const isLoading = isUserLoading || referralsLoading;
+  const isLoading = isUserLoading || referralsLoading || (isAdmin && allReferralsLoading) || isAdminLoading;
 
-  // Calculations are now derived from the single 'referrals' collection
+  // Calculations for the personal dashboard
   const totalEarnings = referrals?.reduce((sum, r) => sum + r.commission, 0) ?? 0;
   const totalReferrals = referrals?.length ?? 0;
   const unpaidCommissions = referrals?.filter(r => r.status === 'unpaid').reduce((sum, r) => sum + r.commission, 0) ?? 0;
@@ -34,6 +45,14 @@ export default function DashboardPage() {
   const recentReferrals = referrals
     ?.sort((a, b) => b.date.toMillis() - a.date.toMillis())
     .slice(0, 5) ?? [];
+
+  // --- ADMIN ONLY ---
+  // Calculation for the platform revenue (the 25% cut)
+  const totalAffiliatePayouts = allReferrals?.reduce((sum, r) => sum + r.commission, 0) ?? 0;
+  // Commission is 75% of a sale, so platform cut (25%) is 1/3 of the commission.
+  const platformRevenue = totalAffiliatePayouts / 3;
+  // --- END ADMIN ONLY ---
+
 
   if (isLoading) {
       return (
@@ -49,6 +68,32 @@ export default function DashboardPage() {
         <h1 className="text-3xl font-bold font-headline">Dashboard</h1>
         <p className="text-muted-foreground">Welcome back! Here's a summary of your affiliate activity.</p>
       </div>
+
+      {/* Conditionally render the admin-only revenue card */}
+      {isAdmin && (
+        <Card className="border-primary/50 bg-primary/5">
+          <CardHeader>
+            <CardTitle className="font-headline text-xl">Admin Overview</CardTitle>
+            <CardDescription>Platform-wide revenue summary.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-4 md:grid-cols-2">
+                <StatCard
+                  title="Total Platform Revenue"
+                  value={`$${platformRevenue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+                  icon={<TrendingUp className="h-5 w-5 text-muted-foreground" />}
+                  description="Your 25% cut from all affiliate sales."
+                />
+                <StatCard
+                  title="Total Affiliate Payouts"
+                  value={`$${totalAffiliatePayouts.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+                  icon={<DollarSign className="h-5 w-5 text-muted-foreground" />}
+                  description="Total 75% commissions paid to all affiliates."
+                />
+            </div>
+          </CardContent>
+        </Card>
+      )}
       
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <StatCard
