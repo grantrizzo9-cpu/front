@@ -35,11 +35,8 @@ const imageGeneratorFlow = ai.defineFlow(
     async (input): Promise<GenerateImageOutput> => {
         try {
             const { media } = await ai.generate({
-                model: 'googleai/gemini-2.5-flash-image-preview',
-                prompt: [{ text: input.prompt }],
-                config: {
-                    responseModalities: ['TEXT', 'IMAGE'],
-                },
+                model: 'googleai/imagen-4.0-fast-generate-001',
+                prompt: input.prompt,
             });
 
             if (!media || !media.url) {
@@ -52,14 +49,14 @@ const imageGeneratorFlow = ai.defineFlow(
              if (errorMessage.includes('Request failed with status code 400') || errorMessage.includes('API key not valid')) {
                 return { error: 'The AI service is not configured correctly. Please ensure your GEMINI_API_KEY is set in your deployment environment.' };
             }
+            if (errorMessage.includes('is only accessible to billed users')) {
+                return { error: 'This image generation model requires a billed Google Cloud account with a positive balance. Please check your project billing status.' };
+            }
             if (errorMessage.includes('404 Not Found') || errorMessage.includes('is not found for API version')) {
                 return { error: 'The selected AI model is not available for your account. This may be due to account status or regional restrictions.' };
             }
              if (errorMessage.includes('blocked') || errorMessage.includes('SAFETY')) {
                 return { error: 'The prompt was blocked by the safety filter. Please try a different prompt.' };
-            }
-            if (errorMessage.includes('billed users at this time')) {
-                return { error: 'This image generation model requires a billed Google Cloud account with a positive balance. Please check your project billing status.' };
             }
             return { error: errorMessage };
         }
