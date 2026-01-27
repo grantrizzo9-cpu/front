@@ -23,7 +23,7 @@ import {
   LayoutGrid,
   BrainCircuit,
   ShieldQuestion,
-  Repeat,
+  UploadCloud,
   ShieldCheck,
 } from "lucide-react";
 import Link from "next/link";
@@ -58,7 +58,7 @@ export function DashboardSidebar() {
   const menuItems = [
     { path: "/dashboard", icon: <LayoutDashboard />, label: "Dashboard" },
     { path: "/dashboard/ai-tools", icon: <BrainCircuit />, label: "AI Content" },
-    { path: "/dashboard/upgrade", icon: <Repeat />, label: "Change Plan" },
+    { path: "/dashboard/upgrade", icon: <UploadCloud />, label: "Upgrade" },
     { path: "/dashboard/referrals", icon: <Users />, label: "Referrals" },
     { path: "/dashboard/payouts", icon: <Wallet />, label: "Payouts" },
     { path: "/dashboard/refund", icon: <ShieldQuestion />, label: "Request Refund" },

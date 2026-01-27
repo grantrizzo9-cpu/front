@@ -121,34 +121,37 @@ export default function UpgradePage() {
       )
   }
 
-  // SCENARIO 2: User HAS a subscription. Show current plan and cheaper options for downgrade.
+  // SCENARIO 2: User HAS a subscription. Show ALL plans to upgrade/downgrade.
   const currentTierId = userData.subscription.tierId;
-  const currentTier = subscriptionTiers.find(t => t.id === currentTierId);
-  const currentPrice = currentTier?.price ?? Infinity;
-
-  const availableTiers = subscriptionTiers
-    .filter(tier => tier.price <= currentPrice)
-    .sort((a, b) => b.price - a.price); // Sort from most to least expensive
   
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-3xl font-bold font-headline">Change Plan</h1>
+        <h1 className="text-3xl font-bold font-headline">Upgrade Plan</h1>
         <p className="text-muted-foreground">
-            You are currently on the <span className="font-semibold text-primary">{currentTier?.name}</span> plan. You can select a different plan below.
+            You can upgrade or change your plan at any time.
         </p>
       </div>
       
       <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-          {availableTiers.map((tier) => (
+          {subscriptionTiers.map((tier) => (
             <Card 
                 key={tier.id} 
                 className={cn(
                     "flex flex-col",
-                    tier.id === currentTierId ? "border-primary ring-2 ring-primary" : ""
+                    tier.id === currentTierId ? "border-primary ring-2 ring-primary" : "",
+                    tier.isMostPopular && tier.id !== currentTierId ? "shadow-lg" : ""
                 )}
             >
-              <CardHeader>
+              {tier.isMostPopular && (
+                <div className={cn(
+                    "text-primary-foreground text-center py-1.5 text-sm font-semibold rounded-t-lg",
+                    tier.id === currentTierId ? "bg-primary/80" : "bg-primary"
+                )}>
+                  Most Popular
+                </div>
+              )}
+              <CardHeader className={cn(!tier.isMostPopular && "pt-6")}>
                 <CardTitle className="font-headline text-xl">{tier.name}</CardTitle>
                 <div className="flex items-baseline gap-1">
                   <span className="text-3xl font-bold">${tier.price.toFixed(2)}</span>
@@ -170,8 +173,8 @@ export default function UpgradePage() {
                 {tier.id === currentTierId ? (
                     <Button className="w-full" disabled>Current Plan</Button>
                 ) : (
-                    <Button className="w-full" variant="outline" onClick={() => handlePlanChange(tier.id)}>
-                        Downgrade to {tier.name}
+                    <Button className="w-full" variant={tier.isMostPopular ? "default" : "outline"} onClick={() => handlePlanChange(tier.id)}>
+                        Switch to {tier.name}
                     </Button>
                 )}
               </CardFooter>
