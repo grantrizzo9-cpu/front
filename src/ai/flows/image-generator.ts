@@ -35,8 +35,11 @@ const imageGeneratorFlow = ai.defineFlow(
     async (input): Promise<GenerateImageOutput> => {
         try {
             const { media } = await ai.generate({
-                model: 'googleai/imagen-4.0-fast-generate-001',
-                prompt: input.prompt,
+                model: 'googleai/gemini-2.5-flash-image-preview',
+                prompt: [{ text: input.prompt }],
+                config: {
+                    responseModalities: ['TEXT', 'IMAGE'],
+                },
             });
 
             if (!media || !media.url) {
@@ -54,6 +57,9 @@ const imageGeneratorFlow = ai.defineFlow(
             }
              if (errorMessage.includes('blocked') || errorMessage.includes('SAFETY')) {
                 return { error: 'The prompt was blocked by the safety filter. Please try a different prompt.' };
+            }
+            if (errorMessage.includes('billed users at this time')) {
+                return { error: 'This image generation model requires a billed Google Cloud account with a positive balance. Please check your project billing status.' };
             }
             return { error: errorMessage };
         }
