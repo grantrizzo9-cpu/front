@@ -264,6 +264,21 @@
       "required": [
         "uid"
       ]
+    },
+    "RefundRequest": {
+        "title": "Refund Request",
+        "type": "object",
+        "description": "Represents a user's request for a refund based on the success guarantee.",
+        "properties": {
+            "id": { "type": "string", "description": "Unique ID for the refund request." },
+            "userId": { "type": "string", "description": "The UID of the user requesting the refund." },
+            "userUsername": { "type": "string", "description": "The username of the user requesting the refund." },
+            "userEmail": { "type": "string", "format": "email", "description": "The email of the user requesting the refund." },
+            "requestDate": { "type": "string", "format": "date-time", "description": "Timestamp when the request was made." },
+            "status": { "type": "string", "enum": ["pending", "processed", "denied"], "description": "The current status of the refund request." },
+            "referralCountAtRequest": { "type": "number", "description": "The number of referrals the user had at the time of the request." }
+        },
+        "required": ["userId", "userUsername", "userEmail", "requestDate", "status", "referralCountAtRequest"]
     }
   },
   "auth": {
@@ -394,6 +409,22 @@
             {
               "name": "username",
               "description": "The user's unique username."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/refundRequests/{requestId}",
+        "definition": {
+          "entityName": "RefundRequest",
+          "schema": {
+            "$ref": "#/backend/entities/RefundRequest"
+          },
+          "description": "Stores user refund requests. Users can create their own, admins can manage all.",
+          "params": [
+            {
+              "name": "requestId",
+              "description": "The unique ID for the refund request."
             }
           ]
         }

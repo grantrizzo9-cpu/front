@@ -132,5 +132,16 @@ service cloud.firestore {
       allow create: if isOwner(userId);
       allow list, update, delete: if false;
     }
+
+    /**
+     * @description Manages refund requests. Users can create their own, admins manage all.
+     */
+    match /refundRequests/{requestId} {
+      allow get: if (isOwner(request.resource.data.userId)) || isAdmin();
+      allow list: if isAdmin();
+      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+      allow update: if isAdmin();
+      allow delete: if false;
+    }
   }
 }

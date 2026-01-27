@@ -22,6 +22,7 @@ import {
   Undo2,
   LayoutGrid,
   BrainCircuit,
+  ShieldQuestion,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -64,6 +65,7 @@ export function DashboardSidebar() {
   const adminMenuItems = [
     { path: "/admin/dashboard", icon: <LayoutGrid />, label: "Packages" },
     { path: "/admin/payouts", icon: <Shield />, label: "Manage Payouts" },
+    { path: "/admin/refunds", icon: <ShieldQuestion />, label: "Refund Requests" },
   ];
 
   return (
