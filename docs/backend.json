@@ -267,6 +267,20 @@
       "type": "object",
       "description": "An empty document whose existence at /roles_admin/{userId} grants a user admin privileges.",
       "properties": {}
+    },
+    "Username": {
+      "title": "Username",
+      "type": "object",
+      "description": "A public mapping from a username to a user's UID.",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "description": "The UID of the user."
+        }
+      },
+      "required": [
+        "uid"
+      ]
     }
   },
   "auth": {
@@ -404,8 +418,26 @@
             }
           ]
         }
+      },
+      {
+        "path": "/usernames/{username}",
+        "definition": {
+          "entityName": "Username",
+          "schema": {
+            "$ref": "#/backend/entities/Username"
+          },
+          "description": "Publicly readable mapping of usernames to user IDs to facilitate referrals. Users can create their own entry, but not modify it or others'.",
+          "params": [
+            {
+              "name": "username",
+              "description": "The user's unique username."
+            }
+          ]
+        }
       }
     ],
     "reasoning": "The Firestore structure is designed to support Affiliate AI Host's affiliate marketing and subscription management features, prioritizing security, scalability, and ease of debugging. The key principle is Authorization Independence, achieved through denormalization of authorization data, eliminating the need for `get()` calls in security rules.  This ensures atomic operations and simplifies security rule logic.  Data is segregated into collections with homogeneous security postures, enabling secure list operations (QAPs). User-owned data is organized under user-specific paths for simplified ownership-based security. The use of DBAC (database-based access control) eliminates custom claims.  Specifically: \n\n*   **Authorization Independence:** The structure avoids hierarchical authorization dependencies.  For instance, access to a user's subscriptions, referrals, and payments is controlled by the user's ID in the path (`/users/{userId}/subscriptions/{subscriptionId}`).  Since all documents under `/users/{userId}` are owned by that user, authorization is determined solely by matching `request.auth.uid` with the `userId` path parameter. \n\n*   **QAPs (Rules are not Filters):** The segregation of user data into subcollections ensures that listing operations are secure and efficient. Listing `/users/{userId}/subscriptions` only returns subscriptions owned by that user.\n\n*   **Affiliate Tracking & Commission:** When a new user signs up via an affiliate link, the `referredBy` field in the `/users` collection records the referring affiliate's ID. When the new user subscribes, the commission is generated in the commissions collection under the affiliates user ID path."
   }
 }
+
+    

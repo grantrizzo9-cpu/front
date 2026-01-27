@@ -10,9 +10,9 @@ import { useToast } from "@/hooks/use-toast";
 import { subscriptionTiers } from "@/lib/data";
 import { useEffect, useState } from "react";
 import { Loader2, Users } from "lucide-react";
-import { useAuth, useFirestore, setDocumentNonBlocking } from "@/firebase";
+import { useAuth, useFirestore } from "@/firebase";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
-import { doc, serverTimestamp } from "firebase/firestore";
+import { doc, serverTimestamp, setDoc, getDoc, collection, addDoc } from "firebase/firestore";
 
 export function SignupForm() {
   const router = useRouter();
@@ -58,25 +58,78 @@ export function SignupForm() {
         // 2. Update user profile with username
         await updateProfile(user, { displayName: username });
 
-        // 3. Create user document in Firestore
+        // --- NEW LOGIC STARTS HERE ---
+
+        let referrerId: string | null = null;
+        let referrerUsername: string | null = referralCode || null;
+
+        // 3. Find referrer if one exists
+        if (referrerUsername && firestore) {
+            const referrerUsernameRef = doc(firestore, "usernames", referrerUsername);
+            const referrerUsernameSnap = await getDoc(referrerUsernameRef);
+            if (referrerUsernameSnap.exists()) {
+                referrerId = referrerUsernameSnap.data().uid;
+            } else {
+                console.warn(`Referrer with username "${referrerUsername}" not found.`);
+                referrerUsername = null; 
+            }
+        }
+
+        // 4. Create user document in Firestore
         const userDocRef = doc(firestore, "users", user.uid);
+        const plan = planId ? subscriptionTiers.find(p => p.id === planId) : null;
         const userData = {
             id: user.uid,
             email: user.email,
             username: username,
-            referredBy: referralCode || null,
-            isAffiliate: true, // All signups are affiliates
+            referredBy: referrerId, // Store referrer's UID
+            isAffiliate: true,
             createdAt: serverTimestamp(),
-            subscription: planId ? {
-                tierId: planId,
-                status: 'active', // Simulate active subscription
+            subscription: plan ? {
+                tierId: plan.id,
+                status: 'active',
                 startDate: serverTimestamp(),
                 endDate: null
             } : null,
-            paypalEmail: '' // User needs to set this in settings
+            paypalEmail: ''
         };
-        
-        setDocumentNonBlocking(userDocRef, userData, { merge: false });
+        // This MUST complete before we create the username mapping for security rules
+        await setDoc(userDocRef, userData);
+
+        // 5. Create the public username-to-UID mapping for the new user
+        const usernameDocRef = doc(firestore, "usernames", username);
+        await setDoc(usernameDocRef, { uid: user.uid });
+
+        // 6. If referral is valid, create referral and commission docs for the referrer
+        if (referrerId && plan && firestore) {
+            // Create Referral Doc
+            const referralRef = collection(firestore, 'users', referrerId, 'referrals');
+            const commissionAmount = plan.price * 0.75; // 75% commission
+            const newReferralData = {
+                referredUserId: user.uid,
+                referredUserUsername: username,
+                planPurchased: plan.name,
+                commission: commissionAmount,
+                status: 'unpaid',
+                date: serverTimestamp(),
+            };
+            const referralDoc = await addDoc(referralRef, newReferralData);
+
+            // Create Commission Doc
+            const commissionRef = collection(firestore, 'users', referrerId, 'commissions');
+            const newCommissionData = {
+                affiliateId: referrerId,
+                referralId: referralDoc.id, // Link to the referral doc
+                amount: commissionAmount,
+                status: 'unpaid',
+                // In a real app, this would be the actual subscription ID from a payment gateway
+                subscriptionId: "simulated_sub_id", 
+                commissionDate: serverTimestamp(),
+            };
+            await addDoc(commissionRef, newCommissionData);
+        }
+
+        // --- NEW LOGIC ENDS HERE ---
 
         toast({
           title: "Account Created!",
@@ -85,7 +138,7 @@ export function SignupForm() {
         router.push("/dashboard");
 
     } catch (error: any) {
-        let description = error.message || "An unknown error occurred while creating your account.";
+        let description = "An unknown error occurred while creating your account.";
         if (error.code === 'auth/email-already-in-use') {
             description = "This email address is already in use. Please log in or use a different email.";
         } else if (error.code === 'auth/weak-password') {
@@ -154,3 +207,5 @@ export function SignupForm() {
     </Card>
   );
 }
+
+    

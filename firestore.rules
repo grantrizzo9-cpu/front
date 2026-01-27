@@ -101,6 +101,25 @@ service cloud.firestore {
       allow update: if isOwner(userId) && isExistingDoc() && request.resource.data.id == resource.data.id;
       allow delete: if isOwner(userId) && isExistingDoc();
     }
+    
+    /**
+     * @description Publicly maps usernames to UIDs to facilitate referral lookups.
+     * @path /usernames/{username}
+     * @allow (get) Any client can read a username-to-UID mapping.
+     * @allow (create) A signed-in user can create their own username mapping, but only if it doesn't already exist and the username matches their profile.
+     * @deny (list, update, delete) For security and data integrity.
+     * @principle Enables client-side referral resolution without exposing the entire user collection.
+     */
+    match /usernames/{username} {
+      allow get: if true;
+      allow list: if false;
+      // The creator must be the owner of the UID, and the {username} path must match their profile username.
+      allow create: if isSignedIn() 
+                    && request.resource.data.uid == request.auth.uid
+                    && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.username == username;
+      allow update: if false;
+      allow delete: if false;
+    }
 
     /**
      * @description Defines subscription tiers. This data is public for all to read.
@@ -194,3 +213,5 @@ service cloud.firestore {
     }
   }
 }
+
+    
