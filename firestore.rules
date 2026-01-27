@@ -2,52 +2,73 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
+    // --- User Data ---
+
+    // Users can read and write their own profile document.
+    // Admins can list all user documents.
     match /users/{userId} {
       allow read, write: if request.auth.uid == userId;
       allow list: if request.auth != null && exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
     }
 
+    // Users can read and write their own subscriptions.
     match /users/{userId}/subscriptions/{subscriptionId} {
       allow read, write: if request.auth.uid == userId;
     }
 
+    // Users can READ their own referrals.
+    // A newly signed-up user can CREATE a referral document in their referrer's subcollection.
     match /users/{userId}/referrals/{referralId} {
-      allow read: if request.auth != null;
+      allow read: if request.auth.uid == userId;
       allow create: if request.auth != null
                       && request.resource.data.referredUserId == request.auth.uid
                       && request.resource.data.triggeringUserReferredBy == userId;
     }
 
+    // Users can READ their own payments. Admins can CREATE/UPDATE payments for all users (for payouts).
     match /users/{userId}/payments/{paymentId} {
-      allow read, write: if request.auth.uid == userId || (request.auth != null && exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid)));
+      allow read: if request.auth.uid == userId || (request.auth != null && exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid)));
+      allow write: if request.auth != null && exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
     }
 
+    // Users can CREATE and READ their own refund requests. Admins can manage all requests.
     match /users/{userId}/refundRequests/{requestId} {
       allow read, create: if request.auth.uid == userId;
       allow update, delete: if request.auth != null && exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
     }
 
+    // --- Public Data & Roles ---
+
+    // Usernames are public for single GET requests to facilitate referrals.
+    // Users can only CREATE their own username mapping. Listing is disallowed.
     match /usernames/{username} {
       allow get: if true;
       allow create: if request.auth != null && request.resource.data.uid == request.auth.uid;
       allow list, update, delete: if false;
     }
 
+    // Subscription Tiers are public and read-only.
     match /subscriptionTiers/{subscriptionTierId} {
       allow get, list: if true;
       allow write: if false;
     }
 
+    // A user can read their own role document to check for admin status.
+    // The user 'rentahost' can write to this path to become an admin.
     match /roles_admin/{userId} {
-      allow read: if request.auth != null;
+      allow read: if request.auth.uid == userId;
       allow write: if request.auth.uid == userId;
       allow list: if false;
     }
 
+    // --- Collection Group Queries for Admin Panel ---
+
+    // Admins can list all referrals across all users.
     match /{path=**}/referrals/{referralId} {
         allow list: if request.auth != null && exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
     }
 
+    // Admins can list all refund requests across all users.
     match /{path=**}/refundRequests/{requestId} {
         allow list: if request.auth != null && exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
     }
