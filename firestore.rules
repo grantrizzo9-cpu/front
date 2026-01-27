@@ -49,7 +49,7 @@ service cloud.firestore {
      * @description Controls access to user profile documents.
      */
     match /users/{userId} {
-      allow get: if isOwner(userId);
+      allow read: if isOwner(userId);
       allow list: if isAdmin();
       allow create: if isOwner(userId) && request.resource.data.id == userId;
       allow update: if isOwner(userId) && request.resource.data.id == resource.data.id;
