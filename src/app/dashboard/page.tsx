@@ -92,7 +92,7 @@ export default function DashboardPage() {
           <Info className="h-4 w-4 text-accent" />
           <AlertTitle className="text-accent">You're on a Trial!</AlertTitle>
           <AlertDescription>
-            Your 7-day free trial is active and will end on {format(trialEndDate, 'PP')}. Start referring to keep the momentum going!
+            Your 3-day free trial is active and will end on {format(trialEndDate, 'PP')}. Start referring to keep the momentum going!
           </AlertDescription>
         </Alert>
       )}
