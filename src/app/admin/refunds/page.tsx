@@ -6,13 +6,14 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, ShieldCheck, AlertTriangle } from "lucide-react";
+import { DollarSign, Loader2, ShieldCheck } from "lucide-react";
 import type { RefundRequest } from "@/lib/types";
 import { useAdmin } from "@/hooks/use-admin";
 import { useCollection, useFirestore, useMemoFirebase, updateDocumentNonBlocking } from "@/firebase";
-import { collectionGroup, query, where, doc } from "firebase/firestore";
+import { collectionGroup, query, doc } from "firebase/firestore";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
+import { StatCard } from "@/components/stat-card";
 
 export default function AdminRefundsPage() {
   const { toast } = useToast();
@@ -20,7 +21,7 @@ export default function AdminRefundsPage() {
   const { isAdmin, isLoading: isAdminLoading } = useAdmin();
   const [processingId, setProcessingId] = useState<string | null>(null);
 
-  // 1. Fetch all pending refund requests using a collection group query
+  // 1. Fetch all refund requests using a collection group query
   const refundRequestsQuery = useMemoFirebase(() => {
     if (!firestore || !isAdmin) return null;
     return query(collectionGroup(firestore, 'refundRequests'));
@@ -53,11 +54,28 @@ export default function AdminRefundsPage() {
       return refundRequests?.filter(r => r.status === 'pending') ?? [];
   }, [refundRequests]);
 
+  const totalRefunded = useMemo(() => {
+    return (
+      refundRequests
+        ?.filter((r) => r.status === "processed")
+        .reduce((sum, r) => sum + (r.amount || 0), 0) ?? 0
+    );
+  }, [refundRequests]);
+
   return (
     <div className="space-y-8">
       <div>
         <h1 className="text-3xl font-bold font-headline">Manage Refunds</h1>
         <p className="text-muted-foreground">Review and process user refund requests.</p>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2">
+        <StatCard
+          title="Total Refunded"
+          value={`$${totalRefunded.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+          icon={<DollarSign className="h-5 w-5 text-muted-foreground" />}
+          description="Total amount processed for refunds."
+        />
       </div>
 
       <Card>
@@ -80,6 +98,7 @@ export default function AdminRefundsPage() {
                   <TableRow>
                     <TableHead>Username</TableHead>
                     <TableHead>Email</TableHead>
+                    <TableHead>Amount</TableHead>
                     <TableHead>Reason</TableHead>
                     <TableHead>Date</TableHead>
                     <TableHead className="text-right">Action</TableHead>
@@ -90,6 +109,7 @@ export default function AdminRefundsPage() {
                     <TableRow key={request.id}>
                       <TableCell className="font-medium">{request.userUsername}</TableCell>
                       <TableCell>{request.userEmail}</TableCell>
+                      <TableCell>${request.amount.toFixed(2)}</TableCell>
                       <TableCell className="max-w-xs truncate">{request.reason}</TableCell>
                       <TableCell>{format(request.requestedAt.toDate(), 'PP')}</TableCell>
                       <TableCell className="text-right">
@@ -123,5 +143,3 @@ export default function AdminRefundsPage() {
     </div>
   );
 }
-
-    

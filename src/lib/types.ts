@@ -1,4 +1,5 @@
 
+
 import type { Timestamp } from 'firebase/firestore';
 
 export type SubscriptionTier = {
@@ -65,6 +66,7 @@ export type RefundRequest = {
   userEmail: string;
   userUsername: string;
   reason: string;
+  amount: number;
   status: 'pending' | 'processed' | 'denied';
   requestedAt: Timestamp;
 };

@@ -275,10 +275,11 @@
           "userEmail": { "type": "string" },
           "userUsername": { "type": "string" },
           "reason": { "type": "string" },
+          "amount": { "type": "number", "description": "The amount being refunded." },
           "status": { "type": "string", "enum": ["pending", "processed", "denied"] },
           "requestedAt": { "type": "string", "format": "date-time" }
         },
-        "required": ["userId", "userEmail", "userUsername", "reason", "status", "requestedAt"]
+        "required": ["userId", "userEmail", "userUsername", "reason", "amount", "status", "requestedAt"]
     },
     "AdminRole": {
       "title": "Admin Role",

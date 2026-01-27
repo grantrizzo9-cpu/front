@@ -4,15 +4,15 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, ShieldQuestion, Info } from "lucide-react";
-import { useUser, useFirestore, useCollection, useMemoFirebase, addDocumentNonBlocking, updateDocumentNonBlocking } from "@/firebase";
+import { Loader2, ShieldQuestion } from "lucide-react";
+import { useUser, useFirestore, useCollection, useMemoFirebase, addDocumentNonBlocking, updateDocumentNonBlocking, useDoc } from "@/firebase";
 import { collection, query, serverTimestamp, orderBy, doc, Timestamp } from "firebase/firestore";
-import type { RefundRequest } from "@/lib/types";
+import type { RefundRequest, User as UserType } from "@/lib/types";
 import { useState, useMemo } from "react";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
+import { subscriptionTiers } from "@/lib/data";
 
 export default function RequestRefundPage() {
   const { user, isUserLoading } = useUser();
@@ -21,6 +21,12 @@ export default function RequestRefundPage() {
   
   const [reason, setReason] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const userDocRef = useMemoFirebase(() => {
+    if (!user) return null;
+    return doc(firestore, 'users', user.uid);
+  }, [user, firestore]);
+  const { data: userData, isLoading: isUserDataLoading } = useDoc<UserType>(userDocRef);
 
   // Fetch ALL refund requests for the current user, ordered by date
   const refundRequestQuery = useMemoFirebase(() => {
@@ -44,6 +50,15 @@ export default function RequestRefundPage() {
         toast({ variant: "destructive", title: "Error", description: "You must be logged in to submit a request." });
         return;
     }
+     if (!userData || !userData.subscription) {
+        toast({ variant: "destructive", title: "Error", description: "Could not find an active subscription to refund." });
+        return;
+    }
+    const tier = subscriptionTiers.find(t => t.id === userData.subscription?.tierId);
+    if (!tier) {
+        toast({ variant: "destructive", title: "Error", description: "Could not find subscription plan details." });
+        return;
+    }
     if (reason.trim().length < 10) {
         toast({ variant: "destructive", title: "Reason too short", description: "Please provide a more detailed reason for your request." });
         return;
@@ -57,17 +72,18 @@ export default function RequestRefundPage() {
         userEmail: user.email,
         userUsername: user.displayName,
         reason: reason,
+        amount: tier.price,
         status: 'pending' as 'pending',
         requestedAt: serverTimestamp(),
     };
 
-    const userDocRef = doc(firestore, 'users', user.uid);
+    const userDocForUpdateRef = doc(firestore, 'users', user.uid);
 
     // Use the non-blocking function and handle the result with .then() to manage UI state
     addDocumentNonBlocking(refundRef, newRefundRequest)
         .then(() => {
             // Also cancel their subscription upon successful refund request
-            updateDocumentNonBlocking(userDocRef, { subscription: null });
+            updateDocumentNonBlocking(userDocForUpdateRef, { subscription: null });
 
             toast({
                 title: "Request Submitted",
@@ -88,8 +104,8 @@ export default function RequestRefundPage() {
         });
   };
 
-  const isLoading = isUserLoading || isLoadingRequests;
-  const showForm = !hasPendingRequest && !isLoading;
+  const isLoading = isUserLoading || isLoadingRequests || isUserDataLoading;
+  const showForm = !hasPendingRequest && !isLoading && !!userData?.subscription;
 
   return (
     <div className="space-y-8 max-w-3xl">
