@@ -4,7 +4,7 @@
 import React, { useMemo, type ReactNode, useEffect, useState } from 'react';
 import { FirebaseProvider } from '@/firebase/provider';
 import { initializeFirebase } from '@/firebase';
-import { enableIndexedDbPersistence, doc, onSnapshot } from 'firebase/firestore';
+import { enableIndexedDbPersistence } from 'firebase/firestore';
 import { Loader2 } from 'lucide-react';
 
 interface FirebaseClientProviderProps {
@@ -29,27 +29,13 @@ export function FirebaseClientProvider({ children }: FirebaseClientProviderProps
           return;
         }
       }
-
-      // Perform a quick, non-blocking check to see if we can talk to the backend.
-      // This helps catch config errors early without blocking the UI for too long.
-      const testDoc = doc(firebaseServices.firestore, '_config/check');
-      const unsubscribe = onSnapshot(testDoc, 
-        () => {
-          // Success! We can connect.
-          setIsReady(true);
-          unsubscribe();
-        },
-        (err) => {
-           if (err.code === 'permission-denied') {
-             setError("Could not connect to the database. This is likely due to an invalid Firebase configuration. Please update `src/firebase/config.ts` with the correct values from your Firebase project.");
-           } else {
-             setError(`Could not connect to the database: ${err.message}. Please check your network connection and Firebase setup.`);
-           }
-          unsubscribe();
-        }
-      );
+      // The previous check against a Firestore document was unreliable due to security rules.
+      // We now assume the connection is ready after attempting to enable persistence.
+      // Actual connection errors will be caught by the components that use Firestore.
+      setIsReady(true);
     };
 
+    // Check for placeholder API key which indicates incomplete setup.
     if (firebaseServices.firestore.app.options.apiKey?.includes('REPLACE_WITH')) {
         setError("Your Firebase configuration in `src/firebase/config.ts` is incomplete. Please add the correct values from your project.");
     } else {
