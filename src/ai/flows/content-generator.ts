@@ -85,7 +85,7 @@ const contentGeneratorFlow = ai.defineFlow(
             }
             // This is a generic network error, check for it last.
             if (errorMessage.includes('Failed to fetch')) {
-                 return { error: 'Could not connect to the AI service. This may be due to a network issue or the Vertex AI API not being enabled on your Google Cloud project.' };
+                 return { error: 'Could not connect to the AI service. We have ruled out API and billing issues. This may be a network problem or an incorrect GEMINI_API_KEY. Please verify your key and network connection.' };
             }
 
             return { error: `An unexpected error occurred. Details: ${errorMessage.substring(0, 150)}...` };
