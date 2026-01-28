@@ -63,10 +63,8 @@ const contentGeneratorFlow = ai.defineFlow(
         } catch (e: any) {
             console.error('Content Generation Error:', e);
             const errorMessage = e.message || 'An unknown error occurred.';
-
-            if (errorMessage.includes('Failed to fetch')) {
-                 return { error: 'Could not connect to the AI service. This may be due to a network issue or the Vertex AI API not being enabled on your Google Cloud project.' };
-            }
+            
+            // Check for most specific errors first.
             if (errorMessage.includes('API key not valid')) {
                 return { error: 'The AI service is not configured correctly. Please ensure your GEMINI_API_KEY is valid.' };
             }
@@ -76,14 +74,18 @@ const contentGeneratorFlow = ai.defineFlow(
             if (errorMessage.includes('billing account')) {
                  return { error: 'A billing account is required to use this AI model. Please ensure billing is enabled for your Google Cloud project.' };
             }
-            if (errorMessage.includes('Request failed with status code 400')) {
-                return { error: 'The request to the AI service was malformed. This may be due to an invalid API key or a problem with the prompt.' };
+            if (errorMessage.includes('content was blocked')) {
+                return { error: 'The content could not be generated because the prompt was blocked by the safety filter. Please try a different prompt.' };
             }
             if (errorMessage.includes('404 Not Found') || errorMessage.includes('is not found for API version')) {
                 return { error: 'The selected AI model is not available for your account. This may be due to account status or regional restrictions.' };
             }
-             if (errorMessage.includes('content was blocked')) {
-                return { error: 'The content could not be generated because the prompt was blocked by the safety filter. Please try a different prompt.' };
+            if (errorMessage.includes('Request failed with status code 400')) {
+                return { error: 'The request to the AI service was malformed. This may be due to an invalid API key or a problem with the prompt.' };
+            }
+            // This is a generic network error, check for it last.
+            if (errorMessage.includes('Failed to fetch')) {
+                 return { error: 'Could not connect to the AI service. This may be due to a network issue or the Vertex AI API not being enabled on your Google Cloud project.' };
             }
 
             return { error: `An unexpected error occurred. Details: ${errorMessage.substring(0, 150)}...` };
