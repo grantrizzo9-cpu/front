@@ -34,6 +34,9 @@ const imageGeneratorFlow = ai.defineFlow(
         outputSchema: GenerateImageOutputSchema,
     },
     async (input): Promise<GenerateImageOutput> => {
+        if (!process.env.GEMINI_API_KEY) {
+            return { error: 'The GEMINI_API_KEY environment variable is not set. Please add it to your environment to use the AI Image Generator. You can get a key from Google AI Studio.' };
+        }
         try {
             const { media } = await ai.generate({
                 model: 'googleai/imagen-4.0-fast-generate-001',
@@ -50,10 +53,10 @@ const imageGeneratorFlow = ai.defineFlow(
             const errorMessage = e.message || 'An unknown error occurred.';
 
             if (errorMessage.includes('Failed to fetch')) {
-                 return { error: 'Could not connect to the AI service. This is often due to a missing GEMINI_API_KEY environment variable or the Vertex AI API not being enabled on your Google Cloud project.' };
+                 return { error: 'Could not connect to the AI service. This may be due to a network issue or the Vertex AI API not being enabled on your Google Cloud project.' };
             }
             if (errorMessage.includes('API key not valid')) {
-                return { error: 'The AI service is not configured correctly. Please ensure your GEMINI_API_KEY is set in your deployment environment and is valid.' };
+                return { error: 'The AI service is not configured correctly. Please ensure your GEMINI_API_KEY is valid.' };
             }
             if (errorMessage.includes('Vertex AI API has not been used') || errorMessage.includes('API is not enabled')) {
                  return { error: 'The Vertex AI API is not enabled for your project. Please enable it in your Google Cloud console to use the image generator.' };
@@ -75,4 +78,3 @@ const imageGeneratorFlow = ai.defineFlow(
         }
     }
 );
-
