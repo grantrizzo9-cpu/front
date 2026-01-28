@@ -44,10 +44,6 @@ export function SignupForm() {
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!firestore) {
-      toast({ variant: "destructive", title: "Signup Failed", description: "Database service is not available." });
-      return;
-    }
     setIsLoading(true);
 
     const formData = new FormData(event.currentTarget);
@@ -59,29 +55,12 @@ export function SignupForm() {
         let referrerId: string | null = null;
         const referrerUsername: string | null = referralCode || null;
 
-        // 1. Find referrer if one exists. This must happen before creating the user.
+        // 1. Find referrer if one exists. Assumes connection is ready due to FirebaseClientProvider.
         if (referrerUsername) {
             const referrerUsernameRef = doc(firestore, "usernames", referrerUsername);
-            let referrerUsernameSnap;
-            
-            // Retry logic to handle the "client is offline" race condition gracefully.
-            for (let i = 0; i < 3; i++) {
-              try {
-                referrerUsernameSnap = await getDoc(referrerUsernameRef);
-                break; // If getDoc succeeds, exit the loop.
-              } catch (e: any) {
-                // If it's a connection error and not the last attempt, wait and retry.
-                if (e.code === 'unavailable' && i < 2) {
-                  console.warn(`Referrer check failed (attempt ${i + 1}), retrying...`);
-                  await new Promise(res => setTimeout(res, 1500));
-                } else {
-                  // On the last attempt or for any other error, re-throw it.
-                  throw e;
-                }
-              }
-            }
+            const referrerUsernameSnap = await getDoc(referrerUsernameRef);
 
-            if (referrerUsernameSnap?.exists()) {
+            if (referrerUsernameSnap.exists()) {
                 referrerId = referrerUsernameSnap.data().uid;
             } else {
                 throw new Error(`Referrer with username "${referrerUsername}" not found. Please check the code and try again.`);
