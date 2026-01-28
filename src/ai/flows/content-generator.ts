@@ -62,8 +62,12 @@ const contentGeneratorFlow = ai.defineFlow(
             return { content: output.content };
         } catch (e: any) {
             console.error('Content Generation Error:', e);
-            // New simplified error handling. Show the raw error to the user for better debugging.
             const rawErrorMessage = e.message || 'An unknown error occurred.';
+
+            if (rawErrorMessage.includes("API is only accessible to billed users at this time")) {
+                 return { error: 'Content Generation Failed: This AI model requires a project with an active billing history. Please ensure your Google Cloud project\'s billing is fully enabled and has a payment history.' };
+            }
+
             return { error: `The connection to the AI service failed. This could be a network issue, an invalid API key, or a problem with your Google Cloud project setup. Please check your environment and configuration. Raw error: "${rawErrorMessage}"` };
         }
     }
