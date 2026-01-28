@@ -6,11 +6,11 @@
 // 4. Copy the values for apiKey, messagingSenderId, and appId and paste them below.
 
 export const firebaseConfig = {
-  apiKey: "REPLACE_WITH_YOUR_API_KEY",
+  apiKey: "AIzaSyCSp_3nPfU-VVdU4itDaIlwQztFgYrwrxM",
   authDomain: "affiliate-ai-host-new.firebaseapp.com",
   projectId: "affiliate-ai-host-new",
   storageBucket: "affiliate-ai-host-new.appspot.com",
-  messagingSenderId: "REPLACE_WITH_YOUR_MESSAGING_SENDER_ID",
-  appId: "REPLACE_WITH_YOUR_APP_ID",
+  messagingSenderId: "952747771167",
+  appId: "1:952747771167:web:98a340b20944ed8810dc2a",
   measurementId: "" // This can often be left blank
 };
