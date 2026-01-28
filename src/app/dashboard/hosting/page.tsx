@@ -9,7 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useUser, useFirestore, useDoc, useMemoFirebase, updateDocumentNonBlocking } from '@/firebase';
 import { doc } from 'firebase/firestore';
 import type { User as UserType } from '@/lib/types';
-import { Loader2, Globe, Info, CheckCircle, AlertTriangle, Search, ExternalLink, HelpCircle, ArrowRight } from 'lucide-react';
+import { Loader2, Globe, Info, CheckCircle, AlertTriangle, Search, ExternalLink, HelpCircle } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
@@ -123,7 +123,7 @@ export default function HostingPage() {
                          <CardTitle>Enter Your Domain</CardTitle>
                     </div>
                     <CardDescription>
-                        First, you need a domain name. If you don't have one, you can register one at a registrar like <a href="https://name.com" target="_blank" rel="noopener noreferrer" className="text-primary underline">Name.com</a>. Once you have your domain, enter it here.
+                       First, you need a domain name. You can forward it to your affiliate link or build a full website on it. If you don't have one, register one at a registrar like <a href="https://name.com" target="_blank" rel="noopener noreferrer" className="text-primary underline">Name.com</a>.
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -140,6 +140,12 @@ export default function HostingPage() {
                         </Button>
                     </div>
                 </CardContent>
+                 <CardFooter>
+                     <p className="text-xs text-muted-foreground">
+                         <strong>Option A (Simple):</strong> Set up "URL Forwarding" at your registrar to point your domain to your affiliate link. <br />
+                         <strong>Option B (Powerful):</strong> Follow the steps below to build a full website on your domain with our hosting.
+                     </p>
+                 </CardFooter>
             </Card>
 
             <Card className={!domainInput ? "opacity-50 pointer-events-none" : ""}>
@@ -185,11 +191,6 @@ export default function HostingPage() {
                         </AlertDescription>
                     </Alert>
                 </CardContent>
-                 <CardFooter>
-                     <p className="text-xs text-muted-foreground">
-                         <strong>Alternative:</strong> If you don't want to build a website and just want to forward your domain to your affiliate link, you can do this in your domain registrar's settings (look for "URL Forwarding").
-                     </p>
-                 </CardFooter>
             </Card>
 
             <Card>
@@ -254,6 +255,33 @@ export default function HostingPage() {
                                 );
                         }
                     })()}
+                </CardContent>
+            </Card>
+
+            <Card>
+                <CardHeader>
+                    <div className="flex items-center gap-3">
+                        <HelpCircle className="flex-shrink-0 w-8 h-8 text-amber-500" />
+                        <CardTitle>Troubleshooting & Support</CardTitle>
+                    </div>
+                    <CardDescription>
+                        Stuck with permission errors? Here are the most common causes and solutions.
+                    </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4 text-sm">
+                    <p>If you're seeing errors like "Error enabling API" or "You don't have permission", it's almost always an issue with your Google Cloud project setup, not the app's code.</p>
+                    <Separator />
+                    <h4 className="font-semibold">1. Check IAM "Owner" Role</h4>
+                    <p className="text-muted-foreground">You must have the <strong>Owner</strong> role in your Google Cloud project. You can verify this on the <a href={`https://console.cloud.google.com/iam-admin/iam?project=${firebaseConfig.projectId}`} target="_blank" rel="noopener noreferrer" className="text-primary underline">IAM page</a>.</p>
+                    <h4 className="font-semibold">2. Check Billing Account</h4>
+                    <p className="text-muted-foreground">Your project must be linked to an active billing account in good standing. Check for alerts on the <a href={`https://console.cloud.google.com/billing?project=${firebaseConfig.projectId}`} target="_blank" rel="noopener noreferrer" className="text-primary underline">Billing page</a>.</p>
+                    <h4 className="font-semibold">3. Still Stuck? Contact Support or Start Fresh</h4>
+                    <p className="text-muted-foreground">If the above are correct and you're still blocked, the project may be in a bad state.
+                        <ul className="list-disc pl-5 mt-2 space-y-1">
+                            <li>You can try contacting <a href="https://console.cloud.google.com/support/cases" target="_blank" rel="noopener noreferrer" className="text-primary underline">Google Cloud Support</a> (this may require a paid support plan).</li>
+                            <li><strong>Recommended:</strong> The fastest solution is often to create a <a href="https://console.cloud.google.com/projectcreate" target="_blank" rel="noopener noreferrer" className="text-primary underline">brand new Google Cloud project</a> and provide the new Project ID to us.</li>
+                        </ul>
+                    </p>
                 </CardContent>
             </Card>
         </div>
