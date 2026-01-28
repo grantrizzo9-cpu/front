@@ -14,6 +14,7 @@ import { Loader2, Users } from "lucide-react";
 import { useAuth, useFirestore, setDocumentNonBlocking } from "@/firebase";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { doc, serverTimestamp, Timestamp } from "firebase/firestore";
+import { firebaseConfig } from "@/firebase/config";
 
 export function SignupForm() {
   const router = useRouter();
@@ -110,7 +111,7 @@ export function SignupForm() {
                 break;
             case 'auth/configuration-not-found':
             case 'auth/api-key-not-valid':
-              description = "The Firebase configuration is invalid. Please follow the instructions on the page to fix it."
+              description = `The Firebase configuration is invalid. The API Key being used starts with: ${firebaseConfig.apiKey.substring(0, 10)}... Please follow the instructions on the page to fix it.`;
               break;
             default:
                 description = error.message || "An unknown error occurred while creating your account.";
