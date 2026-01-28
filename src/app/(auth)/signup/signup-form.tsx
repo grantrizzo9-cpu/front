@@ -71,15 +71,19 @@ export function SignupForm() {
                     throw new Error(`Referrer with username "${referrerUsername}" not found. Please check the code and try again.`);
                 }
             } catch (e: any) {
-                // Catch errors during the getDoc call (like the 'offline' error)
+                // Catch errors during the getDoc call (like the 'offline' or 'unavailable' error)
                 console.error("Error fetching referrer document:", e);
-                // Re-throw a user-friendly error to be caught by the outer catch block.
+                
                 let message = "Could not verify the referral code. Please check it and try again.";
-                if (e.message.includes("offline")) {
-                    message = "Could not connect to the database to verify the referral. Please check your network and try again."
+                
+                // Firestore error codes for connectivity issues
+                if (e.code === 'unavailable' || e.message.includes("client is offline")) {
+                    message = "Could not connect to the database to verify the referral. This can be a temporary issue. Please check your network and try again in a moment.";
                 } else if (e.message.includes("not found")) {
                     message = e.message;
                 }
+                
+                // Re-throw a user-friendly error to be caught by the outer catch block.
                 throw new Error(message);
             }
         }
