@@ -58,10 +58,7 @@ export function SignupForm() {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
 
-        // 2. Update user profile with username
-        await updateProfile(user, { displayName: username });
-
-        // 3. Create user document in Firestore.
+        // 2. Prepare user data and references for Firestore
         const userDocRef = doc(firestore, "users", user.uid);
         const plan = planId ? subscriptionTiers.find(p => p.id === planId) : null;
         
@@ -72,12 +69,12 @@ export function SignupForm() {
             id: user.uid,
             email: user.email,
             username: username,
-            referredBy: referrerUsername, // Store referrer's username directly
+            referredBy: referrerUsername,
             isAffiliate: true,
             createdAt: serverTimestamp(),
             subscription: plan ? {
                 tierId: plan.id,
-                status: 'active',
+                status: 'active' as const,
                 startDate: serverTimestamp(),
                 endDate: null,
                 trialEndDate: Timestamp.fromDate(trialEndDate),
@@ -85,16 +82,16 @@ export function SignupForm() {
             paypalEmail: '',
             customDomain: null
         };
-        await setDoc(userDocRef, userData);
-
-        // 4. Create the public username-to-UID mapping for the new user.
+        
         const usernameDocRef = doc(firestore, "usernames", username);
-        await setDoc(usernameDocRef, { uid: user.uid });
 
-        // NOTE: The creation of the 'referral' document in the affiliate's subcollection
-        // is now handled by a backend process (e.g., a Cloud Function).
-        // This decouples the accounting logic from the user-facing signup,
-        // making the process faster and more resilient to network issues.
+        // 3. Run all subsequent setup operations concurrently to speed up the process.
+        // This makes the signup feel much faster for the user.
+        await Promise.all([
+          updateProfile(user, { displayName: username }),
+          setDoc(userDocRef, userData),
+          setDoc(usernameDocRef, { uid: user.uid })
+        ]);
 
         toast({
           title: "Account Created!",
