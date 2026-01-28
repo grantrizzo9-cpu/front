@@ -66,8 +66,12 @@ export default function HostingPage() {
             name: domainInput,
             status: 'pending' as const,
         };
-        updateDocumentNonBlocking(userDocRef, { customDomain: newDomainData });
+
+        // Immediately update the local UI state for instant feedback
         setLocalDomainStatus('pending');
+        
+        // Update Firestore in the background
+        updateDocumentNonBlocking(userDocRef, { customDomain: newDomainData });
         
         setTimeout(() => {
             toast({
@@ -81,6 +85,8 @@ export default function HostingPage() {
     const handleVerifyDomain = () => {
         if (!userDocRef) return;
         setIsVerifying(true);
+        // In a real app, you would trigger a backend check.
+        // Here, we simulate the verification process.
         setTimeout(() => {
             updateDocumentNonBlocking(userDocRef, { 'customDomain.status': 'connected' });
             setLocalDomainStatus('connected');
@@ -184,10 +190,10 @@ export default function HostingPage() {
                                 Enter your domain name (<code>{domainInput || 'your-domain.com'}</code>) and follow the setup wizard.
                             </li>
                             <li>
-                                Firebase will display the exact DNS records required (usually two 'A' records).
+                                Firebase will display the exact DNS records required (usually one or two 'A' records and a 'TXT' record).
                             </li>
                             <li>
-                                Copy these values and add them to the DNS settings in your Name.com account. You must remove any other conflicting 'A' records.
+                                Copy these values and add them to the DNS settings at your domain registrar (e.g., Name.com). You must remove any other conflicting 'A' records.
                             </li>
                         </ol>
                     </div>
@@ -268,5 +274,3 @@ export default function HostingPage() {
         </div>
     );
 }
-
-    
