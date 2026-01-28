@@ -10,10 +10,13 @@ export function Footer() {
 
   const getLinkWithRef = (baseHref: string) => {
     if (baseHref.startsWith('/#')) return baseHref;
-    if (refCode) {
-      return `${baseHref}?ref=${refCode}`;
+    if (!refCode) {
+      return baseHref;
     }
-    return baseHref;
+    // Use URL to handle existing search params robustly
+    const url = new URL(baseHref, 'http://dummybase.com'); // A dummy base is required to construct the URL object
+    url.searchParams.set('ref', refCode);
+    return `${url.pathname}${url.search}`;
   };
 
   const footerLinks = {
