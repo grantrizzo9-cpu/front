@@ -2,32 +2,38 @@
 
 import { firebaseConfig } from '@/firebase/config';
 import { initializeApp, getApps, getApp, FirebaseApp } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
+import { getAuth, Auth } from 'firebase/auth';
 import { initializeFirestore, persistentLocalCache, getFirestore, Firestore } from 'firebase/firestore';
 
+function getServices() {
+    const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+    const auth = getAuth(app);
+    let firestore: Firestore;
+
+    // This check is crucial for Next.js Fast Refresh (HMR).
+    // It caches the Firestore instance on the window object to prevent re-initialization.
+    if (typeof window !== 'undefined') {
+        if (!(window as any)._firestoreInstance) {
+            (window as any)._firestoreInstance = initializeFirestore(app, {
+                localCache: persistentLocalCache()
+            });
+        }
+        firestore = (window as any)._firestoreInstance;
+    } else {
+        // Fallback for non-browser environments (less likely with 'use client' but safe).
+        firestore = getFirestore(app);
+    }
+    
+    return { app, auth, firestore };
+}
+
+const { app, auth, firestore } = getServices();
+
 /**
- * Initializes and returns the Firebase services.
- * This function is structured to handle Next.js's Fast Refresh feature in development,
- * preventing the "already initialized" error by checking if services already exist.
+ * Returns the initialized Firebase services.
+ * This function now safely returns the cached instances, preventing HMR-related crashes.
  */
 export function initializeFirebase() {
-  const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
-  
-  let firestore: Firestore;
-  try {
-    // Attempt to initialize Firestore with offline persistence.
-    // This may throw an error during hot-reloads in development if it's already initialized.
-    firestore = initializeFirestore(app, {
-      localCache: persistentLocalCache(),
-    });
-  } catch (e: any) {
-    // In case of an error (like during a hot-reload), we fall back to getting the
-    // already-initialized instance. This prevents the app from crashing.
-    firestore = getFirestore(app);
-  }
-  
-  const auth = getAuth(app);
-
   return {
     firebaseApp: app,
     auth,
