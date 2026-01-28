@@ -28,7 +28,8 @@ import {
   ShieldCheck,
   BookOpen,
   Globe,
-  Image as ImageIcon,
+  ImageIcon,
+  Clapperboard,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -64,6 +65,7 @@ export function DashboardSidebar() {
     { path: "/dashboard/hosting", icon: <Globe />, label: "Hosting" },
     { path: "/dashboard/ai-tools", icon: <BrainCircuit />, label: "AI Content" },
     { path: "/dashboard/ai-image", icon: <ImageIcon />, label: "AI Image" },
+    { path: "/dashboard/ai-video", icon: <Clapperboard />, label: "AI Video" },
     { path: "/dashboard/guides", icon: <BookOpen />, label: "Marketing Guides" },
     { path: "/dashboard/upgrade", icon: <UploadCloud />, label: "Upgrade" },
     { path: "/dashboard/referrals", icon: <Users />, label: "Referrals" },
