@@ -3,7 +3,7 @@
 import { firebaseConfig } from '@/firebase/config';
 import { initializeApp, getApps, getApp, FirebaseApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
-import { initializeFirestore, persistentLocalCache } from 'firebase/firestore';
+import { initializeFirestore, persistentLocalCache, getFirestore, Firestore } from 'firebase/firestore';
 
 // IMPORTANT: DO NOT MODIFY THIS FUNCTION
 export function initializeFirebase() {
@@ -18,11 +18,23 @@ export function initializeFirebase() {
 }
 
 export function getSdks(firebaseApp: FirebaseApp) {
-  // Initialize Firestore with offline persistence enabled.
-  // This helps mitigate race conditions on initial load.
-  const firestore = initializeFirestore(firebaseApp, {
-    localCache: persistentLocalCache(),
-  });
+  let firestore: Firestore;
+  try {
+    // Initialize Firestore with offline persistence enabled.
+    // This helps mitigate race conditions on initial load.
+    firestore = initializeFirestore(firebaseApp, {
+      localCache: persistentLocalCache(),
+    });
+  } catch (e: any) {
+    // If it's already initialized (which can happen with HMR),
+    // just get the existing instance.
+    if (e.code === 'failed-precondition') {
+      firestore = getFirestore(firebaseApp);
+    } else {
+      // Re-throw other errors
+      throw e;
+    }
+  }
   
   return {
     firebaseApp,
