@@ -11,9 +11,9 @@ import { useToast } from "@/hooks/use-toast";
 import { subscriptionTiers } from "@/lib/data";
 import { useEffect, useState } from "react";
 import { Loader2, Users } from "lucide-react";
-import { useAuth, useFirestore } from "@/firebase";
+import { useAuth, useFirestore, setDocumentNonBlocking } from "@/firebase";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
-import { doc, serverTimestamp, setDoc, Timestamp } from "firebase/firestore";
+import { doc, serverTimestamp, Timestamp } from "firebase/firestore";
 
 export function SignupForm() {
   const router = useRouter();
@@ -54,11 +54,19 @@ export function SignupForm() {
     try {
         const referrerUsername: string | null = referralCode || null;
 
-        // 1. Create user in Firebase Auth
+        // 1. Create user in Firebase Auth. This is the only operation we wait for.
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
 
-        // 2. Prepare user data and references for Firestore
+        // 2. Immediately toast and redirect for a snappy user experience.
+        toast({
+          title: "Account Created!",
+          description: "Setting up your account and redirecting...",
+        });
+        router.push("/dashboard");
+
+        // 3. Prepare user data and run all subsequent database operations
+        // in the background without blocking the UI.
         const userDocRef = doc(firestore, "users", user.uid);
         const plan = planId ? subscriptionTiers.find(p => p.id === planId) : null;
         
@@ -85,19 +93,10 @@ export function SignupForm() {
         
         const usernameDocRef = doc(firestore, "usernames", username);
 
-        // 3. Run all subsequent setup operations concurrently to speed up the process.
-        // This makes the signup feel much faster for the user.
-        await Promise.all([
-          updateProfile(user, { displayName: username }),
-          setDoc(userDocRef, userData),
-          setDoc(usernameDocRef, { uid: user.uid })
-        ]);
-
-        toast({
-          title: "Account Created!",
-          description: "Redirecting to your dashboard...",
-        });
-        router.push("/dashboard");
+        // These non-blocking operations run in the background. The user is already on their way to the dashboard.
+        updateProfile(user, { displayName: username }).catch(e => console.error("Failed to update auth profile:", e));
+        setDocumentNonBlocking(userDocRef, userData, {});
+        setDocumentNonBlocking(usernameDocRef, { uid: user.uid }, {});
 
     } catch (error: any) {
         let description;
@@ -123,6 +122,8 @@ export function SignupForm() {
             description: description,
         });
     } finally {
+        // We set isLoading to false immediately in the catch block, but if successful,
+        // the user will have navigated away, so this won't be visible.
         setIsLoading(false);
     }
   };
