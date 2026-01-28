@@ -114,7 +114,7 @@ export default function HostingPage() {
                          <CardTitle>Enter Your Domain</CardTitle>
                     </div>
                     <CardDescription>
-                       First, you need a domain name. You can buy one from any registrar, like <a href="https://name.com" target="_blank" rel="noopener noreferrer" className="text-primary underline">Name.com</a> or Google Domains.
+                       Enter the domain name you own. You can buy one from any registrar, like <a href="https://name.com" target="_blank" rel="noopener noreferrer" className="text-primary underline">Name.com</a> or Google Domains.
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -137,44 +137,61 @@ export default function HostingPage() {
                 <CardHeader>
                     <div className="flex items-center gap-3">
                          <div className="flex-shrink-0 w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-bold">2</div>
-                         <CardTitle>Configure DNS in the Firebase Console</CardTitle>
+                         <CardTitle>Connect Your Domain in Firebase</CardTitle>
                     </div>
                     <CardDescription>
-                       This is the most important step. You must add your domain in the Firebase Console to get your unique verification records.
+                       Follow the setup wizard in the Firebase Console. This is a two-part process: first verifying ownership, then going live.
                     </CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                    <h3 className="font-semibold">Instructions:</h3>
-                    <ol className="list-decimal list-inside space-y-3 text-sm text-muted-foreground">
-                        <li>
-                            Click this link to open the Firebase Console for your project: <a href={firebaseConsoleUrl} target="_blank" rel="noopener noreferrer" className="text-primary underline font-semibold">Open Firebase Hosting</a>.
-                        </li>
-                        <li>
-                            Click the <strong>"Add custom domain"</strong> button.
-                        </li>
-                        <li>
-                            Enter your domain name (<code>{domainInput || 'your-domain.com'}</code>) and follow the setup wizard.
-                        </li>
-                        <li>
-                           Firebase will give you one or more <strong>TXT records</strong> to prove you own the domain. Copy these values exactly.
-                        </li>
-                        <li>
-                            Go to your domain registrar (e.g., Name.com) and add **all** of the TXT records provided by Firebase to your domain's DNS settings.
-                        </li>
-                         <li>
-                            One record proves you want to use Firebase Hosting (e.g., `hosting-site=...`). Another may be required for your SSL certificate (e.g., `_acme-challenge...`).
-                        </li>
-                         <li>
-                            After adding the records, return to the Firebase console. It will automatically detect the changes and verify your domain.
-                        </li>
-                    </ol>
-                     <Alert variant="destructive" className="mt-4">
-                        <AlertTriangle className="h-4 w-4" />
-                        <AlertTitle>Critical Step!</AlertTitle>
-                        <AlertDescription>
-                            You must use the exact TXT record values provided by Firebase in the console. Using incorrect values is the main cause of connection issues.
-                        </AlertDescription>
-                    </Alert>
+                <CardContent className="space-y-6">
+                    <div className="space-y-4">
+                        <h3 className="font-semibold">Step 2A: Verify Domain Ownership (TXT Record)</h3>
+                        <ol className="list-decimal list-inside space-y-3 text-sm text-muted-foreground">
+                            <li>
+                                Click this link and click <strong>"Add custom domain"</strong>: <a href={firebaseConsoleUrl} target="_blank" rel="noopener noreferrer" className="text-primary underline font-semibold">Open Firebase Hosting</a>.
+                            </li>
+                            <li>
+                                Enter your domain name (<code>{domainInput || 'your-domain.com'}</code>). Firebase will show you a **TXT record** (e.g., `hosting-site=...`). Copy this value.
+                            </li>
+                            <li>
+                                In your domain registrar (e.g., Namecheap), create a new **TXT record** for your main domain (use `@` for the host).
+                            </li>
+                            <li>
+                                Paste the value you copied from Firebase into the record's "Value" field and save.
+                            </li>
+                            <li>
+                                Wait a few minutes for the record to update online, then return to the Firebase Console and click **"Verify"**.
+                            </li>
+                        </ol>
+                         <Alert>
+                            <Info className="h-4 w-4" />
+                            <AlertTitle>This is the Most Common Sticking Point!</AlertTitle>
+                            <AlertDescription>
+                                If verification fails, wait a little longer. DNS changes can sometimes take up to an hour to propagate across the internet.
+                            </AlertDescription>
+                        </Alert>
+                    </div>
+
+                    <div className="space-y-4 pt-4 border-t">
+                        <h3 className="font-semibold">Step 2B: Go Live (A Records)</h3>
+                        <ol className="list-decimal list-inside space-y-3 text-sm text-muted-foreground">
+                             <li>
+                                After your domain is verified, the Firebase Console will show you **two `A` records**. These are IP addresses that point to your website.
+                            </li>
+                            <li>
+                                Go back to your domain registrar's DNS settings.
+                            </li>
+                            <li>
+                                **Delete** any existing `A` records for your main domain (`@`).
+                            </li>
+                            <li>
+                                Create **two new `A` records**, one for each IP address that Firebase provided. The host for both should be `@`.
+                            </li>
+                            <li>
+                                Once you save these, Firebase will begin provisioning an SSL certificate. Your site will be live at your custom domain once this is complete.
+                            </li>
+                        </ol>
+                    </div>
                 </CardContent>
             </Card>
 
@@ -182,10 +199,10 @@ export default function HostingPage() {
                  <CardHeader>
                     <div className="flex items-center gap-3">
                          <div className="flex-shrink-0 w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-bold">3</div>
-                         <CardTitle>Final Verification</CardTitle>
+                         <CardTitle>Final Status</CardTitle>
                     </div>
                     <CardDescription>
-                        After you've added the DNS records, it can take up to 24 hours to "propagate" across the internet. Once Firebase verifies ownership, it will automatically provision an SSL certificate and your site will be live.
+                        This status reflects the information saved in our app. For live status, always check the Firebase Console.
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="flex flex-col items-center justify-center text-center gap-4 py-8">
@@ -244,5 +261,7 @@ export default function HostingPage() {
             </Card>
         </div>
     );
+
+    
 
     
