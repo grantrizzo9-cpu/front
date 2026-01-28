@@ -269,11 +269,11 @@ export default function HostingPage() {
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4 text-sm">
-                    <p>If you're seeing errors like "Error enabling API" or "You don't have permission", it's almost always an issue with your Google Cloud project setup, not the app's code.</p>
+                    <p>If you're seeing errors like "Signup Failed" or "You don't have permission", it's almost always an issue with your Google Cloud project setup, not the app's code.</p>
                     <Separator />
-                    <h4 className="font-semibold">1. Check IAM "Owner" Role</h4>
-                    <p className="text-muted-foreground">You must have the <strong>Owner</strong> role in your Google Cloud project. You can verify this on the <a href={`https://console.cloud.google.com/iam-admin/iam?project=${firebaseConfig.projectId}`} target="_blank" rel="noopener noreferrer" className="text-primary underline">IAM page</a>.</p>
-                    <h4 className="font-semibold">2. Check Billing Account</h4>
+                    <h4 className="font-semibold">1. You Must Be The Project Owner</h4>
+                    <p className="text-muted-foreground">The Google account you use to sign up for this app **must** also have the `Owner` role in your Google Cloud project. If another account is the owner, you must add your current user as an Owner on the <a href={`https://console.cloud.google.com/iam-admin/iam?project=${firebaseConfig.projectId}`} target="_blank" rel="noopener noreferrer" className="text-primary underline">IAM page</a> before you can proceed.</p>
+                    <h4 className="font-semibold">2. Check Your Billing Account</h4>
                     <p className="text-muted-foreground">Your project must be linked to an active billing account in good standing. Check for alerts on the <a href={`https://console.cloud.google.com/billing?project=${firebaseConfig.projectId}`} target="_blank" rel="noopener noreferrer" className="text-primary underline">Billing page</a>.</p>
                     <h4 className="font-semibold">3. Still Stuck? Contact Support or Start Fresh</h4>
                     <p className="text-muted-foreground">If the above are correct and you're still blocked, the project may be in a bad state.
