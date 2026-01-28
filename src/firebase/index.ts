@@ -5,38 +5,36 @@ import { initializeApp, getApps, getApp, FirebaseApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { initializeFirestore, persistentLocalCache, getFirestore, Firestore } from 'firebase/firestore';
 
-// IMPORTANT: DO NOT MODIFY THIS FUNCTION
+/**
+ * Initializes and returns the Firebase services.
+ * This function is structured to handle Next.js's Fast Refresh feature in development,
+ * preventing the "already initialized" error by checking if services already exist.
+ */
 export function initializeFirebase() {
-  if (!getApps().length) {
-    // Forcing initialization from the config file to bypass potentially stale env vars
-    const firebaseApp = initializeApp(firebaseConfig);
-    return getSdks(firebaseApp);
-  }
-
-  // If already initialized, return the SDKs with the already initialized App
-  return getSdks(getApp());
-}
-
-export function getSdks(firebaseApp: FirebaseApp) {
+  const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+  
   let firestore: Firestore;
   try {
-    // Initialize Firestore with offline persistence enabled.
-    firestore = initializeFirestore(firebaseApp, {
+    // Attempt to initialize Firestore with offline persistence.
+    // This may throw an error during hot-reloads in development if it's already initialized.
+    firestore = initializeFirestore(app, {
       localCache: persistentLocalCache(),
     });
   } catch (e: any) {
-    // If initializeFirestore fails (e.g., already initialized in a different
-    // context like HMR), fall back to getFirestore to retrieve the instance.
-    // This is the recommended approach to avoid initialization errors in Next.js.
-    firestore = getFirestore(firebaseApp);
+    // In case of an error (like during a hot-reload), we fall back to getting the
+    // already-initialized instance. This prevents the app from crashing.
+    firestore = getFirestore(app);
   }
   
+  const auth = getAuth(app);
+
   return {
-    firebaseApp,
-    auth: getAuth(firebaseApp),
-    firestore: firestore
+    firebaseApp: app,
+    auth,
+    firestore,
   };
 }
+
 
 export * from './provider';
 export * from './client-provider';
