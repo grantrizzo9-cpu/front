@@ -9,7 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useUser, useFirestore, useDoc, useMemoFirebase, updateDocumentNonBlocking } from '@/firebase';
 import { doc } from 'firebase/firestore';
 import type { User as UserType } from '@/lib/types';
-import { Loader2, Globe, Info, CheckCircle, AlertTriangle, Search, ExternalLink, HelpCircle } from 'lucide-react';
+import { Loader2, Globe, Info, CheckCircle, AlertTriangle, Search, ExternalLink, HelpCircle, ArrowRight } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
@@ -76,7 +76,7 @@ export default function HostingPage() {
         setTimeout(() => {
             toast({
                 title: 'Domain Saved',
-                description: `Your domain ${domainInput} is now pending verification. Follow Step 2 below.`,
+                description: `Your domain ${domainInput} is now pending verification. Follow the steps below.`,
             });
             setIsSaving(false);
         }, 1000);
@@ -159,8 +159,41 @@ export default function HostingPage() {
             <Card>
                 <CardHeader>
                     <div className="flex items-center gap-3">
+                         <div className="flex-shrink-0 w-8 h-8 bg-accent text-accent-foreground rounded-full flex items-center justify-center font-bold">?</div>
+                         <CardTitle>What Do You Want to Do With Your Domain?</CardTitle>
+                    </div>
+                    <CardDescription>
+                       You have two main options for using your new domain for affiliate marketing. Read below to decide which is right for you.
+                    </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                    <div>
+                        <h3 className="font-semibold mb-2 flex items-center gap-2"><ArrowRight className="text-primary"/> Option 1: Build a Custom Website (Recommended)</h3>
+                        <p className="text-sm text-muted-foreground ml-7">
+                            Use your domain to build a unique website (e.g., a blog, a review site). You can then place your affiliate link on this site. This is the most professional approach and gives you more credibility.
+                        </p>
+                        <p className="text-sm text-muted-foreground ml-7 mt-2">
+                            <strong>To do this, follow Steps 2 and 3 below.</strong>
+                        </p>
+                    </div>
+                     <Separator />
+                     <div>
+                        <h3 className="font-semibold mb-2 flex items-center gap-2"><ArrowRight className="text-primary"/> Option 2: Forward Your Domain to Your Affiliate Link</h3>
+                         <p className="text-sm text-muted-foreground ml-7">
+                            This is a simpler option. Anyone who types your domain name (<code>{domainInput || 'your-awesome-site.com'}</code>) into their browser will be instantly redirected to your affiliate link. You don't need to build a website.
+                        </p>
+                         <p className="text-sm text-muted-foreground ml-7 mt-2">
+                            <strong>How to do this:</strong> This is configured at your domain registrar (like Name.com), not here. Log in to your Name.com account, find your domain, and look for an option called "URL Forwarding" or "Domain Forwarding". Set it to forward to your affiliate link: <code>https://affiliateai.host/?ref={userData?.username || '...'}</code>.
+                        </p>
+                    </div>
+                </CardContent>
+            </Card>
+
+            <Card>
+                <CardHeader>
+                    <div className="flex items-center gap-3">
                          <div className="flex-shrink-0 w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-bold">2</div>
-                         <CardTitle>Point Your Domain to Our Cloud Servers (DNS)</CardTitle>
+                         <CardTitle>For Option 1: Point Your Domain to Our Cloud Servers (DNS)</CardTitle>
                     </div>
                     <CardDescription>
                        This is the most critical step. You must get the correct, unique DNS records from your Firebase project and add them to your domain registrar (e.g., Name.com).
@@ -211,7 +244,7 @@ export default function HostingPage() {
                  <CardHeader>
                     <div className="flex items-center gap-3">
                          <div className="flex-shrink-0 w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-bold">3</div>
-                         <CardTitle>Verification and Connection</CardTitle>
+                         <CardTitle>For Option 1: Verification and Connection</CardTitle>
                     </div>
                     <CardDescription>
                         Once you've saved the correct DNS records, our system will check for them. This "propagation," can take up to 24 hours.
