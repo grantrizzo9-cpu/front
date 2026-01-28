@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -96,6 +97,9 @@ export default function AiToolsPage() {
                       <SelectItem value="social-media-post">Social Media Post</SelectItem>
                       <SelectItem value="product-description">Product Description</SelectItem>
                       <SelectItem value="email-subject-line">Email Subject Line</SelectItem>
+                      <SelectItem value="welcome-email">Welcome Email</SelectItem>
+                      <SelectItem value="promotional-email">Promotional Email</SelectItem>
+                      <SelectItem value="follow-up-email">Follow-up Email</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
