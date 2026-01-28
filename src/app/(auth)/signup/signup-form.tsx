@@ -103,20 +103,23 @@ export function SignupForm() {
         router.push("/dashboard");
 
     } catch (error: any) {
-        let description = "An unknown error occurred while creating your account.";
+        let description;
         
-        if (error.code === 'auth/email-already-in-use') {
-            description = "This email address is already in use. Please log in or use a different email.";
-        } else if (error.code === 'auth/weak-password') {
-            description = "The password is too weak. Please use at least 6 characters.";
-        } else if (error.code === 'auth/configuration-not-found' || error.code === 'auth/api-key-not-valid') {
-          description = "The Firebase configuration is invalid. Please follow the instructions on the page to fix it."
-        } else if (error.code === 'unavailable') {
-            description = "A temporary network issue occurred. Please check your connection and try again in a moment.";
+        switch (error.code) {
+            case 'auth/email-already-in-use':
+                description = "This email address is already in use. Please log in or use a different email.";
+                break;
+            case 'auth/weak-password':
+                description = "The password is too weak. Please use at least 6 characters.";
+                break;
+            case 'auth/configuration-not-found':
+            case 'auth/api-key-not-valid':
+              description = "The Firebase configuration is invalid. Please follow the instructions on the page to fix it."
+              break;
+            default:
+                description = error.message || "An unknown error occurred while creating your account.";
         }
-        else if (error.message) {
-            description = error.message;
-        }
+
         toast({
             variant: "destructive",
             title: "Signup Failed",
