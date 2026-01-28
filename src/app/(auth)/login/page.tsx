@@ -12,7 +12,6 @@ import { useAuth } from "@/firebase";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { useState, useEffect } from "react";
 import { Loader2, AlertTriangle } from "lucide-react";
-import { firebaseConfig } from "@/firebase/config";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function LoginPage() {
@@ -21,13 +20,9 @@ export default function LoginPage() {
   const auth = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [isClientReady, setIsClientReady] = useState(false);
-  const [showConfigError, setShowConfigError] = useState(false);
 
   useEffect(() => {
     // This effect runs only on the client, after initial mount.
-    if (firebaseConfig.apiKey.startsWith("REPLACE_WITH")) {
-      setShowConfigError(true);
-    }
     setIsClientReady(true);
   }, []);
 
@@ -92,42 +87,14 @@ export default function LoginPage() {
         </Card>
     );
   }
-  
-  // After the client is ready, check if we need to show the config error.
-  if (showConfigError) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="font-headline text-2xl flex items-center gap-2">
-            <AlertTriangle className="text-destructive" />
-            Firebase Not Configured
-          </CardTitle>
-          <CardDescription>
-            The application is not connected to Firebase. Please follow the instructions
-            in the code file below to resolve this issue.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4 bg-muted/50 p-4 rounded-lg">
-            <p className="text-sm font-semibold">Action Required:</p>
-            <p className="text-sm">
-                1. Open the file: <code className="bg-background p-1 rounded">src/firebase/config.ts</code>
-            </p>
-            <p className="text-sm">
-                2. Follow the instructions in the comments at the top of the file to add your
-                   Firebase project configuration for project 'rent-a-host-96880149'.
-            </p>
-        </CardContent>
-      </Card>
-    );
-  }
 
-  // If the client is ready and there's no config error, show the real login form.
+  // If the client is ready, show the real login form.
   return (
     <Card>
       <CardHeader>
         <CardTitle className="font-headline text-2xl">Welcome Back</CardTitle>
         <CardDescription>Enter your credentials to access your dashboard.</CardDescription>
-      </Header>
+      </CardHeader>
       <CardContent>
         <form className="space-y-4" onSubmit={handleSubmit}>
           <div className="space-y-2">
