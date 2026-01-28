@@ -107,14 +107,6 @@ export default function HostingPage() {
                 <p className="text-muted-foreground">Connect your custom domain to build a professional affiliate website.</p>
             </div>
 
-            <Alert>
-                <Info className="h-4 w-4" />
-                <AlertTitle>Seeing a "Site Not Found" error on your domain?</AlertTitle>
-                <AlertDescription>
-                    This is a normal part of the setup process! It means your domain is pointing to Firebase, but you haven't finished the configuration inside the Firebase Console yet. <strong>Follow Step 2 carefully to fix this.</strong>
-                </AlertDescription>
-            </Alert>
-            
             <Card>
                 <CardHeader>
                     <div className="flex items-center gap-3">
@@ -122,7 +114,7 @@ export default function HostingPage() {
                          <CardTitle>Enter Your Domain</CardTitle>
                     </div>
                     <CardDescription>
-                       First, you need a domain name. You can forward it to your affiliate link or build a full website on it. If you don't have one, register one at a registrar like <a href="https://name.com" target="_blank" rel="noopener noreferrer" className="text-primary underline">Name.com</a>.
+                       First, you need a domain name. You can buy one from any registrar, like <a href="https://name.com" target="_blank" rel="noopener noreferrer" className="text-primary underline">Name.com</a> or Google Domains.
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -139,12 +131,6 @@ export default function HostingPage() {
                         </Button>
                     </div>
                 </CardContent>
-                 <CardFooter>
-                     <p className="text-xs text-muted-foreground">
-                         <strong>Option A (Simple):</strong> Set up "URL Forwarding" at your registrar to point your domain to your affiliate link. <br />
-                         <strong>Option B (Powerful):</strong> Follow the steps below to build a full website on your domain with our hosting.
-                     </p>
-                 </CardFooter>
             </Card>
 
             <Card className={!domainInput ? "opacity-50 pointer-events-none" : ""}>
@@ -154,7 +140,7 @@ export default function HostingPage() {
                          <CardTitle>Configure DNS in the Firebase Console</CardTitle>
                     </div>
                     <CardDescription>
-                       This is the most important step to fix the "Site Not Found" error. You must add your domain in the Firebase Console to get your unique verification and DNS records.
+                       This is the most important step. You must add your domain in the Firebase Console to get your unique verification records.
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -167,26 +153,26 @@ export default function HostingPage() {
                             Click the <strong>"Add custom domain"</strong> button.
                         </li>
                         <li>
-                            Enter your domain name (<code>{domainInput || 'your-domain.com'}</code>) in the wizard.
+                            Enter your domain name (<code>{domainInput || 'your-domain.com'}</code>) and follow the setup wizard.
                         </li>
                         <li>
-                           Firebase will give you a <strong>TXT record</strong> for verification. Copy this value.
+                           Firebase will give you one or more <strong>TXT records</strong> to prove you own the domain. Copy these values exactly.
                         </li>
                         <li>
-                            Go to your domain registrar (e.g., Name.com) and add this TXT record to your domain's DNS settings.
+                            Go to your domain registrar (e.g., Name.com) and add **all** of the TXT records provided by Firebase to your domain's DNS settings.
                         </li>
                          <li>
-                            Once Firebase verifies the TXT record (this can take a few minutes to a few hours), it will show you the <strong>A records</strong> you need.
+                            One record proves you want to use Firebase Hosting (e.g., `hosting-site=...`). Another may be required for your SSL certificate (e.g., `_acme-challenge...`).
                         </li>
                          <li>
-                            Go back to your registrar and add the two A records provided by Firebase. Make sure to remove any other A records to avoid conflicts.
+                            After adding the records, return to the Firebase console. It will automatically detect the changes and verify your domain.
                         </li>
                     </ol>
                      <Alert variant="destructive" className="mt-4">
                         <AlertTriangle className="h-4 w-4" />
                         <AlertTitle>Critical Step!</AlertTitle>
                         <AlertDescription>
-                            You must use the exact record values provided by Firebase in the console. Using incorrect values is the main cause of connection issues.
+                            You must use the exact TXT record values provided by Firebase in the console. Using incorrect values is the main cause of connection issues.
                         </AlertDescription>
                     </Alert>
                 </CardContent>
@@ -199,7 +185,7 @@ export default function HostingPage() {
                          <CardTitle>Final Verification</CardTitle>
                     </div>
                     <CardDescription>
-                        After you've added the DNS records at your registrar, it can take up to 24 hours for them to "propagate" across the internet. Once complete, your site will be live.
+                        After you've added the DNS records, it can take up to 24 hours to "propagate" across the internet. Once Firebase verifies ownership, it will automatically provision an SSL certificate and your site will be live.
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="flex flex-col items-center justify-center text-center gap-4 py-8">
@@ -211,7 +197,7 @@ export default function HostingPage() {
                                     <>
                                         <Badge className="bg-amber-500 text-white hover:bg-amber-500">Pending Verification</Badge>
                                         <p className="text-sm text-muted-foreground max-w-sm">
-                                            The system is waiting for you to complete the DNS setup in the Firebase Console and at your domain registrar.
+                                            The system is waiting for your DNS records to be verified by Firebase. Check the Firebase Console for the live status.
                                         </p>
                                          <Button onClick={handleVerifyDomain} disabled={isVerifying}>
                                             {isVerifying ? <Loader2 className="animate-spin mr-2" /> : <Search className="mr-2" />}
@@ -258,4 +244,5 @@ export default function HostingPage() {
             </Card>
         </div>
     );
-}
+
+    
