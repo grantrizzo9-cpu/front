@@ -46,8 +46,7 @@ export default function HostingPage() {
 
     const isLoading = isUserLoading || isUserDataLoading;
 
-    // TODO: Replace with your actual Name.com affiliate link
-    const namecomAffiliateLink = "https://www.name.com/?ref=YOUR_USERNAME";
+    const firebaseConsoleUrl = `https://console.firebase.google.com/project/${firebaseConfig.projectId}/hosting/custom-domains`;
 
     const handleSaveDomain = () => {
         if (!userDocRef || !domainInput) return;
@@ -67,10 +66,8 @@ export default function HostingPage() {
             status: 'pending' as const,
         };
 
-        // Immediately update the local UI state for instant feedback
         setLocalDomainStatus('pending');
         
-        // Update Firestore in the background
         updateDocumentNonBlocking(userDocRef, { customDomain: newDomainData });
         
         setTimeout(() => {
@@ -85,21 +82,16 @@ export default function HostingPage() {
     const handleVerifyDomain = () => {
         if (!userDocRef) return;
         setIsVerifying(true);
-        // In a real app, you would trigger a backend check.
-        // Here, we simulate the verification process.
         setTimeout(() => {
-            updateDocumentNonBlocking(userDocRef, { 'customDomain.status': 'connected' });
-            setLocalDomainStatus('connected');
+            // In a real app, this would re-fetch status from a backend that checks DNS.
+            // For now, we simulate a successful check. The user must manually verify in the Firebase Console.
             setIsVerifying(false);
             toast({
-                title: 'Domain Connected!',
-                description: 'Your domain is now live.',
-                className: 'bg-green-500 border-green-500 text-white dark:bg-green-600 dark:border-green-600',
+                title: 'Verification Status',
+                description: 'Please check the Firebase Console to see the live status of your domain connection. This button only simulates a check.',
             });
         }, 2500);
     };
-
-    const firebaseConsoleUrl = `https://console.firebase.google.com/project/${firebaseConfig.projectId}/hosting/custom-domains`;
 
     if (isLoading && localDomainStatus === null) {
         return (
@@ -111,143 +103,103 @@ export default function HostingPage() {
 
     return (
         <div className="space-y-8 max-w-4xl">
+             <div>
+                <h1 className="text-3xl font-bold font-headline">Custom Domain</h1>
+                <p className="text-muted-foreground">Connect your custom domain to build a professional affiliate website.</p>
+            </div>
+
+            <Alert>
+                <Info className="h-4 w-4" />
+                <AlertTitle>Seeing a "Site Not Found" error on your domain?</AlertTitle>
+                <AlertDescription>
+                    This is a normal part of the setup process! It means your domain is pointing to Firebase, but you haven't finished the configuration inside the Firebase Console yet. <strong>Follow Step 2 carefully to fix this.</strong>
+                </AlertDescription>
+            </Alert>
+            
             <Card>
                 <CardHeader>
                     <div className="flex items-center gap-3">
                          <div className="flex-shrink-0 w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-bold">1</div>
-                         <CardTitle>Choose Your Website's Address (Domain Name)</CardTitle>
+                         <CardTitle>Enter Your Domain</CardTitle>
                     </div>
                     <CardDescription>
-                        A domain name is your website's unique address, like <code>www.yourbrand.com</code>. A professional domain builds trust and makes your site easy to find. If you don't have one yet, you'll need to register one.
+                        First, you need a domain name. If you don't have one, you can register one at a registrar like <a href="https://name.com" target="_blank" rel="noopener noreferrer" className="text-primary underline">Name.com</a>. Once you have your domain, enter it here.
                     </CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-6">
-                    <div>
-                        <h3 className="font-semibold mb-2">Option A: Register a New Domain</h3>
-                        <div className="text-sm text-muted-foreground mb-4 space-y-2">
-                          <p>We recommend using our trusted partner, Name.com, to register your new domain.</p>
-                        </div>
-                        <Button asChild className="w-full">
-                            <a href={namecomAffiliateLink} target="_blank" rel="noopener noreferrer">
-                                Register a Domain on Name.com
-                                <ExternalLink className="ml-2 h-4 w-4" />
-                            </a>
+                <CardContent>
+                    <div className="flex gap-2">
+                        <Input
+                            id="domain"
+                            placeholder="your-awesome-site.com"
+                            value={domainInput}
+                            onChange={(e) => setDomainInput(e.target.value)}
+                            disabled={isSaving || localDomainStatus === 'connected'}
+                        />
+                        <Button onClick={handleSaveDomain} disabled={isSaving || !domainInput || localDomainStatus === 'connected'}>
+                            {isSaving ? <Loader2 className="animate-spin" /> : 'Save Domain'}
                         </Button>
                     </div>
-                     <Separator />
-                     <div>
-                        <h3 className="font-semibold mb-2">Option B: Connect a Domain You Already Own</h3>
-                         <p className="text-sm text-muted-foreground mb-4">
-                            If you have already purchased a domain, enter it below to begin the connection process.
-                        </p>
-                        <div className="flex gap-2">
-                            <Input
-                                id="domain"
-                                placeholder="your-awesome-site.com"
-                                value={domainInput}
-                                onChange={(e) => setDomainInput(e.target.value)}
-                                disabled={isSaving || localDomainStatus === 'connected'}
-                            />
-                            <Button onClick={handleSaveDomain} disabled={isSaving || !domainInput || localDomainStatus === 'connected'}>
-                                {isSaving ? <Loader2 className="animate-spin" /> : 'Save & Continue'}
-                            </Button>
-                        </div>
-                    </div>
                 </CardContent>
             </Card>
 
-            <Card>
-                <CardHeader>
-                    <div className="flex items-center gap-3">
-                         <div className="flex-shrink-0 w-8 h-8 bg-accent text-accent-foreground rounded-full flex items-center justify-center font-bold">?</div>
-                         <CardTitle>What Do You Want to Do With Your Domain?</CardTitle>
-                    </div>
-                    <CardDescription>
-                       You have two main options for using your new domain for affiliate marketing. Read below to decide which is right for you.
-                    </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                    <div>
-                        <h3 className="font-semibold mb-2 flex items-center gap-2"><ArrowRight className="text-primary"/> Option 1: Build a Custom Website (Recommended)</h3>
-                        <p className="text-sm text-muted-foreground ml-7">
-                            Use your domain to build a unique website (e.g., a blog, a review site). You can then place your affiliate link on this site. This is the most professional approach and gives you more credibility.
-                        </p>
-                        <p className="text-sm text-muted-foreground ml-7 mt-2">
-                            <strong>To do this, follow Steps 2 and 3 below.</strong>
-                        </p>
-                    </div>
-                     <Separator />
-                     <div>
-                        <h3 className="font-semibold mb-2 flex items-center gap-2"><ArrowRight className="text-primary"/> Option 2: Forward Your Domain to Your Affiliate Link</h3>
-                         <p className="text-sm text-muted-foreground ml-7">
-                            This is a simpler option. Anyone who types your domain name (<code>{domainInput || 'your-awesome-site.com'}</code>) into their browser will be instantly redirected to your affiliate link. You don't need to build a website.
-                        </p>
-                         <p className="text-sm text-muted-foreground ml-7 mt-2">
-                            <strong>How to do this:</strong> This is configured at your domain registrar (like Name.com), not here. Log in to your Name.com account, find your domain, and look for an option called "URL Forwarding" or "Domain Forwarding". Set it to forward to your affiliate link: <code>https://affiliateai.host/?ref={userData?.username || '...'}</code>.
-                        </p>
-                    </div>
-                </CardContent>
-            </Card>
-
-            <Card>
+            <Card className={!domainInput ? "opacity-50 pointer-events-none" : ""}>
                 <CardHeader>
                     <div className="flex items-center gap-3">
                          <div className="flex-shrink-0 w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-bold">2</div>
-                         <CardTitle>For Option 1: Point Your Domain to Our Cloud Servers (DNS)</CardTitle>
+                         <CardTitle>Configure DNS in the Firebase Console</CardTitle>
                     </div>
                     <CardDescription>
-                       This is the most critical step. You must get the correct, unique DNS records from your Firebase project and add them to your domain registrar (e.g., Name.com).
+                       This is the most important step to fix the "Site Not Found" error. You must add your domain in the Firebase Console to get your unique verification and DNS records.
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                    <Alert>
-                        <HelpCircle className="h-4 w-4" />
-                        <AlertTitle>Where to find your DNS records</AlertTitle>
-                        <AlertDescription>
-                            Your DNS records are unique to your project and are provided by Google. You must get them from the Firebase Console after you have successfully published your app.
-                        </AlertDescription>
-                    </Alert>
-                    <div>
-                        <h3 className="font-semibold mb-2">Instructions:</h3>
-                        <ol className="list-decimal list-inside space-y-3 text-sm text-muted-foreground">
-                            <li>
-                                First, publish your application. Then, open the <a href={firebaseConsoleUrl} target="_blank" rel="noopener noreferrer" className="text-primary underline">Firebase Console for your project</a>.
-                            </li>
-                            <li>
-                                Navigate to the <strong>App Hosting</strong> section and find the <strong>Custom Domains</strong> tab for your production backend.
-                            </li>
-                            <li>
-                                Click the <strong>"Add custom domain"</strong> button.
-                            </li>
-                            <li>
-                                Enter your domain name (<code>{domainInput || 'your-domain.com'}</code>) and follow the setup wizard.
-                            </li>
-                            <li>
-                                Firebase will display the exact DNS records required (usually one or two 'A' records and a 'TXT' record).
-                            </li>
-                            <li>
-                                Copy these values and add them to the DNS settings at your domain registrar (e.g., Name.com). You must remove any other conflicting 'A' records.
-                            </li>
-                        </ol>
-                    </div>
+                    <h3 className="font-semibold">Instructions:</h3>
+                    <ol className="list-decimal list-inside space-y-3 text-sm text-muted-foreground">
+                        <li>
+                            Click this link to open the Firebase Console for your project: <a href={firebaseConsoleUrl} target="_blank" rel="noopener noreferrer" className="text-primary underline font-semibold">Open Firebase Hosting</a>.
+                        </li>
+                        <li>
+                            Click the <strong>"Add custom domain"</strong> button.
+                        </li>
+                        <li>
+                            Enter your domain name (<code>{domainInput || 'your-domain.com'}</code>) in the wizard.
+                        </li>
+                        <li>
+                           Firebase will give you a <strong>TXT record</strong> for verification. Copy this value.
+                        </li>
+                        <li>
+                            Go to your domain registrar (e.g., Name.com) and add this TXT record to your domain's DNS settings.
+                        </li>
+                         <li>
+                            Once Firebase verifies the TXT record (this can take a few minutes to a few hours), it will show you the <strong>A records</strong> you need.
+                        </li>
+                         <li>
+                            Go back to your registrar and add the two A records provided by Firebase. Make sure to remove any other A records to avoid conflicts.
+                        </li>
+                    </ol>
                      <Alert variant="destructive" className="mt-4">
                         <AlertTriangle className="h-4 w-4" />
-                        <AlertTitle>Very Important!</AlertTitle>
+                        <AlertTitle>Critical Step!</AlertTitle>
                         <AlertDescription>
-                            Do not use any IP addresses or values other than the ones provided to you in the Firebase Console. Using incorrect values is the primary cause of '404 not found' errors.
+                            You must use the exact record values provided by Firebase in the console. Using incorrect values is the main cause of connection issues.
                         </AlertDescription>
                     </Alert>
                 </CardContent>
+                 <CardFooter>
+                     <p className="text-xs text-muted-foreground">
+                         <strong>Alternative:</strong> If you don't want to build a website and just want to forward your domain to your affiliate link, you can do this in your domain registrar's settings (look for "URL Forwarding").
+                     </p>
+                 </CardFooter>
             </Card>
 
             <Card>
                  <CardHeader>
                     <div className="flex items-center gap-3">
                          <div className="flex-shrink-0 w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-bold">3</div>
-                         <CardTitle>For Option 1: Verification and Connection</CardTitle>
+                         <CardTitle>Final Verification</CardTitle>
                     </div>
                     <CardDescription>
-                        Once you've saved the correct DNS records, our system will check for them. This "propagation," can take up to 24 hours.
+                        After you've added the DNS records at your registrar, it can take up to 24 hours for them to "propagate" across the internet. Once complete, your site will be live.
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="flex flex-col items-center justify-center text-center gap-4 py-8">
@@ -259,11 +211,11 @@ export default function HostingPage() {
                                     <>
                                         <Badge className="bg-amber-500 text-white hover:bg-amber-500">Pending Verification</Badge>
                                         <p className="text-sm text-muted-foreground max-w-sm">
-                                            DNS changes can take time. Once you've added the records from the Firebase Console, you can check the status.
+                                            The system is waiting for you to complete the DNS setup in the Firebase Console and at your domain registrar.
                                         </p>
-                                        <Button onClick={handleVerifyDomain} disabled={isVerifying}>
+                                         <Button onClick={handleVerifyDomain} disabled={isVerifying}>
                                             {isVerifying ? <Loader2 className="animate-spin mr-2" /> : <Search className="mr-2" />}
-                                            {isVerifying ? 'Verifying...' : 'Check Status Now'}
+                                            {isVerifying ? 'Checking...' : 'Check Status'}
                                         </Button>
                                     </>
                                 );
@@ -276,7 +228,7 @@ export default function HostingPage() {
                                                 <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
                                                 <AlertTitle className="text-green-800 dark:text-green-200">Congratulations!</AlertTitle>
                                                 <AlertDescription className="text-green-700 dark:text-green-300">
-                                                    Your domain is successfully connected and your site should be live.
+                                                    Your domain is successfully connected and your site should be live at <a href={`http://${domainInput}`} target="_blank" rel="noopener noreferrer" className="font-semibold underline">{domainInput}</a>.
                                                 </AlertDescription>
                                             </Alert>
                                         </div>
@@ -296,7 +248,7 @@ export default function HostingPage() {
                                     <>
                                         <Badge variant="secondary">Unconfigured</Badge>
                                         <p className="text-sm text-muted-foreground max-w-sm">
-                                            Complete steps 1 and 2. The status of your domain will appear here.
+                                            Complete Step 1 to begin the domain setup process.
                                         </p>
                                     </>
                                 );
