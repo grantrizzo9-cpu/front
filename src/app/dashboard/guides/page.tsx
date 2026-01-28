@@ -55,7 +55,7 @@ export default function GuidesPage() {
   const { isAdmin, isLoading: isAdminLoading } = useAdmin();
 
   const userDocRef = useMemoFirebase(() => {
-    if (!user) return null;
+    if (!user || !firestore) return null;
     return doc(firestore, 'users', user.uid);
   }, [firestore, user?.uid]);
 

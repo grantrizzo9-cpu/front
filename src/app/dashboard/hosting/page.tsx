@@ -26,7 +26,7 @@ export default function HostingPage() {
     const [localDomainStatus, setLocalDomainStatus] = useState<'unconfigured' | 'pending' | 'connected' | 'error' | null>(null);
 
     const userDocRef = useMemoFirebase(() => {
-        if (!user) return null;
+        if (!user || !firestore) return null;
         return doc(firestore, 'users', user.uid);
     }, [firestore, user?.uid]);
 

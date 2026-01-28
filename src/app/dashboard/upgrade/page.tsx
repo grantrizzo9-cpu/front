@@ -16,7 +16,7 @@ export default function UpgradePage() {
   const { toast } = useToast();
 
   const userDocRef = useMemoFirebase(() => {
-    if (!user) return null;
+    if (!user || !firestore) return null;
     return doc(firestore, 'users', user.uid);
   }, [firestore, user?.uid]);
 

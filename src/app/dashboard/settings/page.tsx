@@ -24,7 +24,7 @@ export default function SettingsPage() {
   const [isMakingAdmin, setIsMakingAdmin] = useState(false);
 
   const userDocRef = useMemoFirebase(() => {
-    if (!user) return null;
+    if (!user || !firestore) return null;
     return doc(firestore, 'users', user.uid);
   }, [firestore, user?.uid]);
 
@@ -32,7 +32,7 @@ export default function SettingsPage() {
 
   // Check if the public username document exists
   const usernameDocRef = useMemoFirebase(() => {
-    if (!userData?.username) return null;
+    if (!userData?.username || !firestore) return null;
     return doc(firestore, "usernames", userData.username);
   }, [firestore, userData?.username]);
   const { data: usernameDoc, isLoading: isUsernameDocLoading } = useDoc(usernameDocRef);

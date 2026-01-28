@@ -21,14 +21,14 @@ export default function DashboardPage() {
   const { isAdmin, isLoading: isAdminLoading } = useAdmin();
 
   const userDocRef = useMemoFirebase(() => {
-    if (!user) return null;
+    if (!user || !firestore) return null;
     return doc(firestore, 'users', user.uid);
   }, [firestore, user?.uid]);
   const { data: userData, isLoading: isUserDataLoading } = useDoc<UserType>(userDocRef);
 
   // Fetch referrals for the current user (for their personal dashboard view)
   const referralsRef = useMemoFirebase(() => {
-    if (!user) return null;
+    if (!user || !firestore) return null;
     return collection(firestore, 'users', user.uid, 'referrals');
   }, [firestore, user?.uid]);
 
@@ -37,7 +37,7 @@ export default function DashboardPage() {
   // --- ADMIN ONLY ---
   // Fetch all referrals across the entire platform if the user is an admin
   const allReferralsQuery = useMemoFirebase(() => {
-    if (!isAdmin) return null; // Only run this query if the user is an admin
+    if (!isAdmin || !firestore) return null; // Only run this query if the user is an admin
     return collectionGroup(firestore, 'referrals');
   }, [firestore, isAdmin]);
   const { data: allReferrals, isLoading: allReferralsLoading } = useCollection<Referral>(allReferralsQuery);

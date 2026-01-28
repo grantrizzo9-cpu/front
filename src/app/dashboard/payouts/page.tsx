@@ -14,7 +14,7 @@ export default function PayoutsPage() {
   const firestore = useFirestore();
 
   const payoutsRef = useMemoFirebase(() => {
-    if (!user) return null;
+    if (!user || !firestore) return null;
     return collection(firestore, 'users', user.uid, 'payments');
   }, [firestore, user?.uid]);
 
