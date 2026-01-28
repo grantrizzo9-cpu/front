@@ -21,19 +21,14 @@ export function getSdks(firebaseApp: FirebaseApp) {
   let firestore: Firestore;
   try {
     // Initialize Firestore with offline persistence enabled.
-    // This helps mitigate race conditions on initial load.
     firestore = initializeFirestore(firebaseApp, {
       localCache: persistentLocalCache(),
     });
   } catch (e: any) {
-    // If it's already initialized (which can happen with HMR),
-    // just get the existing instance.
-    if (e.code === 'failed-precondition') {
-      firestore = getFirestore(firebaseApp);
-    } else {
-      // Re-throw other errors
-      throw e;
-    }
+    // If initializeFirestore fails (e.g., already initialized in a different
+    // context like HMR), fall back to getFirestore to retrieve the instance.
+    // This is the recommended approach to avoid initialization errors in Next.js.
+    firestore = getFirestore(firebaseApp);
   }
   
   return {
