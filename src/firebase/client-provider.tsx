@@ -4,7 +4,7 @@
 import React, { useMemo, type ReactNode, useEffect, useState } from 'react';
 import { FirebaseProvider } from '@/firebase/provider';
 import { initializeFirebase } from '@/firebase';
-import { enableIndexedDbPersistence } from 'firebase/firestore';
+import { enableIndexedDbPersistence, doc, onSnapshot } from 'firebase/firestore';
 import { Loader2 } from 'lucide-react';
 
 interface FirebaseClientProviderProps {
@@ -12,59 +12,70 @@ interface FirebaseClientProviderProps {
 }
 
 export function FirebaseClientProvider({ children }: FirebaseClientProviderProps) {
-  // Get the base services. useMemo ensures this only runs once.
   const firebaseServices = useMemo(() => initializeFirebase(), []);
   
-  const [persistenceEnabled, setPersistenceEnabled] = useState(false);
-  const [persistenceError, setPersistenceError] = useState<string | null>(null);
+  const [isReady, setIsReady] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // This effect runs once on the client after the initial render.
-    const enablePersistence = async () => {
+    const initialize = async () => {
       try {
+        // Step 1: Enable persistence. This is fast and prepares offline storage.
         await enableIndexedDbPersistence(firebaseServices.firestore);
-        setPersistenceEnabled(true);
       } catch (err: any) {
         if (err.code == 'failed-precondition') {
-          // This is a common, non-critical error when multiple tabs are open.
-          // The app will still work, just without multi-tab offline sync.
-          // We can consider persistence enabled in this case for the UI.
-          console.warn('Firestore persistence failed because multiple tabs are open.');
-          setPersistenceEnabled(true);
+          console.warn('Firestore persistence failed because multiple tabs are open. App will work but without multi-tab offline sync.');
         } else if (err.code == 'unimplemented') {
-          // The browser doesn't support persistence.
           console.error('Firestore persistence is not supported in this browser.');
-          setPersistenceError('Offline features are not supported in this browser.');
+          setError('Offline features are not supported in this browser.');
+          return; // Stop initialization if persistence is not supported
         } else {
           console.error('An unexpected error occurred while enabling Firestore persistence:', err);
-          setPersistenceError('Could not enable offline features.');
+          setError('Could not enable offline features.');
+          return;
         }
       }
+
+      // Step 2: Confirm connection to the backend.
+      // We listen to a non-existent doc. The first event from the server (even a "not-found" one)
+      // confirms that the connection is active.
+      const unsubscribe = onSnapshot(
+        doc(firebaseServices.firestore, '_init', 'connection-check'),
+        () => {
+          // Success! Connection is live.
+          setIsReady(true);
+          unsubscribe(); // Clean up the listener immediately.
+        },
+        (err) => {
+          // This error callback handles actual connection errors.
+          console.error('Firestore connection check failed:', err);
+          setError('Could not connect to the database. Please check your network connection.');
+          unsubscribe(); // Clean up on error too.
+        }
+      );
     };
 
-    enablePersistence();
+    initialize();
 
   }, [firebaseServices.firestore]);
 
-  // We can show a loading screen until persistence is set up.
-  // This prevents the user from interacting with the app before it's ready.
-  if (!persistenceEnabled && !persistenceError) {
-    return (
-      <div className="flex h-screen w-screen items-center justify-center bg-background">
-        <div className="flex flex-col items-center gap-4 text-muted-foreground">
-            <Loader2 className="h-8 w-8 animate-spin" />
-            <p>Initializing Application...</p>
+  if (error) {
+     return (
+      <div className="flex h-screen w-screen items-center justify-center p-4">
+        <div className="text-center text-destructive">
+            <h1 className="text-xl font-bold">Application Error</h1>
+            <p>{error}</p>
         </div>
       </div>
     );
   }
   
-  if (persistenceError) {
-     return (
-      <div className="flex h-screen w-screen items-center justify-center p-4">
-        <div className="text-center text-destructive">
-            <h1 className="text-xl font-bold">Application Error</h1>
-            <p>{persistenceError}</p>
+  if (!isReady) {
+    return (
+      <div className="flex h-screen w-screen items-center justify-center bg-background">
+        <div className="flex flex-col items-center gap-4 text-muted-foreground">
+            <Loader2 className="h-8 w-8 animate-spin" />
+            <p>Initializing Application...</p>
         </div>
       </div>
     );
