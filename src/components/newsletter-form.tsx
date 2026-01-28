@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, MailCheck } from 'lucide-react';
+import { subscribeToNewsletter } from '@/ai/flows/newsletter-signup';
 
 export function NewsletterForm() {
   const { toast } = useToast();
@@ -12,20 +13,27 @@ export function NewsletterForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setIsLoading(true);
 
-    // In a real app, you would integrate with your email service provider here.
-    // For this prototype, we'll just simulate a successful subscription.
-    setTimeout(() => {
-      setIsLoading(false);
+    const result = await subscribeToNewsletter({ email });
+
+    setIsLoading(false);
+
+    if (result.success) {
       setIsSubmitted(true);
       toast({
         title: 'Subscription Successful!',
         description: `Thanks for joining. We've added ${email} to our list.`,
       });
-    }, 1000);
+    } else {
+      toast({
+        variant: 'destructive',
+        title: 'Subscription Failed',
+        description: result.message,
+      });
+    }
   };
 
   if (isSubmitted) {
