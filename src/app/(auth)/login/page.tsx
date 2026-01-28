@@ -11,8 +11,10 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/firebase";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { useState, useEffect } from "react";
-import { Loader2, AlertTriangle } from "lucide-react";
+import { Loader2, AlertTriangle, FileCode } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { firebaseConfig } from "@/firebase/config";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -22,7 +24,6 @@ export default function LoginPage() {
   const [isClientReady, setIsClientReady] = useState(false);
 
   useEffect(() => {
-    // This effect runs only on the client, after initial mount.
     setIsClientReady(true);
   }, []);
 
@@ -46,8 +47,8 @@ export default function LoginPage() {
         description = "Invalid email or password. If you've signed up before, you can also reset your password.";
       } else if (error.code === 'auth/too-many-requests') {
         description = "Access to this account has been temporarily disabled due to many failed login attempts. You can reset your password or try again later.";
-      } else if (error.code === 'auth/api-key-not-valid') {
-          description = "The provided Firebase API key is not valid. Please check your configuration."
+      } else if (error.code === 'auth/api-key-not-valid' || error.code === 'auth/configuration-not-found') {
+          description = "The Firebase configuration is invalid. Please follow the instructions to fix your API key."
       } else if (error.message) {
         description = error.message;
       }
@@ -62,8 +63,6 @@ export default function LoginPage() {
     }
   };
 
-  // On the server, and on the initial client render, show a skeleton UI.
-  // This ensures the server and client render the same content initially.
   if (!isClientReady) {
     return (
         <Card>
@@ -88,7 +87,34 @@ export default function LoginPage() {
     );
   }
 
-  // If the client is ready, show the real login form.
+  if (firebaseConfig.apiKey.startsWith("REPLACE_WITH")) {
+    return (
+        <Card>
+            <CardHeader>
+                <CardTitle className="font-headline text-2xl flex items-center gap-2">
+                    <AlertTriangle className="h-6 w-6 text-destructive" />
+                    Firebase Not Configured
+                </CardTitle>
+                <CardDescription>
+                    The application is not connected to Firebase. Please follow the instructions in the code file below to resolve this issue.
+                </CardDescription>
+            </CardHeader>
+            <CardContent>
+                 <Alert>
+                    <FileCode className="h-4 w-4" />
+                    <AlertTitle>Action Required:</AlertTitle>
+                    <AlertDescription>
+                        <ol className="list-decimal list-inside space-y-1 mt-2">
+                            <li>Open the file: <code className="font-semibold p-1 bg-muted rounded-sm">src/firebase/config.ts</code></li>
+                            <li>Follow the instructions in the comments at the top of the file to add your Firebase project configuration.</li>
+                        </ol>
+                    </AlertDescription>
+                </Alert>
+            </CardContent>
+        </Card>
+    )
+  }
+
   return (
     <Card>
       <CardHeader>
