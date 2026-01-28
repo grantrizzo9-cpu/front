@@ -111,7 +111,7 @@ export function SignupForm() {
                 break;
             case 'auth/configuration-not-found':
             case 'auth/api-key-not-valid':
-              description = "The project's Firebase configuration is invalid. This can be caused by an incorrect API key, or because your Google Cloud project is missing an active billing account or the correct IAM permissions. Please double-check your project settings in the Google Cloud Console.";
+              description = `The application is trying to connect to Firebase project '${firebaseConfig.projectId}', but the configuration is invalid. This is often because the project is missing an active billing account or the correct IAM permissions in Google Cloud. Please double-check your project settings.`;
               break;
             default:
                 description = error.message || "An unknown error occurred while creating your account.";
