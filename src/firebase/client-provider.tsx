@@ -36,27 +36,11 @@ export function FirebaseClientProvider({ children }: FirebaseClientProviderProps
         }
       }
 
-      // Step 2: Confirm connection to the backend.
-      // We listen to a non-existent doc. The first event from the server (even a "not-found" one)
-      // confirms that the connection is active.
-      const unsubscribe = onSnapshot(
-        doc(firebaseServices.firestore, '_init', 'connection-check'),
-        () => {
-          // Success! Connection is live.
-          setIsReady(true);
-          unsubscribe(); // Clean up the listener immediately.
-        },
-        (err) => {
-          // This error callback handles actual connection errors.
-          console.error('Firestore connection check failed:', err);
-          setError('Could not connect to the database. Please check your network connection.');
-          unsubscribe(); // Clean up on error too.
-        }
-      );
+      // Step 2: Set the app as ready, bypassing the strict connection check for now.
+      setIsReady(true);
     };
 
     initialize();
-
   }, [firebaseServices.firestore]);
 
   if (error) {
