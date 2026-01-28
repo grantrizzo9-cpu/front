@@ -1,13 +1,29 @@
+'use client';
+
 import { Logo } from "@/components/logo";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 
 export function Footer() {
+  const searchParams = useSearchParams();
+  const refCode = searchParams.get('ref');
+
+  const getLinkWithRef = (baseHref: string) => {
+    if (refCode) {
+      // Use URLSearchParams to handle existing query params gracefully if needed in the future
+      const url = new URL(baseHref, "http://localhost"); // base is required
+      url.searchParams.set('ref', refCode);
+      return `${url.pathname}${url.search}`;
+    }
+    return baseHref;
+  };
+
   const footerLinks = {
     platform: [
-      { href: '/pricing', label: 'Pricing' },
+      { href: getLinkWithRef('/pricing'), label: 'Pricing' },
       { href: '/#features', label: 'Features' },
       { href: '/#faq', label: 'FAQ' },
-      { href: '/login', label: 'Login' },
+      { href: getLinkWithRef('/login'), label: 'Login' },
     ],
     legal: [
       { href: '/terms', label: 'Terms of Service' },
