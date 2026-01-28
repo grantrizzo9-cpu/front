@@ -42,6 +42,7 @@ export default function HostingPage() {
     const { toast } = useToast();
     const [domainInput, setDomainInput] = useState('');
     const [isSaving, setIsSaving] = useState(false);
+    const [isVerifying, setIsVerifying] = useState(false);
 
     const userDocRef = useMemoFirebase(() => {
         if (!user) return null;
@@ -84,15 +85,31 @@ export default function HostingPage() {
         }, 1000);
     };
 
+    const handleVerifyDomain = () => {
+        if (!userDocRef) return;
+        setIsVerifying(true);
+        // Simulate a network delay for verification
+        setTimeout(() => {
+            updateDocumentNonBlocking(userDocRef, { 'customDomain.status': 'connected' });
+            setIsVerifying(false);
+            toast({
+                title: 'Domain Connected!',
+                description: 'Your domain is now live.',
+                className: 'bg-green-500 border-green-500 text-white dark:bg-green-600 dark:border-green-600',
+            });
+        }, 2500);
+    };
+
+
     const StatusBadge = () => {
         if (!userData?.customDomain || !userData.customDomain.name) {
             return <Badge variant="secondary">Unconfigured</Badge>;
         }
         switch (userData.customDomain.status) {
             case 'pending':
-                return <Badge className="bg-amber-500 text-white">Pending Verification</Badge>;
+                return <Badge className="bg-amber-500 text-white hover:bg-amber-500">Pending Verification</Badge>;
             case 'connected':
-                return <Badge className="bg-green-500 text-white">Connected</Badge>;
+                return <Badge className="bg-green-500 text-white hover:bg-green-500">Connected</Badge>;
             case 'error':
                  return <Badge variant="destructive">Error</Badge>;
             default:
@@ -158,9 +175,9 @@ export default function HostingPage() {
                                 placeholder="your-awesome-site.com"
                                 defaultValue={userData?.customDomain?.name || ''}
                                 onChange={(e) => setDomainInput(e.target.value)}
-                                disabled={isSaving}
+                                disabled={isSaving || userData?.customDomain?.status === 'connected'}
                             />
-                            <Button onClick={handleSaveDomain} disabled={isSaving || !domainInput}>
+                            <Button onClick={handleSaveDomain} disabled={isSaving || !domainInput || userData?.customDomain?.status === 'connected'}>
                                 {isSaving ? <Loader2 className="animate-spin" /> : 'Save & Continue'}
                             </Button>
                         </div>
@@ -221,14 +238,45 @@ export default function HostingPage() {
                          </CardTitle>
                     </div>
                     <CardDescription>
-                        Once you've saved your DNS records at your registrar, our system will automatically start checking for them. This process, called "propagation," can sometimes take a few minutes or up to 24 hours to complete across the entire internet. Please be patient! We will update the status below as soon as your site is live.
+                        Once you've saved your DNS records, our system will start checking for them. This process, called "propagation," can take some time.
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="flex flex-col items-center justify-center text-center gap-4 py-8">
                      <StatusBadge />
-                     <p className="text-sm text-muted-foreground max-w-sm">
-                        We'll check periodically and update the status here. You don't need to do anything else.
-                     </p>
+
+                     {(!userData?.customDomain || userData.customDomain.status === 'unconfigured') && (
+                        <p className="text-sm text-muted-foreground max-w-sm">
+                            Complete steps 1 and 2. The status of your domain will appear here.
+                        </p>
+                     )}
+                     
+                     {userData?.customDomain?.status === 'pending' && (
+                        <>
+                            <p className="text-sm text-muted-foreground max-w-sm">
+                                DNS changes can take up to 24 hours to propagate. You can manually check the status now.
+                            </p>
+                            <Button onClick={handleVerifyDomain} disabled={isVerifying}>
+                                {isVerifying ? (
+                                    <Loader2 className="animate-spin mr-2" />
+                                ) : (
+                                    <Search className="mr-2" />
+                                )}
+                                {isVerifying ? 'Verifying...' : 'Check Status Now'}
+                            </Button>
+                        </>
+                    )}
+
+                    {userData?.customDomain?.status === 'connected' && (
+                        <div className="w-full max-w-md">
+                            <Alert className="text-left border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-950">
+                                <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
+                                <AlertTitle className="text-green-800 dark:text-green-200">Congratulations!</AlertTitle>
+                                <AlertDescription className="text-green-700 dark:text-green-300">
+                                    Your domain is successfully connected and should be live shortly.
+                                </AlertDescription>
+                            </Alert>
+                        </div>
+                    )}
                 </CardContent>
             </Card>
         </div>
