@@ -9,7 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useUser, useFirestore, useDoc, useMemoFirebase, updateDocumentNonBlocking } from '@/firebase';
 import { doc } from 'firebase/firestore';
 import type { User as UserType } from '@/lib/types';
-import { Loader2, Globe, Copy, Info, CheckCircle, AlertTriangle, Search, ExternalLink } from 'lucide-react';
+import { Loader2, Globe, Copy, Info, CheckCircle, AlertTriangle, Search, ExternalLink, HelpCircle } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
@@ -111,44 +111,36 @@ export default function HostingPage() {
     return (
         <div className="space-y-8 max-w-4xl">
             <div>
-                <h1 className="text-3xl font-bold font-headline">Hosting & Custom Domains</h1>
-                <p className="text-muted-foreground">Connect a professional domain name to your brand.</p>
+                <h1 className="text-3xl font-bold font-headline">Your Guide to Hosting a Professional Website</h1>
+                <p className="text-muted-foreground">Follow these three simple steps to connect a custom domain name to your website.</p>
             </div>
             
             <Card>
                 <CardHeader>
                     <div className="flex items-center gap-3">
                          <div className="flex-shrink-0 w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-bold">1</div>
-                         <CardTitle>Get Your Domain Name</CardTitle>
+                         <CardTitle>Choose Your Website's Address (Domain Name)</CardTitle>
                     </div>
                     <CardDescription>
-                        A custom domain (e.g., `your-brand.com`) is essential for a professional identity.
-                        You can register a new one or connect one you already own.
+                        Think of a domain name as your website's unique street address on the internet, like <code>www.yourbrand.com</code>. A professional domain builds trust and makes your site easy for people to find. If you don't have one yet, you'll need to register one. If you already own one, you can connect it in Option B below.
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
                     <div>
                         <h3 className="font-semibold mb-2">Option A: Register a New Domain</h3>
-                        <p className="text-sm text-muted-foreground mb-4">
-                            We recommend registering your domain with <strong>Name.com</strong>.
-                            Use our partner link to get the best prices and support our platform.
-                        </p>
+                        <div className="text-sm text-muted-foreground mb-4 space-y-2">
+                          <p>We recommend using our trusted partner, Name.com, to register your new domain. They make the process simple and secure.</p>
+                          <p className="font-medium text-foreground">Tips for choosing a great domain name:</p>
+                          <ul className="list-disc pl-5 text-xs">
+                              <li>Keep it short, memorable, and easy to spell.</li>
+                              <li>Try to use a <strong>.com</strong> if possible, as it's the most recognized.</li>
+                              <li>Avoid numbers and hyphens to prevent confusion.</li>
+                          </ul>
+                        </div>
                         <div className="p-4 bg-secondary/50 rounded-lg space-y-4">
-                            <div className="flex gap-2">
-                                <Input
-                                    placeholder="your-new-brand.com"
-                                    disabled
-                                />
-                                <Button disabled>
-                                    <Search className="mr-2 h-4 w-4" />
-                                    Search
-                                </Button>
-                            </div>
-                             <p className="text-xs text-center text-muted-foreground">Domain search and registration directly from your dashboard is coming soon!</p>
-                             <Separator />
                              <Button asChild className="w-full">
                                 <a href={namecomAffiliateLink} target="_blank" rel="noopener noreferrer">
-                                    Register on Name.com
+                                    Register a Domain on Name.com
                                     <ExternalLink className="ml-2 h-4 w-4" />
                                 </a>
                              </Button>
@@ -158,7 +150,7 @@ export default function HostingPage() {
                      <div>
                         <h3 className="font-semibold mb-2">Option B: Connect a Domain You Already Own</h3>
                          <p className="text-sm text-muted-foreground mb-4">
-                            If you already have a domain, enter it here to begin the connection process.
+                            If you have already purchased a domain from any registrar (like GoDaddy, Namecheap, or Name.com), enter it below to begin the connection process.
                         </p>
                         <div className="flex gap-2">
                             <Input
@@ -180,20 +172,41 @@ export default function HostingPage() {
                 <CardHeader>
                     <div className="flex items-center gap-3">
                          <div className="flex-shrink-0 w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-bold">2</div>
-                         <CardTitle>Connect Your Domain to Our Servers</CardTitle>
+                         <CardTitle>Point Your Domain to Our Cloud Servers (DNS)</CardTitle>
                     </div>
                     <CardDescription>
-                        To connect your domain, log in to your domain registrar (e.g., Name.com, GoDaddy) and add the following two records. This points your domain to our high-performance cloud servers.
+                       This next step is like telling the internet's main directory where your website lives. You'll log in to your domain registrar (where you bought your domain, like Name.com) and give it the "address" of our powerful cloud servers. This is done by editing something called DNS Records.
                     </CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-3">
-                    <DnsRecordRow type="A Record" name="@" value="74.125.132.121" />
-                    <DnsRecordRow type="CNAME Record" name="www" value={domainInput || userData?.customDomain?.name || 'your-site.com'} />
+                <CardContent className="space-y-4">
+                    <Alert>
+                        <HelpCircle className="h-4 w-4" />
+                        <AlertTitle>What are DNS Records?</AlertTitle>
+                        <AlertDescription>
+                            DNS stands for "Domain Name System". Think of it as the phonebook of the internet. When you type <code>www.yourbrand.com</code> into a browser, DNS looks up the correct server to connect to. You just need to update this "phonebook entry" for your domain to point to us.
+                        </AlertDescription>
+                    </Alert>
+                    <div>
+                        <h3 className="font-semibold mb-2">Your Required DNS Records</h3>
+                        <p className="text-sm text-muted-foreground mb-4">
+                            Log in to your Name.com (or other registrar) account. Find the section called "DNS Management" or "Manage DNS Records" for your domain. You may need to delete any existing 'A' or 'CNAME' records for your main domain before adding these new ones to avoid conflicts.
+                        </p>
+                        <div className="space-y-3">
+                            <div>
+                                <p className="font-mono text-sm mb-1"><strong>A Record:</strong> <span className="text-muted-foreground">Points your main domain (e.g., <code>yourbrand.com</code>) to our server's address.</span></p>
+                                <DnsRecordRow type="A Record" name="@" value="74.125.132.121" />
+                            </div>
+                            <div>
+                                <p className="font-mono text-sm mb-1"><strong>CNAME Record:</strong> <span className="text-muted-foreground">Ensures the 'www' version of your address also works.</span></p>
+                                <DnsRecordRow type="CNAME Record" name="www" value={domainInput || userData?.customDomain?.name || 'your-site.com'} />
+                            </div>
+                        </div>
+                    </div>
                      <Alert variant="destructive" className="mt-4">
                         <AlertTriangle className="h-4 w-4" />
-                        <AlertTitle>Important!</AlertTitle>
+                        <AlertTitle>Very Important!</AlertTitle>
                         <AlertDescription>
-                            You must remove any other "A" or "CNAME" records for your root domain (@) to avoid conflicts.
+                            You must remove any other "A" or "CNAME" records for your root domain (the one with the name "@" or "yourbrand.com") to avoid conflicts and ensure your site loads correctly.
                         </AlertDescription>
                     </Alert>
                 </CardContent>
@@ -204,17 +217,17 @@ export default function HostingPage() {
                     <div className="flex items-center gap-3">
                          <div className="flex-shrink-0 w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-bold">3</div>
                          <CardTitle className="flex justify-between items-center">
-                            <span>Verification Status</span>
+                            <span>Verification and Connection</span>
                          </CardTitle>
                     </div>
                     <CardDescription>
-                        We'll automatically detect when your DNS changes are complete.
+                        Once you've saved your DNS records at your registrar, our system will automatically start checking for them. This process, called "propagation," can sometimes take a few minutes or up to 24 hours to complete across the entire internet. Please be patient! We will update the status below as soon as your site is live.
                     </CardDescription>
                 </CardHeader>
-                <CardContent className="flex flex-col items-center justify-center text-center gap-4">
+                <CardContent className="flex flex-col items-center justify-center text-center gap-4 py-8">
                      <StatusBadge />
                      <p className="text-sm text-muted-foreground max-w-sm">
-                        DNS changes can take up to 24 hours to propagate across the internet. We will check periodically and update the status here.
+                        We'll check periodically and update the status here. You don't need to do anything else.
                      </p>
                 </CardContent>
             </Card>
