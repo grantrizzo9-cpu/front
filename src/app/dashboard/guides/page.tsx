@@ -60,7 +60,6 @@ export default function GuidesPage() {
 
   const { data: userData, isLoading: isUserDataLoading } = useDoc<UserType>(userDocRef);
 
-  // Combined loading state
   const isLoading = isUserLoading || isUserDataLoading || isAdminLoading;
 
   const handleDownload = (guide: Guide) => {
@@ -84,7 +83,7 @@ export default function GuidesPage() {
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
   };
-
+  
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-full p-8">
@@ -92,7 +91,7 @@ export default function GuidesPage() {
       </div>
     );
   }
-  
+
   // ADMIN VIEW: This is the first check. If the user is an admin, show all guides immediately.
   if (isAdmin) {
     return (
