@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -9,11 +10,9 @@ import { useToast } from '@/hooks/use-toast';
 import { useUser, useFirestore, useDoc, useMemoFirebase, updateDocumentNonBlocking } from '@/firebase';
 import { doc } from 'firebase/firestore';
 import type { User as UserType } from '@/lib/types';
-import { Loader2, Globe, Info, CheckCircle, AlertTriangle, Search, ExternalLink, HelpCircle } from 'lucide-react';
+import { Loader2, Globe, Info, CheckCircle, AlertTriangle, Search } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
-import Link from 'next/link';
-import { Separator } from '@/components/ui/separator';
 import { firebaseConfig } from '@/firebase/config';
 
 export default function HostingPage() {
@@ -255,33 +254,6 @@ export default function HostingPage() {
                                 );
                         }
                     })()}
-                </CardContent>
-            </Card>
-
-            <Card>
-                <CardHeader>
-                    <div className="flex items-center gap-3">
-                        <HelpCircle className="flex-shrink-0 w-8 h-8 text-amber-500" />
-                        <CardTitle>Troubleshooting & Support</CardTitle>
-                    </div>
-                    <CardDescription>
-                        Stuck with permission errors? Here are the most common causes and solutions.
-                    </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4 text-sm">
-                    <p>If you're seeing errors like "Signup Failed" or "You don't have permission", it's almost always an issue with your Google Cloud project setup, not the app's code.</p>
-                    <Separator />
-                    <h4 className="font-semibold">1. You Must Be The Project Owner</h4>
-                    <p className="text-muted-foreground">The Google account you use to sign up for this app **must** also have the `Owner` role in your Google Cloud project. If another account is the owner, you must add your current user as an Owner on the <a href={`https://console.cloud.google.com/iam-admin/iam?project=${firebaseConfig.projectId}`} target="_blank" rel="noopener noreferrer" className="text-primary underline">IAM page</a> before you can proceed.</p>
-                    <h4 className="font-semibold">2. Check Your Billing Account</h4>
-                    <p className="text-muted-foreground">Your project must be linked to an active billing account in good standing. Check for alerts on the <a href={`https://console.cloud.google.com/billing?project=${firebaseConfig.projectId}`} target="_blank" rel="noopener noreferrer" className="text-primary underline">Billing page</a>.</p>
-                    <h4 className="font-semibold">3. Still Stuck? Contact Support or Start Fresh</h4>
-                    <p className="text-muted-foreground">If the above are correct and you're still blocked, the project may be in a bad state.
-                        <ul className="list-disc pl-5 mt-2 space-y-1">
-                            <li>You can try contacting <a href="https://console.cloud.google.com/support/cases" target="_blank" rel="noopener noreferrer" className="text-primary underline">Google Cloud Support</a> (this may require a paid support plan).</li>
-                            <li><strong>Recommended:</strong> The fastest solution is often to create a <a href="https://console.cloud.google.com/projectcreate" target="_blank" rel="noopener noreferrer" className="text-primary underline">brand new Google Cloud project</a> and provide the new Project ID to us.</li>
-                        </ul>
-                    </p>
                 </CardContent>
             </Card>
         </div>

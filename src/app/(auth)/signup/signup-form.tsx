@@ -111,7 +111,7 @@ export function SignupForm() {
                 break;
             case 'auth/configuration-not-found':
             case 'auth/api-key-not-valid':
-              description = `The API Key being used starts with: ${firebaseConfig.apiKey.substring(0,12)}... but is being rejected. This is usually due to a Google Cloud project issue. Please ensure: 1) The user '${email}' has the 'Owner' role on the project's IAM page. 2) The project is linked to an active billing account.`;
+              description = "The project's Firebase configuration is invalid. Please check your API key and project settings.";
               break;
             default:
                 description = error.message || "An unknown error occurred while creating your account.";
