@@ -86,7 +86,7 @@ export default function GuidesPage() {
     );
   }
   
-  if (!currentTier) {
+  if (!currentTier && !isAdmin) {
       return (
           <div className="text-center">
               <h2 className="text-2xl font-bold">No Subscription Found</h2>
@@ -95,14 +95,14 @@ export default function GuidesPage() {
       )
   }
 
-  const isHighestPlan = currentTier.id === 'enterprise';
+  const isHighestPlan = currentTier?.id === 'enterprise';
 
   return (
     <div className="space-y-8">
       <div>
         <h1 className="text-3xl font-bold font-headline">Marketing Guides</h1>
         <p className="text-muted-foreground">
-          You are on the <span className="font-semibold text-primary">{currentTier.name}</span> plan. Here are your unlocked guides.
+          {isAdmin ? "You have admin access to all guides." : `You are on the ${currentTier?.name} plan. Here are your unlocked guides.`}
         </p>
       </div>
 
