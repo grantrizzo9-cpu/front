@@ -20,35 +20,49 @@ export function FirebaseClientProvider({ children }: FirebaseClientProviderProps
   useEffect(() => {
     const initialize = async () => {
       try {
-        // Step 1: Enable persistence. This is fast and prepares offline storage.
         await enableIndexedDbPersistence(firebaseServices.firestore);
       } catch (err: any) {
-        if (err.code == 'failed-precondition') {
+        if (err.code === 'failed-precondition') {
           console.warn('Firestore persistence failed because multiple tabs are open. App will work but without multi-tab offline sync.');
-        } else if (err.code == 'unimplemented') {
-          console.error('Firestore persistence is not supported in this browser.');
+        } else if (err.code === 'unimplemented') {
           setError('Offline features are not supported in this browser.');
-          return; // Stop initialization if persistence is not supported
-        } else {
-          console.error('An unexpected error occurred while enabling Firestore persistence:', err);
-          setError('Could not enable offline features.');
           return;
         }
       }
 
-      // Step 2: Set the app as ready, bypassing the strict connection check for now.
-      setIsReady(true);
+      // Perform a quick, non-blocking check to see if we can talk to the backend.
+      // This helps catch config errors early without blocking the UI for too long.
+      const testDoc = doc(firebaseServices.firestore, '_config/check');
+      const unsubscribe = onSnapshot(testDoc, 
+        () => {
+          // Success! We can connect.
+          setIsReady(true);
+          unsubscribe();
+        },
+        (err) => {
+           if (err.code === 'permission-denied') {
+             setError("Could not connect to the database. This is likely due to an invalid Firebase configuration. Please update `src/firebase/config.ts` with the correct values from your Firebase project.");
+           } else {
+             setError(`Could not connect to the database: ${err.message}. Please check your network connection and Firebase setup.`);
+           }
+          unsubscribe();
+        }
+      );
     };
 
-    initialize();
+    if (firebaseServices.firestore.app.options.apiKey?.includes('REPLACE_WITH')) {
+        setError("Your Firebase configuration in `src/firebase/config.ts` is incomplete. Please add the correct values from your project.");
+    } else {
+        initialize();
+    }
   }, [firebaseServices.firestore]);
 
   if (error) {
      return (
-      <div className="flex h-screen w-screen items-center justify-center p-4">
-        <div className="text-center text-destructive">
+      <div className="flex h-screen w-screen items-center justify-center p-4 bg-background">
+        <div className="text-center text-destructive border border-destructive/50 rounded-lg p-6 max-w-lg">
             <h1 className="text-xl font-bold">Application Error</h1>
-            <p>{error}</p>
+            <p className="mt-2">{error}</p>
         </div>
       </div>
     );
@@ -59,7 +73,7 @@ export function FirebaseClientProvider({ children }: FirebaseClientProviderProps
       <div className="flex h-screen w-screen items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-4 text-muted-foreground">
             <Loader2 className="h-8 w-8 animate-spin" />
-            <p>Initializing Application...</p>
+            <p>Connecting to Database...</p>
         </div>
       </div>
     );

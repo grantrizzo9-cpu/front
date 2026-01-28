@@ -1,17 +1,16 @@
 
 // ACTION REQUIRED:
-// 1. Create a new Firebase project in the Firebase Console: https://console.firebase.google.com/
-// 2. In your new project, go to Project Settings (gear icon) -> Your apps.
+// 1. Go to your new Firebase project in the Firebase Console: https://console.firebase.google.com/project/affiliate-ai-host-new/
+// 2. Go to Project Settings (gear icon) -> Your apps.
 // 3. In the "SDK setup and configuration" section, find the `firebaseConfig` object.
-// 4. Copy the object and paste it below, replacing the placeholder values.
+// 4. Copy the values for apiKey, messagingSenderId, and appId and paste them below.
 
 export const firebaseConfig = {
-  apiKey: "AIzaSyAkUBf0vCY8KuF2OQ6M107mx8s1j9g7K1A",
-  authDomain: "rent-a-host-96880149.firebaseapp.com",
-  projectId: "rent-a-host-96880149",
-  storageBucket: "rent-a-host-96880149.appspot.com",
-  messagingSenderId: "4112396981",
-  appId: "1:4112396981:web:ae2ac3f35df96134f2c4fc",
-  measurementId: ""
+  apiKey: "REPLACE_WITH_YOUR_API_KEY",
+  authDomain: "affiliate-ai-host-new.firebaseapp.com",
+  projectId: "affiliate-ai-host-new",
+  storageBucket: "affiliate-ai-host-new.appspot.com",
+  messagingSenderId: "REPLACE_WITH_YOUR_MESSAGING_SENDER_ID",
+  appId: "REPLACE_WITH_YOUR_APP_ID",
+  measurementId: "" // This can often be left blank
 };
-
