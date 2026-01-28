@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useMemo } from 'react';
@@ -11,7 +10,6 @@ import { Loader2, BookOpen, Lock, Download, BadgeCheck } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
-import { useAdmin } from '@/hooks/use-admin';
 import Link from 'next/link';
 
 // Helper component for rendering the guide list
@@ -52,7 +50,15 @@ function GuideList({ guides, onDownload }: { guides: Guide[], onDownload: (guide
 export default function GuidesPage() {
   const { user, isUserLoading } = useUser();
   const firestore = useFirestore();
-  const { isAdmin, isLoading: isAdminLoading } = useAdmin();
+
+  // --- Admin check logic is now inlined for clarity and to prevent race conditions ---
+  const adminDocRef = useMemoFirebase(() => {
+    if (!user?.uid) return null;
+    return doc(firestore, 'roles_admin', user.uid);
+  }, [firestore, user?.uid]);
+  const { data: adminDoc, isLoading: isAdminDocLoading } = useDoc(adminDocRef);
+  const isAdmin = !!adminDoc;
+  // --- End inlined admin logic ---
 
   const userDocRef = useMemoFirebase(() => {
     if (!user) return null;
@@ -61,7 +67,8 @@ export default function GuidesPage() {
 
   const { data: userData, isLoading: isUserDataLoading } = useDoc<UserType>(userDocRef);
 
-  const isLoading = isUserLoading || isUserDataLoading || isAdminLoading;
+  // Combined loading state: wait for auth, user data, AND admin status check to complete.
+  const isLoading = isUserLoading || isUserDataLoading || (!!user && isAdminDocLoading);
 
   const handleDownload = (guide: Guide) => {
     // This function creates a temporary div to parse the HTML and extract the text content.
@@ -94,7 +101,7 @@ export default function GuidesPage() {
     );
   }
   
-  // ADMIN VIEW: If the user is an admin, show all guides.
+  // ADMIN VIEW: If the user is an admin, show all guides. This is the first check after loading.
   if (isAdmin) {
     return (
         <div className="space-y-8">
