@@ -92,35 +92,44 @@ export const allGuides: Guide[] = [
 
   // Pro Guides
   {
-    title: "Using Your Own Domain: The Professional Touch",
+    title: "Domains: Your Professional Identity",
     level: "pro",
     content: `
-      <p>Using a custom domain name (e.g., <code>www.yourbrand.com</code>) instead of a generic subdomain is one of the most important steps to building a professional online presence. Here's why it's crucial and how to set it up.</p>
+      <p>Using a custom domain name (e.g., <code>www.yourbrand.com</code>) is the most important step to building a professional online presence. This guide covers how to choose, register, and connect your domain.</p>
       
-      <strong>Why You NEED a Custom Domain:</strong>
+      <h3>Part 1: Choosing a Great Domain Name</h3>
       <ul>
-        <li><strong>Builds Trust:</strong> A custom domain shows you are serious and professional. It inspires confidence in your visitors.</li>
-        <li><strong>Brand Control:</strong> It's your brand, not ours. A custom domain strengthens your brand identity and makes you memorable.</li>
-        <li><strong>Better SEO:</strong> Search engines like Google favor websites with custom domains, which can lead to higher rankings and more free traffic over time.</li>
+        <li><strong>Keep it Simple & Memorable:</strong> Your domain should be easy to type and say. Avoid hyphens and numbers if possible.</li>
+        <li><strong>Brandable:</strong> It should represent your brand. E.g., 'starlight.com' is more brandable than 'buy-cheap-lamps-online.com'.</li>
+        <li><strong>Use .com:</strong> The .com extension is the most recognized and trusted. Stick with it unless you have a specific reason not to.</li>
       </ul>
 
-      <strong>How to Connect Your Domain:</strong>
-      <p>You can connect a domain you already own from a registrar like GoDaddy, Namecheap, or Google Domains. The process involves pointing your domain to our servers. Your site is hosted on Google's high-performance cloud infrastructure.</p>
+      <h3>Part 2: Registering Your Domain with Name.com</h3>
+      <p>We recommend using a trusted registrar like Name.com. You will need to create an account and purchase the domain from them directly.</p>
+      <ol>
+        <li>Go to <a href="https://www.name.com" target="_blank" rel="noopener noreferrer" class="text-primary hover:underline">www.name.com</a>.</li>
+        <li>Use their search bar to find an available domain name.</li>
+        <li>Follow their instructions to purchase and register the domain you've chosen.</li>
+      </ol>
+      <p><em>(Feature Coming Soon: In the future, you'll be able to register domains directly from your dashboard!)</em></p>
+      
+      <h3>Part 3: Connecting Your Domain to Our Servers</h3>
+      <p>Once you own a domain, you need to point it to our high-performance cloud servers. This is done by changing its DNS (Domain Name System) records.</p>
       
       <ol>
-        <li>Go to the <a href="/dashboard/hosting" class="text-primary hover:underline">Hosting</a> page in your dashboard.</li>
-        <li>Enter your domain name (e.g., <code>your-awesome-site.com</code>) in the input field and click "Save".</li>
-        <li>The page will show you two DNS records you need to add at your domain registrar: an <strong>A record</strong> and a <strong>CNAME record</strong>.</li>
-        <li>Log in to your domain registrar's website (where you bought your domain).</li>
-        <li>Find the DNS management or advanced DNS settings for your domain.</li>
-        <li>Copy the values from your hosting dashboard and create the new A and CNAME records. Delete any old "A" records for your main domain.</li>
-        <li>Save your changes. It can take anywhere from a few minutes to 24 hours for the changes to take effect across the internet.</li>
+        <li>Go to the <a href="/dashboard/hosting" class="text-primary hover:underline">Hosting</a> page in your dashboard. Here you will find the specific values you need for the DNS records.</li>
+        <li>Log in to your Name.com account and navigate to the DNS management section for your new domain.</li>
+        <li>You will need to create two specific records. Delete any existing 'A' or 'CNAME' records for your main domain (often shown as '@') to avoid conflicts.
+          <ul>
+            <li><strong>A Record:</strong> The 'A' record points your root domain (e.g., <code>yourbrand.com</code>) to a specific server IP address. Create an A record with the name set to <strong>@</strong> and the value set to the IP address shown on your Hosting page.</li>
+            <li><strong>CNAME Record:</strong> The 'CNAME' record handles subdomains like 'www'. Create a CNAME record with the name set to <strong>www</strong> and the value set to your root domain (e.g., <code>yourbrand.com</code>).</li>
+          </ul>
+        </li>
+        <li>Save your changes.</li>
       </ol>
-      <p>Once connected, your website will be live at your custom domain name!</p>
 
-      <strong>What About Domain Forwarding?</strong>
-      <p>Domain forwarding is a simpler option where you redirect traffic from your custom domain to another URL. For example, you could forward <code>www.yourbrand.com</code> directly to your main affiliate link. This is quick and easy but has downsides: the user will see the affiliate link in their browser bar, and it offers no SEO benefits.</p>
-      <p><strong>Our recommendation:</strong> Always use the DNS method above to properly connect your domain. It's the professional choice for building a long-term business.</p>
+      <h3>Part 4: Waiting for Propagation</h3>
+      <p>DNS changes are not instant. It can take anywhere from a few minutes to 24 hours for the new settings to spread across the internet. This is called 'propagation'. Once it's complete, the status on your Hosting page will change to 'Connected', and your site will be live on your domain.</p>
     `
   },
   {
@@ -184,5 +193,3 @@ export const allGuides: Guide[] = [
     `
   }
 ];
-
-    

@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState } from 'react';
@@ -10,10 +9,11 @@ import { useToast } from '@/hooks/use-toast';
 import { useUser, useFirestore, useDoc, useMemoFirebase, updateDocumentNonBlocking } from '@/firebase';
 import { doc } from 'firebase/firestore';
 import type { User as UserType } from '@/lib/types';
-import { Loader2, Globe, Copy, Info, CheckCircle, AlertTriangle } from 'lucide-react';
+import { Loader2, Globe, Copy, Info, CheckCircle, AlertTriangle, BookOpen, Search } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import Link from 'next/link';
 
 function DnsRecordRow({ type, name, value }: { type: string, name: string, value: string }) {
     const { toast } = useToast();
@@ -24,18 +24,16 @@ function DnsRecordRow({ type, name, value }: { type: string, name: string, value
     return (
         <div className="flex items-center justify-between p-3 bg-secondary/50 rounded-md text-sm">
             <div className="flex items-center gap-4 font-mono">
-                <Badge variant="outline" className="w-12 flex-shrink-0 justify-center">{type}</Badge>
-                <span className="hidden sm:inline">{name}</span>
-                <span className="sm:hidden">@</span>
-                <span>{value}</span>
+                <Badge variant="outline" className="w-16 flex-shrink-0 justify-center">{type}</Badge>
+                <span className="w-16">{name}</span>
+                <span className="truncate">{value}</span>
             </div>
-            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => onCopy(value)}>
+            <Button variant="ghost" size="icon" className="h-8 w-8 flex-shrink-0" onClick={() => onCopy(value)}>
                 <Copy className="h-4 w-4" />
             </Button>
         </div>
     );
 }
-
 
 export default function HostingPage() {
     const { user, isUserLoading } = useUser();
@@ -56,7 +54,6 @@ export default function HostingPage() {
     const handleSaveDomain = () => {
         if (!userDocRef || !domainInput) return;
 
-        // Basic validation for domain format
         if (!/^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(domainInput)) {
             toast({
                 variant: 'destructive',
@@ -74,7 +71,6 @@ export default function HostingPage() {
 
         updateDocumentNonBlocking(userDocRef, { customDomain: newDomainData });
         
-        // Simulate saving delay
         setTimeout(() => {
             toast({
                 title: 'Domain Saved',
@@ -111,25 +107,52 @@ export default function HostingPage() {
     return (
         <div className="space-y-8 max-w-4xl">
             <div>
-                <h1 className="text-3xl font-bold font-headline">Hosting &amp; Domains</h1>
+                <h1 className="text-3xl font-bold font-headline">Hosting & Domains</h1>
                 <p className="text-muted-foreground">Connect your custom domain to present a professional brand to your audience.</p>
             </div>
+            
+            <Alert className="border-accent/50 bg-accent/5">
+              <BookOpen className="h-4 w-4 text-accent" />
+              <AlertTitle className="text-accent font-semibold">New to Domains?</AlertTitle>
+              <AlertDescription>
+                Check out our detailed guide on how to choose, register, and connect your domain for a professional online identity.
+                <Button asChild variant="link" className="p-0 h-auto ml-1 text-accent">
+                    <Link href="/dashboard/guides">Go to Marketing Guides</Link>
+                </Button>
+              </AlertDescription>
+            </Alert>
+            
+            <Card>
+                <CardHeader>
+                    <CardTitle>Register a New Domain</CardTitle>
+                    <CardDescription>Find and register a new domain name for your brand. (Feature coming soon)</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <div className="flex gap-2">
+                        <Input
+                            placeholder="your-new-brand.com"
+                            disabled
+                        />
+                        <Button disabled>
+                            <Search className="mr-2 h-4 w-4" />
+                            Search
+                        </Button>
+                    </div>
+                </CardContent>
+            </Card>
 
             <Card>
                 <CardHeader>
                     <CardTitle className="flex justify-between items-center">
-                        <span>Your Custom Domain</span>
+                        <span>Connect Your Existing Domain</span>
                         <StatusBadge />
                     </CardTitle>
                     <CardDescription>
-                        {userData?.customDomain?.name
-                            ? `Your domain is set to ${userData.customDomain.name}.`
-                            : 'You have not configured a custom domain yet.'
-                        }
+                       Already own a domain? Connect it here.
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                    <Label htmlFor="domain">Enter Domain Name</Label>
+                    <Label htmlFor="domain">Enter Your Domain Name</Label>
                     <div className="flex gap-2">
                         <Input
                             id="domain"
@@ -143,48 +166,30 @@ export default function HostingPage() {
                         </Button>
                     </div>
                 </CardContent>
+                 <CardFooter className="text-sm text-muted-foreground">
+                    After saving, proceed to the DNS setup below.
+                </CardFooter>
             </Card>
 
             <Card>
                 <CardHeader>
                     <CardTitle>DNS Setup Instructions</CardTitle>
                     <CardDescription>
-                        To connect your domain, log in to your domain registrar (e.g., GoDaddy, Namecheap) and add the following two records.
+                        To connect your domain, log in to your domain registrar (e.g., Name.com, GoDaddy) and add the following two records.
                     </CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                    <Alert>
-                        <Info className="h-4 w-4" />
+                <CardContent className="space-y-3">
+                    <DnsRecordRow type="A Record" name="@" value="74.125.132.121" />
+                    <DnsRecordRow type="CNAME Record" name="www" value={userData?.customDomain?.name || 'your-site.com'} />
+                     <Alert variant="destructive" className="mt-4">
+                        <AlertTriangle className="h-4 w-4" />
                         <AlertTitle>Important!</AlertTitle>
                         <AlertDescription>
-                            Your website is hosted on Google's high-performance cloud infrastructure. The records below will point your domain to our servers.
-                            Make sure to remove any other "A" or "CNAME" records for your root domain to avoid conflicts.
+                            You must remove any other "A" records for your root domain (@) to avoid conflicts. DNS changes can take up to 24 hours to propagate.
                         </AlertDescription>
                     </Alert>
-                    <div className="space-y-2">
-                        <DnsRecordRow type="A" name="@" value="74.125.132.121" />
-                        <DnsRecordRow type="CNAME" name="www" value={userData?.customDomain?.name || 'your-site.com'} />
-                    </div>
-                </CardContent>
-                <CardFooter className="flex-col items-start gap-4 text-sm text-muted-foreground">
-                    <p>DNS changes can take up to 24 hours to propagate, but it's usually much faster. Once propagated, the status above will change to "Connected".</p>
-                    <p>If you need help, consult the "Using Your Own Domain" guide on the Marketing Guides page or your domain registrar's support documents.</p>
-                </CardFooter>
-            </Card>
-            
-             <Card>
-                <CardHeader>
-                    <CardTitle>Alternative: Domain Forwarding</CardTitle>
-                    <CardDescription>
-                        If you don't want to host a site, you can forward your domain directly to your affiliate link.
-                    </CardDescription>
-                </CardHeader>
-                <CardContent className="text-sm text-muted-foreground space-y-2">
-                    <p>This is a simpler but less professional option. In your domain registrar's settings, choose "Forwarding" and set the destination to your full affiliate link (e.g., <code>https://affiliateai.host/?ref={userData?.username || 'you'}</code>).</p>
-                     <p><strong>Note:</strong> With this method, visitors will see the affiliateai.host URL in their browser bar. For better branding and trust, we strongly recommend the DNS setup method above.</p>
                 </CardContent>
             </Card>
-
         </div>
     );
 }
