@@ -57,7 +57,7 @@ export function SignupForm() {
     
     try {
         let referrerId: string | null = null;
-        let referrerUsername: string | null = referralCode || null;
+        const referrerUsername: string | null = referralCode || null;
 
         // 1. Find referrer if one exists. This must happen before creating the user.
         if (referrerUsername) {
@@ -153,7 +153,7 @@ export function SignupForm() {
         let description = "An unknown error occurred while creating your account.";
         
         if (error.code === 'unavailable' || error.message.includes('client is offline')) {
-            description = "Could not establish a connection to the database. Please check your network and try again.";
+            description = "A temporary network issue occurred. Please try again in a moment.";
         } else if (error.code === 'auth/email-already-in-use') {
             description = "This email address is already in use. Please log in or use a different email.";
         } else if (error.code === 'auth/weak-password') {
