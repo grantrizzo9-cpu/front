@@ -50,33 +50,9 @@ const imageGeneratorFlow = ai.defineFlow(
             return { imageUrl: media.url };
         } catch (e: any) {
             console.error('Image Generation Error:', e);
-            const errorMessage = e.message || 'An unknown error occurred.';
-
-            // Check for most specific errors first.
-            if (errorMessage.includes('API key not valid')) {
-                return { error: 'The AI service is not configured correctly. Please ensure your GEMINI_API_KEY is valid.' };
-            }
-            if (errorMessage.includes('Vertex AI API has not been used') || errorMessage.includes('API is not enabled')) {
-                 return { error: 'The Vertex AI API is not enabled for your project. Please enable it in your Google Cloud console to use the image generator.' };
-            }
-            if (errorMessage.includes('billing account')) {
-                 return { error: 'A billing account is required to use this AI model. Please ensure billing is enabled for your Google Cloud project.' };
-            }
-             if (errorMessage.includes('content was blocked')) {
-                return { error: 'The image could not be generated because the prompt was blocked by the safety filter. Please try a different prompt.' };
-            }
-            if (errorMessage.includes('404 Not Found') || errorMessage.includes('is not found for API version')) {
-                return { error: 'The selected AI model is not available for your account. This may be due to account status or regional restrictions.' };
-            }
-            if (errorMessage.includes('Request failed with status code 400')) {
-                return { error: 'The request to the AI service was malformed. This may be due to an invalid API key or a problem with the prompt.' };
-            }
-            // This is a generic network error, check for it last.
-            if (errorMessage.includes('Failed to fetch')) {
-                 return { error: 'Could not connect to the AI service. We have ruled out API and billing issues. This may be a network problem or an incorrect GEMINI_API_KEY. Please verify your key and network connection.' };
-            }
-
-            return { error: `An unexpected error occurred. Details: ${errorMessage.substring(0, 150)}...` };
+            // New simplified error handling. Show the raw error to the user for better debugging.
+            const rawErrorMessage = e.message || 'An unknown error occurred.';
+            return { error: `The connection to the AI service failed. This could be a network issue, an invalid API key, or a problem with your Google Cloud project setup. Please check your environment and configuration. Raw error: "${rawErrorMessage}"` };
         }
     }
 );
