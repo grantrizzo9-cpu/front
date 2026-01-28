@@ -56,26 +56,40 @@ export function SignupForm() {
     const password = formData.get("password") as string;
     
     try {
-        // 1. Create user in Firebase Auth
-        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        const user = userCredential.user;
-
-        // 2. Update user profile with username
-        await updateProfile(user, { displayName: username });
-
         let referrerId: string | null = null;
         let referrerUsername: string | null = referralCode || null;
 
-        // 3. Find referrer if one exists
+        // 1. Find referrer if one exists. This must happen before creating the user.
         if (referrerUsername) {
-            const referrerUsernameRef = doc(firestore, "usernames", referrerUsername);
-            const referrerUsernameSnap = await getDoc(referrerUsernameRef);
-            if (referrerUsernameSnap.exists()) {
-                referrerId = referrerUsernameSnap.data().uid;
-            } else {
-                console.warn(`Referrer with username "${referrerUsername}" not found.`);
+            try {
+                const referrerUsernameRef = doc(firestore, "usernames", referrerUsername);
+                const referrerUsernameSnap = await getDoc(referrerUsernameRef);
+                if (referrerUsernameSnap.exists()) {
+                    referrerId = referrerUsernameSnap.data().uid;
+                } else {
+                    // If referrer not found, we throw an error to stop the signup.
+                    throw new Error(`Referrer with username "${referrerUsername}" not found. Please check the code and try again.`);
+                }
+            } catch (e: any) {
+                // Catch errors during the getDoc call (like the 'offline' error)
+                console.error("Error fetching referrer document:", e);
+                // Re-throw a user-friendly error to be caught by the outer catch block.
+                let message = "Could not verify the referral code. Please check it and try again.";
+                if (e.message.includes("offline")) {
+                    message = "Could not connect to the database to verify the referral. Please check your network and try again."
+                } else if (e.message.includes("not found")) {
+                    message = e.message;
+                }
+                throw new Error(message);
             }
         }
+        
+        // 2. Create user in Firebase Auth
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+
+        // 3. Update user profile with username
+        await updateProfile(user, { displayName: username });
 
         // 4. Create user document in Firestore. THIS MUST HAPPEN BEFORE CREATING THE REFERRAL.
         const userDocRef = doc(firestore, "users", user.uid);
@@ -103,7 +117,7 @@ export function SignupForm() {
         };
         await setDoc(userDocRef, userData);
 
-        // 5. Create the public username-to-UID mapping for the new user. THIS MUST HAPPEN BEFORE OTHER USERS CAN REFER.
+        // 5. Create the public username-to-UID mapping for the new user.
         const usernameDocRef = doc(firestore, "usernames", username);
         await setDoc(usernameDocRef, { uid: user.uid });
 
@@ -120,10 +134,8 @@ export function SignupForm() {
                 status: 'unpaid' as 'unpaid',
                 date: serverTimestamp(),
                 subscriptionId: "simulated_sub_id_" + user.uid,
-                // This property is added specifically for the security rule check
                 triggeringUserReferredBy: referrerId,
             };
-            // This write is now secured by a simpler, more robust security rule.
             await addDoc(referralRef, newReferralData);
         }
 
