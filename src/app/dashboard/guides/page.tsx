@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useMemo } from 'react';
@@ -60,6 +61,32 @@ export default function GuidesPage() {
 
   const { data: userData, isLoading: isUserDataLoading } = useDoc<UserType>(userDocRef);
 
+  const { currentTier, accessibleGuides } = useMemo(() => {
+    if (!userData?.subscription) {
+        return { currentTier: null, accessibleGuides: [] };
+    }
+    const tier = subscriptionTiers.find(t => t.id === userData.subscription?.tierId);
+    if (!tier) {
+        return { currentTier: null, accessibleGuides: [] };
+    }
+    
+    const levelHierarchy = ['starter', 'plus', 'pro', 'business', 'scale', 'enterprise'];
+    const userLevelIndex = levelHierarchy.indexOf(tier.guideAccessLevel);
+    
+    const guides = allGuides.filter(guide => {
+      const guideLevelIndex = levelHierarchy.indexOf(guide.level);
+      return guideLevelIndex <= userLevelIndex;
+    });
+
+    return { currentTier: tier, accessibleGuides: guides };
+  }, [userData]);
+  
+  const lockedGuides = useMemo(() => 
+    allGuides.filter(guide => !accessibleGuides.some(g => g.title === guide.title)),
+    [accessibleGuides]
+  );
+  
+  const isHighestPlan = currentTier?.id === 'enterprise';
   const isLoading = isUserLoading || isUserDataLoading || isAdminLoading;
 
   const handleDownload = (guide: Guide) => {
@@ -145,29 +172,6 @@ export default function GuidesPage() {
   }
 
   // SUBSCRIBED USER VIEW
-  const { currentTier, accessibleGuides } = useMemo(() => {
-    if (!userData?.subscription) {
-        return { currentTier: null, accessibleGuides: [] };
-    }
-    const tier = subscriptionTiers.find(t => t.id === userData.subscription?.tierId);
-    if (!tier) {
-        return { currentTier: null, accessibleGuides: [] };
-    }
-    
-    const levelHierarchy = ['starter', 'plus', 'pro', 'business', 'scale', 'enterprise'];
-    const userLevelIndex = levelHierarchy.indexOf(tier.guideAccessLevel);
-    
-    const guides = allGuides.filter(guide => {
-      const guideLevelIndex = levelHierarchy.indexOf(guide.level);
-      return guideLevelIndex <= userLevelIndex;
-    });
-
-    return { currentTier: tier, accessibleGuides: guides };
-  }, [userData]);
-  
-  const lockedGuides = allGuides.filter(guide => !accessibleGuides.some(g => g.title === guide.title));
-  const isHighestPlan = currentTier?.id === 'enterprise';
-
   return (
     <div className="space-y-8">
       <div>
