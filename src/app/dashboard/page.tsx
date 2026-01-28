@@ -23,14 +23,14 @@ export default function DashboardPage() {
   const userDocRef = useMemoFirebase(() => {
     if (!user) return null;
     return doc(firestore, 'users', user.uid);
-  }, [firestore, user]);
+  }, [firestore, user?.uid]);
   const { data: userData, isLoading: isUserDataLoading } = useDoc<UserType>(userDocRef);
 
   // Fetch referrals for the current user (for their personal dashboard view)
   const referralsRef = useMemoFirebase(() => {
     if (!user) return null;
     return collection(firestore, 'users', user.uid, 'referrals');
-  }, [firestore, user]);
+  }, [firestore, user?.uid]);
 
   const { data: referrals, isLoading: referralsLoading } = useCollection<Referral>(referralsRef);
   

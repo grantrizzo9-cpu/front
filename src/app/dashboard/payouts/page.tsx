@@ -16,7 +16,7 @@ export default function PayoutsPage() {
   const payoutsRef = useMemoFirebase(() => {
     if (!user) return null;
     return collection(firestore, 'users', user.uid, 'payments');
-  }, [firestore, user]);
+  }, [firestore, user?.uid]);
 
   const { data: payouts, isLoading: payoutsLoading } = useCollection<Payout>(payoutsRef);
 

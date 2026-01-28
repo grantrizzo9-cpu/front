@@ -25,7 +25,7 @@ export default function RequestRefundPage() {
   const userDocRef = useMemoFirebase(() => {
     if (!user) return null;
     return doc(firestore, 'users', user.uid);
-  }, [user, firestore]);
+  }, [user?.uid, firestore]);
   const { data: userData, isLoading: isUserDataLoading } = useDoc<UserType>(userDocRef);
 
   // Fetch ALL refund requests for the current user, ordered by date
@@ -35,7 +35,7 @@ export default function RequestRefundPage() {
         collection(firestore, 'users', user.uid, 'refundRequests'), 
         orderBy('requestedAt', 'desc')
     );
-  }, [firestore, user]);
+  }, [firestore, user?.uid]);
 
   const { data: refundRequests, isLoading: isLoadingRequests } = useCollection<RefundRequest>(refundRequestQuery);
   

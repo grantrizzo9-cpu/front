@@ -28,7 +28,7 @@ export default function HostingPage() {
     const userDocRef = useMemoFirebase(() => {
         if (!user) return null;
         return doc(firestore, 'users', user.uid);
-    }, [firestore, user]);
+    }, [firestore, user?.uid]);
 
     const { data: userData, isLoading: isUserDataLoading } = useDoc<UserType>(userDocRef);
 
