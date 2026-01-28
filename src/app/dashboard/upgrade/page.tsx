@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -95,7 +96,7 @@ export default function UpgradePage() {
                     <CardTitle className="font-headline text-xl">{tier.name}</CardTitle>
                     <div className="flex items-baseline gap-1">
                       <span className="text-3xl font-bold">${tier.price.toFixed(2)}</span>
-                      <span className="text-muted-foreground">/ day</span>
+                      <span className="text-muted-foreground">AUD / day</span>
                     </div>
                     <CardDescription>{tier.description}</CardDescription>
                   </CardHeader>
@@ -155,7 +156,7 @@ export default function UpgradePage() {
                   <CardTitle className="font-headline text-xl">{tier.name}</CardTitle>
                   <div className="flex items-baseline gap-1">
                     <span className="text-3xl font-bold">${tier.price.toFixed(2)}</span>
-                    <span className="text-muted-foreground">/ day</span>
+                    <span className="text-muted-foreground">AUD / day</span>
                   </div>
                   <CardDescription>{tier.description}</CardDescription>
                 </CardHeader>
