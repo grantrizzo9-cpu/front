@@ -26,6 +26,7 @@ export function SignupForm() {
   const [planId, setPlanId] = useState<string | null>(null);
   const [referralCode, setReferralCode] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isDbReady, setIsDbReady] = useState(false);
 
   useEffect(() => {
     const planIdParam = searchParams.get("plan");
@@ -41,6 +42,25 @@ export function SignupForm() {
         setReferralCode(refCode);
     }
   }, [searchParams]);
+
+  useEffect(() => {
+    if (!firestore) return;
+    // Perform a quick, simple read to check if the database connection is active.
+    // This prevents the user from submitting the form before Firestore is ready.
+    const checkDbConnection = async () => {
+      try {
+        const docRef = doc(firestore, 'subscriptionTiers', 'starter');
+        await getDoc(docRef);
+        setIsDbReady(true);
+      } catch (error) {
+        console.warn("Initial DB connection check failed. The form's error handling will manage subsequent attempts.");
+        // We will allow submission even if this fails, as the main handler has robust error checking.
+        // The primary goal is to prevent the common race condition on initial load.
+        setIsDbReady(true); 
+      }
+    };
+    checkDbConnection();
+  }, [firestore]);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -206,9 +226,11 @@ export function SignupForm() {
                 </span>
              </div>
           )}
-          <Button type="submit" className="w-full" disabled={isLoading}>
+          <Button type="submit" className="w-full" disabled={isLoading || !isDbReady}>
             {isLoading ? (
                 <Loader2 className="animate-spin" />
+            ) : !isDbReady ? (
+                "Connecting..."
             ) : selectedPlan ? (
                 `Sign Up & Start Earning`
             ) : (
