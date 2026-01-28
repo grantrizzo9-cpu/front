@@ -26,7 +26,6 @@ export function SignupForm() {
   const [planId, setPlanId] = useState<string | null>(null);
   const [referralCode, setReferralCode] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [isDbReady, setIsDbReady] = useState(false);
 
   useEffect(() => {
     const planIdParam = searchParams.get("plan");
@@ -42,25 +41,6 @@ export function SignupForm() {
         setReferralCode(refCode);
     }
   }, [searchParams]);
-
-  useEffect(() => {
-    if (!firestore) return;
-    // Perform a quick, simple read to check if the database connection is active.
-    // This prevents the user from submitting the form before Firestore is ready.
-    const checkDbConnection = async () => {
-      try {
-        const docRef = doc(firestore, 'subscriptionTiers', 'starter');
-        await getDoc(docRef);
-        setIsDbReady(true);
-      } catch (error) {
-        console.warn("Initial DB connection check failed. The form's error handling will manage subsequent attempts.");
-        // We will allow submission even if this fails, as the main handler has robust error checking.
-        // The primary goal is to prevent the common race condition on initial load.
-        setIsDbReady(true); 
-      }
-    };
-    checkDbConnection();
-  }, [firestore]);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -81,30 +61,30 @@ export function SignupForm() {
 
         // 1. Find referrer if one exists. This must happen before creating the user.
         if (referrerUsername) {
-            try {
-                const referrerUsernameRef = doc(firestore, "usernames", referrerUsername);
-                const referrerUsernameSnap = await getDoc(referrerUsernameRef);
-                if (referrerUsernameSnap.exists()) {
-                    referrerId = referrerUsernameSnap.data().uid;
+            const referrerUsernameRef = doc(firestore, "usernames", referrerUsername);
+            let referrerUsernameSnap;
+            
+            // Retry logic to handle the "client is offline" race condition gracefully.
+            for (let i = 0; i < 3; i++) {
+              try {
+                referrerUsernameSnap = await getDoc(referrerUsernameRef);
+                break; // If getDoc succeeds, exit the loop.
+              } catch (e: any) {
+                // If it's a connection error and not the last attempt, wait and retry.
+                if (e.code === 'unavailable' && i < 2) {
+                  console.warn(`Referrer check failed (attempt ${i + 1}), retrying...`);
+                  await new Promise(res => setTimeout(res, 1500));
                 } else {
-                    // If referrer not found, we throw an error to stop the signup.
-                    throw new Error(`Referrer with username "${referrerUsername}" not found. Please check the code and try again.`);
+                  // On the last attempt or for any other error, re-throw it.
+                  throw e;
                 }
-            } catch (e: any) {
-                // Catch errors during the getDoc call (like the 'offline' or 'unavailable' error)
-                console.error("Error fetching referrer document:", e);
-                
-                let message = "Could not verify the referral code. Please check it and try again.";
-                
-                // Firestore error codes for connectivity issues
-                if (e.code === 'unavailable' || e.message.includes("client is offline")) {
-                    message = "Could not connect to the database to verify the referral. This can be a temporary issue. Please check your network and try again in a moment.";
-                } else if (e.message.includes("not found")) {
-                    message = e.message;
-                }
-                
-                // Re-throw a user-friendly error to be caught by the outer catch block.
-                throw new Error(message);
+              }
+            }
+
+            if (referrerUsernameSnap?.exists()) {
+                referrerId = referrerUsernameSnap.data().uid;
+            } else {
+                throw new Error(`Referrer with username "${referrerUsername}" not found. Please check the code and try again.`);
             }
         }
         
@@ -171,7 +151,10 @@ export function SignupForm() {
 
     } catch (error: any) {
         let description = "An unknown error occurred while creating your account.";
-        if (error.code === 'auth/email-already-in-use') {
+        
+        if (error.code === 'unavailable' || error.message.includes('client is offline')) {
+            description = "Could not establish a connection to the database. Please check your network and try again.";
+        } else if (error.code === 'auth/email-already-in-use') {
             description = "This email address is already in use. Please log in or use a different email.";
         } else if (error.code === 'auth/weak-password') {
             description = "The password is too weak. Please use at least 6 characters.";
@@ -226,11 +209,9 @@ export function SignupForm() {
                 </span>
              </div>
           )}
-          <Button type="submit" className="w-full" disabled={isLoading || !isDbReady}>
+          <Button type="submit" className="w-full" disabled={isLoading}>
             {isLoading ? (
                 <Loader2 className="animate-spin" />
-            ) : !isDbReady ? (
-                "Connecting..."
             ) : selectedPlan ? (
                 `Sign Up & Start Earning`
             ) : (
