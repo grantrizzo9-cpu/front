@@ -100,23 +100,6 @@ export default function HostingPage() {
         }, 2500);
     };
 
-
-    const StatusBadge = () => {
-        if (!userData?.customDomain || !userData.customDomain.name) {
-            return <Badge variant="secondary">Unconfigured</Badge>;
-        }
-        switch (userData.customDomain.status) {
-            case 'pending':
-                return <Badge className="bg-amber-500 text-white hover:bg-amber-500">Pending Verification</Badge>;
-            case 'connected':
-                return <Badge className="bg-green-500 text-white hover:bg-green-500">Connected</Badge>;
-            case 'error':
-                 return <Badge variant="destructive">Error</Badge>;
-            default:
-                return <Badge variant="secondary">Unconfigured</Badge>;
-        }
-    };
-
     if (isLoading) {
         return (
             <div className="flex justify-center items-center h-full p-8">
@@ -127,11 +110,6 @@ export default function HostingPage() {
 
     return (
         <div className="space-y-8 max-w-4xl">
-            <div>
-                <h1 className="text-3xl font-bold font-headline">Your Guide to Hosting a Professional Website</h1>
-                <p className="text-muted-foreground">Follow these three simple steps to connect a custom domain name to your website.</p>
-            </div>
-            
             <Card>
                 <CardHeader>
                     <div className="flex items-center gap-3">
@@ -242,43 +220,66 @@ export default function HostingPage() {
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="flex flex-col items-center justify-center text-center gap-4 py-8">
-                     <StatusBadge />
+                     {(() => {
+                        const status = userData?.customDomain?.status;
 
-                     {(!userData?.customDomain || userData.customDomain.status === 'unconfigured') && (
-                        <p className="text-sm text-muted-foreground max-w-sm">
-                            Complete steps 1 and 2. The status of your domain will appear here.
-                        </p>
-                     )}
-                     
-                     {userData?.customDomain?.status === 'pending' && (
-                        <>
-                            <p className="text-sm text-muted-foreground max-w-sm">
-                                DNS changes can take up to 24 hours to propagate. You can manually check the status now.
-                            </p>
-                            <Button onClick={handleVerifyDomain} disabled={isVerifying}>
-                                {isVerifying ? (
-                                    <Loader2 className="animate-spin mr-2" />
-                                ) : (
-                                    <Search className="mr-2" />
-                                )}
-                                {isVerifying ? 'Verifying...' : 'Check Status Now'}
-                            </Button>
-                        </>
-                    )}
-
-                    {userData?.customDomain?.status === 'connected' && (
-                        <div className="w-full max-w-md">
-                            <Alert className="text-left border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-950">
-                                <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
-                                <AlertTitle className="text-green-800 dark:text-green-200">Congratulations!</AlertTitle>
-                                <AlertDescription className="text-green-700 dark:text-green-300">
-                                    Your domain is successfully connected and should be live shortly.
-                                </AlertDescription>
-                            </Alert>
-                        </div>
-                    )}
+                        switch (status) {
+                            case 'pending':
+                                return (
+                                    <>
+                                        <Badge className="bg-amber-500 text-white hover:bg-amber-500">Pending Verification</Badge>
+                                        <p className="text-sm text-muted-foreground max-w-sm">
+                                            DNS changes can take up to 24 hours to propagate. You can manually check the status now.
+                                        </p>
+                                        <Button onClick={handleVerifyDomain} disabled={isVerifying}>
+                                            {isVerifying ? (
+                                                <Loader2 className="animate-spin mr-2" />
+                                            ) : (
+                                                <Search className="mr-2" />
+                                            )}
+                                            {isVerifying ? 'Verifying...' : 'Check Status Now'}
+                                        </Button>
+                                    </>
+                                );
+                            case 'connected':
+                                return (
+                                    <>
+                                        <Badge className="bg-green-500 text-white hover:bg-green-500">Connected</Badge>
+                                        <div className="w-full max-w-md">
+                                            <Alert className="text-left border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-950">
+                                                <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
+                                                <AlertTitle className="text-green-800 dark:text-green-200">Congratulations!</AlertTitle>
+                                                <AlertDescription className="text-green-700 dark:text-green-300">
+                                                    Your domain is successfully connected and should be live shortly.
+                                                </AlertDescription>
+                                            </Alert>
+                                        </div>
+                                    </>
+                                );
+                            case 'error':
+                                return (
+                                    <>
+                                        <Badge variant="destructive">Error</Badge>
+                                        <p className="text-sm text-destructive max-w-sm">
+                                            Something went wrong. Please try saving your domain again or contact support.
+                                        </p>
+                                    </>
+                                );
+                            default: // This handles null, undefined, and 'unconfigured'
+                                return (
+                                    <>
+                                        <Badge variant="secondary">Unconfigured</Badge>
+                                        <p className="text-sm text-muted-foreground max-w-sm">
+                                            Complete steps 1 and 2. The status of your domain will appear here.
+                                        </p>
+                                    </>
+                                );
+                        }
+                    })()}
                 </CardContent>
             </Card>
         </div>
     );
 }
+
+    
