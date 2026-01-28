@@ -57,15 +57,29 @@ const contentGeneratorFlow = ai.defineFlow(
             }
             return { content: output.content };
         } catch (e: any) {
+            console.error('Content Generation Error:', e);
             const errorMessage = e.message || 'An unknown error occurred.';
-            // This is a common error when API key is missing or invalid on platforms like Railway/Vercel
-            if (errorMessage.includes('Request failed with status code 400') || errorMessage.includes('API key not valid')) {
-                return { error: 'The AI service is not configured correctly. Please ensure your GEMINI_API_KEY is set in your deployment environment.' };
+
+            if (errorMessage.includes('API key not valid')) {
+                return { error: 'The AI service is not configured correctly. Please ensure your GEMINI_API_KEY is set in your deployment environment and is valid.' };
+            }
+            if (errorMessage.includes('Vertex AI API has not been used') || errorMessage.includes('API is not enabled')) {
+                 return { error: 'The Vertex AI API is not enabled for your project. Please enable it in your Google Cloud console to use AI features.' };
+            }
+            if (errorMessage.includes('billing account')) {
+                 return { error: 'A billing account is required to use this AI model. Please ensure billing is enabled for your Google Cloud project.' };
+            }
+            if (errorMessage.includes('Request failed with status code 400')) {
+                return { error: 'The request to the AI service was malformed. This may be due to an invalid API key or a problem with the prompt.' };
             }
             if (errorMessage.includes('404 Not Found') || errorMessage.includes('is not found for API version')) {
                 return { error: 'The selected AI model is not available for your account. This may be due to account status or regional restrictions.' };
             }
-            return { error: 'An unexpected error occurred while trying to generate content.' };
+             if (errorMessage.includes('content was blocked')) {
+                return { error: 'The content could not be generated because the prompt was blocked by the safety filter. Please try a different prompt.' };
+            }
+
+            return { error: `An unexpected error occurred. Details: ${errorMessage.substring(0, 150)}...` };
         }
     }
 );
