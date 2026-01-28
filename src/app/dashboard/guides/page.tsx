@@ -7,14 +7,16 @@ import { doc } from 'firebase/firestore';
 import type { User as UserType } from '@/lib/types';
 import { subscriptionTiers } from '@/lib/data';
 import { allGuides, Guide } from '@/lib/guides';
-import { Loader2, BookOpen, Lock, Download } from 'lucide-react';
+import { Loader2, BookOpen, Lock, Download, BadgeCheck } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
+import { useAdmin } from '@/hooks/use-admin';
 
 export default function GuidesPage() {
   const { user, isUserLoading } = useUser();
   const firestore = useFirestore();
+  const { isAdmin, isLoading: isAdminLoading } = useAdmin();
 
   const userDocRef = useMemoFirebase(() => {
     if (!user) return null;
@@ -23,9 +25,15 @@ export default function GuidesPage() {
 
   const { data: userData, isLoading: isUserDataLoading } = useDoc<UserType>(userDocRef);
 
-  const isLoading = isUserLoading || isUserDataLoading;
+  const isLoading = isUserLoading || isUserDataLoading || isAdminLoading;
 
   const { currentTier, accessibleGuides } = useMemo(() => {
+    if (isAdmin) {
+      // Admins have access to all guides. We'll show them as having the top tier.
+      const adminTier = subscriptionTiers.find(t => t.id === 'enterprise');
+      return { currentTier: adminTier || null, accessibleGuides: allGuides };
+    }
+
     if (!userData || !userData.subscription) {
       return { currentTier: null, accessibleGuides: [] };
     }
@@ -44,7 +52,7 @@ export default function GuidesPage() {
     });
 
     return { currentTier: tier, accessibleGuides: guides };
-  }, [userData]);
+  }, [userData, isAdmin]);
 
   const handleDownload = (guide: Guide) => {
     // This function creates a temporary div to parse the HTML and extract the text content.
@@ -87,6 +95,8 @@ export default function GuidesPage() {
       )
   }
 
+  const isHighestPlan = currentTier.id === 'enterprise';
+
   return (
     <div className="space-y-8">
       <div>
@@ -99,7 +109,9 @@ export default function GuidesPage() {
       <Card>
         <CardHeader>
             <CardTitle>Your Unlocked Guides</CardTitle>
-            <CardDescription>Click on any guide to read its content. Upgrade your plan to unlock more advanced strategies.</CardDescription>
+            <CardDescription>
+              {isAdmin ? "As an admin, you have access to all guides." : "Click on any guide to read its content. Upgrade your plan to unlock more advanced strategies."}
+            </CardDescription>
         </CardHeader>
         <CardContent>
             {accessibleGuides.length > 0 ? (
@@ -133,7 +145,7 @@ export default function GuidesPage() {
         </CardContent>
       </Card>
       
-      {allGuides.length > accessibleGuides.length && (
+      { !isAdmin && !isHighestPlan && allGuides.length > accessibleGuides.length && (
          <Card>
             <CardHeader>
                 <CardTitle>Locked Guides</CardTitle>
@@ -155,8 +167,22 @@ export default function GuidesPage() {
         </Card>
       )}
 
+      {isAdmin && (
+        <Card className="max-w-md bg-green-50 border-green-200 dark:bg-green-950 dark:border-green-800">
+            <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-green-800 dark:text-green-200">
+                    <BadgeCheck className="h-6 w-6" />
+                    <span>Admin Access</span>
+                </CardTitle>
+            </CardHeader>
+            <CardContent>
+                <p className="text-green-700 dark:text-green-300">
+                    You have access to all guides across all subscription tiers.
+                </p>
+            </CardContent>
+        </Card>
+      )}
+
     </div>
   );
 }
-
-    
