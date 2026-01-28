@@ -10,12 +10,10 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { subscriptionTiers } from "@/lib/data";
 import { useEffect, useState } from "react";
-import { Loader2, Users, AlertTriangle, FileCode } from "lucide-react";
+import { Loader2, Users } from "lucide-react";
 import { useAuth, useFirestore } from "@/firebase";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { doc, serverTimestamp, setDoc, getDoc, collection, addDoc, Timestamp } from "firebase/firestore";
-import { firebaseConfig } from "@/firebase/config";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export function SignupForm() {
   const router = useRouter();
@@ -158,34 +156,6 @@ export function SignupForm() {
         setIsLoading(false);
     }
   };
-
-  if (firebaseConfig.apiKey.startsWith("REPLACE_WITH")) {
-    return (
-       <Card>
-           <CardHeader>
-               <CardTitle className="font-headline text-2xl flex items-center gap-2">
-                   <AlertTriangle className="h-6 w-6 text-destructive" />
-                   Firebase Not Configured
-               </CardTitle>
-               <CardDescription>
-                   The application is not connected to Firebase. Please follow the instructions in the code file below to resolve this issue.
-               </CardDescription>
-           </CardHeader>
-           <CardContent>
-                <Alert>
-                   <FileCode className="h-4 w-4" />
-                   <AlertTitle>Action Required:</AlertTitle>
-                   <AlertDescription>
-                       <ol className="list-decimal list-inside space-y-1 mt-2">
-                           <li>Open the file: <code className="font-semibold p-1 bg-muted rounded-sm">src/firebase/config.ts</code></li>
-                           <li>Follow the instructions in the comments at the top of the file to add your Firebase project configuration.</li>
-                       </ol>
-                   </AlertDescription>
-               </Alert>
-           </CardContent>
-       </Card>
-    )
- }
 
   return (
     <Card>
