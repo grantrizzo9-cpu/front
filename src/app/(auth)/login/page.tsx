@@ -10,23 +10,14 @@ import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/firebase";
 import { signInWithEmailAndPassword } from "firebase/auth";
-import { useState, useEffect } from "react";
-import { Loader2, AlertTriangle } from "lucide-react";
-import { firebaseConfig } from "@/firebase/config"; // Import config
+import { useState } from "react";
+import { Loader2 } from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();
   const { toast } = useToast();
   const auth = useAuth();
   const [isLoading, setIsLoading] = useState(false);
-  const [isConfigured, setIsConfigured] = useState(true);
-
-  useEffect(() => {
-    // Check if the config is still the placeholder on the client side
-    if (firebaseConfig.apiKey === "REPLACE_WITH_YOUR_API_KEY") {
-      setIsConfigured(false);
-    }
-  }, []);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -63,30 +54,6 @@ export default function LoginPage() {
         setIsLoading(false);
     }
   };
-
-  if (!isConfigured) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="font-headline text-2xl flex items-center gap-2">
-            <AlertTriangle className="h-6 w-6 text-destructive" />
-            Firebase Not Configured
-          </CardTitle>
-          <CardDescription>
-            The application is not connected to Firebase. Please follow the instructions in the code file below to resolve this issue.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-2 text-sm">
-          <p className="font-semibold">Action Required:</p>
-          <ol className="list-decimal list-inside space-y-1 text-muted-foreground">
-            <li>Open the file: <code className="bg-muted px-1 py-0.5 rounded">src/firebase/config.ts</code></li>
-            <li>Follow the instructions in the comments at the top of the file to add your Firebase project configuration.</li>
-          </ol>
-        </CardContent>
-      </Card>
-    )
-  }
-
 
   return (
     <Card>

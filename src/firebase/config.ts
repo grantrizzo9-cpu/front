@@ -5,11 +5,11 @@
 // 4. Copy the object and paste it below, replacing the placeholder values.
 
 export const firebaseConfig = {
-  apiKey: "REPLACE_WITH_YOUR_API_KEY",
-  authDomain: "REPLACE_WITH_YOUR_AUTH_DOMAIN",
-  projectId: "REPLACE_WITH_YOUR_PROJECT_ID",
-  storageBucket: "REPLACE_WITH_YOUR_STORAGE_BUCKET",
-  messagingSenderId: "REPLACE_WITH_YOUR_MESSAGING_SENDER_ID",
-  appId: "REPLACE_WITH_YOUR_APP_ID",
-  measurementId: "REPLACE_WITH_YOUR_MEASUREMENT_ID"
+  apiKey: "AIzaSyCVM8NoXlgZXbvYohxzLJaje4gU7sK4qdA",
+  authDomain: "rent-a-host-a55fd.firebaseapp.com",
+  projectId: "rent-a-host-a55fd",
+  storageBucket: "rent-a-host-a55fd.firebasestorage.app",
+  messagingSenderId: "675996746308",
+  appId: "1:675996746308:web:860cf911c9059b610b3211",
+  measurementId: "G-FS4QWH387W"
 };
