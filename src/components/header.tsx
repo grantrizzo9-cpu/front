@@ -11,16 +11,16 @@ export function Header() {
   const searchParams = useSearchParams();
   const refCode = searchParams.get('ref');
 
-  const getPricingLink = () => {
-    let link = '/pricing';
+  const getLinkWithRef = (baseHref: string) => {
+    if (baseHref.startsWith('/#')) return baseHref;
     if (refCode) {
-      link += `?ref=${refCode}`;
+      return `${baseHref}?ref=${refCode}`;
     }
-    return link;
+    return baseHref;
   };
   
   const navLinks = [
-    { href: getPricingLink(), label: 'Pricing' },
+    { href: getLinkWithRef('/pricing'), label: 'Pricing' },
     { href: '/#features', label: 'Features' },
     { href: '/#faq', label: 'FAQ' },
   ];
@@ -70,10 +70,10 @@ export function Header() {
         </div>
         <div className="flex items-center justify-end space-x-2 sm:space-x-4">
           <Button variant="ghost" asChild>
-            <Link href="/login">Log In</Link>
+            <Link href={getLinkWithRef('/login')}>Log In</Link>
           </Button>
           <Button asChild>
-            <Link href={getPricingLink()}>Sign Up</Link>
+            <Link href={getLinkWithRef('/pricing')}>Sign Up</Link>
           </Button>
         </div>
       </div>

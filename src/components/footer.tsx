@@ -9,11 +9,9 @@ export function Footer() {
   const refCode = searchParams.get('ref');
 
   const getLinkWithRef = (baseHref: string) => {
+    if (baseHref.startsWith('/#')) return baseHref;
     if (refCode) {
-      // Use URLSearchParams to handle existing query params gracefully if needed in the future
-      const url = new URL(baseHref, "http://localhost"); // base is required
-      url.searchParams.set('ref', refCode);
-      return `${url.pathname}${url.search}`;
+      return `${baseHref}?ref=${refCode}`;
     }
     return baseHref;
   };
@@ -26,12 +24,12 @@ export function Footer() {
       { href: getLinkWithRef('/login'), label: 'Login' },
     ],
     legal: [
-      { href: '/terms', label: 'Terms of Service' },
-      { href: '/privacy', label: 'Privacy Policy' },
+      { href: getLinkWithRef('/terms'), label: 'Terms of Service' },
+      { href: getLinkWithRef('/privacy'), label: 'Privacy Policy' },
     ],
     company: [
-      { href: '/about', label: 'About Us' },
-      { href: '/contact', label: 'Contact' },
+      { href: getLinkWithRef('/about'), label: 'About Us' },
+      { href: getLinkWithRef('/contact'), label: 'Contact' },
     ]
   }
 
