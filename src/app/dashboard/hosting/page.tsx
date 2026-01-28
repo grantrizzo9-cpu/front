@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -43,6 +43,9 @@ export default function HostingPage() {
     const [domainInput, setDomainInput] = useState('');
     const [isSaving, setIsSaving] = useState(false);
     const [isVerifying, setIsVerifying] = useState(false);
+    
+    // Local state to provide immediate UI feedback for domain status
+    const [localDomainStatus, setLocalDomainStatus] = useState<'unconfigured' | 'pending' | 'connected' | 'error' | null>(null);
 
     const userDocRef = useMemoFirebase(() => {
         if (!user) return null;
@@ -50,6 +53,16 @@ export default function HostingPage() {
     }, [firestore, user]);
 
     const { data: userData, isLoading: isUserDataLoading } = useDoc<UserType>(userDocRef);
+
+    // Effect to sync local state with Firestore data once it loads
+    useEffect(() => {
+        if (userData?.customDomain?.status) {
+            setLocalDomainStatus(userData.customDomain.status);
+        } else {
+            setLocalDomainStatus('unconfigured');
+        }
+    }, [userData?.customDomain?.status]);
+
 
     const isLoading = isUserLoading || isUserDataLoading;
 
@@ -74,7 +87,11 @@ export default function HostingPage() {
             status: 'pending' as const,
         };
 
+        // Update Firestore in the background
         updateDocumentNonBlocking(userDocRef, { customDomain: newDomainData });
+        
+        // Immediately update local state to provide instant UI feedback
+        setLocalDomainStatus('pending');
         
         setTimeout(() => {
             toast({
@@ -90,7 +107,10 @@ export default function HostingPage() {
         setIsVerifying(true);
         // Simulate a network delay for verification
         setTimeout(() => {
+            // Update firestore in the background
             updateDocumentNonBlocking(userDocRef, { 'customDomain.status': 'connected' });
+            // Update local state immediately for instant UI feedback
+            setLocalDomainStatus('connected');
             setIsVerifying(false);
             toast({
                 title: 'Domain Connected!',
@@ -100,7 +120,7 @@ export default function HostingPage() {
         }, 2500);
     };
 
-    if (isLoading) {
+    if (isLoading && localDomainStatus === null) {
         return (
             <div className="flex justify-center items-center h-full p-8">
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -153,9 +173,9 @@ export default function HostingPage() {
                                 placeholder="your-awesome-site.com"
                                 defaultValue={userData?.customDomain?.name || ''}
                                 onChange={(e) => setDomainInput(e.target.value)}
-                                disabled={isSaving || userData?.customDomain?.status === 'connected'}
+                                disabled={isSaving || localDomainStatus === 'connected'}
                             />
-                            <Button onClick={handleSaveDomain} disabled={isSaving || !domainInput || userData?.customDomain?.status === 'connected'}>
+                            <Button onClick={handleSaveDomain} disabled={isSaving || !domainInput || localDomainStatus === 'connected'}>
                                 {isSaving ? <Loader2 className="animate-spin" /> : 'Save & Continue'}
                             </Button>
                         </div>
@@ -221,7 +241,7 @@ export default function HostingPage() {
                 </CardHeader>
                 <CardContent className="flex flex-col items-center justify-center text-center gap-4 py-8">
                      {(() => {
-                        const status = userData?.customDomain?.status;
+                        const status = localDomainStatus;
 
                         switch (status) {
                             case 'pending':
@@ -281,5 +301,3 @@ export default function HostingPage() {
         </div>
     );
 }
-
-    
