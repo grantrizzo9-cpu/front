@@ -10,10 +10,10 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { subscriptionTiers } from "@/lib/data";
 import { useEffect, useState } from "react";
-import { Loader2, Users, AlertTriangle } from "lucide-react";
+import { Loader2, Users } from "lucide-react";
 import { useAuth, useFirestore } from "@/firebase";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
-import { doc, serverTimestamp, setDoc, getDoc, collection, addDoc, Timestamp } from "firebase/firestore";
+import { doc, serverTimestamp, setDoc, Timestamp } from "firebase/firestore";
 
 export function SignupForm() {
   const router = useRouter();
@@ -52,29 +52,16 @@ export function SignupForm() {
     const password = formData.get("password") as string;
     
     try {
-        let referrerId: string | null = null;
         const referrerUsername: string | null = referralCode || null;
 
-        // 1. Find referrer if one exists. Assumes connection is ready due to FirebaseClientProvider.
-        if (referrerUsername) {
-            const referrerUsernameRef = doc(firestore, "usernames", referrerUsername);
-            const referrerUsernameSnap = await getDoc(referrerUsernameRef);
-
-            if (referrerUsernameSnap.exists()) {
-                referrerId = referrerUsernameSnap.data().uid;
-            } else {
-                throw new Error(`Referrer with username "${referrerUsername}" not found. Please check the code and try again.`);
-            }
-        }
-        
-        // 2. Create user in Firebase Auth
+        // 1. Create user in Firebase Auth
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
 
-        // 3. Update user profile with username
+        // 2. Update user profile with username
         await updateProfile(user, { displayName: username });
 
-        // 4. Create user document in Firestore. THIS MUST HAPPEN BEFORE CREATING THE REFERRAL.
+        // 3. Create user document in Firestore.
         const userDocRef = doc(firestore, "users", user.uid);
         const plan = planId ? subscriptionTiers.find(p => p.id === planId) : null;
         
@@ -85,7 +72,7 @@ export function SignupForm() {
             id: user.uid,
             email: user.email,
             username: username,
-            referredBy: referrerId, // Store referrer's UID
+            referredBy: referrerUsername, // Store referrer's username directly
             isAffiliate: true,
             createdAt: serverTimestamp(),
             subscription: plan ? {
@@ -100,27 +87,14 @@ export function SignupForm() {
         };
         await setDoc(userDocRef, userData);
 
-        // 5. Create the public username-to-UID mapping for the new user.
+        // 4. Create the public username-to-UID mapping for the new user.
         const usernameDocRef = doc(firestore, "usernames", username);
         await setDoc(usernameDocRef, { uid: user.uid });
 
-        // 6. If referral is valid, create ONE referral doc for the referrer
-        if (referrerId && plan) {
-            const referralRef = collection(firestore, 'users', referrerId, 'referrals');
-            const commissionAmount = plan.price * 0.70;
-            const newReferralData = {
-                affiliateId: referrerId,
-                referredUserId: user.uid,
-                referredUserUsername: username,
-                planPurchased: plan.name,
-                commission: commissionAmount,
-                status: 'unpaid' as 'unpaid',
-                date: serverTimestamp(),
-                subscriptionId: "simulated_sub_id_" + user.uid,
-                triggeringUserReferredBy: referrerId,
-            };
-            await addDoc(referralRef, newReferralData);
-        }
+        // NOTE: The creation of the 'referral' document in the affiliate's subcollection
+        // is now handled by a backend process (e.g., a Cloud Function).
+        // This decouples the accounting logic from the user-facing signup,
+        // making the process faster and more resilient to network issues.
 
         toast({
           title: "Account Created!",
@@ -131,16 +105,14 @@ export function SignupForm() {
     } catch (error: any) {
         let description = "An unknown error occurred while creating your account.";
         
-        if (error.code === 'unavailable' || error.message.includes('client is offline')) {
-            description = "A temporary network issue occurred. Please try again in a moment.";
-        } else if (error.code === 'auth/email-already-in-use') {
+        if (error.code === 'auth/email-already-in-use') {
             description = "This email address is already in use. Please log in or use a different email.";
         } else if (error.code === 'auth/weak-password') {
             description = "The password is too weak. Please use at least 6 characters.";
-        } else if (error.code === 'permission-denied') {
-            description = "A security rule prevented signup. This might be due to an invalid referral code or system misconfiguration."
         } else if (error.code === 'auth/configuration-not-found' || error.code === 'auth/api-key-not-valid') {
           description = "The Firebase configuration is invalid. Please follow the instructions on the page to fix it."
+        } else if (error.code === 'unavailable') {
+            description = "A temporary network issue occurred. Please check your connection and try again in a moment.";
         }
         else if (error.message) {
             description = error.message;

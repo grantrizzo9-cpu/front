@@ -25,7 +25,7 @@
             "string",
             "null"
           ],
-          "description": "ID of the affiliate who referred this user."
+          "description": "Username of the affiliate who referred this user. This is resolved to a UID by a backend process."
         },
         "isAffiliate": {
           "type": "boolean",
@@ -231,10 +231,6 @@
         "subscriptionId": {
             "type": "string",
             "description": "The ID of the subscription that generated this commission."
-        },
-        "triggeringUserReferredBy": {
-          "type": "string",
-          "description": "A write-only field used by security rules to verify the referral without a `get` call. It should contain the UID of the referrer."
         }
       },
       "required": [
@@ -392,7 +388,7 @@
           "schema": {
             "$ref": "#/backend/entities/Referral"
           },
-          "description": "Stores referrals made by a user. A newly signed up user is allowed to create this document in their referrer's subcollection. This is validated by checking data within the request, avoiding a complex `get` call.",
+          "description": "Stores referrals made by a user. These documents are created by a backend process that resolves referred users, ensuring atomicity and decoupling it from the user signup flow.",
           "params": [
             {
               "name": "userId",
@@ -481,5 +477,3 @@
     "reasoning": "The Firestore structure is designed to support Affiliate AI Host's affiliate marketing and subscription management features, prioritizing security, scalability, and ease of debugging. The key principle is Authorization Independence, achieved through denormalization of authorization data, eliminating the need for `get()` calls in security rules where possible. Data is segregated into collections with homogeneous security postures, enabling secure list operations. User-owned data is organized under user-specific paths for simplified ownership-based security. The use of DBAC (database-based access control) via the `/roles_admin` collection eliminates the need for custom claims."
   }
 }
-
-    

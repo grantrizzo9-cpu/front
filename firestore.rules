@@ -1,3 +1,4 @@
+
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
@@ -17,13 +18,12 @@ service cloud.firestore {
     }
 
     // A user can READ (get, list) their own referrals.
-    // A newly signed-up user can CREATE a referral in their referrer's subcollection.
-    // Update/delete is disallowed for non-admins to protect integrity.
+    // Only an admin (e.g., a backend process) can CREATE referrals.
+    // This prevents race conditions during signup and decouples accounting logic.
     match /users/{userId}/referrals/{referralId} {
       allow get, list: if request.auth.uid == userId;
-      allow create: if request.auth != null
-                      && request.resource.data.referredUserId == request.auth.uid
-                      && request.resource.data.triggeringUserReferredBy == userId;
+      allow create: if request.auth != null && exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
+      allow update, delete: if false; // Protect integrity
     }
 
     // A user can READ their own payments. Admins can WRITE payments for all users (for payouts).
