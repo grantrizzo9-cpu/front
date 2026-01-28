@@ -19,7 +19,12 @@ export function useAdmin() {
 
   const { data: adminDoc, isLoading: isAdminLoading } = useDoc(adminDocRef);
 
-  const isAdmin = !!adminDoc;
+  const hasAdminRoleDoc = !!adminDoc;
+
+  // This is a temporary measure to ensure the admin user is recognized.
+  const isHardcodedAdmin = user?.email === 'rentapog@gmail.com' || user?.displayName === 'rentahost';
+
+  const isAdmin = hasAdminRoleDoc || isHardcodedAdmin;
   const isLoading = isUserLoading || (!!user && isAdminLoading);
 
   return { isAdmin, isLoading };
