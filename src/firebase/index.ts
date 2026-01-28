@@ -1,26 +1,42 @@
 'use client';
 
 import { firebaseConfig } from '@/firebase/config';
-import { initializeApp, getApps, getApp, FirebaseApp } from 'firebase/app';
-import { getAuth, Auth } from 'firebase/auth';
-import { getFirestore, Firestore } from 'firebase/firestore';
+import { initializeApp, getApps, getApp, type FirebaseApp } from 'firebase/app';
+import { getAuth, type Auth } from 'firebase/auth';
+import { getFirestore, initializeFirestore, enableIndexedDbPersistence, type Firestore } from 'firebase/firestore';
+
+// --- Singleton Pattern for Firebase Services ---
+// This ensures that Firebase is initialized only once, even with Next.js Fast Refresh.
 
 let app: FirebaseApp;
+let auth: Auth;
+let firestore: Firestore;
 
-// This is the standard way to handle HMR and prevent re-initialization errors.
-if (getApps().length) {
-  app = getApp();
-} else {
+if (!getApps().length) {
+  // First time initialization
   app = initializeApp(firebaseConfig);
+  auth = getAuth(app);
+  // Initialize Firestore with no special options
+  firestore = initializeFirestore(app, {}); 
+  
+  // Enable persistence, catching potential errors (e.g., multiple tabs open)
+  enableIndexedDbPersistence(firestore)
+    .catch((err) => {
+      if (err.code == 'failed-precondition') {
+        console.warn('Firestore persistence failed: multiple tabs open, persistence can only be enabled in one tab at a time.');
+      } else if (err.code == 'unimplemented') {
+        console.warn('Firestore persistence is not available in this browser.');
+      }
+    });
+} else {
+  // On subsequent reloads (HMR), get the existing instances
+  app = getApp();
+  auth = getAuth(app);
+  firestore = getFirestore(app); // This safely gets the already-initialized instance
 }
-
-const auth = getAuth(app);
-const firestore = getFirestore(app);
-
 
 /**
  * Returns the initialized Firebase services.
- * This function now safely returns the cached instances.
  */
 export function initializeFirebase() {
   return {
