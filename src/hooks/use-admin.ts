@@ -20,7 +20,7 @@ export function useAdmin() {
 
   const { data: adminDoc, isLoading: isAdminDocLoading } = useDoc(adminDocRef);
 
-  const isHardcodedAdmin = user?.email === 'rentapog@gmail.com' || user?.displayName === 'rentahost';
+  const isHardcodedAdmin = user?.email === 'grantrizzo2@gmail.com' || user?.displayName === 'rentahost';
   
   const isAdminByDb = !!adminDoc;
 
