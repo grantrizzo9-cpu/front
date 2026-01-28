@@ -51,6 +51,8 @@ export default function LoginPage() {
         description = "Invalid email or password. If you've signed up before, you can also reset your password.";
       } else if (error.code === 'auth/too-many-requests') {
         description = "Access to this account has been temporarily disabled due to many failed login attempts. You can reset your password or try again later.";
+      } else if (error.code === 'auth/api-key-not-valid') {
+          description = "The provided Firebase API key is not valid. Please check your configuration."
       } else if (error.message) {
         description = error.message;
       }
@@ -112,7 +114,7 @@ export default function LoginPage() {
             </p>
             <p className="text-sm">
                 2. Follow the instructions in the comments at the top of the file to add your
-                   Firebase project configuration.
+                   Firebase project configuration for project 'rent-a-host-96880149'.
             </p>
         </CardContent>
       </Card>
@@ -125,7 +127,7 @@ export default function LoginPage() {
       <CardHeader>
         <CardTitle className="font-headline text-2xl">Welcome Back</CardTitle>
         <CardDescription>Enter your credentials to access your dashboard.</CardDescription>
-      </CardHeader>
+      </Header>
       <CardContent>
         <form className="space-y-4" onSubmit={handleSubmit}>
           <div className="space-y-2">

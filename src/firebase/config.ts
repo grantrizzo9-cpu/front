@@ -6,19 +6,19 @@
 //
 // How to find your config object:
 // 1. Go to the Firebase Console: https://console.firebase.google.com/
-// 2. Select your project (studio-4293456336).
+// 2. Select your project (rent-a-host-96880149).
 // 3. In the project overview, click the gear icon and select "Project settings".
-// 4. In the "Your apps" card, find your web app.
+// 4. In the "Your apps" card, find your web app. If you don't have one, create one.
 // 5. Select "Config" for the SDK setup and configuration.
 // 6. Copy the entire 'firebaseConfig' object and paste it below, replacing
 //    the placeholder object.
 // =================================================================================
 
 export const firebaseConfig = {
-  apiKey: "AIzaSyBe-3LwohmwM00hFfAC25Fq6t-9aGYqPzA",
-  authDomain: "studio-4293456336.firebaseapp.com",
-  projectId: "studio-4293456336",
-  storageBucket: "studio-4293456336.appspot.com",
-  messagingSenderId: "1090153835693",
-  appId: "1:1090153835693:web:96e0018503a55545a90d34"
+  apiKey: "REPLACE_WITH_YOUR_API_KEY",
+  authDomain: "rent-a-host-96880149.firebaseapp.com",
+  projectId: "rent-a-host-96880149",
+  storageBucket: "rent-a-host-96880149.appspot.com",
+  messagingSenderId: "REPLACE_WITH_YOUR_MESSAGING_SENDER_ID",
+  appId: "REPLACE_WITH_YOUR_APP_ID"
 };
