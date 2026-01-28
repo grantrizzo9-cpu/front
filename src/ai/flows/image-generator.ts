@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -48,6 +49,9 @@ const imageGeneratorFlow = ai.defineFlow(
             console.error('Image Generation Error:', e);
             const errorMessage = e.message || 'An unknown error occurred.';
 
+            if (errorMessage.includes('Failed to fetch')) {
+                 return { error: 'Could not connect to the AI service. This is often due to a missing GEMINI_API_KEY environment variable or the Vertex AI API not being enabled on your Google Cloud project.' };
+            }
             if (errorMessage.includes('API key not valid')) {
                 return { error: 'The AI service is not configured correctly. Please ensure your GEMINI_API_KEY is set in your deployment environment and is valid.' };
             }
