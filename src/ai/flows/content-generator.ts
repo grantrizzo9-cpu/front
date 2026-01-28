@@ -65,7 +65,7 @@ const contentGeneratorFlow = ai.defineFlow(
             const rawErrorMessage = e.message || 'An unknown error occurred.';
 
             if (rawErrorMessage.includes("API is only accessible to billed users at this time")) {
-                 return { error: 'Content Generation Failed: This AI model requires a project with an active billing history. Please ensure your Google Cloud project\'s billing is fully enabled and has a payment history.' };
+                 return { error: 'Content Generation Blocked by Google Policy: This AI model requires a project with a billing history. This is not a bug in the app. To resolve this, you may need to wait for a billing cycle or contact Google Cloud support regarding your project\'s billing status.' };
             }
 
             return { error: `The connection to the AI service failed. This could be a network issue, an invalid API key, or a problem with your Google Cloud project setup. Please check your environment and configuration. Raw error: "${rawErrorMessage}"` };
