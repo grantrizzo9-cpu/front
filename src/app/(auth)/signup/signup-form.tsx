@@ -12,9 +12,14 @@ import { subscriptionTiers } from "@/lib/data";
 import { useEffect, useState } from "react";
 import { Loader2, Users } from "lucide-react";
 import { useAuth, useFirestore, setDocumentNonBlocking } from "@/firebase";
-import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
-import { doc, serverTimestamp, Timestamp } from "firebase/firestore";
+import { createUserWithEmailAndPassword, updateProfile, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import { doc, getDoc, writeBatch, serverTimestamp, Timestamp } from "firebase/firestore";
 import { firebaseConfig } from "@/firebase/config";
+
+const GoogleIcon = () => (
+    <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" className="mr-2 h-4 w-4 fill-current"><title>Google</title><path d="M12.48 10.92v3.28h7.84c-.24 1.84-.85 3.18-1.73 4.1-1.02 1.02-2.62 1.98-4.48 1.98-3.62 0-6.55-2.92-6.55-6.55s2.93-6.55 6.55-6.55c2.03 0 3.33.82 4.1 1.59l2.48-2.48C17.22 3.43 15.14 2 12.48 2 7.08 2 3 6.08 3 11.48s4.08 9.48 9.48 9.48c5.13 0 9.1-3.48 9.1-9.28 0-.6-.08-1.12-.2-1.68H3.48v.01z"></path></svg>
+);
+
 
 export function SignupForm() {
   const router = useRouter();
@@ -27,6 +32,8 @@ export function SignupForm() {
   const [planId, setPlanId] = useState<string | null>(null);
   const [referralCode, setReferralCode] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+
 
   useEffect(() => {
     const planIdParam = searchParams.get("plan");
@@ -43,7 +50,7 @@ export function SignupForm() {
     }
   }, [searchParams]);
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+  const handleEmailSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setIsLoading(true);
 
@@ -123,12 +130,85 @@ export function SignupForm() {
             description: description,
         });
     } finally {
-        // We set isLoading to false immediately in the catch block, but if successful,
-        // the user will have navigated away, so this won't be visible.
         setIsLoading(false);
     }
   };
-  
+
+  const handleGoogleSignIn = async () => {
+    setIsGoogleLoading(true);
+    const provider = new GoogleAuthProvider();
+    try {
+        const result = await signInWithPopup(auth, provider);
+        const user = result.user;
+
+        const userDocRef = doc(firestore, "users", user.uid);
+        const userDoc = await getDoc(userDocRef);
+
+        if (!userDoc.exists()) {
+            let username = (user.displayName || user.email?.split('@')[0] || `user${user.uid.substring(0,5)}`).replace(/[^a-zA-Z0-9]/g, '');
+            const usernameDocRef = doc(firestore, "usernames", username);
+            const usernameDoc = await getDoc(usernameDocRef);
+
+            if (usernameDoc.exists()) {
+                username = `${username}${Math.floor(100 + Math.random() * 900)}`;
+            }
+
+            const plan = planId ? subscriptionTiers.find(p => p.id === planId) : null;
+            const trialEndDate = new Date();
+            trialEndDate.setDate(trialEndDate.getDate() + 3);
+
+            const newUserDocData = {
+                id: user.uid,
+                email: user.email,
+                username: username,
+                referredBy: referralCode || null,
+                isAffiliate: true,
+                createdAt: serverTimestamp(),
+                subscription: plan ? {
+                    tierId: plan.id,
+                    status: 'active' as const,
+                    startDate: serverTimestamp(),
+                    endDate: null,
+                    trialEndDate: Timestamp.fromDate(trialEndDate),
+                } : null,
+                paypalEmail: '',
+                customDomain: null
+            };
+            
+            const batch = writeBatch(firestore);
+            batch.set(userDocRef, newUserDocData);
+            batch.set(doc(firestore, "usernames", username), { uid: user.uid });
+            await batch.commit();
+            toast({
+                title: "Account Created!",
+                description: "Welcome! We've set up your new account.",
+            });
+        } else {
+             toast({
+                title: "Login Successful",
+                description: "Welcome back!",
+            });
+        }
+
+        router.push("/dashboard");
+
+    } catch (error: any) {
+        let description = "An unknown error occurred. Please try again.";
+        if (error.code === 'auth/popup-closed-by-user') {
+            description = "The sign-in window was closed before completion.";
+        } else if (error.code === 'auth/account-exists-with-different-credential') {
+            description = "An account already exists with the same email address but different sign-in credentials. Please sign in using the original method.";
+        }
+        toast({
+            variant: "destructive",
+            title: "Google Sign-In Failed",
+            description: description,
+        });
+    } finally {
+        setIsGoogleLoading(false);
+    }
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -141,18 +221,18 @@ export function SignupForm() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form className="space-y-4" onSubmit={handleSubmit}>
+        <form className="space-y-4" onSubmit={handleEmailSubmit}>
           <div className="space-y-2">
             <Label htmlFor="username">Username</Label>
-            <Input id="username" name="username" type="text" placeholder="your-username" required disabled={isLoading} />
+            <Input id="username" name="username" type="text" placeholder="your-username" required disabled={isLoading || isGoogleLoading} />
           </div>
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
-            <Input id="email" name="email" type="email" placeholder="you@example.com" required disabled={isLoading} />
+            <Input id="email" name="email" type="email" placeholder="you@example.com" required disabled={isLoading || isGoogleLoading} />
           </div>
           <div className="space-y-2">
             <Label htmlFor="password">Password</Label>
-            <Input id="password" name="password" type="password" required disabled={isLoading} />
+            <Input id="password" name="password" type="password" required disabled={isLoading || isGoogleLoading} />
           </div>
           {referralCode && (
              <div className="flex items-center gap-3 text-sm text-primary border border-primary/20 bg-primary/5 p-3 rounded-lg">
@@ -162,7 +242,7 @@ export function SignupForm() {
                 </span>
              </div>
           )}
-          <Button type="submit" className="w-full" disabled={isLoading}>
+          <Button type="submit" className="w-full" disabled={isLoading || isGoogleLoading}>
             {isLoading ? (
                 <Loader2 className="animate-spin" />
             ) : selectedPlan ? (
@@ -172,6 +252,18 @@ export function SignupForm() {
             )}
           </Button>
         </form>
+         <div className="relative my-4">
+            <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-card px-2 text-muted-foreground">Or sign up with</span>
+            </div>
+        </div>
+        <Button variant="outline" className="w-full" onClick={handleGoogleSignIn} disabled={isLoading || isGoogleLoading}>
+            {isGoogleLoading ? <Loader2 className="animate-spin" /> : <GoogleIcon />}
+            Sign Up with Google
+        </Button>
         <div className="mt-4 text-center text-sm">
           Already have an account?{" "}
           <Link href="/login" className="text-primary hover:underline">
