@@ -13,22 +13,22 @@ export function useAdmin() {
   const { user, isUserLoading } = useUser();
   const firestore = useFirestore();
 
-  // FORCED ADMIN CHECK: This is the primary check for the main administrator.
-  // This bypasses any database reads to ensure the admin is always recognized.
-  if (user && (user.email === 'rentapog@gmail.com' || user.displayName === 'rentahost')) {
-      return { isAdmin: true, isLoading: false };
-  }
-
-  // Standard database check for other potential admins.
   const adminDocRef = useMemoFirebase(() => {
     if (!user?.uid) return null;
     return doc(firestore, 'roles_admin', user.uid);
   }, [firestore, user?.uid]);
 
-  const { data: adminDoc, isLoading: isAdminLoading } = useDoc(adminDocRef);
+  const { data: adminDoc, isLoading: isAdminDocLoading } = useDoc(adminDocRef);
 
-  const isAdmin = !!adminDoc;
-  const isLoading = isUserLoading || (!!user && isAdminLoading);
+  const isHardcodedAdmin = user?.email === 'rentapog@gmail.com' || user?.displayName === 'rentahost';
+  
+  const isAdminByDb = !!adminDoc;
+
+  const isAdmin = isHardcodedAdmin || isAdminByDb;
+  
+  // Loading is true if we are still waiting on the user object, or if we are waiting on the admin doc.
+  // However, we don't need to wait for the admin doc if the user is the hardcoded admin.
+  const isLoading = isUserLoading || (!isHardcodedAdmin && isAdminDocLoading);
 
   return { isAdmin, isLoading };
 }
