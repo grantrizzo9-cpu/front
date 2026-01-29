@@ -51,10 +51,6 @@ const contentGeneratorFlow = ai.defineFlow(
         outputSchema: GenerateContentOutputSchema,
     },
     async (input): Promise<GenerateContentOutput> => {
-        const apiKey = process.env.GEMINI_API_KEY;
-        if (!apiKey || apiKey === 'REPLACE_WITH_YOUR_GEMINI_API_KEY') {
-            return { error: 'Your Gemini API Key is not configured. Please get a key from Google AI Studio and add it to your .env file.' };
-        }
         try {
             const { output } = await prompt(input);
             if (!output) {
@@ -65,11 +61,15 @@ const contentGeneratorFlow = ai.defineFlow(
             console.error('Content Generation Error:', e);
             const rawErrorMessage = e.message || 'An unknown error occurred.';
 
+            if (rawErrorMessage.includes("API key not valid")) {
+                 return { error: `Authentication failed. Please check that your Gemini API Key in the .env file is correct. Raw error: "${rawErrorMessage}"` };
+            }
+
             if (rawErrorMessage.includes("API is only accessible to billed users at this time")) {
                  return { error: 'Content Generation Blocked by Google Policy: This AI model requires a project with a billing history. This is not a bug in the app. To resolve this, you may need to wait for a billing cycle or contact Google Cloud support regarding your project\'s billing status.' };
             }
 
-            return { error: `The connection to the AI service failed. This could be a network issue, an invalid API key, or a problem with your Google Cloud project setup. Please check your environment and configuration. Raw error: "${rawErrorMessage}"` };
+            return { error: `The connection to the AI service failed. This could be a network issue or a problem with your Google Cloud project setup. Please check your environment and configuration. Raw error: "${rawErrorMessage}"` };
         }
     }
 );

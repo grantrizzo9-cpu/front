@@ -40,8 +40,8 @@ async function downloadVideoToBuffer(video: MediaPart): Promise<Buffer> {
         throw new Error('Video media part does not contain a URL.');
     }
     const apiKey = process.env.GEMINI_API_KEY;
-    if (!apiKey || apiKey === 'REPLACE_WITH_YOUR_GEMINI_API_KEY') {
-        throw new Error('Your Gemini API Key is not configured. Please get a key from Google AI Studio and add it to your .env file.');
+    if (!apiKey) {
+        throw new Error('Your Gemini API Key is not available to download the video. Please check your .env file.');
     }
     
     const fetch = (await import('node-fetch')).default;
@@ -65,10 +65,6 @@ const videoGeneratorFlow = ai.defineFlow(
         outputSchema: GenerateVideoOutputSchema,
     },
     async (input): Promise<GenerateVideoOutput> => {
-        const apiKey = process.env.GEMINI_API_KEY;
-        if (!apiKey || apiKey === 'REPLACE_WITH_YOUR_GEMINI_API_KEY') {
-            return { error: 'Your Gemini API Key is not configured. Please get a key from Google AI Studio and add it to your .env file.' };
-        }
         try {
             let { operation } = await ai.generate({
                 model: 'googleai/veo-2.0-generate-001',
@@ -109,11 +105,15 @@ const videoGeneratorFlow = ai.defineFlow(
             console.error('Video Generation Flow Error:', e);
             const rawErrorMessage = e.message || 'An unknown error occurred.';
 
+            if (rawErrorMessage.includes("API key not valid")) {
+                 return { error: `Authentication failed. Please check that your Gemini API Key in the .env file is correct. Raw error: "${rawErrorMessage}"` };
+            }
+
             if (rawErrorMessage.includes("API is only accessible to billed users at this time")) {
                 return { error: 'Video Generation Blocked by Google Policy: This AI model requires a project with a billing history. This is not a bug in the app. To resolve this, you may need to wait for a billing cycle or contact Google Cloud support regarding your project\'s billing status.' };
             }
 
-            return { error: `The connection to the AI service failed. This could be a network issue, an invalid API key, or a problem with your Google Cloud project setup. Please check your environment and configuration. Raw error: "${rawErrorMessage}"` };
+            return { error: `The connection to the AI service failed. This could be a network issue or a problem with your Google Cloud project setup. Please check your environment and configuration. Raw error: "${rawErrorMessage}"` };
         }
     }
 );
