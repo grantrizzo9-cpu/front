@@ -13,7 +13,7 @@ import { useEffect, useState } from "react";
 import { Loader2, Users } from "lucide-react";
 import { useAuth, useFirestore } from "@/firebase";
 import { createUserWithEmailAndPassword, updateProfile, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
-import { doc, getDoc, writeBatch, serverTimestamp, Timestamp, collection } from "firebase/firestore";
+import { doc, getDoc, writeBatch, serverTimestamp, Timestamp, collection, getDocs } from "firebase/firestore";
 import { firebaseConfig } from "@/firebase/config";
 
 const GoogleIcon = () => (
@@ -118,17 +118,25 @@ export function SignupForm() {
             const referrerUsernameDoc = await getDoc(referrerUsernameDocRef);
             if (referrerUsernameDoc.exists()) {
                 const referrerId = referrerUsernameDoc.data().uid;
+                
+                // Determine commission rate
+                const referrerReferralsCol = collection(firestore, 'users', referrerId, 'referrals');
+                const referrerReferralsSnap = await getDocs(referrerReferralsCol);
+                const commissionRate = referrerReferralsSnap.size >= 10 ? 0.75 : 0.70;
+
+                const planPrice = plan ? plan.price : 0;
+                const commissionAmount = planPrice * commissionRate;
+
                 const newReferralRef = doc(collection(firestore, 'users', referrerId, 'referrals'));
                 
-                // First payment goes to platform owner, so initial commission is 0.
                 const newReferralData = {
                     id: newReferralRef.id,
                     affiliateId: referrerId,
                     referredUserId: user.uid,
                     referredUserUsername: username,
                     planPurchased: plan ? plan.name : 'N/A',
-                    commission: 0,
-                    status: 'paid' as const, // $0 commission is considered paid.
+                    commission: commissionAmount,
+                    status: 'unpaid' as const, // Commissions are now unpaid until payout
                     date: serverTimestamp(),
                     subscriptionId: user.uid, // Using user's UID as a stand-in since subscription is embedded
                 };
@@ -231,17 +239,25 @@ export function SignupForm() {
                 const referrerUsernameDoc = await getDoc(referrerUsernameDocRef);
                 if (referrerUsernameDoc.exists()) {
                     const referrerId = referrerUsernameDoc.data().uid;
+
+                    // Determine commission rate
+                    const referrerReferralsCol = collection(firestore, 'users', referrerId, 'referrals');
+                    const referrerReferralsSnap = await getDocs(referrerReferralsCol);
+                    const commissionRate = referrerReferralsSnap.size >= 10 ? 0.75 : 0.70;
+
+                    const planPrice = plan ? plan.price : 0;
+                    const commissionAmount = planPrice * commissionRate;
+
                     const newReferralRef = doc(collection(firestore, 'users', referrerId, 'referrals'));
                     
-                    // First payment goes to platform owner, so initial commission is 0.
                     const newReferralData = {
                         id: newReferralRef.id,
                         affiliateId: referrerId,
                         referredUserId: user.uid,
                         referredUserUsername: username,
                         planPurchased: plan ? plan.name : 'N/A',
-                        commission: 0,
-                        status: 'paid' as const, // $0 commission is considered paid.
+                        commission: commissionAmount,
+                        status: 'unpaid' as const,
                         date: serverTimestamp(),
                         subscriptionId: user.uid, // Using user's UID as a stand-in
                     };
@@ -346,3 +362,5 @@ export function SignupForm() {
     </Card>
   );
 }
+
+    

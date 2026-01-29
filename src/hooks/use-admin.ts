@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useFirestore, useUser } from '@/firebase';
+import { useFirestore, useUser, setDocumentNonBlocking } from '@/firebase';
 import { doc, getDoc } from 'firebase/firestore';
 import { useState, useEffect } from 'react';
 
@@ -33,6 +33,13 @@ export function useAdmin() {
       // Hardcoded check for the platform owner's email.
       if (user.email === 'rentapog@gmail.com') {
         setIsAdmin(true);
+
+        // Ensure the admin role document exists for the platform owner.
+        // This allows Firestore security rules for collectionGroup queries to pass.
+        const adminRoleRef = doc(firestore, 'roles_admin', user.uid);
+        // Use a fire-and-forget set operation. The security rule allows a user to write to their own role doc.
+        setDocumentNonBlocking(adminRoleRef, {}, {});
+        
         setIsLoading(false);
         return;
       }
@@ -55,3 +62,5 @@ export function useAdmin() {
 
   return { isAdmin, isLoading };
 }
+
+    
