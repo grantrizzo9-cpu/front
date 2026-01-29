@@ -11,9 +11,9 @@ import { useToast } from "@/hooks/use-toast";
 import { subscriptionTiers } from "@/lib/data";
 import { useEffect, useState } from "react";
 import { Loader2, Users } from "lucide-react";
-import { useAuth, useFirestore, setDocumentNonBlocking } from "@/firebase";
+import { useAuth, useFirestore } from "@/firebase";
 import { createUserWithEmailAndPassword, updateProfile, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
-import { doc, getDoc, writeBatch, serverTimestamp, Timestamp } from "firebase/firestore";
+import { doc, getDoc, writeBatch, serverTimestamp, Timestamp, collection } from "firebase/firestore";
 import { firebaseConfig } from "@/firebase/config";
 
 const GoogleIcon = () => (
@@ -62,19 +62,28 @@ export function SignupForm() {
     try {
         const referrerUsername: string | null = referralCode || null;
 
-        // 1. Create user in Firebase Auth. This is the only operation we wait for.
+        // Check if username is already taken before creating the user
+        const usernameDocRef = doc(firestore, "usernames", username);
+        const usernameDoc = await getDoc(usernameDocRef);
+        if (usernameDoc.exists()) {
+            toast({
+                variant: "destructive",
+                title: "Username Taken",
+                description: "This username is already in use. Please choose another one.",
+            });
+            setIsLoading(false);
+            return;
+        }
+
+        // 1. Create user in Firebase Auth
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
+        await updateProfile(user, { displayName: username });
 
-        // 2. Immediately toast and redirect for a snappy user experience.
-        toast({
-          title: "Account Created!",
-          description: "Setting up your account and redirecting...",
-        });
-        router.push("/dashboard");
+        // 2. Prepare all database writes in a batch
+        const batch = writeBatch(firestore);
 
-        // 3. Prepare user data and run all subsequent database operations
-        // in the background without blocking the UI.
+        // -- User Profile --
         const userDocRef = doc(firestore, "users", user.uid);
         const plan = planId ? subscriptionTiers.find(p => p.id === planId) : null;
         
@@ -98,13 +107,45 @@ export function SignupForm() {
             paypalEmail: '',
             customDomain: null
         };
-        
-        const usernameDocRef = doc(firestore, "usernames", username);
+        batch.set(userDocRef, userData);
 
-        // These non-blocking operations run in the background. The user is already on their way to the dashboard.
-        updateProfile(user, { displayName: username }).catch(e => console.error("Failed to update auth profile:", e));
-        setDocumentNonBlocking(userDocRef, userData, {});
-        setDocumentNonBlocking(usernameDocRef, { uid: user.uid }, {});
+        // -- Public Username --
+        batch.set(usernameDocRef, { uid: user.uid });
+
+        // -- Referral Record (if applicable) --
+        if (referrerUsername) {
+            const referrerUsernameDocRef = doc(firestore, "usernames", referrerUsername);
+            const referrerUsernameDoc = await getDoc(referrerUsernameDocRef);
+            if (referrerUsernameDoc.exists()) {
+                const referrerId = referrerUsernameDoc.data().uid;
+                const newReferralRef = doc(collection(firestore, 'users', referrerId, 'referrals'));
+                const commission = plan ? plan.price * 0.70 : 0;
+
+                const newReferralData = {
+                    id: newReferralRef.id,
+                    affiliateId: referrerId,
+                    referredUserId: user.uid,
+                    referredUserUsername: username,
+                    planPurchased: plan ? plan.name : 'N/A',
+                    commission: commission,
+                    status: 'unpaid' as const,
+                    date: serverTimestamp(),
+                    subscriptionId: user.uid, // Using user's UID as a stand-in since subscription is embedded
+                    triggeringUserReferredBy: referrerUsername, // For security rule
+                };
+                batch.set(newReferralRef, newReferralData);
+            }
+        }
+
+        // 3. Commit the batch
+        await batch.commit();
+
+        // 4. Toast and redirect
+        toast({
+          title: "Account Created!",
+          description: "Welcome! We're redirecting you to your dashboard.",
+        });
+        router.push("/dashboard");
 
     } catch (error: any) {
         let description;
@@ -145,23 +186,32 @@ export function SignupForm() {
         const userDoc = await getDoc(userDocRef);
 
         if (!userDoc.exists()) {
+            const batch = writeBatch(firestore);
+            
+            // -- Username --
             let username = (user.displayName || user.email?.split('@')[0] || `user${user.uid.substring(0,5)}`).replace(/[^a-zA-Z0-9]/g, '');
-            const usernameDocRef = doc(firestore, "usernames", username);
-            const usernameDoc = await getDoc(usernameDocRef);
-
-            if (usernameDoc.exists()) {
+            const initialUsernameDocRef = doc(firestore, "usernames", username);
+            const initialUsernameDoc = await getDoc(initialUsernameDocRef);
+            if (initialUsernameDoc.exists()) {
                 username = `${username}${Math.floor(100 + Math.random() * 900)}`;
             }
+            batch.set(doc(firestore, "usernames", username), { uid: user.uid });
+            // Ensure Auth profile matches username if it was changed
+            if (user.displayName !== username) {
+                await updateProfile(user, { displayName: username });
+            }
 
+            // -- User Profile --
             const plan = planId ? subscriptionTiers.find(p => p.id === planId) : null;
             const trialEndDate = new Date();
             trialEndDate.setDate(trialEndDate.getDate() + 3);
+            const referrerUsername: string | null = referralCode || null;
 
             const newUserDocData = {
                 id: user.uid,
                 email: user.email,
                 username: username,
-                referredBy: referralCode || null,
+                referredBy: referrerUsername,
                 isAffiliate: true,
                 createdAt: serverTimestamp(),
                 subscription: plan ? {
@@ -174,11 +224,35 @@ export function SignupForm() {
                 paypalEmail: '',
                 customDomain: null
             };
-            
-            const batch = writeBatch(firestore);
             batch.set(userDocRef, newUserDocData);
-            batch.set(doc(firestore, "usernames", username), { uid: user.uid });
+            
+            // -- Referral Record (if applicable) --
+            if (referrerUsername) {
+                const referrerUsernameDocRef = doc(firestore, "usernames", referrerUsername);
+                const referrerUsernameDoc = await getDoc(referrerUsernameDocRef);
+                if (referrerUsernameDoc.exists()) {
+                    const referrerId = referrerUsernameDoc.data().uid;
+                    const newReferralRef = doc(collection(firestore, 'users', referrerId, 'referrals'));
+                    const commission = plan ? plan.price * 0.70 : 0;
+    
+                    const newReferralData = {
+                        id: newReferralRef.id,
+                        affiliateId: referrerId,
+                        referredUserId: user.uid,
+                        referredUserUsername: username,
+                        planPurchased: plan ? plan.name : 'N/A',
+                        commission: commission,
+                        status: 'unpaid' as const,
+                        date: serverTimestamp(),
+                        subscriptionId: user.uid, // Using user's UID as a stand-in
+                        triggeringUserReferredBy: referrerUsername, // For security rule
+                    };
+                    batch.set(newReferralRef, newReferralData);
+                }
+            }
+
             await batch.commit();
+
             toast({
                 title: "Account Created!",
                 description: "Welcome! We've set up your new account.",

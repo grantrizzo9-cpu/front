@@ -18,11 +18,13 @@ service cloud.firestore {
     }
 
     // A user can READ (get, list) their own referrals.
-    // Only an admin (e.g., a backend process) can CREATE referrals.
-    // This prevents race conditions during signup and decouples accounting logic.
+    // An admin (e.g., a backend process) can CREATE referrals.
+    // A new user can also create a referral doc for their referrer during signup.
     match /users/{userId}/referrals/{referralId} {
       allow get, list: if request.auth.uid == userId;
-      allow create: if request.auth != null && exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
+      // Allow creation by admin OR by the user being referred, if the data is correct.
+      allow create: if (request.auth != null && exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid))) ||
+                    (request.resource.data.referredUserId == request.auth.uid && get(/databases/$(database)/documents/usernames/$(request.resource.data.triggeringUserReferredBy)).data.uid == userId);
       allow update, delete: if false; // Protect integrity
     }
 
