@@ -39,13 +39,14 @@ async function downloadVideoToBuffer(video: MediaPart): Promise<Buffer> {
     if (!video.media?.url) {
         throw new Error('Video media part does not contain a URL.');
     }
-    if (!process.env.GEMINI_API_KEY) {
-        throw new Error('GEMINI_API_KEY is not set.');
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey || apiKey === 'REPLACE_WITH_YOUR_GEMINI_API_KEY') {
+        throw new Error('Your Gemini API Key is not configured. Please get a key from Google AI Studio and add it to your .env file.');
     }
     
     const fetch = (await import('node-fetch')).default;
 
-    const videoDownloadUrl = `${video.media.url}&key=${process.env.GEMINI_API_KEY}`;
+    const videoDownloadUrl = `${video.media.url}&key=${apiKey}`;
     
     const videoDownloadResponse = await fetch(videoDownloadUrl);
 
@@ -64,8 +65,9 @@ const videoGeneratorFlow = ai.defineFlow(
         outputSchema: GenerateVideoOutputSchema,
     },
     async (input): Promise<GenerateVideoOutput> => {
-        if (!process.env.GEMINI_API_KEY) {
-            return { error: 'The GEMINI_API_KEY environment variable is not set. Please add it to your environment to use the AI Video Generator. You can get a key from Google AI Studio.' };
+        const apiKey = process.env.GEMINI_API_KEY;
+        if (!apiKey || apiKey === 'REPLACE_WITH_YOUR_GEMINI_API_KEY') {
+            return { error: 'Your Gemini API Key is not configured. Please get a key from Google AI Studio and add it to your .env file.' };
         }
         try {
             let { operation } = await ai.generate({

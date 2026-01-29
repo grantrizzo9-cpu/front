@@ -34,8 +34,9 @@ const imageGeneratorFlow = ai.defineFlow(
         outputSchema: GenerateImageOutputSchema,
     },
     async (input): Promise<GenerateImageOutput> => {
-        if (!process.env.GEMINI_API_KEY) {
-            return { error: 'The GEMINI_API_KEY environment variable is not set. Please add it to your environment to use the AI Image Generator. You can get a key from Google AI Studio.' };
+        const apiKey = process.env.GEMINI_API_KEY;
+        if (!apiKey || apiKey === 'REPLACE_WITH_YOUR_GEMINI_API_KEY') {
+            return { error: 'Your Gemini API Key is not configured. Please get a key from Google AI Studio and add it to your .env file.' };
         }
         try {
             const { media } = await ai.generate({

@@ -141,10 +141,27 @@ export default function AiToolsPage() {
                 </div>
             )}
             {!isLoading && error && (
-                <div className='flex flex-col items-center gap-4 text-destructive text-center'>
-                    <AlertTriangle className='w-12 h-12' />
-                    <p className='font-semibold'>Content Generation Failed</p>
-                    <p className='text-sm'>{error}</p>
+                <div className="flex flex-col items-center gap-4 text-center">
+                  <AlertTriangle className="w-12 h-12 text-destructive" />
+                  <p className="font-semibold text-destructive">
+                    Content Generation Failed
+                  </p>
+                  <div className="text-sm text-muted-foreground p-4 bg-secondary/50 rounded-lg max-w-sm">
+                    <p>{error}</p>
+                    {error.includes("API Key") && (
+                      <p className="mt-2">
+                        Click the link below to get your key, then paste it into the 
+                        <code className="bg-muted p-1 rounded-sm mx-1">.env</code> file in the file explorer.
+                      </p>
+                    )}
+                  </div>
+                  {error.includes("API Key") && (
+                    <Button asChild variant="link">
+                      <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer">
+                        Get Gemini API Key
+                      </a>
+                    </Button>
+                  )}
                 </div>
             )}
             {!isLoading && !error && !generatedContent && (
