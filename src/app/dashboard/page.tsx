@@ -32,7 +32,7 @@ export default function DashboardPage() {
     return collection(firestore, 'users', user.uid, 'referrals');
   }, [firestore, user?.uid]);
 
-  const { data: referrals, isLoading: referralsLoading } = useCollection<Referral>(referralsRef);
+  const { data: personalReferrals, isLoading: referralsLoading } = useCollection<Referral>(referralsRef);
   
   // --- ADMIN ONLY ---
   // Fetch all referrals across the entire platform if the user is an admin
@@ -45,28 +45,32 @@ export default function DashboardPage() {
 
   const isLoading = isUserLoading || isUserDataLoading || referralsLoading || (isAdmin && allReferralsLoading) || isAdminLoading;
 
-  // --- Calculations for the personal affiliate stats ---
-  const personalTotalCommission = referrals?.reduce((sum, r) => sum + r.commission, 0) ?? 0;
-  const totalReferrals = referrals?.length ?? 0;
-  const unpaidCommissions = referrals?.filter(r => r.status === 'unpaid').reduce((sum, r) => sum + r.commission, 0) ?? 0;
+  // --- Personal Stats Calculations ---
+  const personalTotalCommission = personalReferrals?.reduce((sum, r) => sum + r.commission, 0) ?? 0;
+  const personalTotalReferrals = personalReferrals?.length ?? 0;
+  const personalUnpaidCommissions = personalReferrals?.filter(r => r.status === 'unpaid').reduce((sum, r) => sum + r.commission, 0) ?? 0;
+  const adminPersonalTotalSaleValue = personalReferrals?.reduce((sum, r) => sum + (r.commission / 0.70), 0) ?? 0;
   
-  // --- Admin-specific calculation to show 100% of sale value for personal referrals ---
-  // If commission is 70%, then 100% is commission / 0.70
-  const adminPersonalTotalSaleValue = referrals?.reduce((sum, r) => sum + (r.commission / 0.70), 0) ?? 0;
-  
-  // Conditionally set the value for the "Total Earnings" card based on admin status
-  const totalEarningsValue = isAdmin ? adminPersonalTotalSaleValue : personalTotalCommission;
-  
-  const recentReferrals = referrals
+  const recentReferrals = personalReferrals
     ?.sort((a, b) => b.date.toMillis() - a.date.toMillis())
     .slice(0, 5) ?? [];
 
-  // --- ADMIN ONLY ---
-  // Calculation for the platform revenue (the 30% cut)
+  // --- Platform-wide Stats Calculations (for Admin) ---
   const totalAffiliatePayouts = allReferrals?.reduce((sum, r) => sum + r.commission, 0) ?? 0;
-  // Commission is 70% of a sale, so platform cut (30%) is (30/70) of the commission.
   const platformRevenue = totalAffiliatePayouts * (30 / 70);
-  // --- END ADMIN ONLY ---
+  const platformTotalReferrals = allReferrals?.length ?? 0;
+  const platformUnpaidCommissions = allReferrals?.filter(r => r.status === 'unpaid').reduce((sum, r) => sum + r.commission, 0) ?? 0;
+
+  // --- Determine which values to display based on admin status ---
+  const totalEarningsValue = isAdmin ? adminPersonalTotalSaleValue : personalTotalCommission;
+  const totalReferralsValue = isAdmin ? platformTotalReferrals : personalTotalReferrals;
+  const unpaidCommissionsValue = isAdmin ? platformUnpaidCommissions : personalUnpaidCommissions;
+  
+  const totalEarningsDescription = isAdmin ? "Gross value of sales you personally referred (100%)." : "Your 70% base commission from all-time sales.";
+  const totalReferralsDescription = isAdmin ? "Total referrals across the platform." : "Users who signed up with your link.";
+  const totalSalesDescription = isAdmin ? "Total initial sales across the platform." : "Total initial sales from your referrals.";
+  const unpaidCommissionsDescription = isAdmin ? "Total unpaid commissions across the platform." : "Your 70% share to be paid out tomorrow.";
+
 
   const trialEndDate = userData?.subscription?.trialEndDate?.toDate();
   const isTrialActive = trialEndDate && trialEndDate > new Date();
@@ -128,25 +132,25 @@ export default function DashboardPage() {
           title="Total Earnings"
           value={`$${totalEarningsValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
           icon={<DollarSign className="h-5 w-5 text-muted-foreground" />}
-          description={isAdmin ? "Gross value of sales you personally referred (100%)." : "Your 70% base commission from all-time sales."}
+          description={totalEarningsDescription}
         />
         <StatCard
           title="Total Referrals"
-          value={`+${totalReferrals}`}
+          value={`+${totalReferralsValue}`}
           icon={<Users className="h-5 w-5 text-muted-foreground" />}
-          description="Users who signed up with your link."
+          description={totalReferralsDescription}
         />
         <StatCard
           title="Total Sales"
-          value={`+${totalReferrals}`}
+          value={`+${totalReferralsValue}`}
           icon={<BarChart className="h-5 w-5 text-muted-foreground" />}
-          description="Total initial sales from your referrals."
+          description={totalSalesDescription}
         />
          <StatCard
           title="Unpaid Commissions"
-          value={`$${unpaidCommissions.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+          value={`$${unpaidCommissionsValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
           icon={<DollarSign className="h-5 w-5 text-green-500" />}
-          description="Your 70% share to be paid out tomorrow."
+          description={unpaidCommissionsDescription}
         />
       </div>
 
