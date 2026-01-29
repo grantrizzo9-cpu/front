@@ -14,6 +14,7 @@ import { useUser, useFirestore, useCollection, useMemoFirebase, useDoc } from "@
 import { collection, collectionGroup, doc } from "firebase/firestore";
 import { useAdmin } from "@/hooks/use-admin";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { useMemo } from "react";
 
 export default function DashboardPage() {
   const { user, isUserLoading } = useUser();
@@ -26,40 +27,37 @@ export default function DashboardPage() {
   }, [firestore, user?.uid]);
   const { data: userData, isLoading: isUserDataLoading } = useDoc<UserType>(userDocRef);
 
-  // --- Data Fetching ---
-  // Fetch personal referrals for all users (including admins)
-  const personalReferralsRef = useMemoFirebase(() => {
-    if (!user || !firestore) return null;
+  // --- Unified Data Fetching ---
+  // This query now dynamically fetches either personal referrals or all platform referrals
+  // based on the user's admin status. This is more efficient and less error-prone.
+  const referralsQuery = useMemoFirebase(() => {
+    if (isAdminLoading || !user || !firestore) {
+      return null; // Wait until we know the user's status and have services ready.
+    }
+    if (isAdmin) {
+      return collectionGroup(firestore, 'referrals');
+    }
     return collection(firestore, 'users', user.uid, 'referrals');
-  }, [firestore, user?.uid]);
-  const { data: personalReferrals, isLoading: personalReferralsLoading } = useCollection<Referral>(personalReferralsRef);
+  }, [isAdmin, isAdminLoading, user, firestore]);
+
+  const { data: referrals, isLoading: referralsLoading } = useCollection<Referral>(referralsQuery);
   
-  // Fetch all referrals across the entire platform (admins only)
-  const allReferralsQuery = useMemoFirebase(() => {
-    if (!isAdmin || !firestore) return null; // Only run this query if the user is an admin
-    return collectionGroup(firestore, 'referrals');
-  }, [firestore, isAdmin]);
-  const { data: allReferrals, isLoading: allReferralsLoading } = useCollection<Referral>(allReferralsQuery);
+  const isLoading = isUserLoading || isUserDataLoading || referralsLoading || isAdminLoading;
 
-  const isLoading = isUserLoading || isUserDataLoading || personalReferralsLoading || (isAdmin && allReferralsLoading) || isAdminLoading;
+  // --- Stats Calculations ---
+  // These calculations now work on the unified 'referrals' data source.
+  const totalCommission = referrals?.reduce((sum, r) => sum + r.commission, 0) ?? 0;
+  const totalReferrals = referrals?.length ?? 0;
+  const unpaidCommissions = referrals?.filter(r => r.status === 'unpaid').reduce((sum, r) => sum + r.commission, 0) ?? 0;
+  const grossSalesValue = referrals?.reduce((sum, r) => sum + (r.commission / 0.70), 0) ?? 0; 
+  const platformRevenue = grossSalesValue * 0.30;
 
-  // --- Personal Stats Calculations ---
-  const personalTotalCommission = personalReferrals?.reduce((sum, r) => sum + r.commission, 0) ?? 0;
-  const personalTotalReferrals = personalReferrals?.length ?? 0;
-  const personalUnpaidCommissions = personalReferrals?.filter(r => r.status === 'unpaid').reduce((sum, r) => sum + r.commission, 0) ?? 0;
-  const personalGrossSalesValue = personalReferrals?.reduce((sum, r) => sum + (r.commission / 0.70), 0) ?? 0;
-
-  const recentPersonalReferrals = personalReferrals
+  const recentReferrals = referrals
     ?.sort((a, b) => b.date.toMillis() - a.date.toMillis())
     .slice(0, 5) ?? [];
 
-  // --- Platform-wide Stats Calculations (for Admin) ---
-  const platformTotalPayouts = allReferrals?.reduce((sum, r) => sum + r.commission, 0) ?? 0;
-  const platformRevenue = platformTotalPayouts * (30 / 70);
-
   const trialEndDate = userData?.subscription?.trialEndDate?.toDate();
   const isTrialActive = trialEndDate && trialEndDate > new Date();
-
 
   if (isLoading) {
       return (
@@ -69,6 +67,79 @@ export default function DashboardPage() {
       )
   }
 
+  // Admin View: A dedicated UI for platform-wide metrics.
+  if (isAdmin) {
+    return (
+      <div className="space-y-8">
+        <div>
+          <h1 className="text-3xl font-bold font-headline">Admin Dashboard</h1>
+          <p className="text-muted-foreground">Platform-wide affiliate activity summary.</p>
+        </div>
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <StatCard
+            title="Platform Revenue"
+            value={`$${platformRevenue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+            icon={<TrendingUp className="h-5 w-5 text-muted-foreground" />}
+            description="The 30% platform cut from all sales."
+          />
+          <StatCard
+            title="Total Affiliate Payouts"
+            value={`$${totalCommission.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+            icon={<DollarSign className="h-5 w-5 text-muted-foreground" />}
+            description="Total 70% commissions earned by all affiliates."
+          />
+          <StatCard
+            title="Platform-Wide Referrals"
+            value={`+${totalReferrals}`}
+            icon={<Users className="h-5 w-5 text-muted-foreground" />}
+            description="Total users referred across the platform."
+          />
+          <StatCard
+            title="Total Gross Sales"
+            value={`$${grossSalesValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+            icon={<BarChart className="h-5 w-5 text-muted-foreground" />}
+            description="Gross value of all sales across the platform."
+          />
+        </div>
+         <Card>
+          <CardHeader>
+            <CardTitle>Recent Platform-Wide Referrals</CardTitle>
+            <CardDescription>The latest sign-ups from all affiliates.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {recentReferrals.length > 0 ? (
+                <Table>
+                <TableHeader>
+                    <TableRow>
+                    <TableHead>Referred User</TableHead>
+                    <TableHead>Affiliate ID</TableHead>
+                    <TableHead>Plan</TableHead>
+                    <TableHead>Commission</TableHead>
+                    </TableRow>
+                </TableHeader>
+                <TableBody>
+                    {recentReferrals.map((referral) => (
+                    <TableRow key={referral.id}>
+                        <TableCell className="font-medium">{referral.referredUserUsername}</TableCell>
+                        <TableCell className="font-mono text-xs">{referral.affiliateId}</TableCell>
+                        <TableCell>{referral.planPurchased}</TableCell>
+                        <TableCell>${referral.commission.toFixed(2)}</TableCell>
+                    </TableRow>
+                    ))}
+                </TableBody>
+                </Table>
+            ) : (
+                <div className="text-center text-muted-foreground py-10">
+                    <p>No recent referrals across the platform.</p>
+                </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // Regular User View
   return (
     <div className="space-y-8">
       <div>
@@ -81,60 +152,33 @@ export default function DashboardPage() {
           <Info className="h-4 w-4 text-accent" />
           <AlertTitle className="text-accent">You're on a Trial!</AlertTitle>
           <AlertDescription>
-            Your 3-day free trial is active and will end on {format(trialEndDate, 'PP')}. Start referring to keep the momentum going!
+            Your 3-day free trial will end on {format(trialEndDate, 'PP')}. Start referring to keep the momentum going!
           </AlertDescription>
         </Alert>
       )}
-
-      {/* ADMIN ONLY: Platform-wide overview */}
-      {isAdmin && (
-        <Card className="border-primary/50 bg-primary/5">
-          <CardHeader>
-            <CardTitle className="font-headline text-xl">Admin Overview</CardTitle>
-            <CardDescription>Platform-wide revenue summary.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid gap-4 md:grid-cols-2">
-                <StatCard
-                  title="Platform Revenue (Your Cut)"
-                  value={`$${platformRevenue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
-                  icon={<TrendingUp className="h-5 w-5 text-muted-foreground" />}
-                  description="The 30% platform cut from every sale across the platform."
-                />
-                <StatCard
-                  title="Total Affiliate Payouts"
-                  value={`$${platformTotalPayouts.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
-                  icon={<DollarSign className="h-5 w-5 text-muted-foreground" />}
-                  description="Total 70% commissions paid to all affiliates."
-                />
-            </div>
-          </CardContent>
-        </Card>
-      )}
       
-      {/* PERSONAL STATS: Shown to all users, including admins */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <StatCard
           title="Your Total Earnings"
-          value={`$${personalTotalCommission.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+          value={`$${totalCommission.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
           icon={<DollarSign className="h-5 w-5 text-muted-foreground" />}
           description="Your 70% base commission from all-time sales."
         />
         <StatCard
           title="Your Total Referrals"
-          value={`+${personalTotalReferrals}`}
+          value={`+${totalReferrals}`}
           icon={<Users className="h-5 w-5 text-muted-foreground" />}
           description="Users who signed up using your link."
         />
         <StatCard
           title="Your Gross Sales Value"
-          value={`$${personalGrossSalesValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+          value={`$${grossSalesValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
           icon={<BarChart className="h-5 w-5 text-muted-foreground" />}
           description="Gross value of sales from your referrals (100%)."
         />
          <StatCard
           title="Your Unpaid Commissions"
-          value={`$${personalUnpaidCommissions.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+          value={`$${unpaidCommissions.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
           icon={<DollarSign className="h-5 w-5 text-green-500" />}
           description="Your 70% share to be paid out tomorrow."
         />
@@ -147,7 +191,7 @@ export default function DashboardPage() {
             <CardDescription>A quick look at the latest sign-ups from your link.</CardDescription>
           </CardHeader>
           <CardContent>
-            {recentPersonalReferrals.length > 0 ? (
+            {recentReferrals.length > 0 ? (
                 <Table>
                 <TableHeader>
                     <TableRow>
@@ -159,7 +203,7 @@ export default function DashboardPage() {
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {recentPersonalReferrals.map((referral) => (
+                    {recentReferrals.map((referral) => (
                     <TableRow key={referral.id}>
                         <TableCell className="font-medium">{referral.referredUserUsername}</TableCell>
                         <TableCell>{referral.planPurchased}</TableCell>
@@ -208,7 +252,6 @@ export default function DashboardPage() {
           </CardFooter>
         </Card>
       </div>
-
     </div>
   );
 }
