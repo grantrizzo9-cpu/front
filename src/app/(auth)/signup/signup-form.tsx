@@ -28,27 +28,22 @@ export function SignupForm() {
   const auth = useAuth();
   const firestore = useFirestore();
 
-  const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
-  const [planId, setPlanId] = useState<string | null>(null);
-  const [referralCode, setReferralCode] = useState<string | null>(null);
+  const [selectedPlanName, setSelectedPlanName] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
+  // Directly read from searchParams for reliability
+  const planId = searchParams.get("plan");
+  const referralCode = searchParams.get("ref");
 
   useEffect(() => {
-    const planIdParam = searchParams.get("plan");
-    const refCode = searchParams.get("ref");
-    if (planIdParam) {
-        const plan = subscriptionTiers.find(p => p.id === planIdParam);
+    if (planId) {
+        const plan = subscriptionTiers.find(p => p.id === planId);
         if (plan) {
-            setSelectedPlan(plan.name);
-            setPlanId(plan.id);
+            setSelectedPlanName(plan.name);
         }
     }
-    if (refCode) {
-        setReferralCode(refCode);
-    }
-  }, [searchParams]);
+  }, [planId]);
 
   const handleEmailSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -60,18 +55,17 @@ export function SignupForm() {
     const password = formData.get("password") as string;
     
     try {
-        const referrerUsername: string | null = referralCode || null;
         const plan = planId ? subscriptionTiers.find(p => p.id === planId) : null;
 
         // Ensure a plan is selected if a referral code is present, to correctly assign commission.
-        if (referrerUsername && !plan) {
+        if (referralCode && !plan) {
             toast({
                 variant: "destructive",
                 title: "Plan Required",
                 description: "To sign up with a referral, you must select a plan from the pricing page.",
             });
             setIsLoading(false);
-            router.push(`/pricing?ref=${referrerUsername}`);
+            router.push(`/pricing?ref=${referralCode}`);
             return;
         }
 
@@ -106,7 +100,7 @@ export function SignupForm() {
             id: user.uid,
             email: user.email,
             username: username,
-            referredBy: referrerUsername,
+            referredBy: referralCode || null,
             isAffiliate: true,
             createdAt: serverTimestamp(),
             subscription: plan ? {
@@ -125,8 +119,8 @@ export function SignupForm() {
         batch.set(usernameDocRef, { uid: user.uid });
 
         // -- Referral Record (if applicable) --
-        if (referrerUsername && plan) {
-            const referrerUsernameDocRef = doc(firestore, "usernames", referrerUsername);
+        if (referralCode && plan) {
+            const referrerUsernameDocRef = doc(firestore, "usernames", referralCode);
             const referrerUsernameDoc = await getDoc(referrerUsernameDocRef);
             if (referrerUsernameDoc.exists()) {
                 const referrerId = referrerUsernameDoc.data().uid;
@@ -201,16 +195,15 @@ export function SignupForm() {
 
         if (!userDoc.exists()) {
             const plan = planId ? subscriptionTiers.find(p => p.id === planId) : null;
-            const referrerUsername: string | null = referralCode || null;
 
-            if (referrerUsername && !plan) {
+            if (referralCode && !plan) {
                 toast({
                     variant: "destructive",
                     title: "Plan Required",
                     description: "To sign up with a referral, you must select a plan from the pricing page.",
                 });
                 setIsGoogleLoading(false);
-                router.push(`/pricing?ref=${referrerUsername}`);
+                router.push(`/pricing?ref=${referralCode}`);
                 return;
             }
             
@@ -237,7 +230,7 @@ export function SignupForm() {
                 id: user.uid,
                 email: user.email,
                 username: username,
-                referredBy: referrerUsername,
+                referredBy: referralCode,
                 isAffiliate: true,
                 createdAt: serverTimestamp(),
                 subscription: plan ? {
@@ -253,8 +246,8 @@ export function SignupForm() {
             batch.set(userDocRef, newUserDocData);
             
             // -- Referral Record (if applicable) --
-            if (referrerUsername && plan) {
-                const referrerUsernameDocRef = doc(firestore, "usernames", referrerUsername);
+            if (referralCode && plan) {
+                const referrerUsernameDocRef = doc(firestore, "usernames", referralCode);
                 const referrerUsernameDoc = await getDoc(referrerUsernameDocRef);
                 if (referrerUsernameDoc.exists()) {
                     const referrerId = referrerUsernameDoc.data().uid;
@@ -316,8 +309,8 @@ export function SignupForm() {
       <CardHeader>
         <CardTitle className="font-headline text-2xl">Create Your Account</CardTitle>
         <CardDescription>
-            {selectedPlan 
-                ? `You've selected the ${selectedPlan} plan. Let's get you set up.`
+            {selectedPlanName 
+                ? `You've selected the ${selectedPlanName} plan. Let's get you set up.`
                 : "Join now to become an affiliate and start earning."
             }
         </CardDescription>
@@ -347,7 +340,7 @@ export function SignupForm() {
           <Button type="submit" className="w-full" disabled={isLoading || isGoogleLoading}>
             {isLoading ? (
                 <Loader2 className="animate-spin" />
-            ) : selectedPlan ? (
+            ) : selectedPlanName ? (
                 `Sign Up & Start Earning`
             ) : (
                 `Create Account`
