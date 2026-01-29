@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useFirestore, useUser, useDoc, useMemoFirebase } from '@/firebase';
@@ -13,16 +14,16 @@ export function useAdmin() {
   const { user, isUserLoading } = useUser();
   const firestore = useFirestore();
 
-  // Perform the hardcoded check first. This user is always an admin.
-  const isHardcodedAdmin = user?.email === 'rentapog@gmail.com' || user?.displayName === 'rentahost';
+  // We should not decide anything until the user loading is complete.
+  const isHardcodedAdmin = !isUserLoading && (user?.email === 'rentapog@gmail.com' || user?.displayName === 'rentahost');
 
-  // Only create a reference and perform a DB query if the user is NOT a hardcoded admin.
+  // Also, don't try to get a doc ref while user is loading.
   const adminDocRef = useMemoFirebase(() => {
-    if (isHardcodedAdmin || !user?.uid) {
+    if (isUserLoading || isHardcodedAdmin || !user?.uid) {
       return null;
     }
     return doc(firestore, 'roles_admin', user.uid);
-  }, [firestore, user?.uid, isHardcodedAdmin]);
+  }, [firestore, user?.uid, isUserLoading, isHardcodedAdmin]);
 
   // This hook will now only run if adminDocRef is not null.
   const { data: adminDoc, isLoading: isAdminDocLoading } = useDoc(adminDocRef);
@@ -32,8 +33,8 @@ export function useAdmin() {
   // The user is an admin if they pass either the hardcoded check or the database check.
   const isAdmin = isHardcodedAdmin || isAdminByDb;
   
-  // We are loading if the user object is loading, OR if we are not a hardcoded admin and we are still waiting for the database check.
-  const isLoading = isUserLoading || (!isHardcodedAdmin && isAdminDocLoading);
+  // The final loading state depends on user loading AND the potential db doc loading.
+  const isLoading = isUserLoading || isAdminDocLoading;
 
   return { isAdmin, isLoading };
 }
