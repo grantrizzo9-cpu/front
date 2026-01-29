@@ -3,27 +3,36 @@
 
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Loader2, CheckCircle, ArrowUpCircle, BadgeCheck } from "lucide-react";
-import { useUser, useFirestore, useDoc, useMemoFirebase, updateDocumentNonBlocking } from "@/firebase";
-import { doc, serverTimestamp, Timestamp } from "firebase/firestore";
-import type { User as UserType } from "@/lib/types";
+import { Loader2, CheckCircle, ArrowUpCircle, BadgeCheck, Star } from "lucide-react";
+import { useUser, useFirestore, useDoc, useMemoFirebase, updateDocumentNonBlocking, useCollection } from "@/firebase";
+import { doc, serverTimestamp, Timestamp, collection } from "firebase/firestore";
+import type { User as UserType, Referral } from "@/lib/types";
 import { subscriptionTiers } from "@/lib/data";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { useState } from "react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export default function UpgradePage() {
   const { user, isUserLoading } = useUser();
   const firestore = useFirestore();
   const { toast } = useToast();
+  const [isUpgrading, setIsUpgrading] = useState(false);
 
   const userDocRef = useMemoFirebase(() => {
     if (!user || !firestore) return null;
     return doc(firestore, 'users', user.uid);
   }, [firestore, user?.uid]);
-
   const { data: userData, isLoading: isUserDataLoading } = useDoc<UserType>(userDocRef);
 
-  const isLoading = isUserLoading || isUserDataLoading;
+  // Fetch referrals to check for the early upgrade condition
+  const referralsQuery = useMemoFirebase(() => {
+    if (!user || !firestore) return null;
+    return collection(firestore, 'users', user.uid, 'referrals');
+  }, [firestore, user?.uid]);
+  const { data: referrals, isLoading: referralsLoading } = useCollection<Referral>(referralsQuery);
+
+  const isLoading = isUserLoading || isUserDataLoading || referralsLoading;
 
   const handlePlanChange = (tierId: string) => {
     if (!user) return;
@@ -61,6 +70,23 @@ export default function UpgradePage() {
       description: "You've successfully subscribed. Your 3-day trial starts now!",
     });
   };
+  
+  const handleEarlyUpgrade = () => {
+    if (!user || !userDocRef) return;
+    setIsUpgrading(true);
+
+    updateDocumentNonBlocking(userDocRef, {
+        'subscription.trialEndDate': null,
+    });
+
+    setTimeout(() => {
+        toast({
+            title: "Upgrade Complete!",
+            description: "Your trial has ended and your full subscription is active. You can now earn commissions.",
+        });
+        setIsUpgrading(false);
+    }, 1500);
+  }
 
   if (isLoading) {
     return (
@@ -69,7 +95,11 @@ export default function UpgradePage() {
       </div>
     );
   }
-  
+
+  const isOnTrial = userData?.subscription?.trialEndDate && userData.subscription.trialEndDate.toDate() > new Date();
+  const referralCount = referrals?.length ?? 0;
+  const canEarlyUpgrade = isOnTrial && referralCount >= 2;
+
   // SCENARIO 1: User has NO subscription. Show all plans for purchase.
   if (!userData?.subscription) {
       return (
@@ -121,8 +151,8 @@ export default function UpgradePage() {
           </div>
       )
   }
-
-  // SCENARIO 2: User HAS a subscription. Show only UPGRADES.
+  
+  // SCENARIO 2: User HAS a subscription (could be trial or full).
   const currentTier = subscriptionTiers.find(t => t.id === userData.subscription?.tierId);
   const availableUpgrades = currentTier 
     ? subscriptionTiers.filter(tier => tier.price > currentTier.price) 
@@ -136,6 +166,23 @@ export default function UpgradePage() {
             You are currently on the <span className="font-semibold text-primary">{currentTier?.name}</span> plan. Unlock more features by upgrading.
         </p>
       </div>
+      
+      {canEarlyUpgrade && (
+        <Alert className="border-accent bg-accent/5 max-w-2xl">
+            <Star className="h-4 w-4 text-accent" />
+            <AlertTitle className="font-bold text-accent">Unlock Your Commissions Now!</AlertTitle>
+            <AlertDescription>
+                You've referred {referralCount} people during your trial! You can end your trial now to start your paid subscription and begin earning commissions from your referrals immediately.
+                <Button onClick={handleEarlyUpgrade} disabled={isUpgrading} className="mt-4 w-full sm:w-auto">
+                    {isUpgrading ? (
+                        <><Loader2 className="animate-spin mr-2" /> Upgrading...</>
+                    ) : (
+                        "Upgrade Now & Start Earning"
+                    )}
+                </Button>
+            </AlertDescription>
+        </Alert>
+      )}
       
       {availableUpgrades.length > 0 ? (
         <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">

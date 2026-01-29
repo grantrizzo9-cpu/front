@@ -119,16 +119,16 @@ export function SignupForm() {
             if (referrerUsernameDoc.exists()) {
                 const referrerId = referrerUsernameDoc.data().uid;
                 const newReferralRef = doc(collection(firestore, 'users', referrerId, 'referrals'));
-                const commission = plan ? plan.price * 0.70 : 0;
-
+                
+                // First payment goes to platform owner, so initial commission is 0.
                 const newReferralData = {
                     id: newReferralRef.id,
                     affiliateId: referrerId,
                     referredUserId: user.uid,
                     referredUserUsername: username,
                     planPurchased: plan ? plan.name : 'N/A',
-                    commission: commission,
-                    status: 'unpaid' as const,
+                    commission: 0,
+                    status: 'paid' as const, // $0 commission is considered paid.
                     date: serverTimestamp(),
                     subscriptionId: user.uid, // Using user's UID as a stand-in since subscription is embedded
                 };
@@ -232,16 +232,16 @@ export function SignupForm() {
                 if (referrerUsernameDoc.exists()) {
                     const referrerId = referrerUsernameDoc.data().uid;
                     const newReferralRef = doc(collection(firestore, 'users', referrerId, 'referrals'));
-                    const commission = plan ? plan.price * 0.70 : 0;
-    
+                    
+                    // First payment goes to platform owner, so initial commission is 0.
                     const newReferralData = {
                         id: newReferralRef.id,
                         affiliateId: referrerId,
                         referredUserId: user.uid,
                         referredUserUsername: username,
                         planPurchased: plan ? plan.name : 'N/A',
-                        commission: commission,
-                        status: 'unpaid' as const,
+                        commission: 0,
+                        status: 'paid' as const, // $0 commission is considered paid.
                         date: serverTimestamp(),
                         subscriptionId: user.uid, // Using user's UID as a stand-in
                     };
