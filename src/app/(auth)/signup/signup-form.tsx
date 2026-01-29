@@ -61,6 +61,19 @@ export function SignupForm() {
     
     try {
         const referrerUsername: string | null = referralCode || null;
+        const plan = planId ? subscriptionTiers.find(p => p.id === planId) : null;
+
+        // Ensure a plan is selected if a referral code is present, to correctly assign commission.
+        if (referrerUsername && !plan) {
+            toast({
+                variant: "destructive",
+                title: "Plan Required",
+                description: "To sign up with a referral, you must select a plan from the pricing page.",
+            });
+            setIsLoading(false);
+            router.push(`/pricing?ref=${referrerUsername}`);
+            return;
+        }
 
         // Check if username is already taken before creating the user
         const usernameDocRef = doc(firestore, "usernames", username);
@@ -85,7 +98,6 @@ export function SignupForm() {
 
         // -- User Profile --
         const userDocRef = doc(firestore, "users", user.uid);
-        const plan = planId ? subscriptionTiers.find(p => p.id === planId) : null;
         
         const trialEndDate = new Date();
         trialEndDate.setDate(trialEndDate.getDate() + 3);
@@ -119,8 +131,7 @@ export function SignupForm() {
             if (referrerUsernameDoc.exists()) {
                 const referrerId = referrerUsernameDoc.data().uid;
                 
-                // Simplified commission logic to avoid permission errors
-                const commissionRate = 0.70; // Base commission rate
+                const commissionRate = 0.70;
                 const commissionAmount = plan.price * commissionRate;
 
                 const newReferralRef = doc(collection(firestore, 'users', referrerId, 'referrals'));
@@ -189,6 +200,20 @@ export function SignupForm() {
         const userDoc = await getDoc(userDocRef);
 
         if (!userDoc.exists()) {
+            const plan = planId ? subscriptionTiers.find(p => p.id === planId) : null;
+            const referrerUsername: string | null = referralCode || null;
+
+            if (referrerUsername && !plan) {
+                toast({
+                    variant: "destructive",
+                    title: "Plan Required",
+                    description: "To sign up with a referral, you must select a plan from the pricing page.",
+                });
+                setIsGoogleLoading(false);
+                router.push(`/pricing?ref=${referrerUsername}`);
+                return;
+            }
+            
             const batch = writeBatch(firestore);
             
             // -- Username --
@@ -205,10 +230,8 @@ export function SignupForm() {
             }
 
             // -- User Profile --
-            const plan = planId ? subscriptionTiers.find(p => p.id === planId) : null;
             const trialEndDate = new Date();
             trialEndDate.setDate(trialEndDate.getDate() + 3);
-            const referrerUsername: string | null = referralCode || null;
 
             const newUserDocData = {
                 id: user.uid,
@@ -236,8 +259,7 @@ export function SignupForm() {
                 if (referrerUsernameDoc.exists()) {
                     const referrerId = referrerUsernameDoc.data().uid;
 
-                    // Simplified commission logic to avoid permission errors
-                    const commissionRate = 0.70; // Base commission rate
+                    const commissionRate = 0.70;
                     const commissionAmount = plan.price * commissionRate;
 
                     const newReferralRef = doc(collection(firestore, 'users', referrerId, 'referrals'));

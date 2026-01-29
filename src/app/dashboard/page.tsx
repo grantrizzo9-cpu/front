@@ -23,6 +23,11 @@ export default function DashboardPage() {
   const firestore = useFirestore();
   const { isAdmin, isLoading: isAdminLoading } = useAdmin();
 
+  const getTierPrice = (planName: string) => {
+      const tier = subscriptionTiers.find(t => t.name === planName);
+      return tier ? tier.price : 0;
+  };
+
   // --- Personal Data Fetching (for all users, including admin) ---
   const personalReferralsQuery = useMemoFirebase(() => {
     if (!user || !firestore) return null;
@@ -45,38 +50,45 @@ export default function DashboardPage() {
   
   const isLoading = isUserLoading || isUserDataLoading || personalReferralsLoading || (isAdmin && allReferralsLoading);
 
-  const getTierPrice = (planName: string) => {
-      const tier = subscriptionTiers.find(t => t.name === planName);
-      return tier ? tier.price : 0;
-  };
 
   // --- Platform-Wide Stats (for Admins) ---
-  const platformRevenue = useMemo(() => {
-    if (!allReferrals) return 0;
-    // Platform revenue is the sum of the first day's payment for every new signup.
-    return allReferrals.reduce((sum, r) => sum + getTierPrice(r.planPurchased), 0);
+  const { platformRevenue, totalAffiliatePayouts, totalPlatformReferrals, totalGrossSales } = useMemo(() => {
+      if (!allReferrals || allReferrals.length === 0) {
+          return { platformRevenue: 0, totalAffiliatePayouts: 0, totalPlatformReferrals: 0, totalGrossSales: 0 };
+      }
+
+      const revenue = allReferrals.reduce((sum, r) => sum + getTierPrice(r.planPurchased), 0);
+      const payouts = allReferrals.reduce((sum, r) => sum + r.commission, 0);
+
+      return {
+          platformRevenue: revenue,
+          totalAffiliatePayouts: payouts,
+          totalPlatformReferrals: allReferrals.length,
+          totalGrossSales: revenue, // At signup, gross sales equals platform revenue
+      };
   }, [allReferrals]);
 
-  const totalAffiliatePayouts = useMemo(() => {
-      if (!allReferrals) return 0;
-      // This is the sum of all commissions earned by affiliates *at the moment of signup*.
-      // Per business logic, this is $0, as commission is earned on subsequent payments.
-      return allReferrals.reduce((sum, r) => sum + r.commission, 0);
-  }, [allReferrals]);
-
-  const totalPlatformReferrals = allReferrals?.length ?? 0;
-  const totalGrossSales = platformRevenue; // At signup, total sales value equals the platform's initial revenue.
-  const recentAllReferrals = allReferrals?.sort((a, b) => b.date.toMillis() - a.date.toMillis()).slice(0, 5) ?? [];
+  const recentAllReferrals = useMemo(() => 
+      allReferrals?.sort((a, b) => b.date.toMillis() - a.date.toMillis()).slice(0, 5) ?? [],
+      [allReferrals]
+  );
 
   // --- Personal Stats (for the logged-in user, admin or not) ---
-  const personalTotalCommission = personalReferrals?.reduce((sum, r) => sum + r.commission, 0) ?? 0;
-  const personalTotalReferrals = personalReferrals?.length ?? 0;
-  const personalUnpaidCommissions = personalReferrals?.filter(r => r.status === 'unpaid').reduce((sum, r) => sum + r.commission, 0) ?? 0;
-  
-  const personalGrossSalesValue = useMemo(() => {
-    if (!personalReferrals) return 0;
-    // The gross value of sales this user is responsible for.
-    return personalReferrals.reduce((sum, r) => sum + getTierPrice(r.planPurchased), 0);
+   const { personalTotalCommission, personalTotalReferrals, personalUnpaidCommissions, personalGrossSalesValue } = useMemo(() => {
+      if (!personalReferrals || personalReferrals.length === 0) {
+          return { personalTotalCommission: 0, personalTotalReferrals: 0, personalUnpaidCommissions: 0, personalGrossSalesValue: 0 };
+      }
+
+      const totalCommission = personalReferrals.reduce((sum, r) => sum + r.commission, 0);
+      const unpaidCommissions = personalReferrals.filter(r => r.status === 'unpaid').reduce((sum, r) => sum + r.commission, 0);
+      const grossSales = personalReferrals.reduce((sum, r) => sum + getTierPrice(r.planPurchased), 0);
+
+      return {
+          personalTotalCommission: totalCommission,
+          personalTotalReferrals: personalReferrals.length,
+          personalUnpaidCommissions: unpaidCommissions,
+          personalGrossSalesValue: grossSales,
+      };
   }, [personalReferrals]);
 
   const recentPersonalReferrals = personalReferrals?.sort((a, b) => b.date.toMillis() - a.date.toMillis()).slice(0, 5) ?? [];
@@ -111,7 +123,7 @@ export default function DashboardPage() {
                         title="Total Affiliate Payouts"
                         value={`$${totalAffiliatePayouts.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                         icon={<DollarSign className="h-5 w-5 text-muted-foreground" />}
-                        description="Total commissions earned by all affiliates at signup."
+                        description="Total commissions generated at signup."
                     />
                     <StatCard
                         title="Platform-Wide Referrals"
@@ -185,7 +197,7 @@ export default function DashboardPage() {
                 title="Your Total Earnings"
                 value={`$${personalTotalCommission.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                 icon={<DollarSign className="h-5 w-5 text-muted-foreground" />}
-                description="Your commission from all sales (after the first payment)."
+                description="Your commission from all sales."
             />
             <StatCard
                 title="Your Total Referrals"
@@ -278,3 +290,5 @@ export default function DashboardPage() {
     </div>
   );
 }
+
+    
