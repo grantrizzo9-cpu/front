@@ -8,6 +8,7 @@ import Link from "next/link";
 import type { Payout } from "@/lib/types";
 import { useUser, useFirestore, useCollection, useMemoFirebase } from "@/firebase";
 import { collection } from "firebase/firestore";
+import { Button } from "@/components/ui/button";
 
 export default function PayoutsPage() {
   const { user, isUserLoading } = useUser();
@@ -41,7 +42,11 @@ export default function PayoutsPage() {
         <CardHeader>
           <CardTitle>All Payouts</CardTitle>
           <CardDescription>
-            All payouts are sent daily via PayPal.
+            All payouts are sent daily to your configured PayPal email. You can update it on the{' '}
+            <Link href="/dashboard/settings" className="font-medium text-primary hover:underline">
+              Settings
+            </Link>{' '}
+            page.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -74,9 +79,16 @@ export default function PayoutsPage() {
               </TableBody>
             </Table>
           ) : (
-             <div className="text-center text-muted-foreground py-10">
-                <p>No payout history to show.</p>
-                <p className="text-sm">Your payouts will appear here once you start earning commissions.</p>
+             <div className="text-center text-muted-foreground py-10 space-y-4">
+                <div>
+                  <p>No payout history to show.</p>
+                  <p className="text-sm">Your payouts will appear here once you start earning commissions.</p>
+                </div>
+                 <Button asChild variant="outline">
+                    <Link href="/dashboard/settings">
+                        Configure Payout Settings
+                    </Link>
+                </Button>
             </div>
           )}
         </CardContent>
