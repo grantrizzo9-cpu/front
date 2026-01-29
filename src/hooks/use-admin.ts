@@ -1,8 +1,8 @@
 
 'use client';
 
-import { useFirestore, useUser, setDocumentNonBlocking } from '@/firebase';
-import { doc, getDoc } from 'firebase/firestore';
+import { useFirestore, useUser } from '@/firebase';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { useState, useEffect } from 'react';
 
 /**
@@ -29,18 +29,25 @@ export function useAdmin() {
         setIsLoading(false);
         return;
       }
+      
+      setIsLoading(true);
 
       // Hardcoded check for the platform owner's email.
       if (user.email === 'rentapog@gmail.com') {
-        setIsAdmin(true);
-
-        // Ensure the admin role document exists for the platform owner.
-        // This allows Firestore security rules for collectionGroup queries to pass.
-        const adminRoleRef = doc(firestore, 'roles_admin', user.uid);
-        // Use a fire-and-forget set operation. The security rule allows a user to write to their own role doc.
-        setDocumentNonBlocking(adminRoleRef, {}, {});
-        
-        setIsLoading(false);
+        try {
+            const adminRoleRef = doc(firestore, 'roles_admin', user.uid);
+            const adminDocSnap = await getDoc(adminRoleRef);
+            if (!adminDocSnap.exists()) {
+                // Use await to ensure the role is created before proceeding
+                await setDoc(adminRoleRef, {});
+            }
+            setIsAdmin(true);
+        } catch (error) {
+            console.error("Error setting admin role for owner:", error);
+            setIsAdmin(false); // Fail safely
+        } finally {
+            setIsLoading(false);
+        }
         return;
       }
 

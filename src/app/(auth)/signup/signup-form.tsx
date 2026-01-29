@@ -13,7 +13,7 @@ import { useEffect, useState } from "react";
 import { Loader2, Users } from "lucide-react";
 import { useAuth, useFirestore } from "@/firebase";
 import { createUserWithEmailAndPassword, updateProfile, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
-import { doc, getDoc, writeBatch, serverTimestamp, Timestamp, collection, getDocs } from "firebase/firestore";
+import { doc, getDoc, writeBatch, serverTimestamp, Timestamp, collection } from "firebase/firestore";
 import { firebaseConfig } from "@/firebase/config";
 
 const GoogleIcon = () => (
@@ -113,19 +113,15 @@ export function SignupForm() {
         batch.set(usernameDocRef, { uid: user.uid });
 
         // -- Referral Record (if applicable) --
-        if (referrerUsername) {
+        if (referrerUsername && plan) {
             const referrerUsernameDocRef = doc(firestore, "usernames", referrerUsername);
             const referrerUsernameDoc = await getDoc(referrerUsernameDocRef);
             if (referrerUsernameDoc.exists()) {
                 const referrerId = referrerUsernameDoc.data().uid;
                 
-                // Determine commission rate
-                const referrerReferralsCol = collection(firestore, 'users', referrerId, 'referrals');
-                const referrerReferralsSnap = await getDocs(referrerReferralsCol);
-                const commissionRate = referrerReferralsSnap.size >= 10 ? 0.75 : 0.70;
-
-                const planPrice = plan ? plan.price : 0;
-                const commissionAmount = planPrice * commissionRate;
+                // Simplified commission logic to avoid permission errors
+                const commissionRate = 0.70; // Base commission rate
+                const commissionAmount = plan.price * commissionRate;
 
                 const newReferralRef = doc(collection(firestore, 'users', referrerId, 'referrals'));
                 
@@ -134,11 +130,11 @@ export function SignupForm() {
                     affiliateId: referrerId,
                     referredUserId: user.uid,
                     referredUserUsername: username,
-                    planPurchased: plan ? plan.name : 'N/A',
+                    planPurchased: plan.name,
                     commission: commissionAmount,
-                    status: 'unpaid' as const, // Commissions are now unpaid until payout
+                    status: 'unpaid' as const,
                     date: serverTimestamp(),
-                    subscriptionId: user.uid, // Using user's UID as a stand-in since subscription is embedded
+                    subscriptionId: user.uid,
                 };
                 batch.set(newReferralRef, newReferralData);
             }
@@ -234,19 +230,15 @@ export function SignupForm() {
             batch.set(userDocRef, newUserDocData);
             
             // -- Referral Record (if applicable) --
-            if (referrerUsername) {
+            if (referrerUsername && plan) {
                 const referrerUsernameDocRef = doc(firestore, "usernames", referrerUsername);
                 const referrerUsernameDoc = await getDoc(referrerUsernameDocRef);
                 if (referrerUsernameDoc.exists()) {
                     const referrerId = referrerUsernameDoc.data().uid;
 
-                    // Determine commission rate
-                    const referrerReferralsCol = collection(firestore, 'users', referrerId, 'referrals');
-                    const referrerReferralsSnap = await getDocs(referrerReferralsCol);
-                    const commissionRate = referrerReferralsSnap.size >= 10 ? 0.75 : 0.70;
-
-                    const planPrice = plan ? plan.price : 0;
-                    const commissionAmount = planPrice * commissionRate;
+                    // Simplified commission logic to avoid permission errors
+                    const commissionRate = 0.70; // Base commission rate
+                    const commissionAmount = plan.price * commissionRate;
 
                     const newReferralRef = doc(collection(firestore, 'users', referrerId, 'referrals'));
                     
@@ -255,11 +247,11 @@ export function SignupForm() {
                         affiliateId: referrerId,
                         referredUserId: user.uid,
                         referredUserUsername: username,
-                        planPurchased: plan ? plan.name : 'N/A',
+                        planPurchased: plan.name,
                         commission: commissionAmount,
                         status: 'unpaid' as const,
                         date: serverTimestamp(),
-                        subscriptionId: user.uid, // Using user's UID as a stand-in
+                        subscriptionId: user.uid,
                     };
                     batch.set(newReferralRef, newReferralData);
                 }
