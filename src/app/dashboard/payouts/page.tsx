@@ -1,27 +1,51 @@
 'use client';
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { format } from "date-fns";
 import { ArrowRight, Loader2 } from "lucide-react";
 import Link from "next/link";
-import type { Payout } from "@/lib/types";
-import { useUser, useFirestore, useCollection, useMemoFirebase } from "@/firebase";
-import { collection } from "firebase/firestore";
+import type { Payout, User as UserType } from "@/lib/types";
+import { useUser, useFirestore, useCollection, useMemoFirebase, useDoc, updateDocumentNonBlocking } from "@/firebase";
+import { collection, doc } from "firebase/firestore";
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { useToast } from "@/hooks/use-toast";
 
 export default function PayoutsPage() {
   const { user, isUserLoading } = useUser();
   const firestore = useFirestore();
+  const { toast } = useToast();
 
   const payoutsRef = useMemoFirebase(() => {
     if (!user || !firestore) return null;
     return collection(firestore, 'users', user.uid, 'payments');
   }, [firestore, user?.uid]);
-
   const { data: payouts, isLoading: payoutsLoading } = useCollection<Payout>(payoutsRef);
 
-  const isLoading = isUserLoading || payoutsLoading;
+  const userDocRef = useMemoFirebase(() => {
+    if (!user || !firestore) return null;
+    return doc(firestore, 'users', user.uid);
+  }, [firestore, user?.uid]);
+  const { data: userData, isLoading: isUserDataLoading } = useDoc<UserType>(userDocRef);
+
+  const isLoading = isUserLoading || payoutsLoading || isUserDataLoading;
+
+  const handleSaveChanges = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!userDocRef) return;
+    
+    const formData = new FormData(e.currentTarget);
+    const newPaypalEmail = formData.get('paypal-email') as string;
+
+    updateDocumentNonBlocking(userDocRef, { paypalEmail: newPaypalEmail });
+    
+    toast({
+      title: "Changes Saved",
+      description: "Your PayPal email has been updated.",
+    });
+  };
 
   if (isLoading) {
       return (
@@ -34,19 +58,33 @@ export default function PayoutsPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-3xl font-bold font-headline">Payout History</h1>
-        <p className="text-muted-foreground">Your complete history of daily commission payouts.</p>
+        <h1 className="text-3xl font-bold font-headline">Payouts</h1>
+        <p className="text-muted-foreground">Manage your payout settings and view your payout history.</p>
       </div>
+      
+      <Card>
+        <form onSubmit={handleSaveChanges}>
+          <CardHeader>
+            <CardTitle>Payout Information</CardTitle>
+            <CardDescription>This is the PayPal email where your daily commissions will be sent.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              <Label htmlFor="paypal-email">PayPal Email</Label>
+              <Input id="paypal-email" name="paypal-email" type="email" defaultValue={userData?.paypalEmail || ''} required />
+            </div>
+          </CardContent>
+          <CardFooter>
+            <Button type="submit">Save Changes</Button>
+          </CardFooter>
+        </form>
+      </Card>
 
       <Card>
         <CardHeader>
-          <CardTitle>All Payouts</CardTitle>
+          <CardTitle>Payout History</CardTitle>
           <CardDescription>
-            All payouts are sent daily to your configured PayPal email. You can update it on the{' '}
-            <Link href="/dashboard/settings" className="font-medium text-primary hover:underline">
-              Settings
-            </Link>{' '}
-            page.
+            Your complete history of daily commission payouts.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -84,11 +122,6 @@ export default function PayoutsPage() {
                   <p>No payout history to show.</p>
                   <p className="text-sm">Your payouts will appear here once you start earning commissions.</p>
                 </div>
-                 <Button asChild variant="outline">
-                    <Link href="/dashboard/settings">
-                        Configure Payout Settings
-                    </Link>
-                </Button>
             </div>
           )}
         </CardContent>

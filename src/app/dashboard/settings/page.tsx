@@ -4,7 +4,6 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Copy, Loader2, PartyPopper, Info } from "lucide-react";
 import { useUser, useFirestore, useDoc, updateDocumentNonBlocking, useMemoFirebase } from "@/firebase";
@@ -47,21 +46,6 @@ export default function SettingsPage() {
         description: "Your affiliate link has been copied.",
       });
     }
-  };
-  
-  const handleSaveChanges = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (!userDocRef) return;
-    
-    const formData = new FormData(e.currentTarget);
-    const newPaypalEmail = formData.get('paypal-email') as string;
-
-    updateDocumentNonBlocking(userDocRef, { paypalEmail: newPaypalEmail });
-    
-    toast({
-      title: "Changes Saved",
-      description: "Your PayPal email has been updated.",
-    });
   };
   
   const handleBecomeAffiliate = () => {
@@ -166,24 +150,6 @@ export default function SettingsPage() {
             </Alert>
           )}
         </CardContent>
-      </Card>
-
-      <Card>
-        <form onSubmit={handleSaveChanges}>
-          <CardHeader>
-            <CardTitle>Payout Information</CardTitle>
-            <CardDescription>This is the PayPal email where your daily commissions will be sent.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              <Label htmlFor="paypal-email">PayPal Email</Label>
-              <Input id="paypal-email" name="paypal-email" type="email" defaultValue={userData?.paypalEmail || ''} required />
-            </div>
-          </CardContent>
-          <CardFooter>
-            <Button type="submit">Save Changes</Button>
-          </CardFooter>
-        </form>
       </Card>
     </div>
   );
