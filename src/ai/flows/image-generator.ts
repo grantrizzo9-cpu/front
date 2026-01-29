@@ -50,7 +50,7 @@ const imageGeneratorFlow = ai.defineFlow(
             const rawErrorMessage = e.message || 'An unknown error occurred.';
 
             if (rawErrorMessage.includes("API key not valid")) {
-                 return { error: `Authentication failed. Please check that your Gemini API Key in the .env file is correct. Raw error: "${rawErrorMessage}"` };
+                 return { error: `Authentication failed. The Gemini API Key you provided in the .env file appears to be invalid. Please double-check that you have copied the entire key correctly from Google AI Studio. Raw error: "${rawErrorMessage}"` };
             }
 
             if (rawErrorMessage.includes("Imagen API is only accessible to billed users at this time")) {
