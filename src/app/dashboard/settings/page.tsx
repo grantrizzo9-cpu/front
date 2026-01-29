@@ -21,7 +21,6 @@ export default function SettingsPage() {
   const { isAdmin, isLoading: isAdminLoading } = useAdmin();
 
   const [isRepairing, setIsRepairing] = useState(false);
-  const [isMakingAdmin, setIsMakingAdmin] = useState(false);
 
   const userDocRef = useMemoFirebase(() => {
     if (!user || !firestore) return null;
@@ -91,24 +90,6 @@ export default function SettingsPage() {
     }
   };
 
-  const handleMakeAdmin = async () => {
-    if (!firestore || !user) {
-        toast({ variant: 'destructive', title: 'Error', description: 'Could not grant admin privileges. User not found.' });
-        return;
-    }
-    setIsMakingAdmin(true);
-    try {
-        const adminRoleRef = doc(firestore, 'roles_admin', user.uid);
-        await setDoc(adminRoleRef, {}); // Create an empty document
-        toast({ title: 'Success!', description: 'Admin privileges granted. The page will now reload.' });
-        setTimeout(() => window.location.reload(), 1500);
-    } catch (error: any) {
-        toast({ variant: 'destructive', title: 'Operation Failed', description: error.message || 'An unknown error occurred.' });
-    } finally {
-        setIsMakingAdmin(false);
-    }
-  };
-
   const isLoading = isUserLoading || isUserDataLoading || isUsernameDocLoading || isAdminLoading;
 
   if (isLoading) {
@@ -125,25 +106,6 @@ export default function SettingsPage() {
         <h1 className="text-3xl font-bold font-headline">Settings</h1>
         <p className="text-muted-foreground">Manage your account and affiliate settings.</p>
       </div>
-
-      {userData?.username === 'rentahost' && !isAdmin && (
-        <Card className="border-accent">
-          <CardHeader>
-            <CardTitle>Admin Privileges</CardTitle>
-            <CardDescription>Grant administrative rights to this account.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground">
-              This section is only visible to the 'rentahost' user. Click the button below to grant your account full administrative privileges. You will only need to do this once.
-            </p>
-          </CardContent>
-          <CardFooter>
-            <Button onClick={handleMakeAdmin} disabled={isMakingAdmin}>
-              {isMakingAdmin ? <Loader2 className="animate-spin" /> : "Grant Admin Privileges"}
-            </Button>
-          </CardFooter>
-        </Card>
-      )}
 
       <Card>
         <CardHeader>
