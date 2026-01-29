@@ -1,40 +1,66 @@
-
 'use client';
 
-import { useFirestore, useUser, useDoc, useMemoFirebase } from '@/firebase';
-import { doc } from 'firebase/firestore';
+import { useFirestore, useUser } from '@/firebase';
+import { doc, getDoc } from 'firebase/firestore';
+import { useState, useEffect } from 'react';
 
 /**
  * Hook to determine if the current user has admin privileges.
- * It checks for the existence of a document in the /roles_admin/{userId} collection.
- * It also contains a hardcoded check for the primary admin user.
+ * It checks for the existence of a document in the /roles_admin/{userId} collection
+ * and also includes a hardcoded check for the primary admin user.
  * @returns {object} An object containing a boolean `isAdmin` and a boolean `isLoading`.
  */
 export function useAdmin() {
   const { user, isUserLoading } = useUser();
   const firestore = useFirestore();
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // We should not decide anything until the user loading is complete.
-  const isHardcodedAdmin = !isUserLoading && (user?.email === 'rentapog@gmail.com' || user?.displayName === 'rentahost');
+  useEffect(() => {
+    // Always start in a loading state when dependencies change
+    setIsLoading(true);
 
-  // Also, don't try to get a doc ref while user is loading.
-  const adminDocRef = useMemoFirebase(() => {
-    if (isUserLoading || isHardcodedAdmin || !user?.uid) {
-      return null;
+    if (isUserLoading) {
+      // We are waiting for Firebase Auth to resolve, so we wait.
+      return;
     }
-    return doc(firestore, 'roles_admin', user.uid);
-  }, [firestore, user?.uid, isUserLoading, isHardcodedAdmin]);
 
-  // This hook will now only run if adminDocRef is not null.
-  const { data: adminDoc, isLoading: isAdminDocLoading } = useDoc(adminDocRef);
+    if (!user) {
+      // No user is logged in, so they can't be an admin.
+      setIsAdmin(false);
+      setIsLoading(false);
+      return;
+    }
+    
+    // Check for hardcoded primary admin email. This is the fastest and most reliable check.
+    if (user.email === 'rentapog@gmail.com') {
+        setIsAdmin(true);
+        setIsLoading(false);
+        return;
+    }
 
-  const isAdminByDb = !!adminDoc;
+    // If the user is not the hardcoded admin, check for a role document in the database.
+    const checkDbRole = async () => {
+      try {
+        const adminDocRef = doc(firestore, 'roles_admin', user.uid);
+        const adminDoc = await getDoc(adminDocRef);
+        // The user is an admin if their role document exists.
+        setIsAdmin(adminDoc.exists());
+      } catch (error) {
+        // If there's an error (e.g., permissions), we assume the user is not an admin
+        // and log the error instead of crashing the app.
+        console.error("An error occurred while checking for admin privileges:", error);
+        setIsAdmin(false);
+      } finally {
+        // Regardless of the outcome, the loading process is complete.
+        setIsLoading(false);
+      }
+    };
 
-  // The user is an admin if they pass either the hardcoded check or the database check.
-  const isAdmin = isHardcodedAdmin || isAdminByDb;
-  
-  // The final loading state depends on user loading AND the potential db doc loading.
-  const isLoading = isUserLoading || isAdminDocLoading;
+    checkDbRole();
+
+  }, [user, isUserLoading, firestore]);
+
 
   return { isAdmin, isLoading };
 }
