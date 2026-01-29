@@ -131,7 +131,6 @@ export function SignupForm() {
                     status: 'unpaid' as const,
                     date: serverTimestamp(),
                     subscriptionId: user.uid, // Using user's UID as a stand-in since subscription is embedded
-                    triggeringUserReferredBy: referrerUsername, // For security rule
                 };
                 batch.set(newReferralRef, newReferralData);
             }
@@ -245,7 +244,6 @@ export function SignupForm() {
                         status: 'unpaid' as const,
                         date: serverTimestamp(),
                         subscriptionId: user.uid, // Using user's UID as a stand-in
-                        triggeringUserReferredBy: referrerUsername, // For security rule
                     };
                     batch.set(newReferralRef, newReferralData);
                 }

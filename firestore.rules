@@ -23,8 +23,7 @@ service cloud.firestore {
     match /users/{userId}/referrals/{referralId} {
       allow get, list: if request.auth.uid == userId;
       // Allow creation by admin OR by the user being referred, if the data is correct.
-      allow create: if (request.auth != null && exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid))) ||
-                    (request.resource.data.referredUserId == request.auth.uid && get(/databases/$(database)/documents/usernames/$(request.resource.data.triggeringUserReferredBy)).data.uid == userId);
+      allow create: if (request.auth != null && exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid))) || (request.auth.uid == request.resource.data.referredUserId && userId == request.resource.data.affiliateId);
       allow update, delete: if false; // Protect integrity
     }
 
