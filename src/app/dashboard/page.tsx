@@ -54,28 +54,30 @@ export default function DashboardPage() {
   // --- Platform-Wide Stats (for Admins) ---
   const { platformRevenue, totalAffiliatePayouts, totalPlatformReferrals, totalGrossSales } = useMemo(() => {
     if (!isAdmin || !allReferrals || allReferrals.length === 0) {
-        return { platformRevenue: 0, totalAffiliatePayouts: 0, totalPlatformReferrals: 0, totalGrossSales: 0 };
+      return { platformRevenue: 0, totalAffiliatePayouts: 0, totalPlatformReferrals: 0, totalGrossSales: 0 };
     }
 
     try {
-        const grossSales = allReferrals.reduce((sum, r) => {
-            const price = getTierPrice(r.planPurchased);
-            return sum + (typeof price === 'number' ? price : 0);
-        }, 0);
+      const grossSales = allReferrals.reduce((sum, r) => {
+        const price = getTierPrice(r.planPurchased);
+        return sum + (typeof price === 'number' ? price : 0);
+      }, 0);
 
-        const payouts = allReferrals.reduce((sum, r) => {
-            return sum + (typeof r.commission === 'number' ? r.commission : 0);
-        }, 0);
+      const payouts = allReferrals.reduce((sum, r) => {
+        return sum + (typeof r.commission === 'number' ? r.commission : 0);
+      }, 0);
+      
+      const companyRevenue = grossSales - payouts;
 
-        return {
-            platformRevenue: grossSales,
-            totalAffiliatePayouts: payouts,
-            totalPlatformReferrals: allReferrals.length,
-            totalGrossSales: grossSales,
-        };
+      return {
+        platformRevenue: companyRevenue,
+        totalAffiliatePayouts: payouts,
+        totalPlatformReferrals: allReferrals.length,
+        totalGrossSales: grossSales,
+      };
     } catch (e) {
-        console.error("Error calculating platform stats:", e);
-        return { platformRevenue: 0, totalAffiliatePayouts: 0, totalPlatformReferrals: 0, totalGrossSales: 0 };
+      console.error("Error calculating platform stats:", e);
+      return { platformRevenue: 0, totalAffiliatePayouts: 0, totalPlatformReferrals: 0, totalGrossSales: 0 };
     }
   }, [allReferrals, isAdmin]);
 
@@ -128,7 +130,7 @@ export default function DashboardPage() {
                         title="Platform Revenue"
                         value={`$${platformRevenue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                         icon={<TrendingUp className="h-5 w-5 text-muted-foreground" />}
-                        description="Total revenue from all signup payments."
+                        description="Company's share of revenue from all sales."
                     />
                     <StatCard
                         title="Total Affiliate Payouts"
@@ -155,7 +157,7 @@ export default function DashboardPage() {
                         <CardDescription>The latest sign-ups from all affiliates.</CardDescription>
                     </CardHeader>
                     <CardContent>
-                        {recentAllReferrals.length > 0 ? (
+                        {allReferrals && allReferrals.length > 0 ? (
                             <Table>
                                 <TableHeader>
                                     <TableRow>
@@ -177,8 +179,22 @@ export default function DashboardPage() {
                                 </TableBody>
                             </Table>
                         ) : (
-                            <div className="text-center text-muted-foreground py-10">
-                                <p>No recent referrals across the platform.</p>
+                            <div className="text-center text-muted-foreground py-10 px-4">
+                                <Users className="mx-auto h-12 w-12 text-gray-400" />
+                                <h3 className="mt-4 text-lg font-semibold text-foreground">Waiting for the First Referral</h3>
+                                <p className="mt-1 text-sm">
+                                    The admin dashboard is working, but there's no data to show yet.
+                                    To see your dashboard populate with data, simulate a customer referral.
+                                </p>
+                                <div className="mt-4 text-sm text-left bg-secondary/50 p-4 rounded-lg">
+                                    <p className="font-semibold">How to test the referral flow:</p>
+                                    <ol className="list-decimal list-inside mt-2 space-y-1">
+                                        <li>Go to your <Link href="/dashboard/settings" className="text-primary underline">Settings</Link> page and copy your affiliate link.</li>
+                                        <li>Open that link in a new incognito browser window.</li>
+                                        <li>Sign up for a new account with a different email address and choose a plan.</li>
+                                        <li>Once the new user is created, this dashboard will update with the referral data.</li>
+                                    </ol>
+                                </div>
                             </div>
                         )}
                     </CardContent>
@@ -301,5 +317,3 @@ export default function DashboardPage() {
     </div>
   );
 }
-
-    
