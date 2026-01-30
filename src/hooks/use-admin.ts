@@ -2,7 +2,7 @@
 'use client';
 
 import { useFirestore, useUser } from '@/firebase';
-import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { useState, useEffect } from 'react';
 
 /**
@@ -42,12 +42,11 @@ export function useAdmin() {
                 await setDoc(adminRoleRef, {});
             }
 
-            // Ensure the user's profile has isAffiliate set to true
+            // Ensure the user's profile has isAffiliate set to true.
+            // Using setDoc with merge is more robust than updateDoc.
+            // It will create the document if it's missing, or update it if it exists.
             const userDocRef = doc(firestore, 'users', user.uid);
-            const userDocSnap = await getDoc(userDocRef);
-            if (userDocSnap.exists() && !userDocSnap.data()?.isAffiliate) {
-                await updateDoc(userDocRef, { isAffiliate: true });
-            }
+            await setDoc(userDocRef, { isAffiliate: true }, { merge: true });
 
             setIsAdmin(true);
         } catch (error) {
