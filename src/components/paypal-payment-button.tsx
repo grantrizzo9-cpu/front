@@ -38,6 +38,7 @@ export function PayPalPaymentButton({ planId, onPaymentSuccess, onPaymentStart, 
                 variant: 'destructive',
                 title: 'PayPal Error',
                 description: result.error || 'Could not create a PayPal order. Please refresh and try again.',
+                duration: 12000, // Increased duration to read detailed errors
             });
             onPaymentError();
             throw new Error(result.error || 'Could not create PayPal order.');

@@ -11,7 +11,7 @@ import { subscriptionTiers } from '@/lib/data';
  * @returns An object containing the orderId or an error.
  */
 export async function createPaypalOrder(planId: string) {
-    const client = await getClient();
+    const client = getClient();
     if (!client) {
         return { error: 'PayPal server-side keys are not configured. Please ensure PAYPAL_CLIENT_ID and PAYPAL_CLIENT_SECRET are set in your .env file and restart the server.' };
     }
@@ -43,11 +43,27 @@ export async function createPaypalOrder(planId: string) {
         const order = await client.execute(request);
         return { orderId: order.result.id };
     } catch (err: any) {
-        console.error("Error creating PayPal order:", err);
-         if (err.statusCode === 401) { // Unauthorized
-             return { error: 'Could not connect to PayPal. Your server-side PAYPAL_CLIENT_ID and/or PAYPAL_CLIENT_SECRET in the .env file are likely incorrect. Please check them and restart the server.' };
+        console.error("Error creating PayPal order:", JSON.stringify(err, null, 2));
+        
+        let userMessage = 'Could not initiate PayPal transaction. The server encountered an error while communicating with PayPal.';
+
+        if (err.statusCode === 401 || (err.message && err.message.includes("AUTHENTICATION_FAILURE"))) {
+             userMessage = 'Authentication with PayPal failed. Your server-side PAYPAL_CLIENT_ID and/or PAYPAL_CLIENT_SECRET in the .env file are likely incorrect. Please double-check them and restart the server.';
+        } else if (err.statusCode === 422 || err.statusCode === 400) { // Unprocessable Entity or Bad Request
+            try {
+                // PayPal error messages are often a JSON string in the message property
+                const errorDetails = JSON.parse(err.message);
+                const issue = errorDetails.details?.[0]?.issue || errorDetails.name;
+                const description = errorDetails.details?.[0]?.description || errorDetails.message;
+                userMessage = `PayPal rejected the transaction: ${issue}. Details: "${description}"`;
+            } catch {
+                 userMessage = `PayPal returned an unexpected validation error. Raw message: ${err.message}`;
+            }
+        } else if (err.message) {
+             userMessage = `An unexpected error occurred while communicating with PayPal. Raw message: "${err.message}"`;
         }
-        return { error: 'Could not initiate PayPal transaction. The server encountered an error while communicating with PayPal.' };
+        
+        return { error: userMessage };
     }
 }
 
@@ -57,7 +73,7 @@ export async function createPaypalOrder(planId: string) {
  * @returns An object indicating success and the captured data, or an error.
  */
 export async function capturePaypalOrder(orderId: string) {
-    const client = await getClient();
+    const client = getClient();
     if (!client) {
         return { success: false, error: 'PayPal server-side keys are not configured. Please check your .env file and restart the server.' };
     }
