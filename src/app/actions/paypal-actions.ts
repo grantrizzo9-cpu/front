@@ -10,6 +10,10 @@ import { subscriptionTiers } from '@/lib/data';
  * @returns An object containing the orderId or an error.
  */
 export async function createPaypalOrder(planId: string) {
+    if (!client) {
+        return { error: 'PayPal service is not configured on the server. Please check the environment variables.' };
+    }
+
     const plan = subscriptionTiers.find(p => p.id === planId);
     if (!plan) {
         return { error: 'Plan not found' };
@@ -48,6 +52,10 @@ export async function createPaypalOrder(planId: string) {
  * @returns An object indicating success and the captured data, or an error.
  */
 export async function capturePaypalOrder(orderId: string) {
+    if (!client) {
+        return { success: false, error: 'PayPal service is not configured on the server. Please check environment variables.' };
+    }
+
     const request = new paypal.orders.OrdersCaptureRequest(orderId);
 
     try {

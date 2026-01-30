@@ -20,18 +20,22 @@ export function FirebaseClientProvider({ children }: FirebaseClientProviderProps
   useEffect(() => {
     const initialize = async () => {
       try {
+        // Attempt to enable offline persistence.
         await enableIndexedDbPersistence(firebaseServices.firestore);
       } catch (err: any) {
         if (err.code === 'failed-precondition') {
+          // This is a common, non-critical error when multiple tabs are open.
           console.warn('Firestore persistence failed because multiple tabs are open. App will work but without multi-tab offline sync.');
         } else if (err.code === 'unimplemented') {
-          setError('Offline features are not supported in this browser.');
-          return;
+          // This occurs in environments where IndexedDB is not supported (e.g., private browsing).
+          console.warn('Offline features are not supported in this browser environment.');
+        } else {
+          // Catch any other unexpected errors during persistence setup.
+          console.error('An unexpected error occurred while enabling Firestore persistence:', err);
         }
       }
-      // The previous check against a Firestore document was unreliable due to security rules.
-      // We now assume the connection is ready after attempting to enable persistence.
-      // Actual connection errors will be caught by the components that use Firestore.
+      // Crucially, we set the app as "ready" even if persistence fails.
+      // The app can still function with a live connection.
       setIsReady(true);
     };
 
