@@ -1,3 +1,4 @@
+
 'use server';
 
 import { getClient } from '@/lib/paypal-client';
@@ -12,7 +13,7 @@ import { subscriptionTiers } from '@/lib/data';
 export async function createPaypalOrder(planId: string) {
     const client = await getClient();
     if (!client) {
-        return { error: 'PayPal service is not configured on the server. Please check the environment variables.' };
+        return { error: 'PayPal server-side keys are not configured. Please ensure PAYPAL_CLIENT_ID and PAYPAL_CLIENT_SECRET are set in your .env file and restart the server.' };
     }
 
     const plan = subscriptionTiers.find(p => p.id === planId);
@@ -43,7 +44,10 @@ export async function createPaypalOrder(planId: string) {
         return { orderId: order.result.id };
     } catch (err: any) {
         console.error("Error creating PayPal order:", err);
-        return { error: 'Could not initiate PayPal transaction. Check server logs for details.' };
+         if (err.statusCode === 401) { // Unauthorized
+             return { error: 'Could not connect to PayPal. Your server-side PAYPAL_CLIENT_ID and/or PAYPAL_CLIENT_SECRET in the .env file are likely incorrect. Please check them and restart the server.' };
+        }
+        return { error: 'Could not initiate PayPal transaction. The server encountered an error while communicating with PayPal.' };
     }
 }
 
@@ -55,7 +59,7 @@ export async function createPaypalOrder(planId: string) {
 export async function capturePaypalOrder(orderId: string) {
     const client = await getClient();
     if (!client) {
-        return { success: false, error: 'PayPal service is not configured on the server. Please check environment variables.' };
+        return { success: false, error: 'PayPal server-side keys are not configured. Please check your .env file and restart the server.' };
     }
 
     const request = new paypal.orders.OrdersCaptureRequest(orderId);
