@@ -1,6 +1,7 @@
 
 "use client";
 
+import { PayPalScriptProvider } from "@paypal/react-paypal-js";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -9,27 +10,20 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { subscriptionTiers } from "@/lib/data";
-import { useEffect, useState } from "react";
-import { Loader2, Users, CheckCircle } from "lucide-react";
+import { useState } from "react";
+import { Loader2, Users, CheckCircle, AlertTriangle } from "lucide-react";
 import { useAuth, useFirestore } from "@/firebase";
 import { createUserWithEmailAndPassword, updateProfile, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { doc, getDoc, writeBatch, serverTimestamp, Timestamp, collection } from "firebase/firestore";
-import dynamic from 'next/dynamic';
-
-const PayPalWrapper = dynamic(
-    () => import('./paypal-wrapper').then(mod => mod.PayPalWrapper),
-    { 
-        ssr: false,
-        loading: () => <div className="h-24 w-full bg-muted animate-pulse rounded-md" />
-    }
-);
+import { PayPalPaymentButton } from "@/components/paypal-payment-button";
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 
 const GoogleIcon = () => (
     <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" className="mr-2 h-4 w-4 fill-current"><title>Google</title><path d="M12.48 10.92v3.28h7.84c-.24 1.84-.85 3.18-1.73 4.1-1.02 1.02-2.62 1.98-4.48 1.98-3.62 0-6.55-2.92-6.55-6.55s2.93-6.55 6.55-6.55c2.03 0 3.33.82 4.1 1.59l2.48-2.48C17.22 3.43 15.14 2 12.48 2 7.08 2 3 6.08 3 11.48s4.08 9.48 9.48 9.48c5.13 0 9.1-3.48 9.1-9.28 0-.6-.08-1.12-.2-1.68H3.48v.01z"></path></svg>
 );
 
 
-export function SignupForm() {
+function SignupFormInternal() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const { toast } = useToast();
@@ -45,8 +39,6 @@ export function SignupForm() {
     const planId = searchParams.get("plan") || 'starter';
     const referralCode = searchParams.get("ref");
     const plan = subscriptionTiers.find(p => p.id === planId) || subscriptionTiers[0];
-
-    const paypalClientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || '';
     
     const isFormValid = username.length > 2 && email.includes('@') && password.length >= 6;
 
@@ -184,14 +176,21 @@ export function SignupForm() {
                     </ul>
                 </CardContent>
                 <CardFooter className="flex-col items-stretch gap-4">
-                     <PayPalWrapper 
-                        plan={plan}
-                        isProcessing={isProcessing}
-                        paypalClientId={paypalClientId}
-                        onPaymentSuccess={handlePaymentSuccess}
-                        onPaymentStart={() => setIsProcessing(true)}
-                        onPaymentError={() => setIsProcessing(false)}
-                     />
+                     <div className="relative">
+                        {isProcessing && (
+                            <div className="absolute inset-0 bg-background/80 flex flex-col items-center justify-center z-10 rounded-md">
+                                <Loader2 className="animate-spin h-8 w-8 text-primary" />
+                                <p className="mt-2 text-sm text-muted-foreground">Processing payment...</p>
+                            </div>
+                        )}
+                        <PayPalPaymentButton 
+                            planId={plan.id}
+                            onPaymentSuccess={handlePaymentSuccess}
+                            onPaymentStart={() => setIsProcessing(true)}
+                            onPaymentError={() => setIsProcessing(false)}
+                            disabled={isProcessing}
+                        />
+                    </div>
                     <Button variant="ghost" onClick={() => setStep('details')} disabled={isProcessing}>
                         Back to details
                     </Button>
@@ -249,4 +248,41 @@ export function SignupForm() {
     );
 }
 
+export function SignupForm() {
+    const paypalClientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || '';
+    const isPaypalConfigured = paypalClientId && !paypalClientId.includes('REPLACE_WITH');
     
+    if (!isPaypalConfigured) {
+        return (
+            <Card>
+                 <CardHeader>
+                    <CardTitle className="font-headline text-2xl">Create Your Account</CardTitle>
+                    <CardDescription>
+                        Select a plan and create an account to get started.
+                    </CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <Alert variant="destructive">
+                        <AlertTriangle className="h-4 w-4" />
+                        <AlertTitle>Payment Service Not Configured</AlertTitle>
+                        <AlertDescription>
+                            The application owner needs to configure the PayPal Client ID. Please add your `NEXT_PUBLIC_PAYPAL_CLIENT_ID` to the `.env` file and **restart the development server**. The signup form cannot be displayed until this is resolved.
+                        </AlertDescription>
+                    </Alert>
+                </CardContent>
+                 <CardFooter>
+                    <div className="text-center text-sm w-full">
+                        Already have an account?{" "}
+                        <Link href="/login" className="text-primary hover:underline">Log in</Link>
+                    </div>
+                 </CardFooter>
+            </Card>
+        );
+    }
+
+    return (
+        <PayPalScriptProvider options={{ clientId: paypalClientId, currency: "AUD", intent: "capture" }}>
+            <SignupFormInternal />
+        </PayPalScriptProvider>
+    );
+}
