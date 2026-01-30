@@ -1,69 +1,80 @@
-
 'use client';
 
-import React, { useMemo, type ReactNode, useEffect, useState } from 'react';
+import React, { type ReactNode, useEffect, useState } from 'react';
 import { FirebaseProvider } from '@/firebase/provider';
-import { initializeFirebase } from '@/firebase';
+import { initializeFirebase, type FirebaseServices } from '@/firebase';
 import { enableIndexedDbPersistence } from 'firebase/firestore';
 import { Loader2 } from 'lucide-react';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { AlertTriangle } from 'lucide-react';
 
 interface FirebaseClientProviderProps {
   children: ReactNode;
 }
 
 export function FirebaseClientProvider({ children }: FirebaseClientProviderProps) {
-  const firebaseServices = useMemo(() => initializeFirebase(), []);
-  
-  const [isReady, setIsReady] = useState(false);
+  const [services, setServices] = useState<FirebaseServices | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
-    const initialize = async () => {
+    let servicesInstance: FirebaseServices;
+
+    try {
+      // Defer initialization to the client side inside useEffect.
+      servicesInstance = initializeFirebase();
+      
+      // Explicitly check for placeholder keys which cause crashes.
+      if (servicesInstance.firebaseApp.options.apiKey?.includes('REPLACE_WITH')) {
+        throw new Error("Your Firebase configuration contains placeholder values. Please add your project's configuration to `src/firebase/config.ts`.");
+      }
+
+      setServices(servicesInstance);
+
+    } catch (e: any) {
+      console.error("Firebase Initialization Error:", e);
+      setError(`Failed to initialize Firebase. This is often caused by an invalid or incomplete configuration in \`src/firebase/config.ts\`. Please verify your Firebase project details. Raw error: ${e.message}`);
+      setIsReady(false); // Make sure we show the error and not the loader
+      return;
+    }
+
+    const setupPersistence = async () => {
       try {
-        // Attempt to enable offline persistence.
-        await enableIndexedDbPersistence(firebaseServices.firestore);
+        await enableIndexedDbPersistence(servicesInstance.firestore);
       } catch (err: any) {
         if (err.code === 'failed-precondition') {
-          // This is a common, non-critical error when multiple tabs are open.
-          console.warn('Firestore persistence failed because multiple tabs are open. App will work but without multi-tab offline sync.');
+          console.warn('Firestore persistence not enabled: multiple tabs open.');
         } else if (err.code === 'unimplemented') {
-          // This occurs in environments where IndexedDB is not supported (e.g., private browsing).
-          console.warn('Offline features are not supported in this browser environment.');
+          console.warn('Firestore persistence not supported in this browser.');
         } else {
-          // Catch any other unexpected errors during persistence setup.
-          console.error('An unexpected error occurred while enabling Firestore persistence:', err);
+          console.error('Error enabling Firestore persistence:', err);
         }
       }
-      // Crucially, we set the app as "ready" even if persistence fails.
-      // The app can still function with a live connection.
       setIsReady(true);
     };
 
-    // Check for placeholder API key which indicates incomplete setup.
-    if (firebaseServices.firestore.app.options.apiKey?.includes('REPLACE_WITH')) {
-        setError("Your Firebase configuration in `src/firebase/config.ts` is incomplete. Please add the correct values from your project.");
-    } else {
-        initialize();
-    }
-  }, [firebaseServices.firestore]);
+    setupPersistence();
+
+  }, []); // Empty dependency array ensures this runs only once on mount
 
   if (error) {
-     return (
+    return (
       <div className="flex h-screen w-screen items-center justify-center p-4 bg-background">
-        <div className="text-center text-destructive border border-destructive/50 rounded-lg p-6 max-w-lg">
-            <h1 className="text-xl font-bold">Application Error</h1>
-            <p className="mt-2">{error}</p>
-        </div>
+        <Alert variant="destructive" className="max-w-lg">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertTitle>Application Configuration Error</AlertTitle>
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
       </div>
     );
   }
-  
-  if (!isReady) {
+
+  if (!isReady || !services) {
     return (
       <div className="flex h-screen w-screen items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-4 text-muted-foreground">
-            <Loader2 className="h-8 w-8 animate-spin" />
-            <p>Connecting to Database...</p>
+          <Loader2 className="h-8 w-8 animate-spin" />
+          <p>Connecting to Services...</p>
         </div>
       </div>
     );
@@ -71,9 +82,9 @@ export function FirebaseClientProvider({ children }: FirebaseClientProviderProps
 
   return (
     <FirebaseProvider
-      firebaseApp={firebaseServices.firebaseApp}
-      auth={firebaseServices.auth}
-      firestore={firebaseServices.firestore}
+      firebaseApp={services.firebaseApp}
+      auth={services.auth}
+      firestore={services.firestore}
     >
       {children}
     </FirebaseProvider>

@@ -5,15 +5,18 @@ import { initializeApp, getApps, getApp, type FirebaseApp } from 'firebase/app';
 import { getAuth, type Auth } from 'firebase/auth';
 import { getFirestore, type Firestore } from 'firebase/firestore';
 
-// Initialize Firebase
-const app: FirebaseApp = !getApps().length ? initializeApp(firebaseConfig) : getApp();
-const auth: Auth = getAuth(app);
-const firestore: Firestore = getFirestore(app);
+export interface FirebaseServices {
+  firebaseApp: FirebaseApp;
+  auth: Auth;
+  firestore: Firestore;
+}
 
-/**
- * Returns the initialized Firebase services.
- */
-export function initializeFirebase() {
+// Defer initialization until this function is called.
+export function initializeFirebase(): FirebaseServices {
+  const app: FirebaseApp = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+  const auth: Auth = getAuth(app);
+  const firestore: Firestore = getFirestore(app);
+  
   return {
     firebaseApp: app,
     auth,
