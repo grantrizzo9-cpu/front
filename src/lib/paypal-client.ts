@@ -2,12 +2,19 @@
 
 import paypal from '@paypal/checkout-server-sdk';
 
+let client: paypal.core.PayPalHttpClient | null = null;
+
 /**
  * Initializes and returns a PayPal HTTP client.
- * Returns null and logs a warning if credentials are not properly configured,
- * preventing the application from crashing on startup.
+ * Caches the client to avoid re-creating it on every call.
+ * Returns null and logs a warning if credentials are not properly configured.
  */
-function initializeClient() {
+export function getClient(): paypal.core.PayPalHttpClient | null {
+    // Return the cached client if it exists
+    if (client) {
+        return client;
+    }
+
     const clientId = process.env.PAYPAL_CLIENT_ID;
     const clientSecret = process.env.PAYPAL_CLIENT_SECRET;
 
@@ -24,13 +31,11 @@ function initializeClient() {
           ? new paypal.core.LiveEnvironment(clientId, clientSecret)
           : new paypal.core.SandboxEnvironment(clientId, clientSecret);
         
-        return new paypal.core.PayPalHttpClient(environment);
+        // Create and cache the client
+        client = new paypal.core.PayPalHttpClient(environment);
+        return client;
     } catch (error) {
         console.error("Failed to initialize PayPal client. Your credentials may be invalid.", error);
         return null;
     }
 }
-
-const client = initializeClient();
-
-export default client;
