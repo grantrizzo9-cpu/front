@@ -37,7 +37,7 @@ async function getPayPalAccessToken(): Promise<string> {
 /**
  * Creates a new PayPal order using the v2 API directly.
  */
-export async function createOrder(planId: string): Promise<{orderId: string} | {error: string}> {
+export async function createOrder(planId: string): Promise<{orderId?: string; error?: string; debug?: string}> {
   try {
     const accessToken = await getPayPalAccessToken();
     const url = `${PAYPAL_API_BASE}/v2/checkout/orders`;
@@ -74,31 +74,38 @@ export async function createOrder(planId: string): Promise<{orderId: string} | {
       body: JSON.stringify(payload),
     });
 
-    const data = await response.json();
-
     if (!response.ok) {
-      console.error("PAYPAL_CREATE_ORDER_ERROR:", JSON.stringify(data, null, 2));
-      const issue = data.details?.[0]?.issue || "UNKNOWN_ISSUE";
-      const description = data.details?.[0]?.description || "An error occurred while creating the order.";
-      return { error: `PayPal Error: ${issue} - ${description}` };
+      const errorBodyText = await response.text();
+      console.error("PAYPAL_CREATE_ORDER_ERROR:", errorBodyText);
+      // Try to parse, but fall back to raw text if not JSON
+      let errorJson;
+      try {
+          errorJson = JSON.parse(errorBodyText);
+      } catch {
+          errorJson = { message: "Response was not valid JSON.", body: errorBodyText };
+      }
+      const issue = errorJson.details?.[0]?.issue || errorJson.name || "UNKNOWN_ISSUE";
+      const description = errorJson.details?.[0]?.description || errorJson.message || "An error occurred while creating the order.";
+      return { error: `PayPal Error: ${issue} - ${description}`, debug: `Status: ${response.status}. Body: ${errorBodyText}` };
     }
 
+    const data = await response.json();
     console.log("PAYPAL_DEBUG: Order created successfully. ID:", data.id);
     return { orderId: data.id };
 
   } catch (error: any) {
     console.error("PAYPAL_CREATE_ORDER_CATCH_BLOCK:", error);
     if (error.message === "MISSING_PAYPAL_CREDENTIALS") {
-        return { error: "PayPal server credentials (PAYPAL_CLIENT_ID, PAYPAL_CLIENT_SECRET) are not configured in the .env file." };
+        return { error: "PayPal server credentials (PAYPAL_CLIENT_ID, PAYPAL_CLIENT_SECRET) are not configured in the .env file.", debug: error.toString() };
     }
-    return { error: `An unexpected server error occurred: ${error.message}` };
+    return { error: `An unexpected server error occurred: ${error.message}`, debug: error.toString() };
   }
 }
 
 /**
  * Captures a PayPal order using the v2 API directly.
  */
-export async function captureOrder(orderId: string): Promise<{success: boolean, orderData?: any, error?: string}> {
+export async function captureOrder(orderId: string): Promise<{success: boolean, orderData?: any, error?: string, debug?: string}> {
   try {
     const accessToken = await getPayPalAccessToken();
     const url = `${PAYPAL_API_BASE}/v2/checkout/orders/${orderId}/capture`;
@@ -113,15 +120,21 @@ export async function captureOrder(orderId: string): Promise<{success: boolean, 
       },
     });
 
-    const data = await response.json();
-
     if (!response.ok) {
-       console.error("PAYPAL_CAPTURE_ORDER_ERROR:", JSON.stringify(data, null, 2));
-       const issue = data.details?.[0]?.issue || "CAPTURE_FAILED";
-       const description = data.details?.[0]?.description || "Could not capture the payment.";
-       return { success: false, error: `PayPal capture failed: ${issue}. Details: "${description}"` };
+       const errorBodyText = await response.text();
+       console.error("PAYPAL_CAPTURE_ORDER_ERROR:", errorBodyText);
+       let errorJson;
+       try {
+            errorJson = JSON.parse(errorBodyText);
+        } catch {
+            errorJson = { message: "Response was not valid JSON.", body: errorBodyText };
+        }
+       const issue = errorJson.details?.[0]?.issue || errorJson.name || "CAPTURE_FAILED";
+       const description = errorJson.details?.[0]?.description || errorJson.message || "Could not capture the payment.";
+       return { success: false, error: `PayPal capture failed: ${issue}. Details: "${description}"`, debug: `Status: ${response.status}. Body: ${errorBodyText}` };
     }
     
+    const data = await response.json();
     console.log("PAYPAL_DEBUG: Order captured successfully.");
     if (data.status === 'COMPLETED') {
       return { success: true, orderData: data };
@@ -131,6 +144,6 @@ export async function captureOrder(orderId: string): Promise<{success: boolean, 
 
   } catch (error: any) {
     console.error("PAYPAL_CAPTURE_ORDER_CATCH_BLOCK:", error);
-    return { success: false, error: `An unexpected server error occurred during capture: ${error.message}` };
+    return { success: false, error: `An unexpected server error occurred during capture: ${error.message}`, debug: error.toString() };
   }
 }

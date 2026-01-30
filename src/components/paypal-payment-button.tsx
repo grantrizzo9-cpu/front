@@ -36,6 +36,14 @@ export function PayPalPaymentButton({ planId, onPaymentSuccess, onPaymentStart, 
         onPaymentStart();
         try {
             const result = await createPaypalOrder(planId);
+            
+            // This is the new, more aggressive error check.
+            if (result.debug) {
+                const errorMessage = `A server-side error occurred. Please see the details below.\n\nDebug Info: ${result.debug}`;
+                onPaymentError(errorMessage);
+                return Promise.reject(new Error(errorMessage));
+            }
+
             if (result.error || !result.orderId) {
                 const errorMessage = result.error || 'The server responded but could not create a PayPal order.';
                 onPaymentError(errorMessage);
@@ -52,6 +60,13 @@ export function PayPalPaymentButton({ planId, onPaymentSuccess, onPaymentStart, 
     const handleOnApprove = async (data: { orderID: string }) => {
         try {
             const result = await capturePaypalOrder(data.orderID);
+
+            // New debug check
+            if (result.debug) {
+                const errorMessage = `Payment capture failed. See details below.\n\nDebug Info: ${result.debug}`;
+                onPaymentError(errorMessage);
+                return;
+            }
 
             if (result.success && result.orderData) {
                 toast({
