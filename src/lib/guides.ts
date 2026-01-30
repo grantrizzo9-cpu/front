@@ -14,7 +14,7 @@ export const allGuides: Guide[] = [
     content: `
         <p>Welcome to the first step of your affiliate journey! This guide will make you comfortable with your two most important tools: your affiliate link and your dashboard.</p>
         <strong>1. Your Unique Affiliate Link:</strong>
-        <p>Your affiliate link is your personal signature. It looks something like this: <code>https://affiliateai.host/?ref=your-username</code>. When someone clicks this link, our system places a special tracking cookie in their browser. This cookie tells us that YOU sent them. If they sign up (even days or weeks later), the sale is credited to you.</p>
+        <p>Your affiliate link is your personal signature. It looks something like this: <code>https://hostproai.com/?ref=your-username</code>. When someone clicks this link, our system places a special tracking cookie in their browser. This cookie tells us that YOU sent them. If they sign up (even days or weeks later), the sale is credited to you.</p>
         <ul>
             <li><strong>Where to find it:</strong> Go to your <a href="/dashboard/settings" class="text-primary hover:underline">Settings</a> page. It's right there at the top.</li>
             <li><strong>Rule #1:</strong> Always use your full, unique link. Don't shorten it or alter it, or the tracking might not work.</li>
@@ -105,7 +105,7 @@ export const allGuides: Guide[] = [
           <li>Your API key will be displayed on the next screen. You can click the <strong>Copy</strong> button to copy it to your clipboard.</li>
       </ol>
       <h3>Securing Your API Key</h3>
-      <p>Your API key is secret and should be treated like a password. Do not share it publicly. The best practice is to store it in an environment variable file (like a <code>.env</code> file) in your project, for example:</p>
+      <p>Your API key is secret and should be treated like a password. The best practice is to store it in an environment variable file (like a <code>.env</code> file) in your project, for example:</p>
       <code>MAILERLITE_API_KEY=your_api_key_here</code>
       <p>This allows your application to use the key securely without exposing it in your code.</p>
     `
@@ -113,44 +113,44 @@ export const allGuides: Guide[] = [
 
   // Pro Guides
   {
-    title: "Domains: Your Professional Identity",
+    title: "Your Pre-Launch Checklist",
     level: "pro",
     content: `
-      <p>Using a custom domain name (e.g., <code>www.yourbrand.com</code>) is the most important step to building a professional online presence. This guide covers how to choose, register, and connect your domain.</p>
-      
-      <h3>Part 1: Choosing a Great Domain Name</h3>
-      <ul>
-        <li><strong>Keep it Simple & Memorable:</strong> Your domain should be easy to type and say. Avoid hyphens and numbers if possible.</li>
-        <li><strong>Brandable:</strong> It should represent your brand. E.g., 'starlight.com' is more brandable than 'buy-cheap-lamps-online.com'.</li>
-        <li><strong>Use .com:</strong> The .com extension is the most recognized and trusted. Stick with it unless you have a specific reason not to.</li>
-      </ul>
+        <p>This is your definitive checklist to follow before you launch your affiliate site to the world. Following these steps will ensure a smooth, professional launch.</p>
+        
+        <h3>Step 1: Finalize Your Production Keys</h3>
+        <p>Your <code>.env</code> file holds the keys to your external services. Before launch, you must switch from testing (sandbox) keys to live (production) keys.</p>
+        <ul>
+            <li><strong>PayPal:</strong> Log in to your PayPal Developer Dashboard and get your <strong>Live</strong> credentials. Update the <code>PAYPAL_CLIENT_ID</code> and <code>PAYPAL_CLIENT_SECRET</code> in your <code>.env</code> file. Also ensure <code>NEXT_PUBLIC_PAYPAL_CLIENT_ID</code> matches your live client ID.</li>
+            <li><strong>MailerLite & Gemini:</strong> Ensure you have your final, production-ready API keys in the <code>.env</code> file for <code>MAILERLITE_API_KEY</code>, <code>MAILERLITE_GROUP_ID</code>, and <code>GEMINI_API_KEY</code>.</li>
+        </ul>
 
-      <h3>Part 2: Registering Your Domain with Name.com</h3>
-      <p>We recommend using a trusted registrar like Name.com. You will need to create an account and purchase the domain from them directly.</p>
-      <ol>
-        <li>Go to <a href="https://www.name.com" target="_blank" rel="noopener noreferrer" class="text-primary hover:underline">www.name.com</a>.</li>
-        <li>Use their search bar to find an available domain name.</li>
-        <li>Follow their instructions to purchase and register the domain you've chosen.</li>
-      </ol>
-      <p><em>(Feature Coming Soon: In the future, you'll be able to register domains directly from your dashboard!)</em></p>
-      
-      <h3>Part 3: Connecting Your Domain to Our Servers</h3>
-      <p>Once you own a domain, you need to point it to our high-performance cloud servers. This is done by changing its DNS (Domain Name System) records.</p>
-      
-      <ol>
-        <li>Go to the <a href="/dashboard/hosting" class="text-primary hover:underline">Hosting</a> page in your dashboard. Here you will find the specific values you need for the DNS records.</li>
-        <li>Log in to your Name.com account and navigate to the DNS management section for your new domain.</li>
-        <li>You will need to create two specific records. Delete any existing 'A' or 'CNAME' records for your main domain (often shown as '@') to avoid conflicts.
-          <ul>
-            <li><strong>A Record:</strong> The 'A' record points your root domain (e.g., <code>yourbrand.com</code>) to a specific server IP address. Create an A record with the name set to <strong>@</strong> and the value set to the IP address shown on your Hosting page.</li>
-            <li><strong>CNAME Record:</strong> The 'CNAME' record handles subdomains like 'www'. Create a CNAME record with the name set to <strong>www</strong> and the value set to your root domain (e.g., <code>yourbrand.com</code>).</li>
-          </ul>
-        </li>
-        <li>Save your changes.</li>
-      </ol>
+        <h3>Step 2: Connect Your Custom Domain</h3>
+        <p>This is the most critical step. You need to point your domain (e.g., <code>hostproai.com</code>) to our cloud hosting servers.</p>
+        <ol>
+            <li><strong>Navigate to Firebase Hosting:</strong> Go to this specific URL for your project: <a href="https://console.firebase.google.com/project/affiliate-ai-host-new/hosting/custom-domains" target="_blank" rel="noopener noreferrer">Firebase Hosting Console</a>. Click "Add custom domain".</li>
+            <li><strong>Verify Ownership (TXT Record):</strong> The Firebase wizard will ask you to verify you own the domain. It will provide a <strong>TXT record</strong> value. Copy this value. Go to your domain registrar (the website where you purchased your domain), find its DNS settings, and add a new TXT record for your main domain (the host is usually '@'). Paste the value from Firebase and save. Wait for Firebase to verify it, which can take up to an hour.</li>
+            <li><strong>Go Live (A Records):</strong> After verification, Firebase will give you two <strong>A Records</strong> (IP addresses). Go back to your domain registrar's DNS settings. <strong>Delete any old A records</strong> for your root domain ('@') to prevent conflicts. Then, create two new A records, one for each IP address Firebase provided.</li>
+        </ol>
+        <p>Once these DNS changes propagate across the internet, your site will be live at your custom domain with a secure SSL certificate.</p>
+        
+        <h3>Step 3: Test Your Live Site</h3>
+        <p>Once your domain is live, perform one final test.</p>
+        <ul>
+            <li>Open a new incognito browser window.</li>
+            <li>Go to your live domain: <code>https://hostproai.com</code></li>
+            <li>Sign up for the cheapest plan using a new email address and a real credit card or PayPal account. This ensures your payment gateway is working correctly in production.</li>
+            <li>After the test, you can request a refund for the transaction.</li>
+        </ul>
 
-      <h3>Part 4: Waiting for Propagation</h3>
-      <p>DNS changes are not instant. It can take anywhere from a few minutes to 24 hours for the new settings to spread across the internet. This is called 'propagation'. Once it's complete, the status on your Hosting page will change to 'Connected', and your site will be live on your domain.</p>
+        <h3>Step 4 (Optional): Google Site Verification</h3>
+        <p>To help Google index your site and track its performance, you can add a site verification tag.</p>
+        <ul>
+            <li>Go to <a href="https://search.google.com/search-console" target="_blank" rel="noopener noreferrer">Google Search Console</a> and add your domain.</li>
+            <li>Choose the "HTML tag" verification method.</li>
+            <li>Copy the meta tag Google provides (e.g., <code>&lt;meta name="google-site-verification" content="..." /&gt;</code>).</li>
+            <li>Paste this tag into the <code>&lt;head&gt;</code> section of the <code>src/app/layout.tsx</code> file in your project.</li>
+        </ul>
     `
   },
   {

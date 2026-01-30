@@ -10,10 +10,10 @@ import { useToast } from '@/hooks/use-toast';
 import { useUser, useFirestore, useDoc, useMemoFirebase, updateDocumentNonBlocking } from '@/firebase';
 import { doc } from 'firebase/firestore';
 import type { User as UserType } from '@/lib/types';
-import { Loader2, Globe, Info, CheckCircle, AlertTriangle, Search } from 'lucide-react';
+import { Loader2, Globe, Info, CheckCircle, AlertTriangle, Search, BookOpen } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
-import { firebaseConfig } from '@/firebase/config';
+import Link from 'next/link';
 
 export default function HostingPage() {
     const { user, isUserLoading } = useUser();
@@ -21,7 +21,6 @@ export default function HostingPage() {
     const { toast } = useToast();
     const [domainInput, setDomainInput] = useState('');
     const [isSaving, setIsSaving] = useState(false);
-    const [isVerifying, setIsVerifying] = useState(false);
     
     const [localDomainStatus, setLocalDomainStatus] = useState<'unconfigured' | 'pending' | 'connected' | 'error' | null>(null);
 
@@ -44,8 +43,6 @@ export default function HostingPage() {
     }, [userData?.customDomain]);
 
     const isLoading = isUserLoading || isUserDataLoading;
-
-    const firebaseConsoleUrl = `https://console.firebase.google.com/project/${firebaseConfig.projectId}/hosting/custom-domains`;
 
     const handleSaveDomain = () => {
         if (!userDocRef || !domainInput) return;
@@ -76,20 +73,6 @@ export default function HostingPage() {
             });
             setIsSaving(false);
         }, 1000);
-    };
-
-    const handleVerifyDomain = () => {
-        if (!userDocRef) return;
-        setIsVerifying(true);
-        setTimeout(() => {
-            // In a real app, this would re-fetch status from a backend that checks DNS.
-            // For now, we simulate a successful check. The user must manually verify in the Firebase Console.
-            setIsVerifying(false);
-            toast({
-                title: 'Verification Status',
-                description: 'Please check the Firebase Console to see the live status of your domain connection. This button only simulates a check.',
-            });
-        }, 2500);
     };
 
     if (isLoading && localDomainStatus === null) {
@@ -137,61 +120,25 @@ export default function HostingPage() {
                 <CardHeader>
                     <div className="flex items-center gap-3">
                          <div className="flex-shrink-0 w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-bold">2</div>
-                         <CardTitle>Connect Your Domain in Firebase</CardTitle>
+                         <CardTitle>Connect Your Domain</CardTitle>
                     </div>
                     <CardDescription>
-                       Follow the setup wizard in the Firebase Console. This is a two-part process: first verifying ownership, then going live.
+                       To connect your domain, you'll need to update its DNS records at your registrar.
                     </CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-6">
-                    <div className="space-y-4">
-                        <h3 className="font-semibold">Step 2A: Verify Domain Ownership (TXT Record)</h3>
-                        <ol className="list-decimal list-inside space-y-3 text-sm text-muted-foreground">
-                            <li>
-                                Click this link and click <strong>"Add custom domain"</strong>: <a href={firebaseConsoleUrl} target="_blank" rel="noopener noreferrer" className="text-primary underline font-semibold">Open Firebase Hosting</a>.
-                            </li>
-                            <li>
-                                Enter your domain name (<code>{domainInput || 'your-domain.com'}</code>). Firebase will show you a **TXT record** (e.g., `hosting-site=...`). Copy this value.
-                            </li>
-                            <li>
-                                In your domain registrar (e.g., Namecheap), create a new **TXT record** for your main domain (use `@` for the host).
-                            </li>
-                            <li>
-                                Paste the value you copied from Firebase into the record's "Value" field and save.
-                            </li>
-                            <li>
-                                Wait a few minutes for the record to update online, then return to the Firebase Console and click **"Verify"**.
-                            </li>
-                        </ol>
-                         <Alert>
-                            <Info className="h-4 w-4" />
-                            <AlertTitle>This is the Most Common Sticking Point!</AlertTitle>
-                            <AlertDescription>
-                                If verification fails, wait a little longer. DNS changes can sometimes take up to an hour to propagate across the internet.
-                            </AlertDescription>
-                        </Alert>
-                    </div>
-
-                    <div className="space-y-4 pt-4 border-t">
-                        <h3 className="font-semibold">Step 2B: Go Live (A Records)</h3>
-                        <ol className="list-decimal list-inside space-y-3 text-sm text-muted-foreground">
-                             <li>
-                                After your domain is verified, the Firebase Console will show you **two `A` records**. These are IP addresses that point to your website.
-                            </li>
-                            <li>
-                                Go back to your domain registrar's DNS settings.
-                            </li>
-                            <li>
-                                **Delete** any existing `A` records for your main domain (`@`).
-                            </li>
-                            <li>
-                                Create **two new `A` records**, one for each IP address that Firebase provided. The host for both should be `@`.
-                            </li>
-                            <li>
-                                Once you save these, Firebase will begin provisioning an SSL certificate. Your site will be live at your custom domain once this is complete.
-                            </li>
-                        </ol>
-                    </div>
+                <CardContent>
+                     <Alert>
+                        <BookOpen className="h-4 w-4" />
+                        <AlertTitle>View The Full Guide</AlertTitle>
+                        <AlertDescription>
+                            We've created a detailed, step-by-step guide to walk you through the entire process of connecting your domain and going live.
+                             <Button asChild variant="link" className="p-0 h-auto font-semibold">
+                                <Link href="/dashboard/guides">
+                                    Click here to read the "Pre-Launch Checklist" guide.
+                                </Link>
+                            </Button>
+                        </AlertDescription>
+                    </Alert>
                 </CardContent>
             </Card>
 
@@ -214,12 +161,8 @@ export default function HostingPage() {
                                     <>
                                         <Badge className="bg-amber-500 text-white hover:bg-amber-500">Pending Verification</Badge>
                                         <p className="text-sm text-muted-foreground max-w-sm">
-                                            The system is waiting for your DNS records to be verified by Firebase. Check the Firebase Console for the live status.
+                                            The system is waiting for your DNS records to be verified by Firebase. Check the Firebase Console and our Pre-Launch guide for details.
                                         </p>
-                                         <Button onClick={handleVerifyDomain} disabled={isVerifying}>
-                                            {isVerifying ? <Loader2 className="animate-spin mr-2" /> : <Search className="mr-2" />}
-                                            {isVerifying ? 'Checking...' : 'Check Status'}
-                                        </Button>
                                     </>
                                 );
                             case 'connected':
@@ -231,7 +174,7 @@ export default function HostingPage() {
                                                 <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
                                                 <AlertTitle className="text-green-800 dark:text-green-200">Congratulations!</AlertTitle>
                                                 <AlertDescription className="text-green-700 dark:text-green-300">
-                                                    Your domain is successfully connected and your site should be live at <a href={`http://${domainInput}`} target="_blank" rel="noopener noreferrer" className="font-semibold underline">{domainInput}</a>.
+                                                    Your domain is successfully connected and your site should be live at <a href={`https://{domainInput}`} target="_blank" rel="noopener noreferrer" className="font-semibold underline">{domainInput}</a>.
                                                 </AlertDescription>
                                             </Alert>
                                         </div>
@@ -261,7 +204,4 @@ export default function HostingPage() {
             </Card>
         </div>
     );
-
-    
-
-    
+}
