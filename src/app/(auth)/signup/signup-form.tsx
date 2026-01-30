@@ -1,6 +1,6 @@
-
 "use client";
 
+import { useState, useEffect } from 'react';
 import { PayPalScriptProvider } from "@paypal/react-paypal-js";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,18 +10,17 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { subscriptionTiers } from "@/lib/data";
-import { useState } from "react";
 import { Loader2, Users, CheckCircle, AlertTriangle } from "lucide-react";
 import { useAuth, useFirestore } from "@/firebase";
 import { createUserWithEmailAndPassword, updateProfile, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { doc, getDoc, writeBatch, serverTimestamp, Timestamp, collection } from "firebase/firestore";
 import { PayPalPaymentButton } from "@/components/paypal-payment-button";
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const GoogleIcon = () => (
     <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" className="mr-2 h-4 w-4 fill-current"><title>Google</title><path d="M12.48 10.92v3.28h7.84c-.24 1.84-.85 3.18-1.73 4.1-1.02 1.02-2.62 1.98-4.48 1.98-3.62 0-6.55-2.92-6.55-6.55s2.93-6.55 6.55-6.55c2.03 0 3.33.82 4.1 1.59l2.48-2.48C17.22 3.43 15.14 2 12.48 2 7.08 2 3 6.08 3 11.48s4.08 9.48 9.48 9.48c5.13 0 9.1-3.48 9.1-9.28 0-.6-.08-1.12-.2-1.68H3.48v.01z"></path></svg>
 );
-
 
 function SignupFormInternal() {
     const router = useRouter();
@@ -248,7 +247,43 @@ function SignupFormInternal() {
     );
 }
 
+function SignupLoadingSkeleton() {
+  return (
+    <Card>
+      <CardHeader>
+        <Skeleton className="h-8 w-1/2" />
+        <Skeleton className="h-4 w-3/4" />
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="space-y-2">
+            <Skeleton className="h-4 w-1/4" />
+            <Skeleton className="h-10 w-full" />
+        </div>
+        <div className="space-y-2">
+            <Skeleton className="h-4 w-1/4" />
+            <Skeleton className="h-10 w-full" />
+        </div>
+        <div className="space-y-2">
+            <Skeleton className="h-4 w-1/4" />
+            <Skeleton className="h-10 w-full" />
+        </div>
+        <Skeleton className="h-10 w-full" />
+      </CardContent>
+    </Card>
+  )
+}
+
 export function SignupForm() {
+    const [isClient, setIsClient] = useState(false);
+
+    useEffect(() => {
+        setIsClient(true);
+    }, []);
+
+    if (!isClient) {
+        return <SignupLoadingSkeleton />;
+    }
+    
     const paypalClientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || '';
     const isPaypalConfigured = paypalClientId && !paypalClientId.includes('REPLACE_WITH');
     

@@ -1,8 +1,6 @@
 'use client';
-
-import { useState, useEffect } from 'react';
 import { SignupForm } from './signup-form';
-import { Card, CardHeader, CardContent } from '@/components/ui/card';
+import { Suspense } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 
 function SignupLoadingSkeleton() {
@@ -31,15 +29,11 @@ function SignupLoadingSkeleton() {
   )
 }
 
+
 export default function SignupPage() {
-  const [isClient, setIsClient] = useState(false);
-
-  // This useEffect hook ensures that the SignupForm, which contains
-  // client-side specific code for PayPal, is only rendered on the client.
-  // This prevents hydration errors that cause a blank page.
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
-
-  return isClient ? <SignupForm /> : <SignupLoadingSkeleton />;
+  return (
+    <Suspense fallback={<SignupLoadingSkeleton />}>
+      <SignupForm />
+    </Suspense>
+  );
 }
