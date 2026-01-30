@@ -32,18 +32,28 @@ export function PayPalPaymentButton({ planId, onPaymentSuccess, onPaymentStart, 
 
     const handleCreateOrder = async () => {
         onPaymentStart();
-        const result = await createPaypalOrder(planId);
-        if (result.error || !result.orderId) {
-            toast({
-                variant: 'destructive',
-                title: 'PayPal Error',
-                description: result.error || 'Could not create a PayPal order. Please refresh and try again.',
-                duration: 12000, // Increased duration to read detailed errors
-            });
+        try {
+            const result = await createPaypalOrder(planId);
+            if (result.error || !result.orderId) {
+                // This toast is for when the server *successfully* returns an error message.
+                toast({
+                    variant: 'destructive',
+                    title: 'PayPal Server Error',
+                    description: result.error || 'Could not create a PayPal order. Please refresh and try again.',
+                    duration: 15000,
+                });
+                onPaymentError();
+                // We throw to trigger the onError of PayPalButtons
+                throw new Error(result.error || 'Could not create PayPal order.');
+            }
+            return result.orderId;
+        } catch (serverError: any) {
+            // This catch block is for when the server action itself fails unexpectedly.
             onPaymentError();
-            throw new Error(result.error || 'Could not create PayPal order.');
+            // We rethrow the error so it's caught by the PayPal button's `onError` handler below.
+            // This ensures a user-facing message is always shown.
+            throw serverError;
         }
-        return result.orderId;
     };
 
     const handleOnApprove = async (data: { orderID: string }, actions: any) => {
@@ -66,10 +76,13 @@ export function PayPalPaymentButton({ planId, onPaymentSuccess, onPaymentStart, 
     };
     
     const onError = (err: any) => {
+        console.error("PAYPAL_CLIENT_ERROR:", err); // Log the full error for debugging.
+        const message = err.message || 'An unknown error occurred on the server.';
         toast({
             variant: "destructive",
             title: "PayPal Transaction Error",
-            description: "An unexpected error occurred during the transaction. Please check your details and try again.",
+            description: `The PayPal window closed because of an error. This is often due to sandbox account issues or server configuration. Full error: "${message}"`,
+            duration: 15000, // Make it last longer to be able to read it.
         });
         onPaymentError();
     }
