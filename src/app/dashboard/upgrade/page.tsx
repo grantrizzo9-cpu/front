@@ -99,12 +99,11 @@ function ExistingSubscriptionFlow({ currentTierId, onPlanChange }: {
 }
 
 // Component for users without a subscription or on a trial. This is where payment happens.
-function NewSubscriptionFlow({ onPaymentSuccess, onPaymentStart, onPaymentError, isProcessing, paypalClientId, paymentError }: {
+function NewSubscriptionFlow({ onPaymentSuccess, onPaymentStart, onPaymentError, isProcessing, paymentError }: {
     onPaymentSuccess: (tierId: string) => (details: any) => Promise<void>;
     onPaymentStart: (tierId: string) => void;
     onPaymentError: (error: string) => void;
     isProcessing: boolean;
-    paypalClientId: string;
     paymentError: string | null;
 }) {
     const [selectedTierId, setSelectedTierId] = useState<string | null>(null);
@@ -112,18 +111,6 @@ function NewSubscriptionFlow({ onPaymentSuccess, onPaymentStart, onPaymentError,
     const handleSelectTier = (tierId: string) => {
         onPaymentError(''); // Clear previous errors
         setSelectedTierId(tierId);
-    }
-
-    if (!paypalClientId || paypalClientId.includes('REPLACE_WITH')) {
-        return (
-            <Alert variant="destructive">
-                <AlertTriangle className="h-4 w-4" />
-                <AlertTitle>PayPal Configuration Error</AlertTitle>
-                <AlertDescription>
-                    The PayPal Client ID is missing. Please add your `NEXT_PUBLIC_PAYPAL_CLIENT_ID` to the `.env` file in the project's root directory.
-                </AlertDescription>
-            </Alert>
-        );
     }
     
     // If a plan has been selected, show the payment view for that single plan.
@@ -145,58 +132,56 @@ function NewSubscriptionFlow({ onPaymentSuccess, onPaymentStart, onPaymentError,
         }
 
         return (
-            <PayPalScriptProvider options={{ clientId: paypalClientId, currency: "USD", intent: "capture" }}>
-                <Card className="max-w-md mx-auto animate-in fade-in-50">
-                    <CardHeader>
-                        <CardTitle>Confirm Your Plan</CardTitle>
-                        <CardDescription>You are purchasing the <span className="font-bold text-primary">{tier.name}</span> plan.</CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                         {paymentError && (
-                            <Alert variant="destructive">
-                                <AlertTriangle className="h-4 w-4" />
-                                <AlertTitle>Payment Error</AlertTitle>
-                                <AlertDescription className="break-words">{paymentError}</AlertDescription>
-                            </Alert>
+            <Card className="max-w-md mx-auto animate-in fade-in-50">
+                <CardHeader>
+                    <CardTitle>Confirm Your Plan</CardTitle>
+                    <CardDescription>You are purchasing the <span className="font-bold text-primary">{tier.name}</span> plan.</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                     {paymentError && (
+                        <Alert variant="destructive">
+                            <AlertTriangle className="h-4 w-4" />
+                            <AlertTitle>Payment Error</AlertTitle>
+                            <AlertDescription className="break-words">{paymentError}</AlertDescription>
+                        </Alert>
+                    )}
+                    <div className="flex items-baseline gap-2">
+                        <span className="text-4xl font-bold">${tier.price.toFixed(2)}</span>
+                        <span className="text-muted-foreground">USD / day</span>
+                    </div>
+                     <ul className="space-y-3">
+                      {tier.features.map((feature, index) => (
+                        <li key={index} className="flex items-start gap-2">
+                          <CheckCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-green-500" />
+                          <span className="text-sm">{feature}</span>
+                        </li>
+                      ))}
+                    </ul>
+                </CardContent>
+                <CardFooter className="flex-col items-stretch gap-4">
+                    <div className="relative">
+                        {isProcessing && (
+                            <div className="absolute inset-0 bg-background/80 flex flex-col items-center justify-center z-10 rounded-md">
+                                <Loader2 className="animate-spin h-8 w-8 text-primary" />
+                                <p className="mt-2 text-sm text-muted-foreground">Processing...</p>
+                            </div>
                         )}
-                        <div className="flex items-baseline gap-2">
-                            <span className="text-4xl font-bold">${tier.price.toFixed(2)}</span>
-                            <span className="text-muted-foreground">USD / day</span>
-                        </div>
-                         <ul className="space-y-3">
-                          {tier.features.map((feature, index) => (
-                            <li key={index} className="flex items-start gap-2">
-                              <CheckCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-green-500" />
-                              <span className="text-sm">{feature}</span>
-                            </li>
-                          ))}
-                        </ul>
-                    </CardContent>
-                    <CardFooter className="flex-col items-stretch gap-4">
-                        <div className="relative">
-                            {isProcessing && (
-                                <div className="absolute inset-0 bg-background/80 flex flex-col items-center justify-center z-10 rounded-md">
-                                    <Loader2 className="animate-spin h-8 w-8 text-primary" />
-                                    <p className="mt-2 text-sm text-muted-foreground">Processing...</p>
-                                </div>
-                            )}
-                            <PayPalPaymentButton 
-                                planId={tier.id}
-                                onPaymentSuccess={onPaymentSuccess(tier.id)}
-                                onPaymentStart={() => {
-                                    onPaymentError('');
-                                    onPaymentStart(tier.id);
-                                }}
-                                onPaymentError={onPaymentError}
-                                disabled={isProcessing}
-                            />
-                        </div>
-                        <Button variant="ghost" onClick={() => setSelectedTierId(null)} disabled={isProcessing}>
-                            Choose a different plan
-                        </Button>
-                    </CardFooter>
-                </Card>
-            </PayPalScriptProvider>
+                        <PayPalPaymentButton 
+                            planId={tier.id}
+                            onPaymentSuccess={onPaymentSuccess(tier.id)}
+                            onPaymentStart={() => {
+                                onPaymentError('');
+                                onPaymentStart(tier.id);
+                            }}
+                            onPaymentError={onPaymentError}
+                            disabled={isProcessing}
+                        />
+                    </div>
+                    <Button variant="ghost" onClick={() => setSelectedTierId(null)} disabled={isProcessing}>
+                        Choose a different plan
+                    </Button>
+                </CardFooter>
+            </Card>
         );
     }
 
@@ -252,7 +237,7 @@ export default function UpgradePage() {
     const [isProcessing, setIsProcessing] = useState(false);
     const [paymentError, setPaymentError] = useState<string | null>(null);
 
-    const paypalClientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || '';
+    const paypalClientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID;
 
     const userDocRef = useMemoFirebase(() => {
         if (!user || !firestore) return null;
@@ -296,6 +281,25 @@ export default function UpgradePage() {
     
     const shouldShowPaymentFlow = !hasPaidSubscription;
     
+    // CONFIGURATION GUARD: Check for PayPal Client ID before rendering payment flow
+    if (shouldShowPaymentFlow && (!paypalClientId || paypalClientId.includes('REPLACE_WITH'))) {
+      return (
+          <div className="space-y-8">
+              <div>
+                <h1 className="text-3xl font-bold font-headline">Choose Your Plan</h1>
+                <p className="text-muted-foreground mt-2">Choose a plan below to start your paid subscription.</p>
+              </div>
+              <Alert variant="destructive">
+                  <AlertTriangle className="h-4 w-4" />
+                  <AlertTitle>Payment Gateway Not Configured</AlertTitle>
+                  <AlertDescription>
+                      The application's payment processing is not yet set up. The `NEXT_PUBLIC_PAYPAL_CLIENT_ID` is missing from the `.env` file. Please add your PayPal Sandbox or Production Client ID to proceed.
+                  </AlertDescription>
+              </Alert>
+          </div>
+      );
+    }
+
     return (
         <div className="space-y-8">
             <div>
@@ -311,17 +315,18 @@ export default function UpgradePage() {
             </div>
 
             {shouldShowPaymentFlow ? (
-                <NewSubscriptionFlow
-                    onPaymentSuccess={handlePaymentSuccess}
-                    onPaymentStart={() => setIsProcessing(true)}
-                    onPaymentError={(err) => {
-                        setPaymentError(err);
-                        setIsProcessing(false);
-                    }}
-                    isProcessing={isProcessing}
-                    paypalClientId={paypalClientId}
-                    paymentError={paymentError}
-                />
+                 <PayPalScriptProvider options={{ clientId: paypalClientId!, currency: "USD", intent: "capture" }}>
+                    <NewSubscriptionFlow
+                        onPaymentSuccess={handlePaymentSuccess}
+                        onPaymentStart={() => setIsProcessing(true)}
+                        onPaymentError={(err) => {
+                            setPaymentError(err);
+                            setIsProcessing(false);
+                        }}
+                        isProcessing={isProcessing}
+                        paymentError={paymentError}
+                    />
+                </PayPalScriptProvider>
             ) : (
                 <ExistingSubscriptionFlow 
                     currentTierId={userData.subscription!.tierId}
