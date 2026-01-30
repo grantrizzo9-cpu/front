@@ -10,11 +10,14 @@ import type { User as UserType, Referral } from "@/lib/types";
 import { subscriptionTiers } from "@/lib/data";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, Suspense } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { PayPalPaymentButton } from "@/components/paypal-payment-button";
 import { PayPalScriptProvider } from "@paypal/react-paypal-js";
 import { Skeleton } from "@/components/ui/skeleton";
+
+// Read the environment variable at the module level for reliability.
+const PAYPAL_CLIENT_ID = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID;
 
 // Component for users with a paid subscription, allowing them to upgrade. No PayPal needed here.
 function ExistingSubscriptionFlow({ currentTierId, onPlanChange }: {
@@ -273,7 +276,7 @@ function UpgradePageContent() {
         setIsProcessing(false);
     };
 
-    const paypalClientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID;
+    const paypalClientId = PAYPAL_CLIENT_ID;
     const shouldShowPaymentFlow = !hasPaidSubscription;
 
     return (
@@ -322,7 +325,6 @@ function UpgradePageContent() {
 
 // The main page component that orchestrates everything.
 export default function UpgradePage() {
-    // Suspense is good practice in case child components fetch data.
     return (
         <Suspense fallback={
             <div className="space-y-8">
