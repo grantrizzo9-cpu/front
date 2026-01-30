@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { PayPalScriptProvider } from "@paypal/react-paypal-js";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -17,52 +17,12 @@ import { createUserWithEmailAndPassword, updateProfile, GoogleAuthProvider, sign
 import { doc, getDoc, writeBatch, serverTimestamp, Timestamp, collection } from "firebase/firestore";
 import { PayPalPaymentButton } from "@/components/paypal-payment-button";
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
-import { Skeleton } from '@/components/ui/skeleton';
 
 const GoogleIcon = () => (
     <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" className="mr-2 h-4 w-4 fill-current"><title>Google</title><path d="M12.48 10.92v3.28h7.84c-.24 1.84-.85 3.18-1.73 4.1-1.02 1.02-2.62 1.98-4.48 1.98-3.62 0-6.55-2.92-6.55-6.55s2.93-6.55 6.55-6.55c2.03 0 3.33.82 4.1 1.59l2.48-2.48C17.22 3.43 15.14 2 12.48 2 7.08 2 3 6.08 3 11.48s4.08 9.48 9.48 9.48c5.13 0 9.1-3.48 9.1-9.28 0-.6-.08-1.12-.2-1.68H3.48v.01z"></path></svg>
 );
 
-function SignupLoadingSkeleton() {
-  return (
-    <Card>
-      <CardHeader>
-        <Skeleton className="h-8 w-1/2" />
-        <Skeleton className="h-4 w-3/4" />
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="space-y-2">
-            <Skeleton className="h-4 w-1/4" />
-            <Skeleton className="h-10 w-full" />
-        </div>
-        <div className="space-y-2">
-            <Skeleton className="h-4 w-1/4" />
-            <Skeleton className="h-10 w-full" />
-        </div>
-        <div className="space-y-2">
-            <Skeleton className="h-4 w-1/4" />
-            <Skeleton className="h-10 w-full" />
-        </div>
-        <Skeleton className="h-10 w-full" />
-        <div className="relative my-4">
-            <div className="absolute inset-0 flex items-center"><span className="w-full border-t" /></div>
-            <div className="relative flex justify-center text-xs uppercase"><span className="bg-card px-2 text-muted-foreground">Or</span></div>
-        </div>
-        <Skeleton className="h-10 w-full" />
-      </CardContent>
-    </Card>
-  )
-}
-
 export function SignupForm() {
-    const [isClient, setIsClient] = useState(false);
-    
-    // This useEffect runs only on the client, after the component has mounted.
-    // This is the "guard" that prevents hydration errors.
-    useEffect(() => {
-        setIsClient(true);
-    }, []);
-    
     const searchParams = useSearchParams();
     const router = useRouter();
     const { toast } = useToast();
@@ -75,18 +35,9 @@ export function SignupForm() {
     const [password, setPassword] = useState('');
     const [isProcessing, setIsProcessing] = useState(false);
     
-    // We can only safely read from searchParams after the client has mounted.
-    const planId = isClient ? (searchParams.get("plan") || 'starter') : 'starter';
-    const referralCode = isClient ? searchParams.get("ref") : null;
+    const planId = searchParams.get("plan") || 'starter';
+    const referralCode = searchParams.get("ref");
     const plan = subscriptionTiers.find(p => p.id === planId) || subscriptionTiers[0];
-    
-    if (!isClient) {
-        // On the server and during the initial client render, show a skeleton.
-        // This ensures the server and client render the exact same thing initially.
-        return <SignupLoadingSkeleton />;
-    }
-
-    // --- From this point on, the code only runs safely on the client ---
 
     const isFormValid = username.length > 2 && email.includes('@') && password.length >= 6;
 
