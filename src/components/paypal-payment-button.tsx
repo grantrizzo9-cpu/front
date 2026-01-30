@@ -43,14 +43,23 @@ export function PayPalPaymentButton({ planId, onPaymentSuccess, onPaymentStart, 
                 }),
             });
 
-            const result = await response.json();
-
             if (!response.ok) {
-                const errorMessage = `Server Error: ${result.error || `HTTP status ${response.status}`}. ${result.debug ? `(Debug: ${JSON.stringify(result.debug)})` : ''}`;
-                onPaymentError(errorMessage);
-                return Promise.reject(new Error(errorMessage));
+                // The server returned an error. We need to handle both JSON and non-JSON responses.
+                let errorText;
+                const contentType = response.headers.get('content-type');
+                if (contentType && contentType.includes('application/json')) {
+                    const errorResult = await response.json();
+                    errorText = `Server Error: ${errorResult.error || `HTTP status ${response.status}`}. ${errorResult.debug ? `(Debug: ${JSON.stringify(errorResult.debug)})` : ''}`;
+                } else {
+                    // It's not JSON, so it's likely an HTML error page from a server crash.
+                    errorText = `The server returned a non-JSON response with status ${response.status}. This indicates a critical server error. Please check the server logs for a file named 'route.ts' inside a folder named 'api/paypal'.`;
+                }
+                onPaymentError(errorText);
+                return Promise.reject(new Error(errorText));
             }
 
+            const result = await response.json();
+            
             if (result.error) {
                 const errorMessage = `Server Logic Error: ${result.error}. ${result.debug ? `(Debug: ${JSON.stringify(result.debug)})` : ''}`;
                 onPaymentError(errorMessage);
