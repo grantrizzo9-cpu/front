@@ -35,7 +35,7 @@ export default function SettingsPage() {
   }, [firestore, userData?.username]);
   const { data: usernameDoc, isLoading: isUsernameDocLoading } = useDoc(usernameDocRef);
 
-  const affiliateLink = userData?.username ? `https://affiliateai.host/?ref=${userData.username}` : '';
+  const affiliateLink = userData?.username ? `https://hostproai.com/?ref=${userData.username}` : '';
   const isLinkPubliclyActive = !!usernameDoc;
   
   const handleCopyLink = () => {
@@ -50,6 +50,8 @@ export default function SettingsPage() {
   
   const handleBecomeAffiliate = () => {
       if (!userDocRef) return;
+      // This is now handled by the useAdmin hook idempotently, 
+      // but we leave a non-destructive path for non-admins to click.
       updateDocumentNonBlocking(userDocRef, { isAffiliate: true });
       toast({
           title: "Congratulations!",
