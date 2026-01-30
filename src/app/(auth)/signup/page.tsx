@@ -36,11 +36,13 @@ function SignupLoadingSkeleton() {
 }
 
 export default function SignupPage() {
+  const paypalClientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID;
+
   // The Suspense boundary is a critical part of the solution.
   // It allows the SignupForm component to safely use the useSearchParams hook on the client.
   return (
     <Suspense fallback={<SignupLoadingSkeleton />}>
-      <SignupForm />
+      <SignupForm paypalClientId={paypalClientId} />
     </Suspense>
   );
 }

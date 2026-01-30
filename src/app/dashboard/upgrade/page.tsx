@@ -16,9 +16,6 @@ import { PayPalPaymentButton } from "@/components/paypal-payment-button";
 import { PayPalScriptProvider } from "@paypal/react-paypal-js";
 import { Skeleton } from "@/components/ui/skeleton";
 
-// Read the environment variable at the module level for reliability.
-const PAYPAL_CLIENT_ID = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID;
-
 // Component for users with a paid subscription, allowing them to upgrade. No PayPal needed here.
 function ExistingSubscriptionFlow({ currentTierId, onPlanChange }: {
     currentTierId: string;
@@ -220,7 +217,7 @@ function NewSubscriptionFlow({ onPaymentSuccess, onPaymentStart, onPaymentError,
 }
 
 // "Gatekeeper" component to safely render PayPal provider only on the client
-function UpgradePageContent() {
+function UpgradePageContent({ paypalClientId }: { paypalClientId?: string }) {
     const { user, isUserLoading } = useUser();
     const firestore = useFirestore();
     const { toast } = useToast();
@@ -275,8 +272,7 @@ function UpgradePageContent() {
         toast({ title: "Subscription Activated!", description: "You've successfully subscribed." });
         setIsProcessing(false);
     };
-
-    const paypalClientId = PAYPAL_CLIENT_ID;
+    
     const shouldShowPaymentFlow = !hasPaidSubscription;
 
     return (
@@ -325,6 +321,8 @@ function UpgradePageContent() {
 
 // The main page component that orchestrates everything.
 export default function UpgradePage() {
+    const paypalClientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID;
+
     return (
         <Suspense fallback={
             <div className="space-y-8">
@@ -336,7 +334,7 @@ export default function UpgradePage() {
                 </div>
             </div>
         }>
-            <UpgradePageContent />
+            <UpgradePageContent paypalClientId={paypalClientId} />
         </Suspense>
     )
 }
