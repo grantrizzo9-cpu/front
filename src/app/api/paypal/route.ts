@@ -48,6 +48,15 @@ async function getPayPalAccessToken(): Promise<{ token?: string; error?: string 
 }
 
 export async function POST(request: Request) {
+  // CRITICAL: Check for environment variables first to prevent silent crashes.
+  const clientId = process.env.PAYPAL_CLIENT_ID;
+  const clientSecret = process.env.PAYPAL_CLIENT_SECRET;
+  if (!clientId || !clientSecret || clientId.includes('REPLACE_WITH') || clientSecret.includes('REPLACE_WITH')) {
+    const errorMsg = "PayPal server credentials (PAYPAL_CLIENT_ID, PAYPAL_CLIENT_SECRET) are not configured. Please add them to your .env file.";
+    console.error("PayPal API Error:", errorMsg);
+    return NextResponse.json({ success: false, error: errorMsg, debug: "Server-side environment variables are missing." }, { status: 500 });
+  }
+
   try {
     const body = await request.json();
     const { action } = body;

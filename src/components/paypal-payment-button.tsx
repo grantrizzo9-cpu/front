@@ -43,27 +43,13 @@ export function PayPalPaymentButton({ planId, onPaymentSuccess, onPaymentStart, 
                 }),
             });
 
-            if (!response.ok) {
-                // The server returned an error. We need to handle both JSON and non-JSON responses.
-                let errorText;
-                const contentType = response.headers.get('content-type');
-                if (contentType && contentType.includes('application/json')) {
-                    const errorResult = await response.json();
-                    errorText = `Server Error: ${errorResult.error || `HTTP status ${response.status}`}. ${errorResult.debug ? `(Debug: ${JSON.stringify(errorResult.debug)})` : ''}`;
-                } else {
-                    // It's not JSON, so it's likely an HTML error page from a server crash.
-                    errorText = `The server returned a non-JSON response with status ${response.status}. This indicates a critical server error. Please check the server logs for a file named 'route.ts' inside a folder named 'api/paypal'.`;
-                }
+            const result = await response.json();
+
+            if (!response.ok || !result.success) {
+                // This will catch missing .env errors, PayPal API errors, etc.
+                const errorText = `Server Error: ${result.error || `An unexpected server error occurred with status ${response.status}`}. ${result.debug ? `(Debug: ${JSON.stringify(result.debug)})` : ''}`;
                 onPaymentError(errorText);
                 return Promise.reject(new Error(errorText));
-            }
-
-            const result = await response.json();
-            
-            if (result.error) {
-                const errorMessage = `Server Logic Error: ${result.error}. ${result.debug ? `(Debug: ${JSON.stringify(result.debug)})` : ''}`;
-                onPaymentError(errorMessage);
-                return Promise.reject(new Error(errorMessage));
             }
             
             if (!result.orderId) {
@@ -75,6 +61,7 @@ export function PayPalPaymentButton({ planId, onPaymentSuccess, onPaymentStart, 
             return result.orderId;
 
         } catch (error: any) {
+            // This catches network errors where the client can't even reach the server.
             const errorMessage = `A client-side exception occurred while trying to create the order. The server might be down or misconfigured. Error: "${error.message || 'Unknown fetch error'}"`;
             onPaymentError(errorMessage);
             return Promise.reject(new Error(errorMessage));
@@ -119,8 +106,9 @@ export function PayPalPaymentButton({ planId, onPaymentSuccess, onPaymentStart, 
     const onError = (err: any) => {
         console.error("PAYPAL_CLIENT_SCRIPT_ERROR:", err);
         const message = err.message || 'An unknown error occurred inside the PayPal script.';
-        const finalMessage = `The PayPal window closed due to an error: "${message}"`;
-        onPaymentError(finalMessage);
+        // The detailed error from `handleCreateOrder` is more useful, so we don't overwrite it here
+        // unless it's a completely new error.
+        onPaymentError(`The PayPal window closed unexpectedly. This is often caused by an error during order creation. Please check the error message above. Raw PayPal Script Error: "${message}"`);
     }
 
     if (isPending) {
@@ -134,7 +122,7 @@ export function PayPalPaymentButton({ planId, onPaymentSuccess, onPaymentStart, 
     if (isRejected) {
         return (
             <div className="flex h-[44px] w-full items-center justify-center rounded-md border border-destructive bg-destructive/10 text-center text-sm text-destructive">
-                Error: PayPal failed to load.
+                Error: PayPal script failed to load. Check Client ID.
             </div>
         );
     }
