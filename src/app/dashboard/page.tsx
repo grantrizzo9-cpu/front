@@ -15,18 +15,11 @@ import { collection, collectionGroup, doc } from "firebase/firestore";
 import { useAdmin } from "@/hooks/use-admin";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useMemo } from "react";
-import { subscriptionTiers } from "@/lib/data";
-
 
 export default function DashboardPage() {
   const { user, isUserLoading } = useUser();
   const firestore = useFirestore();
   const { isAdmin, isLoading: isAdminLoading } = useAdmin();
-
-  const getTierPrice = (planName: string) => {
-      const tier = subscriptionTiers.find(t => t.name === planName);
-      return tier ? tier.price : 0;
-  };
 
   // --- Personal Data Fetching (for all users, including admin) ---
   const personalReferralsQuery = useMemoFirebase(() => {
@@ -58,15 +51,8 @@ export default function DashboardPage() {
     }
 
     try {
-      const grossSales = allReferrals.reduce((sum, r) => {
-        const price = getTierPrice(r.planPurchased);
-        return sum + (typeof price === 'number' ? price : 0);
-      }, 0);
-
-      const payouts = allReferrals.reduce((sum, r) => {
-        return sum + (typeof r.commission === 'number' ? r.commission : 0);
-      }, 0);
-      
+      const grossSales = allReferrals.reduce((sum, r) => sum + (typeof r.grossSale === 'number' ? r.grossSale : 0), 0);
+      const payouts = allReferrals.reduce((sum, r) => sum + (typeof r.commission === 'number' ? r.commission : 0), 0);
       const companyRevenue = grossSales - payouts;
 
       return {
@@ -94,7 +80,7 @@ export default function DashboardPage() {
 
       const totalCommission = personalReferrals.reduce((sum, r) => sum + r.commission, 0);
       const unpaidCommissions = personalReferrals.filter(r => r.status === 'unpaid').reduce((sum, r) => sum + r.commission, 0);
-      const grossSales = personalReferrals.reduce((sum, r) => sum + getTierPrice(r.planPurchased), 0);
+      const grossSales = personalReferrals.reduce((sum, r) => sum + (typeof r.grossSale === 'number' ? r.grossSale : 0), 0);
 
       return {
           personalTotalCommission: totalCommission,
@@ -333,3 +319,5 @@ export default function DashboardPage() {
     </div>
   );
 }
+
+    

@@ -41,6 +41,7 @@ export type Referral = {
   referredUserId: string;
   referredUserUsername: string;
   planPurchased: string;
+  grossSale: number;
   commission: number;
   status: 'paid' | 'unpaid';
   date: Timestamp;
@@ -75,5 +76,7 @@ export type RefundRequest = {
   status: 'pending' | 'processed' | 'denied';
   requestedAt: Timestamp;
 };
+
+    
 
     

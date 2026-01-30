@@ -212,8 +212,12 @@
           "description": "Username of the referred user."
         },
         "planPurchased": {
-            "type": "string",
-            "description": "The name of the subscription plan purchased by the referred user."
+          "type": "string",
+          "description": "The name of the subscription plan purchased by the referred user."
+        },
+        "grossSale": {
+          "type": "number",
+          "description": "The gross amount of the sale from the initial subscription payment."
         },
         "date": {
           "type": "string",
@@ -229,17 +233,21 @@
           "description": "Status of the commission (e.g., 'paid', 'unpaid')."
         },
         "subscriptionId": {
-            "type": "string",
-            "description": "The ID of the subscription that generated this commission."
+          "type": "string",
+          "description": "The ID of the subscription that generated this commission."
         }
       },
       "required": [
         "id",
         "affiliateId",
         "referredUserId",
+        "referredUserUsername",
+        "planPurchased",
+        "grossSale",
         "date",
         "commission",
-        "status"
+        "status",
+        "subscriptionId"
       ]
     },
     "Payment": {
@@ -478,3 +486,5 @@
     "reasoning": "The Firestore structure is designed to support Affiliate AI Host's affiliate marketing and subscription management features, prioritizing security, scalability, and ease of debugging. The key principle is Authorization Independence, achieved through denormalization of authorization data, eliminating the need for `get()` calls in security rules where possible. Data is segregated into collections with homogeneous security postures, enabling secure list operations. User-owned data is organized under user-specific paths for simplified ownership-based security. The use of DBAC (database-based access control) via the `/roles_admin` collection eliminates the need for custom claims."
   }
 }
+
+    

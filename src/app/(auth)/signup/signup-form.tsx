@@ -136,6 +136,7 @@ export function SignupForm() {
                     referredUserId: user.uid,
                     referredUserUsername: username,
                     planPurchased: plan.name,
+                    grossSale: plan.price,
                     commission: commissionAmount,
                     status: 'unpaid' as const,
                     date: serverTimestamp(),
@@ -263,6 +264,7 @@ export function SignupForm() {
                         referredUserId: user.uid,
                         referredUserUsername: username,
                         planPurchased: plan.name,
+                        grossSale: plan.price,
                         commission: commissionAmount,
                         status: 'unpaid' as const,
                         date: serverTimestamp(),
@@ -369,5 +371,7 @@ export function SignupForm() {
     </Card>
   );
 }
+
+    
 
     
