@@ -16,7 +16,6 @@ import { PayPalScriptProvider } from "@paypal/react-paypal-js";
 
 const paypalClientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID;
 
-
 export default function UpgradePage() {
   const { user, isUserLoading } = useUser();
   const firestore = useFirestore();
@@ -91,6 +90,7 @@ export default function UpgradePage() {
     }, 1500);
   }
 
+  // Loading State
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-full p-8">
@@ -99,11 +99,9 @@ export default function UpgradePage() {
     );
   }
 
-  const isOnTrial = userData?.subscription?.trialEndDate && userData.subscription.trialEndDate.toDate() > new Date();
-  const referralCount = referrals?.length ?? 0;
-  const canEarlyUpgrade = isOnTrial && referralCount >= 2;
-
+  // SCENARIO 1: User has NO subscription
   if (!userData?.subscription) {
+      // Sub-case: PayPal is not configured. Show an error and stop.
       if (!paypalClientId || paypalClientId.includes('REPLACE_WITH')) {
         return (
             <div className="space-y-8">
@@ -122,6 +120,7 @@ export default function UpgradePage() {
         )
       }
 
+      // Sub-case: PayPal is configured. Show payment options.
       return (
         <PayPalScriptProvider options={{ clientId: paypalClientId, currency: "AUD", intent: "capture" }}>
           <div className="space-y-8">
@@ -185,10 +184,14 @@ export default function UpgradePage() {
       );
   }
   
+  // SCENARIO 2: User HAS a subscription, show them upgrade options.
   const currentTier = subscriptionTiers.find(t => t.id === userData.subscription?.tierId);
   const availableUpgrades = currentTier 
     ? subscriptionTiers.filter(tier => tier.price > currentTier.price) 
     : [];
+  const isOnTrial = userData?.subscription?.trialEndDate && userData.subscription.trialEndDate.toDate() > new Date();
+  const referralCount = referrals?.length ?? 0;
+  const canEarlyUpgrade = isOnTrial && referralCount >= 2;
 
   return (
     <div className="space-y-8">
