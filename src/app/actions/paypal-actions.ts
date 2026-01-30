@@ -23,14 +23,14 @@ function getClient(): paypal.core.PayPalHttpClient | null {
     }
 
     try {
-        const environment = process.env.NODE_ENV === 'production'
-          ? new paypal.core.LiveEnvironment(clientId, clientSecret)
-          : new paypal.core.SandboxEnvironment(clientId, clientSecret);
+        // FORCE SANDBOX ENVIRONMENT: This was the likely source of the error.
+        // We are now explicitly using the SandboxEnvironment to match the sandbox keys.
+        const environment = new paypal.core.SandboxEnvironment(clientId, clientSecret);
         
         const client = new paypal.core.PayPalHttpClient(environment);
         return client;
     } catch (error) {
-        console.error("Failed to initialize PayPal client. Your credentials may be invalid.", error);
+        console.error("CRITICAL: Failed to initialize PayPal client. Your credentials in the .env file may be invalid or malformed.", error);
         return null;
     }
 }
@@ -146,3 +146,4 @@ export async function capturePaypalOrder(orderId: string) {
         }
     }
 }
+
