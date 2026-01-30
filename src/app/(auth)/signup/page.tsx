@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, Suspense } from 'react';
-import { PayPalScriptProvider } from "@paypal/react-paypal-js";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -10,12 +9,10 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { subscriptionTiers } from "@/lib/data";
-import { Loader2, Users, CheckCircle, AlertTriangle } from "lucide-react";
+import { Loader2, Users } from "lucide-react";
 import { useAuth, useFirestore } from "@/firebase";
 import { createUserWithEmailAndPassword, updateProfile, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
-import { doc, getDoc, writeBatch, serverTimestamp, Timestamp, collection } from "firebase/firestore";
-import { PayPalPaymentButton } from "@/components/paypal-payment-button";
-import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
+import { doc, getDoc, writeBatch, serverTimestamp, Timestamp } from "firebase/firestore";
 import { Skeleton } from '@/components/ui/skeleton';
 
 
@@ -31,12 +28,10 @@ function SignupFormComponent() {
     const firestore = useFirestore();
     const searchParams = useSearchParams();
 
-    const [step, setStep] = useState<'details' | 'payment'>('details');
     const [username, setUsername] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [isProcessing, setIsProcessing] = useState(false);
-    const [paymentError, setPaymentError] = useState<string | null>(null);
     
     const planId = searchParams.get("plan") || 'starter';
     const referralCode = searchParams.get("ref");
@@ -44,10 +39,12 @@ function SignupFormComponent() {
 
     const isFormValid = username.length > 2 && email.includes('@') && password.length >= 6;
 
-    const handleDetailsSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    const handleSignup = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setIsProcessing(true);
+        
         try {
+            // Check if username is taken
             const usernameDocRef = doc(firestore, "usernames", username);
             const usernameDoc = await getDoc(usernameDocRef);
             if (usernameDoc.exists()) {
@@ -55,53 +52,32 @@ function SignupFormComponent() {
                 setIsProcessing(false);
                 return;
             }
-            setStep('payment');
-        } catch (error: any) {
-            toast({ variant: "destructive", title: "Validation Error", description: error.message || "Could not validate user details." });
-        } finally {
-            setIsProcessing(false);
-        }
-    };
-    
-    const handlePaymentSuccess = async (details: any) => {
-        setIsProcessing(true);
-        try {
+
+            // Create user with email and password
             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
             const user = userCredential.user;
             await updateProfile(user, { displayName: username });
 
+            // Set up Firestore documents in a batch
             const batch = writeBatch(firestore);
             const userDocRef = doc(firestore, "users", user.uid);
             
+            const trialEndDate = new Date();
+            trialEndDate.setDate(trialEndDate.getDate() + 3);
+
             const userData = {
                 id: user.uid, email: user.email, username: username, referredBy: referralCode || null, isAffiliate: true, createdAt: serverTimestamp(),
-                subscription: { tierId: plan.id, status: 'active' as const, startDate: serverTimestamp(), endDate: null, trialEndDate: null },
+                subscription: { tierId: plan.id, status: 'active' as const, startDate: serverTimestamp(), endDate: null, trialEndDate: Timestamp.fromDate(trialEndDate) },
                 paypalEmail: '', customDomain: null
             };
             batch.set(userDocRef, userData);
 
-            const usernameDocRef = doc(firestore, "usernames", username);
-            batch.set(usernameDocRef, { uid: user.uid });
-
-            if (referralCode) {
-                const referrerUsernameDocRef = doc(firestore, "usernames", referralCode);
-                const referrerUsernameDoc = await getDoc(referrerUsernameDocRef);
-                if (referrerUsernameDoc.exists()) {
-                    const referrerId = referrerUsernameDoc.data().uid;
-                    const commissionRate = 0.70;
-                    const commissionAmount = plan.price * commissionRate;
-                    const newReferralRef = doc(collection(firestore, 'users', referrerId, 'referrals'));
-                    batch.set(newReferralRef, {
-                        id: newReferralRef.id, affiliateId: referrerId, referredUserId: user.uid, referredUserUsername: username,
-                        planPurchased: plan.name, grossSale: plan.price, commission: commissionAmount, status: 'unpaid' as const,
-                        date: serverTimestamp(), subscriptionId: user.uid,
-                    });
-                }
-            }
+            const usernameDocForWriteRef = doc(firestore, "usernames", username);
+            batch.set(usernameDocForWriteRef, { uid: user.uid });
 
             await batch.commit();
 
-            toast({ title: "Account Created & Subscription Active!", description: "Welcome! We're redirecting you to your dashboard." });
+            toast({ title: "Account Created & Trial Started!", description: "Welcome! Your 3-day free trial is active. We're redirecting you to your dashboard." });
             router.push("/dashboard");
 
         } catch (error: any) {
@@ -109,9 +85,9 @@ function SignupFormComponent() {
             switch (error.code) {
                 case 'auth/email-already-in-use': description = "This email address is already in use by another account."; break;
                 case 'auth/weak-password': description = "The password is too weak. Please use at least 6 characters."; break;
-                default: description = error.message || "An unknown error occurred while creating your account after payment.";
+                default: description = error.message || "An unknown error occurred while creating your account.";
             }
-            toast({ variant: "destructive", title: "Account Creation Failed", description: `${description} Please contact support with your payment details.` });
+            toast({ variant: "destructive", title: "Account Creation Failed", description: description });
         } finally {
             setIsProcessing(false);
         }
@@ -154,80 +130,16 @@ function SignupFormComponent() {
         }
     };
     
-    const paypalClientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || '';
-    
-    if (step === 'payment') {
-        return (
-            <PayPalScriptProvider options={{ clientId: paypalClientId, currency: "USD", intent: "capture" }}>
-                <Card className="max-w-md mx-auto animate-in fade-in-50">
-                    <CardHeader>
-                        <CardTitle>Complete Your Purchase</CardTitle>
-                        <CardDescription>
-                            You are purchasing the <span className="font-bold text-primary">{plan.name}</span> plan. After payment, your account will be created.
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                        {paymentError && (
-                            <Alert variant="destructive">
-                                <AlertTriangle className="h-4 w-4" />
-                                <AlertTitle>Payment Error</AlertTitle>
-                                <AlertDescription>{paymentError}</AlertDescription>
-                            </Alert>
-                        )}
-                        <div className="flex items-baseline gap-2">
-                            <span className="text-4xl font-bold">${plan.price.toFixed(2)}</span>
-                            <span className="text-muted-foreground">USD / day</span>
-                        </div>
-                        <ul className="space-y-3">
-                        {plan.features.map((feature, index) => (
-                            <li key={index} className="flex items-start gap-2">
-                            <CheckCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-green-500" />
-                            <span className="text-sm">{feature}</span>
-                            </li>
-                        ))}
-                        </ul>
-                    </CardContent>
-                    <CardFooter className="flex-col items-stretch gap-4">
-                        <div className="relative">
-                            {isProcessing && (
-                                <div className="absolute inset-0 bg-background/80 flex flex-col items-center justify-center z-10 rounded-md">
-                                    <Loader2 className="animate-spin h-8 w-8 text-primary" />
-                                    <p className="mt-2 text-sm text-muted-foreground">Processing payment...</p>
-                                </div>
-                            )}
-                            <PayPalPaymentButton 
-                                planId={plan.id}
-                                onPaymentSuccess={handlePaymentSuccess}
-                                onPaymentStart={() => {
-                                    setIsProcessing(true);
-                                    setPaymentError(null);
-                                }}
-                                onPaymentError={(error) => {
-                                    setIsProcessing(false);
-                                    setPaymentError(error);
-                                }}
-                                disabled={isProcessing}
-                            />
-                        </div>
-                        <Button variant="ghost" onClick={() => setStep('details')} disabled={isProcessing}>
-                            Back to details
-                        </Button>
-                    </CardFooter>
-                </Card>
-            </PayPalScriptProvider>
-        );
-    }
-    
     return (
         <Card>
             <CardHeader>
                 <CardTitle className="font-headline text-2xl">Create Your Account</CardTitle>
                 <CardDescription>
-                    You've selected the <strong>{plan.name}</strong> plan. Create your account to proceed to payment.
+                    Start your 3-day free trial on the <strong>{plan.name}</strong> plan. No payment required today.
                 </CardDescription>
             </CardHeader>
             <CardContent>
-                <form className="space-y-4" onSubmit={handleDetailsSubmit}>
+                <form className="space-y-4" onSubmit={handleSignup}>
                     <div className="space-y-2">
                         <Label htmlFor="username">Username</Label>
                         <Input id="username" value={username} onChange={(e) => setUsername(e.target.value)} required disabled={isProcessing} />
@@ -247,7 +159,7 @@ function SignupFormComponent() {
                         </div>
                     )}
                     <Button type="submit" className="w-full" disabled={!isFormValid || isProcessing}>
-                        {isProcessing ? <Loader2 className="animate-spin" /> : "Continue to Payment"}
+                        {isProcessing ? <Loader2 className="animate-spin" /> : "Start Free Trial"}
                     </Button>
                 </form>
                 <div className="relative my-4">
@@ -256,13 +168,15 @@ function SignupFormComponent() {
                 </div>
                  <Button variant="outline" className="w-full" onClick={handleGoogleSignIn} disabled={isProcessing}>
                     {isProcessing ? <Loader2 className="animate-spin" /> : <GoogleIcon />}
-                    Sign Up with Google (Starts a Free Trial)
+                    Sign Up with Google
                 </Button>
-                <div className="mt-4 text-center text-sm">
+            </CardContent>
+            <CardFooter>
+                 <div className="mt-4 text-center text-sm w-full">
                     Already have an account?{" "}
                     <Link href="/login" className="text-primary hover:underline">Log in</Link>
                 </div>
-            </CardContent>
+            </CardFooter>
         </Card>
     );
 }

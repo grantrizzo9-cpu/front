@@ -71,7 +71,7 @@ export function HomeContent() {
     { q: "How and when do I get paid?", a: "We process all commission payouts daily. All your earned commissions from the previous day are automatically sent to the PayPal account you have on file. It's fully automated." },
     { q: "What am I selling?", a: "You are promoting our subscription plans which include high-quality web hosting, a suite of powerful AI tools, and access to an exclusive, tiered library of marketing guides designed to help users build and grow their online businesses and make more sales." },
     { q: "Is there a limit to how much I can earn?", a: "Absolutely not! There is no cap on your potential earnings. The more customers you refer, the more you earn. With a base 70% commission rate that rises to 75% for top affiliates, the sky is the limit." },
-    { q: "What is your trial and refund policy?", a: "We aim to please and want you to be happy. We offer an incredible risk-free trial: pay for your first day of service, and get the next 3 days completely free to explore the platform. If you're not happy for any reason, you can cancel your membership at any time during the trial with no hard feelings. This gives you a few days to see the value and start earning before your daily billing begins. Even after the trial, you can cancel at any time if you're not satisfied." },
+    { q: "What is your trial and refund policy?", a: "We offer a 3-day free trial on all plans. Sign up and explore the full platform without any commitment. If you're not satisfied, you can cancel at any time during the trial. After the trial, you can request a refund for your first day's payment if you're not happy." },
   ];
 
   return (
@@ -85,11 +85,11 @@ export function HomeContent() {
               Earn 70%-75% Daily Commissions with <span className="text-primary">AI-Powered Hosting</span>
             </h1>
             <p className="mt-6 max-w-2xl mx-auto text-lg text-muted-foreground md:text-xl">
-              Pay for your first day, get a 3-day free trial, and get paid daily for every referral you make. Our automated system handles everything.
+              Start your 3-day free trial today. Get paid daily for every referral you make. Our automated system handles everything.
             </p>
             <div className="mt-10 flex justify-center gap-4">
               <Button size="lg" asChild>
-                <Link href={pricingLink}>Become an Affiliate Now</Link>
+                <Link href={pricingLink}>Start Your Free Trial</Link>
               </Button>
               <Button size="lg" variant="outline" asChild>
                 <Link href="#features">Learn More</Link>
@@ -129,8 +129,8 @@ export function HomeContent() {
                 <li className="flex gap-4">
                   <div className="flex-shrink-0 w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-bold">1</div>
                   <div>
-                    <h3 className="font-semibold text-lg">Join & Get Your Link</h3>
-                    <p className="text-muted-foreground">Sign up for any plan to instantly become an affiliate and receive your unique referral link.</p>
+                    <h3 className="font-semibold text-lg">Start Your Free Trial</h3>
+                    <p className="text-muted-foreground">Sign up for any plan to start your 3-day trial and instantly get your unique referral link.</p>
                   </div>
                 </li>
                 <li className="flex gap-4">
@@ -290,7 +290,7 @@ export function HomeContent() {
             <div className="mt-8">
               <Button size="lg" asChild className="text-lg py-7 px-10">
                 <Link href={pricingLink}>
-                  Claim Your 70% Commission Rate
+                  Start Your Free Trial Now
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
               </Button>

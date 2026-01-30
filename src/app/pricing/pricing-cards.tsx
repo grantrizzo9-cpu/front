@@ -56,7 +56,7 @@ export function PricingCards() {
           </CardContent>
           <CardFooter>
             <Button asChild className="w-full" variant={tier.isMostPopular ? "default" : "outline"}>
-              <Link href={getSignupLink(tier.id)}>Sign Up Now</Link>
+              <Link href={getSignupLink(tier.id)}>Start Free Trial</Link>
             </Button>
           </CardFooter>
         </Card>
