@@ -181,7 +181,7 @@ function SignupFormComponent() {
              )
         }
         return (
-            <PayPalScriptProvider options={{ clientId: paypalClientId, currency: "AUD", intent: "capture" }}>
+            <PayPalScriptProvider options={{ clientId: paypalClientId, currency: "USD", intent: "capture" }}>
                 <Card className="max-w-md mx-auto animate-in fade-in-50">
                     <CardHeader>
                         <CardTitle>Complete Your Purchase</CardTitle>
@@ -192,7 +192,7 @@ function SignupFormComponent() {
                     <CardContent className="space-y-4">
                         <div className="flex items-baseline gap-2">
                             <span className="text-4xl font-bold">${plan.price.toFixed(2)}</span>
-                            <span className="text-muted-foreground">AUD / day</span>
+                            <span className="text-muted-foreground">USD / day</span>
                         </div>
                         <ul className="space-y-3">
                         {plan.features.map((feature, index) => (

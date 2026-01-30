@@ -18,7 +18,7 @@ export default function AdminDashboardPage() {
               <CardTitle className="font-headline text-xl">{tier.name}</CardTitle>
               <div className="flex items-baseline gap-1">
                 <span className="text-3xl font-bold">${tier.price.toFixed(2)}</span>
-                <span className="text-muted-foreground">AUD / day</span>
+                <span className="text-muted-foreground">USD / day</span>
               </div>
               <CardDescription>{tier.description}</CardDescription>
             </CardHeader>
