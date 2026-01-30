@@ -1,5 +1,3 @@
-'use server';
-
 import paypal from '@paypal/checkout-server-sdk';
 
 /**

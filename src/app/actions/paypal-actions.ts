@@ -74,3 +74,43 @@ export async function createPaypalOrder(planId: string) {
         return { error: userMessage };
     }
 }
+
+
+/**
+ * Captures the payment for a PayPal order after the user has approved it.
+ * @param orderId The ID of the order to capture.
+ * @returns An object containing the success status and order data or an error.
+ */
+export async function capturePaypalOrder(orderId: string) {
+    const client = getClient();
+    if (!client) {
+        return { error: 'PayPal client not initialized on server.' };
+    }
+
+    const request = new paypal.orders.OrdersCaptureRequest(orderId);
+    request.requestBody({});
+
+    try {
+        const capture = await client.execute(request);
+        const orderData = capture.result;
+        
+        if (orderData.status === 'COMPLETED') {
+            return { success: true, orderData: orderData };
+        } else {
+            return { error: `Payment not completed. Status: ${orderData.status}` };
+        }
+    } catch (err: any) {
+        console.error("PayPal Capture Error:", err);
+        const errorMessage = err.message || 'Failed to capture PayPal order.';
+        // Attempt to parse a more detailed message from PayPal's response
+        try {
+            const detailedError = JSON.parse(err.message);
+            const issue = detailedError.details?.[0]?.issue || 'CAPTURE_FAILED';
+            const description = detailedError.details?.[0]?.description || 'Could not capture the payment.';
+            return { error: `PayPal capture failed: ${issue}. Details: "${description}"` };
+        } catch {
+            // Fallback to the generic error
+            return { error: errorMessage };
+        }
+    }
+}
