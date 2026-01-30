@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -101,18 +102,18 @@ function ExistingSubscriptionFlow({ currentTierId, onPlanChange }: {
 }
 
 // Component for users without a subscription or on a trial. This is where payment happens.
-function NewSubscriptionFlow({ onPaymentSuccess, onPaymentStart, onPaymentError, isProcessing, paypalClientId }: {
+function NewSubscriptionFlow({ onPaymentSuccess, onPaymentStart, onPaymentError, isProcessing, paypalClientId, paymentError }: {
     onPaymentSuccess: (tierId: string) => (details: any) => Promise<void>;
     onPaymentStart: (tierId: string) => void;
     onPaymentError: (error: string) => void;
     isProcessing: boolean;
     paypalClientId: string;
+    paymentError: string | null;
 }) {
     const [selectedTierId, setSelectedTierId] = useState<string | null>(null);
-    const [paymentError, setPaymentError] = useState<string | null>(null);
 
     const handleSelectTier = (tierId: string) => {
-        setPaymentError(null);
+        onPaymentError(''); // Clear previous errors
         setSelectedTierId(tierId);
     }
     
@@ -146,7 +147,7 @@ function NewSubscriptionFlow({ onPaymentSuccess, onPaymentStart, onPaymentError,
                             <Alert variant="destructive">
                                 <AlertTriangle className="h-4 w-4" />
                                 <AlertTitle>Payment Error</AlertTitle>
-                                <AlertDescription>{paymentError}</AlertDescription>
+                                <AlertDescription className="break-words">{paymentError}</AlertDescription>
                             </Alert>
                         )}
                         <div className="flex items-baseline gap-2">
@@ -174,13 +175,10 @@ function NewSubscriptionFlow({ onPaymentSuccess, onPaymentStart, onPaymentError,
                                 planId={tier.id}
                                 onPaymentSuccess={onPaymentSuccess(tier.id)}
                                 onPaymentStart={() => {
-                                    setPaymentError(null);
+                                    onPaymentError('');
                                     onPaymentStart(tier.id);
                                 }}
-                                onPaymentError={(error) => {
-                                    setPaymentError(error);
-                                    onPaymentError(error);
-                                }}
+                                onPaymentError={onPaymentError}
                                 disabled={isProcessing}
                             />
                         </div>
@@ -243,6 +241,7 @@ function UpgradePageContent() {
     const firestore = useFirestore();
     const { toast } = useToast();
     const [isProcessing, setIsProcessing] = useState(false);
+    const [paymentError, setPaymentError] = useState<string | null>(null);
 
     const paypalClientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || '';
 
@@ -306,9 +305,13 @@ function UpgradePageContent() {
                 <NewSubscriptionFlow
                     onPaymentSuccess={handlePaymentSuccess}
                     onPaymentStart={() => setIsProcessing(true)}
-                    onPaymentError={() => setIsProcessing(false)}
+                    onPaymentError={(err) => {
+                        setPaymentError(err);
+                        setIsProcessing(false);
+                    }}
                     isProcessing={isProcessing}
                     paypalClientId={paypalClientId}
+                    paymentError={paymentError}
                 />
             ) : (
                 <ExistingSubscriptionFlow 
