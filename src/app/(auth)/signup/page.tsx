@@ -1,6 +1,7 @@
 'use client';
-import { SignupForm } from './signup-form';
-import { Suspense } from 'react';
+import { SignupFormWrapper } from './signup-form';
+import { Suspense, useState, useEffect } from 'react';
+import { Card, CardHeader, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 
 function SignupLoadingSkeleton() {
@@ -29,11 +30,23 @@ function SignupLoadingSkeleton() {
   )
 }
 
-
 export default function SignupPage() {
-  return (
-    <Suspense fallback={<SignupLoadingSkeleton />}>
-      <SignupForm />
-    </Suspense>
-  );
+    const [isClient, setIsClient] = useState(false);
+
+    // This hook ensures that the component is only rendered on the client side,
+    // which is necessary to prevent hydration errors with browser-only scripts like PayPal.
+    useEffect(() => {
+        setIsClient(true);
+    }, []);
+
+    if (!isClient) {
+        return <SignupLoadingSkeleton />;
+    }
+
+    return (
+        // Suspense is necessary because the child component uses `useSearchParams`.
+        <Suspense fallback={<SignupLoadingSkeleton />}>
+            <SignupFormWrapper />
+        </Suspense>
+    );
 }
