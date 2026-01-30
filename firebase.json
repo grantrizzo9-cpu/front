@@ -1,0 +1,12 @@
+{
+  "hosting": {
+    "rewrites": [
+      {
+        "source": "**",
+        "apphosting": {
+          "backendId": "affiliate-ai-host-new"
+        }
+      }
+    ]
+  }
+}
