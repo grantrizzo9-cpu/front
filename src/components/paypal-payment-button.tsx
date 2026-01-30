@@ -30,30 +30,37 @@ export function PayPalPaymentButton({ planId, onPaymentSuccess, onPaymentStart, 
     }, [isRejected, toast]);
 
 
-    const handleCreateOrder = async () => {
+    const handleCreateOrder = () => {
         onPaymentStart();
-        try {
-            const result = await createPaypalOrder(planId);
+        
+        return createPaypalOrder(planId).then(result => {
             if (result.error || !result.orderId) {
-                // This toast is for when the server *successfully* returns an error message.
+                // This path is for when the server responds successfully, but with a logical error.
                 toast({
                     variant: 'destructive',
                     title: 'PayPal Server Error',
-                    description: result.error || 'Could not create a PayPal order. Please refresh and try again.',
+                    description: result.error || 'The server responded but could not create a PayPal order. Please try again.',
                     duration: 15000,
                 });
                 onPaymentError();
-                // We throw to trigger the onError of PayPalButtons
-                throw new Error(result.error || 'Could not create PayPal order.');
+                // Reject the promise to trigger PayPal's onError handler.
+                return Promise.reject(new Error(result.error || 'Could not create PayPal order.'));
             }
+            // Success, resolve with the orderId.
             return result.orderId;
-        } catch (serverError: any) {
-            // This catch block is for when the server action itself fails unexpectedly.
+        }).catch(error => {
+            // This path is for when the server action itself fails (e.g., network error, server crash).
+            // This is the aggressive catch-all.
+            toast({
+                variant: 'destructive',
+                title: 'Failed to Create Order',
+                description: `A client-server communication error occurred. This is the error that was caught: "${error.message}". Please check the server logs.`,
+                duration: 15000,
+            });
             onPaymentError();
-            // We rethrow the error so it's caught by the PayPal button's `onError` handler below.
-            // This ensures a user-facing message is always shown.
-            throw serverError;
-        }
+            // Re-throw the error to ensure PayPal's onError is also triggered.
+            throw error;
+        });
     };
 
     const handleOnApprove = async (data: { orderID: string }, actions: any) => {
@@ -68,21 +75,22 @@ export function PayPalPaymentButton({ planId, onPaymentSuccess, onPaymentStart, 
         } else {
             toast({
                 variant: 'destructive',
-                title: 'Payment Failed',
-                description: result.error || 'An error occurred while processing your payment. You have not been charged.',
+                title: 'Payment Capture Failed',
+                description: result.error || 'An error occurred while processing your payment after approval. You have not been charged.',
             });
             onPaymentError();
         }
     };
     
     const onError = (err: any) => {
-        console.error("PAYPAL_CLIENT_ERROR:", err); // Log the full error for debugging.
-        const message = err.message || 'An unknown error occurred on the server.';
+        // This is PayPal's own error handler. It will be triggered if handleCreateOrder rejects.
+        console.error("PAYPAL_CLIENT_ERROR:", err);
+        const message = err.message || 'An unknown error occurred inside the PayPal script.';
         toast({
             variant: "destructive",
             title: "PayPal Transaction Error",
-            description: `The PayPal window closed because of an error. This is often due to sandbox account issues or server configuration. Full error: "${message}"`,
-            duration: 15000, // Make it last longer to be able to read it.
+            description: `The PayPal window closed because of an error. The error was: "${message}"`,
+            duration: 15000,
         });
         onPaymentError();
     }
