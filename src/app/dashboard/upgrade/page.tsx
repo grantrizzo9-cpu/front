@@ -10,27 +10,26 @@ import type { User as UserType, Referral } from "@/lib/types";
 import { subscriptionTiers } from "@/lib/data";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { PayPalPaymentButton } from "@/components/paypal-payment-button";
 import { PayPalScriptProvider } from "@paypal/react-paypal-js";
+import { Skeleton } from "@/components/ui/skeleton";
 
-
-// Component for users with a subscription, allowing them to upgrade. No PayPal needed here.
+// Component for users with a paid subscription, allowing them to upgrade. No PayPal needed here.
 function ExistingSubscriptionFlow({ currentTierId, onPlanChange }: {
     currentTierId: string;
     onPlanChange: (tierId: string) => void;
 }) {
     const currentTier = subscriptionTiers.find(t => t.id === currentTierId);
 
-    // SAFETY CHECK: If the user's plan ID from the database doesn't match any known plan.
     if (!currentTier) {
         return (
             <Alert variant="destructive">
                 <AlertTriangle className="h-4 w-4" />
                 <AlertTitle>Subscription Data Error</AlertTitle>
                 <AlertDescription>
-                    We couldn't find the details for your current subscription plan. This can happen with older trial accounts. Please contact support to resolve this issue.
+                    We couldn't find the details for your current subscription plan. Please contact support to resolve this issue.
                 </AlertDescription>
             </Alert>
         )
@@ -101,7 +100,7 @@ function ExistingSubscriptionFlow({ currentTierId, onPlanChange }: {
     );
 }
 
-// Component for users without a subscription. This is where payment happens.
+// Component for users without a subscription or on a trial. This is where payment happens.
 function NewSubscriptionFlow({ onPaymentSuccess, onPaymentStart, onPaymentError, isProcessing }: {
     onPaymentSuccess: (tierId: string) => (details: any) => Promise<void>;
     onPaymentStart: () => void;
@@ -114,7 +113,6 @@ function NewSubscriptionFlow({ onPaymentSuccess, onPaymentStart, onPaymentError,
     if (selectedTierId) {
         const tier = subscriptionTiers.find(t => t.id === selectedTierId);
         if (!tier) {
-            // Fallback in case of an error.
             return (
                 <div className="text-center">
                     <Alert variant="destructive">
@@ -129,7 +127,6 @@ function NewSubscriptionFlow({ onPaymentSuccess, onPaymentStart, onPaymentError,
             );
         }
 
-        // --- PAYMENT MODE ---
         return (
             <Card className="max-w-md mx-auto animate-in fade-in-50">
                 <CardHeader>
@@ -174,7 +171,6 @@ function NewSubscriptionFlow({ onPaymentSuccess, onPaymentStart, onPaymentError,
         );
     }
 
-    // --- SELECTION MODE ---
     // If no plan is selected yet, show all plans with "Select" buttons.
     return (
         <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
@@ -220,141 +216,125 @@ function NewSubscriptionFlow({ onPaymentSuccess, onPaymentStart, onPaymentError,
     );
 }
 
+// "Gatekeeper" component to safely render PayPal provider only on the client
+function UpgradePageContent() {
+    const { user, isUserLoading } = useUser();
+    const firestore = useFirestore();
+    const { toast } = useToast();
+    const [isProcessing, setIsProcessing] = useState(false);
+    const [isClient, setIsClient] = useState(false);
+
+    useEffect(() => {
+        setIsClient(true);
+    }, []);
+
+    const userDocRef = useMemoFirebase(() => {
+        if (!user || !firestore) return null;
+        return doc(firestore, 'users', user.uid);
+    }, [firestore, user?.uid]);
+    const { data: userData, isLoading: isUserDataLoading } = useDoc<UserType>(userDocRef);
+    
+    const isLoading = isUserLoading || isUserDataLoading || !isClient;
+
+    if (isLoading) {
+        return (
+            <div className="space-y-8">
+                <Skeleton className="h-12 w-1/2" />
+                <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+                    <Skeleton className="h-96 w-full" />
+                    <Skeleton className="h-96 w-full" />
+                    <Skeleton className="h-96 w-full" />
+                </div>
+            </div>
+        );
+    }
+    
+    const isOnTrial = userData?.subscription?.trialEndDate && userData.subscription.trialEndDate.toDate() > new Date();
+    const hasPaidSubscription = userData?.subscription && !isOnTrial;
+
+    const handlePlanChange = (tierId: string) => {
+        if (!userDocRef) return;
+        updateDocumentNonBlocking(userDocRef, { 'subscription.tierId': tierId });
+        toast({ title: "Plan Upgraded!", description: `Your plan has been successfully upgraded.` });
+    };
+
+    const handlePaymentSuccess = (tierId: string) => async (details: any) => {
+        if (!userDocRef) return;
+        // This will now end the trial and start a paid subscription.
+        const newSubscription = {
+          tierId: tierId,
+          status: 'active' as 'active',
+          startDate: serverTimestamp(),
+          endDate: null,
+          trialEndDate: null, // End the trial
+        };
+        updateDocumentNonBlocking(userDocRef, { subscription: newSubscription });
+        toast({ title: "Subscription Activated!", description: "You've successfully subscribed." });
+        setIsProcessing(false);
+    };
+
+    const paypalClientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID;
+    const shouldShowPaymentFlow = !hasPaidSubscription;
+
+    return (
+        <div className="space-y-8">
+            <div>
+                <h1 className="text-3xl font-bold font-headline">
+                    {hasPaidSubscription ? "Upgrade Your Plan" : (isOnTrial ? "End Trial & Choose Plan" : "Choose Your Plan")}
+                </h1>
+                <p className="text-muted-foreground mt-2">
+                    {hasPaidSubscription 
+                        ? `You are currently on the ${subscriptionTiers.find(t => t.id === userData.subscription?.tierId)?.name || 'Unknown'} plan. Unlock more features by upgrading.`
+                        : "Choose a plan below to start your paid subscription."
+                    }
+                </p>
+            </div>
+
+            {shouldShowPaymentFlow ? (
+                (!paypalClientId || paypalClientId.includes('REPLACE_WITH')) 
+                ? (
+                    <Alert variant="destructive">
+                        <AlertTriangle className="h-4 w-4" />
+                        <AlertTitle>Payment Service Not Configured</AlertTitle>
+                        <AlertDescription>
+                            The application owner needs to configure the PayPal Client ID. Please add your `NEXT_PUBLIC_PAYPAL_CLIENT_ID` to the `.env` file and **restart the development server**.
+                        </AlertDescription>
+                    </Alert>
+                ) : (
+                    <PayPalScriptProvider options={{ clientId: paypalClientId, currency: "AUD", intent: "capture" }}>
+                        <NewSubscriptionFlow
+                            onPaymentSuccess={handlePaymentSuccess}
+                            onPaymentStart={() => setIsProcessing(true)}
+                            onPaymentError={() => setIsProcessing(false)}
+                            isProcessing={isProcessing}
+                        />
+                    </PayPalScriptProvider>
+                )
+            ) : (
+                <ExistingSubscriptionFlow 
+                    currentTierId={userData.subscription!.tierId}
+                    onPlanChange={handlePlanChange}
+                />
+            )}
+        </div>
+    );
+}
+
 // The main page component that orchestrates everything.
 export default function UpgradePage() {
-  const { user, isUserLoading } = useUser();
-  const firestore = useFirestore();
-  const { toast } = useToast();
-  const [isProcessing, setIsProcessing] = useState(false);
-
-  const userDocRef = useMemoFirebase(() => {
-    if (!user || !firestore) return null;
-    return doc(firestore, 'users', user.uid);
-  }, [firestore, user?.uid]);
-  const { data: userData, isLoading: isUserDataLoading } = useDoc<UserType>(userDocRef);
-
-  const referralsQuery = useMemoFirebase(() => {
-    if (!user || !firestore) return null;
-    return collection(firestore, 'users', user.uid, 'referrals');
-  }, [firestore, user?.uid]);
-  const { data: referrals, isLoading: referralsLoading } = useCollection<Referral>(referralsQuery);
-  
-  const paypalClientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID;
-
-  const isLoading = isUserLoading || isUserDataLoading || referralsLoading;
-
-  const handlePlanChange = (tierId: string) => {
-    if (!userDocRef) return;
-    updateDocumentNonBlocking(userDocRef, {
-        'subscription.tierId': tierId,
-    });
-    toast({
-      title: "Plan Upgraded!",
-      description: `Your plan has been successfully upgraded.`,
-    });
-  };
-
-  const handlePaymentSuccess = (tierId: string) => async (details: any) => {
-    if (!userDocRef) return;
-    const trialEndDate = new Date();
-    trialEndDate.setDate(trialEndDate.getDate() + 3);
-    const newSubscription = {
-      tierId: tierId,
-      status: 'active' as 'active',
-      startDate: serverTimestamp(),
-      endDate: null,
-      trialEndDate: Timestamp.fromDate(trialEndDate),
-    };
-    updateDocumentNonBlocking(userDocRef, { subscription: newSubscription });
-    toast({
-      title: "Plan Activated!",
-      description: "You've successfully subscribed. Your 3-day trial starts now!",
-    });
-  };
-  
-  const handleEarlyUpgrade = () => {
-    if (!userDocRef) return;
-    setIsProcessing(true);
-    updateDocumentNonBlocking(userDocRef, { 'subscription.trialEndDate': null });
-    setTimeout(() => {
-        toast({
-            title: "Upgrade Complete!",
-            description: "Your trial has ended and your full subscription is active. You can now earn commissions.",
-        });
-        setIsProcessing(false);
-    }, 1500);
-  }
-
-  if (isLoading) {
+    // Suspense is good practice in case child components fetch data.
     return (
-      <div className="flex justify-center items-center h-full p-8">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    );
-  }
-
-  const hasSubscription = !!userData?.subscription;
-  const isOnTrial = hasSubscription && userData.subscription.trialEndDate && userData.subscription.trialEndDate.toDate() > new Date();
-  const referralCount = referrals?.length ?? 0;
-  const canEarlyUpgrade = isOnTrial && referralCount >= 2;
-
-  return (
-      <div className="space-y-8">
-        <div>
-            <h1 className="text-3xl font-bold font-headline">
-                {hasSubscription ? "Upgrade Your Plan" : "Choose Your Plan"}
-            </h1>
-            <p className="text-muted-foreground mt-2">
-                {hasSubscription 
-                    ? `You are currently on the ${subscriptionTiers.find(t => t.id === userData.subscription?.tierId)?.name || 'Unknown'} plan. Unlock more features by upgrading.`
-                    : "You don't have an active subscription. Choose a plan below to get started."
-                }
-            </p>
-        </div>
-
-        {canEarlyUpgrade && (
-            <Alert className="border-accent bg-accent/5 max-w-2xl">
-                <Star className="h-4 w-4 text-accent" />
-                <AlertTitle className="font-bold text-accent">Unlock Your Commissions Now!</AlertTitle>
-                <AlertDescription>
-                    You've referred {referralCount} people during your trial! You can end your trial now to start your paid subscription and begin earning commissions from your referrals immediately.
-                    <Button onClick={handleEarlyUpgrade} disabled={isProcessing} className="mt-4 w-full sm:w-auto">
-                        {isProcessing ? (
-                            <><Loader2 className="animate-spin mr-2" /> Upgrading...</>
-                        ) : (
-                            "Upgrade Now & Start Earning"
-                        )}
-                    </Button>
-                </AlertDescription>
-            </Alert>
-        )}
-
-        {hasSubscription ? (
-            <ExistingSubscriptionFlow 
-                currentTierId={userData.subscription!.tierId}
-                onPlanChange={handlePlanChange}
-            />
-        ) : (
-            (!paypalClientId || paypalClientId.includes('REPLACE_WITH')) 
-            ? (
-                <Alert variant="destructive">
-                    <AlertTriangle className="h-4 w-4" />
-                    <AlertTitle>Payment Service Not Configured</AlertTitle>
-                    <AlertDescription>
-                        The application owner needs to configure the PayPal Client ID in the environment variables to enable subscriptions. Please add your `NEXT_PUBLIC_PAYPAL_CLIENT_ID` to the `.env` file.
-                    </AlertDescription>
-                </Alert>
-            ) : (
-                <PayPalScriptProvider options={{ clientId: paypalClientId, currency: "AUD", intent: "capture" }}>
-                    <NewSubscriptionFlow
-                        onPaymentSuccess={handlePaymentSuccess}
-                        onPaymentStart={() => setIsProcessing(true)}
-                        onPaymentError={() => setIsProcessing(false)}
-                        isProcessing={isProcessing}
-                    />
-                </PayPalScriptProvider>
-            )
-        )}
-      </div>
-  );
+        <Suspense fallback={
+            <div className="space-y-8">
+                <Skeleton className="h-12 w-1/2" />
+                <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+                    <Skeleton className="h-96 w-full" />
+                    <Skeleton className="h-96 w-full" />
+                    <Skeleton className="h-96 w-full" />
+                </div>
+            </div>
+        }>
+            <UpgradePageContent />
+        </Suspense>
+    )
 }

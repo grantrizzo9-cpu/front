@@ -15,12 +15,10 @@ import { useAuth, useFirestore } from "@/firebase";
 import { createUserWithEmailAndPassword, updateProfile, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { doc, getDoc, writeBatch, serverTimestamp, Timestamp, collection } from "firebase/firestore";
 import { firebaseConfig } from "@/firebase/config";
-import { PayPalPaymentButton } from "@/components/paypal-payment-button";
 
 const GoogleIcon = () => (
     <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" className="mr-2 h-4 w-4 fill-current"><title>Google</title><path d="M12.48 10.92v3.28h7.84c-.24 1.84-.85 3.18-1.73 4.1-1.02 1.02-2.62 1.98-4.48 1.98-3.62 0-6.55-2.92-6.55-6.55s2.93-6.55 6.55-6.55c2.03 0 3.33.82 4.1 1.59l2.48-2.48C17.22 3.43 15.14 2 12.48 2 7.08 2 3 6.08 3 11.48s4.08 9.48 9.48 9.48c5.13 0 9.1-3.48 9.1-9.28 0-.6-.08-1.12-.2-1.68H3.48v.01z"></path></svg>
 );
-
 
 export function SignupForm() {
   const router = useRouter();
@@ -29,7 +27,6 @@ export function SignupForm() {
   const auth = useAuth();
   const firestore = useFirestore();
 
-  const [selectedPlanName, setSelectedPlanName] = useState<string | null>(null);
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -37,41 +34,18 @@ export function SignupForm() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
-  const planId = searchParams.get("plan");
+  const planId = searchParams.get("plan") || 'starter'; // Default to starter plan
   const referralCode = searchParams.get("ref");
   
   const isFormValid = username.length > 2 && email.includes('@') && password.length >= 6;
 
-  useEffect(() => {
-    if (planId) {
-        const plan = subscriptionTiers.find(p => p.id === planId);
-        if (plan) {
-            setSelectedPlanName(plan.name);
-        }
-    } else {
-        // If no plan is selected, redirect to pricing page.
-        // This is crucial because payment is now part of signup.
-        toast({
-            title: "No Plan Selected",
-            description: "Please choose a plan to continue.",
-            variant: "destructive"
-        });
-        router.push(referralCode ? `/pricing?ref=${referralCode}` : '/pricing');
-    }
-  }, [planId, router, referralCode, toast]);
+  const plan = subscriptionTiers.find(p => p.id === planId) || subscriptionTiers[0];
 
-  const handlePaymentSuccess = async (paymentDetails: any) => {
-    // This function now contains all the logic for creating a user
-    // after a successful payment.
+  const handleSignup = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setIsProcessing(true);
+
     try {
-        const plan = planId ? subscriptionTiers.find(p => p.id === planId) : null;
-        if (!plan) {
-            // This should ideally not happen if the effect above works correctly.
-            toast({ variant: "destructive", title: "Signup Failed", description: "No plan was selected." });
-            setIsProcessing(false);
-            return;
-        }
-
         // Check if username is already taken before creating the user
         const usernameDocRef = doc(firestore, "usernames", username);
         const usernameDoc = await getDoc(usernameDocRef);
@@ -103,7 +77,7 @@ export function SignupForm() {
             createdAt: serverTimestamp(),
             subscription: {
                 tierId: plan.id,
-                status: 'active' as const,
+                status: 'active' as const, // Trial is considered active
                 startDate: serverTimestamp(),
                 endDate: null,
                 trialEndDate: Timestamp.fromDate(trialEndDate),
@@ -120,7 +94,6 @@ export function SignupForm() {
             const referrerUsernameDoc = await getDoc(referrerUsernameDocRef);
             if (referrerUsernameDoc.exists()) {
                 const referrerId = referrerUsernameDoc.data().uid;
-                
                 const commissionRate = 0.70;
                 const commissionAmount = plan.price * commissionRate;
 
@@ -145,7 +118,7 @@ export function SignupForm() {
 
         toast({
           title: "Account Created!",
-          description: "Welcome! We're redirecting you to your dashboard.",
+          description: "Welcome! Your 3-day trial starts now. We're redirecting you to your dashboard.",
         });
         router.push("/dashboard");
 
@@ -165,8 +138,6 @@ export function SignupForm() {
 
   const handleGoogleSignIn = async () => {
     setIsGoogleLoading(true);
-    // This flow remains unchanged. Google sign-in provides a trial.
-    // The user can upgrade with PayPal from the dashboard.
     const provider = new GoogleAuthProvider();
     try {
         const result = await signInWithPopup(auth, provider);
@@ -176,7 +147,6 @@ export function SignupForm() {
         const userDoc = await getDoc(userDocRef);
 
         if (!userDoc.exists()) {
-            const plan = planId ? subscriptionTiers.find(p => p.id === planId) : null;
             const batch = writeBatch(firestore);
             
             let username = (user.displayName || user.email?.split('@')[0] || `user${user.uid.substring(0,5)}`).replace(/[^a-zA-Z0-9]/g, '');
@@ -195,14 +165,14 @@ export function SignupForm() {
 
             const newUserDocData = {
                 id: user.uid, email: user.email, username: username, referredBy: referralCode, isAffiliate: true, createdAt: serverTimestamp(),
-                subscription: plan ? {
+                subscription: {
                     tierId: plan.id, status: 'active' as const, startDate: serverTimestamp(), endDate: null, trialEndDate: Timestamp.fromDate(trialEndDate),
-                } : null,
+                },
                 paypalEmail: '', customDomain: null
             };
             batch.set(userDocRef, newUserDocData);
             
-            if (referralCode && plan) {
+            if (referralCode) {
                 const referrerUsernameDocRef = doc(firestore, "usernames", referralCode);
                 const referrerUsernameDoc = await getDoc(referrerUsernameDocRef);
                 if (referrerUsernameDoc.exists()) {
@@ -242,14 +212,11 @@ export function SignupForm() {
       <CardHeader>
         <CardTitle className="font-headline text-2xl">Create Your Account</CardTitle>
         <CardDescription>
-            {selectedPlanName 
-                ? `You've selected the ${selectedPlanName} plan. Complete the form and pay with PayPal to start.`
-                : "Join now to become an affiliate and start earning."
-            }
+            You've selected the <strong>{plan.name}</strong> plan. Create your account to start your 3-day free trial.
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="space-y-4">
+        <form className="space-y-4" onSubmit={handleSignup}>
           <div className="space-y-2">
             <Label htmlFor="username">Username</Label>
             <Input id="username" name="username" type="text" placeholder="your-username" required disabled={isProcessing || isGoogleLoading} value={username} onChange={(e) => setUsername(e.target.value)} />
@@ -271,24 +238,10 @@ export function SignupForm() {
              </div>
           )}
           
-          {planId && (
-            <div className="relative pt-4">
-               {isProcessing && (
-                  <div className="absolute inset-0 bg-background/80 flex flex-col items-center justify-center z-10 rounded-md">
-                      <Loader2 className="animate-spin h-8 w-8 text-primary" />
-                      <p className="mt-2 text-sm text-muted-foreground">Processing... Do not close this window.</p>
-                  </div>
-               )}
-               <PayPalPaymentButton 
-                    planId={planId}
-                    onPaymentSuccess={handlePaymentSuccess}
-                    onPaymentStart={() => setIsProcessing(true)}
-                    onPaymentError={() => setIsProcessing(false)}
-                    disabled={!isFormValid || isProcessing || isGoogleLoading}
-               />
-            </div>
-          )}
-        </div>
+          <Button type="submit" className="w-full" disabled={!isFormValid || isProcessing || isGoogleLoading}>
+             {isProcessing ? <Loader2 className="animate-spin" /> : "Start Free Trial"}
+          </Button>
+        </form>
          <div className="relative my-4">
             <div className="absolute inset-0 flex items-center">
                 <span className="w-full border-t" />
