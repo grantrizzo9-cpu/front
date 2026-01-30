@@ -22,9 +22,21 @@ function ExistingSubscriptionFlow({ currentTierId, onPlanChange }: {
     onPlanChange: (tierId: string) => void;
 }) {
     const currentTier = subscriptionTiers.find(t => t.id === currentTierId);
-    const availableUpgrades = currentTier 
-      ? subscriptionTiers.filter(tier => tier.price > currentTier.price) 
-      : [];
+
+    // SAFETY CHECK: If the user's plan ID from the database doesn't match any known plan.
+    if (!currentTier) {
+        return (
+            <Alert variant="destructive">
+                <AlertTriangle className="h-4 w-4" />
+                <AlertTitle>Subscription Data Error</AlertTitle>
+                <AlertDescription>
+                    We couldn't find the details for your current subscription plan. This can happen with older trial accounts. Please contact support to resolve this issue.
+                </AlertDescription>
+            </Alert>
+        )
+    }
+    
+    const availableUpgrades = subscriptionTiers.filter(tier => tier.price > currentTier.price);
 
     if (availableUpgrades.length === 0) {
         return (
@@ -294,7 +306,7 @@ export default function UpgradePage() {
             </h1>
             <p className="text-muted-foreground mt-2">
                 {hasSubscription 
-                    ? `You are currently on the ${subscriptionTiers.find(t => t.id === userData.subscription?.tierId)?.name} plan. Unlock more features by upgrading.`
+                    ? `You are currently on the ${subscriptionTiers.find(t => t.id === userData.subscription?.tierId)?.name || 'Unknown'} plan. Unlock more features by upgrading.`
                     : "You don't have an active subscription. Choose a plan below to get started."
                 }
             </p>
@@ -323,7 +335,6 @@ export default function UpgradePage() {
                 onPlanChange={handlePlanChange}
             />
         ) : (
-            // This is the new subscription flow. Check for the key HERE.
             (!paypalClientId || paypalClientId.includes('REPLACE_WITH')) 
             ? (
                 <Alert variant="destructive">
@@ -334,7 +345,6 @@ export default function UpgradePage() {
                     </AlertDescription>
                 </Alert>
             ) : (
-                // Only render the provider if the key is valid and we are in the new sub flow.
                 <PayPalScriptProvider options={{ clientId: paypalClientId, currency: "AUD", intent: "capture" }}>
                     <NewSubscriptionFlow
                         onPaymentSuccess={handlePaymentSuccess}
