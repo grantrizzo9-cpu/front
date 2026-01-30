@@ -20,12 +20,12 @@ export function PayPalPaymentButton({ planId, onPaymentSuccess, onPaymentStart, 
 
     useEffect(() => {
         if (isRejected) {
-             const errorMessage = 'The PayPal script failed to load. This can be caused by an invalid Client ID in your .env file, a network issue, or an ad blocker. Please verify your NEXT_PUBLIC_PAYPAL_CLIENT_ID and restart the server.';
+             const errorMessage = 'CRITICAL: The PayPal script failed to load. This can be caused by an invalid Client ID in your .env file (check NEXT_PUBLIC_PAYPAL_CLIENT_ID), a network issue, or an ad blocker.';
              toast({
                 variant: 'destructive',
                 title: 'PayPal Script Load Error',
                 description: errorMessage,
-                duration: 10000,
+                duration: 15000,
             });
             onPaymentError(errorMessage);
         }
@@ -35,32 +35,38 @@ export function PayPalPaymentButton({ planId, onPaymentSuccess, onPaymentStart, 
     const handleCreateOrder = async (): Promise<string> => {
         onPaymentStart();
         try {
+            // This is the most important change. We wrap the server call in a try/catch.
             const result = await createPaypalOrder(planId);
 
+            // Defensive programming: Check if the server returned *anything* at all.
             if (!result) {
-                const errorMessage = "The server returned an empty or invalid response. This indicates a critical server issue.";
+                const errorMessage = "The server returned an empty or invalid response. This suggests a server crash or a critical network issue.";
                 onPaymentError(errorMessage);
                 return Promise.reject(new Error(errorMessage));
             }
 
+            // Check if the server's own error catching returned an error field.
             if (result.error || result.debug) {
-                const errorMessage = `PayPal order creation failed: ${result.error}. ${result.debug ? `(Debug: ${result.debug})` : ''}`;
+                const errorMessage = `Server Error: ${result.error}. ${result.debug ? `(Debug: ${JSON.stringify(result.debug)})` : ''}`;
                 onPaymentError(errorMessage);
                 return Promise.reject(new Error(errorMessage));
             }
 
+            // Check if we got an orderId, which is the only successful outcome.
             if (!result.orderId) {
-                const errorMessage = "The server did not return a PayPal order ID, even though it reported success.";
+                const errorMessage = "The server action succeeded but did not return a PayPal order ID. This is a bug.";
                 onPaymentError(errorMessage);
                 return Promise.reject(new Error(errorMessage));
             }
-
+            
+            // Happy path
             return result.orderId;
 
         } catch (error: any) {
-            const errorMessage = `A client-server communication error occurred. The server might be down or misconfigured. Please check the server logs. Client-side error: "${error.message || 'Unknown fetch error'}"`;
+            // This block will catch errors if the `await createPaypalOrder` call itself fails (e.g., total server crash, network timeout).
+            const errorMessage = `A client-side exception occurred while trying to create the order. The server might be down or misconfigured. Error: "${error.message || 'Unknown fetch error'}"`;
             onPaymentError(errorMessage);
-            return Promise.reject(error);
+            return Promise.reject(new Error(errorMessage));
         }
     };
 
@@ -77,11 +83,11 @@ export function PayPalPaymentButton({ planId, onPaymentSuccess, onPaymentStart, 
             if (result.success && result.orderData) {
                 toast({
                     title: 'Payment Successful!',
-                    description: "We're now creating your account...",
+                    description: "Finalizing your subscription...",
                 });
                 await onPaymentSuccess(result.orderData);
             } else {
-                const errorMessage = `Payment capture failed: ${result.error}. ${result.debug ? `(Debug: ${result.debug})` : ''}`;
+                const errorMessage = `Payment capture failed: ${result.error}. ${result.debug ? `(Debug: ${JSON.stringify(result.debug)})` : ''}`;
                 onPaymentError(errorMessage);
             }
         } catch (error: any) {
@@ -91,9 +97,10 @@ export function PayPalPaymentButton({ planId, onPaymentSuccess, onPaymentStart, 
     };
     
     const onError = (err: any) => {
-        console.error("PAYPAL_CLIENT_ERROR:", err);
+        // This catches errors from the PayPal script itself (e.g., window closed, invalid parameters).
+        console.error("PAYPAL_CLIENT_SCRIPT_ERROR:", err);
         const message = err.message || 'An unknown error occurred inside the PayPal script.';
-        const finalMessage = `The PayPal window closed because of an error. The error was: "${message}"`;
+        const finalMessage = `The PayPal window closed due to an error: "${message}"`;
         onPaymentError(finalMessage);
     }
 
