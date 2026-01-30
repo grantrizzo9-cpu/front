@@ -1,9 +1,8 @@
-
 'use client';
 
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Loader2, CheckCircle, ArrowUpCircle, BadgeCheck, Star } from "lucide-react";
+import { Loader2, CheckCircle, ArrowUpCircle, BadgeCheck, Star, AlertTriangle } from "lucide-react";
 import { useUser, useFirestore, useDoc, useMemoFirebase, updateDocumentNonBlocking, useCollection } from "@/firebase";
 import { doc, serverTimestamp, Timestamp, collection } from "firebase/firestore";
 import type { User as UserType, Referral } from "@/lib/types";
@@ -13,6 +12,10 @@ import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { PayPalPaymentButton } from "@/components/paypal-payment-button";
+import { PayPalScriptProvider } from "@paypal/react-paypal-js";
+
+const paypalClientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID;
+
 
 export default function UpgradePage() {
   const { user, isUserLoading } = useUser();
@@ -101,7 +104,26 @@ export default function UpgradePage() {
   const canEarlyUpgrade = isOnTrial && referralCount >= 2;
 
   if (!userData?.subscription) {
+      if (!paypalClientId || paypalClientId.includes('REPLACE_WITH')) {
+        return (
+            <div className="space-y-8">
+                <div>
+                    <h1 className="text-3xl font-bold font-headline">Choose Your Plan</h1>
+                    <p className="text-muted-foreground mt-2">You don't have an active subscription. Please configure payment services to subscribe.</p>
+                </div>
+                <Alert variant="destructive">
+                    <AlertTriangle className="h-4 w-4" />
+                    <AlertTitle>Payment Service Not Configured</AlertTitle>
+                    <AlertDescription>
+                        The application owner needs to configure the PayPal Client ID in the environment variables to enable subscriptions. Please add your `NEXT_PUBLIC_PAYPAL_CLIENT_ID` to the `.env` file.
+                    </AlertDescription>
+                </Alert>
+            </div>
+        )
+      }
+
       return (
+        <PayPalScriptProvider options={{ clientId: paypalClientId, currency: "AUD", intent: "capture" }}>
           <div className="space-y-8">
             <div>
               <h1 className="text-3xl font-bold font-headline">Choose Your Plan</h1>
@@ -159,7 +181,8 @@ export default function UpgradePage() {
               ))}
             </div>
           </div>
-      )
+        </PayPalScriptProvider>
+      );
   }
   
   const currentTier = subscriptionTiers.find(t => t.id === userData.subscription?.tierId);
