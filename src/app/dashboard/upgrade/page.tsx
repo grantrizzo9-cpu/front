@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,7 +16,80 @@ import { PayPalPaymentButton } from "@/components/paypal-payment-button";
 import { PayPalScriptProvider } from "@paypal/react-paypal-js";
 
 
-// THIS IS THE NEW COMPONENT. It guarantees only one PayPal button is ever rendered.
+// Component for users with a subscription, allowing them to upgrade. No PayPal needed here.
+function ExistingSubscriptionFlow({ currentTierId, onPlanChange }: {
+    currentTierId: string;
+    onPlanChange: (tierId: string) => void;
+}) {
+    const currentTier = subscriptionTiers.find(t => t.id === currentTierId);
+    const availableUpgrades = currentTier 
+      ? subscriptionTiers.filter(tier => tier.price > currentTier.price) 
+      : [];
+
+    if (availableUpgrades.length === 0) {
+        return (
+             <Card className="max-w-md">
+                <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                        <BadgeCheck className="h-6 w-6 text-green-500" />
+                        <span>You're on the Top Plan!</span>
+                    </CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <p className="text-muted-foreground">
+                        You already have the best plan available. Thank you for being a valued customer!
+                    </p>
+                </CardContent>
+            </Card>
+        );
+    }
+    
+    return (
+        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+            {availableUpgrades.map((tier) => (
+              <Card 
+                  key={tier.id} 
+                  className={cn(
+                      "flex flex-col",
+                      tier.isMostPopular ? "border-primary ring-2 ring-primary shadow-lg" : ""
+                  )}
+              >
+                {tier.isMostPopular && (
+                  <div className="bg-primary text-primary-foreground text-center py-1.5 text-sm font-semibold rounded-t-lg">
+                    Most Popular
+                  </div>
+                )}
+                <CardHeader>
+                  <CardTitle className="font-headline text-xl">{tier.name}</CardTitle>
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-3xl font-bold">${tier.price.toFixed(2)}</span>
+                    <span className="text-muted-foreground">AUD / day</span>
+                  </div>
+                  <CardDescription>{tier.description}</CardDescription>
+                </CardHeader>
+                <CardContent className="flex-1">
+                  <ul className="space-y-3">
+                    {tier.features.map((feature, index) => (
+                      <li key={index} className="flex items-start gap-2">
+                        <CheckCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-green-500" />
+                        <span className="text-sm">{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </CardContent>
+                <CardFooter>
+                    <Button className="w-full" variant={tier.isMostPopular ? "default" : "outline"} onClick={() => onPlanChange(tier.id)}>
+                        <ArrowUpCircle className="mr-2" />
+                        Upgrade to {tier.name}
+                    </Button>
+                </CardFooter>
+              </Card>
+            ))}
+        </div>
+    );
+}
+
+// Component for users without a subscription. This is where payment happens.
 function NewSubscriptionFlow({ onPaymentSuccess, onPaymentStart, onPaymentError, isProcessing }: {
     onPaymentSuccess: (tierId: string) => (details: any) => Promise<void>;
     onPaymentStart: () => void;
@@ -134,81 +208,8 @@ function NewSubscriptionFlow({ onPaymentSuccess, onPaymentStart, onPaymentError,
     );
 }
 
-
-// This component is for users who already have a subscription. It doesn't use PayPal so it's fine.
-function ExistingSubscriptionFlow({ currentTierId, onPlanChange }: {
-    currentTierId: string;
-    onPlanChange: (tierId: string) => void;
-}) {
-    const currentTier = subscriptionTiers.find(t => t.id === currentTierId);
-    const availableUpgrades = currentTier 
-      ? subscriptionTiers.filter(tier => tier.price > currentTier.price) 
-      : [];
-
-    if (availableUpgrades.length === 0) {
-        return (
-             <Card className="max-w-md">
-                <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                        <BadgeCheck className="h-6 w-6 text-green-500" />
-                        <span>You're on the Top Plan!</span>
-                    </CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <p className="text-muted-foreground">
-                        You already have the best plan available. Thank you for being a valued customer!
-                    </p>
-                </CardContent>
-            </Card>
-        );
-    }
-    
-    return (
-        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-            {availableUpgrades.map((tier) => (
-              <Card 
-                  key={tier.id} 
-                  className={cn(
-                      "flex flex-col",
-                      tier.isMostPopular ? "border-primary ring-2 ring-primary shadow-lg" : ""
-                  )}
-              >
-                {tier.isMostPopular && (
-                  <div className="bg-primary text-primary-foreground text-center py-1.5 text-sm font-semibold rounded-t-lg">
-                    Most Popular
-                  </div>
-                )}
-                <CardHeader>
-                  <CardTitle className="font-headline text-xl">{tier.name}</CardTitle>
-                  <div className="flex items-baseline gap-1">
-                    <span className="text-3xl font-bold">${tier.price.toFixed(2)}</span>
-                    <span className="text-muted-foreground">AUD / day</span>
-                  </div>
-                  <CardDescription>{tier.description}</CardDescription>
-                </CardHeader>
-                <CardContent className="flex-1">
-                  <ul className="space-y-3">
-                    {tier.features.map((feature, index) => (
-                      <li key={index} className="flex items-start gap-2">
-                        <CheckCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-green-500" />
-                        <span className="text-sm">{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </CardContent>
-                <CardFooter>
-                    <Button className="w-full" variant={tier.isMostPopular ? "default" : "outline"} onClick={() => onPlanChange(tier.id)}>
-                        <ArrowUpCircle className="mr-2" />
-                        Upgrade to {tier.name}
-                    </Button>
-                </CardFooter>
-              </Card>
-            ))}
-        </div>
-    );
-}
-
-function UpgradePageContent() {
+// The main page component that orchestrates everything.
+export default function UpgradePage() {
   const { user, isUserLoading } = useUser();
   const firestore = useFirestore();
   const { toast } = useToast();
@@ -225,16 +226,16 @@ function UpgradePageContent() {
     return collection(firestore, 'users', user.uid, 'referrals');
   }, [firestore, user?.uid]);
   const { data: referrals, isLoading: referralsLoading } = useCollection<Referral>(referralsQuery);
+  
+  const paypalClientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID;
 
   const isLoading = isUserLoading || isUserDataLoading || referralsLoading;
 
   const handlePlanChange = (tierId: string) => {
-    if (!user) return;
-    const userDocRef = doc(firestore, 'users', user.uid);
+    if (!userDocRef) return;
     updateDocumentNonBlocking(userDocRef, {
         'subscription.tierId': tierId,
     });
-
     toast({
       title: "Plan Upgraded!",
       description: `Your plan has been successfully upgraded.`,
@@ -242,11 +243,9 @@ function UpgradePageContent() {
   };
 
   const handlePaymentSuccess = (tierId: string) => async (details: any) => {
-    if (!user || !userDocRef) return;
-    
+    if (!userDocRef) return;
     const trialEndDate = new Date();
     trialEndDate.setDate(trialEndDate.getDate() + 3);
-
     const newSubscription = {
       tierId: tierId,
       status: 'active' as 'active',
@@ -254,11 +253,7 @@ function UpgradePageContent() {
       endDate: null,
       trialEndDate: Timestamp.fromDate(trialEndDate),
     };
-
-    updateDocumentNonBlocking(userDocRef, {
-        subscription: newSubscription
-    });
-
+    updateDocumentNonBlocking(userDocRef, { subscription: newSubscription });
     toast({
       title: "Plan Activated!",
       description: "You've successfully subscribed. Your 3-day trial starts now!",
@@ -266,13 +261,9 @@ function UpgradePageContent() {
   };
   
   const handleEarlyUpgrade = () => {
-    if (!user || !userDocRef) return;
+    if (!userDocRef) return;
     setIsProcessing(true);
-
-    updateDocumentNonBlocking(userDocRef, {
-        'subscription.trialEndDate': null,
-    });
-
+    updateDocumentNonBlocking(userDocRef, { 'subscription.trialEndDate': null });
     setTimeout(() => {
         toast({
             title: "Upgrade Complete!",
@@ -332,27 +323,9 @@ function UpgradePageContent() {
                 onPlanChange={handlePlanChange}
             />
         ) : (
-            <NewSubscriptionFlow
-                onPaymentSuccess={handlePaymentSuccess}
-                onPaymentStart={() => setIsProcessing(true)}
-                onPaymentError={() => setIsProcessing(false)}
-                isProcessing={isProcessing}
-            />
-        )}
-      </div>
-  );
-}
-
-export default function UpgradePage() {
-    const paypalClientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID;
-
-    if (!paypalClientId || paypalClientId.includes('REPLACE_WITH')) {
-        return (
-             <div className="space-y-8">
-                <div>
-                    <h1 className="text-3xl font-bold font-headline">Choose Your Plan</h1>
-                    <p className="text-muted-foreground mt-2">You don't have an active subscription. Please configure payment services to subscribe.</p>
-                </div>
+            // This is the new subscription flow. Check for the key HERE.
+            (!paypalClientId || paypalClientId.includes('REPLACE_WITH')) 
+            ? (
                 <Alert variant="destructive">
                     <AlertTriangle className="h-4 w-4" />
                     <AlertTitle>Payment Service Not Configured</AlertTitle>
@@ -360,13 +333,18 @@ export default function UpgradePage() {
                         The application owner needs to configure the PayPal Client ID in the environment variables to enable subscriptions. Please add your `NEXT_PUBLIC_PAYPAL_CLIENT_ID` to the `.env` file.
                     </AlertDescription>
                 </Alert>
-            </div>
-        );
-    }
-    
-    return (
-        <PayPalScriptProvider options={{ clientId: paypalClientId, currency: "AUD", intent: "capture" }}>
-           <UpgradePageContent />
-        </PayPalScriptProvider>
-    )
+            ) : (
+                // Only render the provider if the key is valid and we are in the new sub flow.
+                <PayPalScriptProvider options={{ clientId: paypalClientId, currency: "AUD", intent: "capture" }}>
+                    <NewSubscriptionFlow
+                        onPaymentSuccess={handlePaymentSuccess}
+                        onPaymentStart={() => setIsProcessing(true)}
+                        onPaymentError={() => setIsProcessing(false)}
+                        isProcessing={isProcessing}
+                    />
+                </PayPalScriptProvider>
+            )
+        )}
+      </div>
+  );
 }
