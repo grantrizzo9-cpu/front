@@ -18,7 +18,7 @@ const clientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID;
 export function PayPalPaymentButton({ planId, onPaymentSuccess, onPaymentStart, onPaymentError, disabled }: PayPalPaymentButtonProps) {
     const { toast } = useToast();
     
-    if (!clientId) {
+    if (!clientId || clientId.includes('REPLACE_WITH')) {
         return (
             <div className="text-center p-4 rounded-md border border-destructive bg-destructive/10 text-destructive text-sm">
                 <p className="font-bold">Payments are currently disabled.</p>
