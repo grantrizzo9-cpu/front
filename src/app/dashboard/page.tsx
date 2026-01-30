@@ -4,7 +4,7 @@ import { StatCard } from "@/components/stat-card";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { format } from "date-fns";
-import { DollarSign, Users, BarChart, BrainCircuit, ArrowRight, Loader2, TrendingUp, Info } from "lucide-react";
+import { DollarSign, Users, BarChart, BrainCircuit, ArrowRight, Loader2, TrendingUp, Info, UserCheck, UserPlus } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import Link from 'next/link';
 import { Button } from "@/components/ui/button";
@@ -34,6 +34,12 @@ export default function DashboardPage() {
   const { data: userData, isLoading: isUserDataLoading } = useDoc<UserType>(userDocRef);
 
   // --- Admin-Only Data Fetching ---
+  const allUsersQuery = useMemoFirebase(() => {
+    if (!isAdmin || !firestore) return null; // Only fetch if admin
+    return collection(firestore, 'users');
+  }, [isAdmin, firestore]);
+  const { data: allUsers, isLoading: allUsersLoading } = useCollection<UserType>(allUsersQuery);
+  
   const allReferralsQuery = useMemoFirebase(() => {
     if (!isAdmin || !firestore) return null; // Only fetch if admin
     return collectionGroup(firestore, 'referrals');
@@ -44,16 +50,22 @@ export default function DashboardPage() {
   const isPlatformDataEmpty = isAdmin && !allReferralsLoading && allReferrals?.length === 0;
 
   // --- Platform-Wide Stats (for Admins) ---
-  const { platformRevenue, totalAffiliatePayouts, totalPlatformReferrals, totalGrossSales } = useMemo(() => {
-    if (!isAdmin || !allReferrals || allReferrals.length === 0) {
-      return { platformRevenue: 0, totalAffiliatePayouts: 0, totalPlatformReferrals: 0, totalGrossSales: 0 };
+  const { platformRevenue, totalAffiliatePayouts, totalPlatformReferrals, totalGrossSales, totalUsers, totalAffiliates } = useMemo(() => {
+    if (!isAdmin) {
+      return { platformRevenue: 0, totalAffiliatePayouts: 0, totalPlatformReferrals: 0, totalGrossSales: 0, totalUsers: 0, totalAffiliates: 0 };
+    }
+
+    const usersCount = allUsers?.length ?? 0;
+    const affiliatesCount = allUsers?.filter(u => u.isAffiliate).length ?? 0;
+
+    if (!allReferrals || allReferrals.length === 0) {
+      return { platformRevenue: 0, totalAffiliatePayouts: 0, totalPlatformReferrals: 0, totalGrossSales: 0, totalUsers: usersCount, totalAffiliates: affiliatesCount };
     }
 
     try {
       // Calculate gross sales by deriving it from the commission, which is more reliable if grossSale field is missing.
       const grossSales = allReferrals.reduce((sum, r) => {
           const commission = typeof r.commission === 'number' ? r.commission : 0;
-          // Assume a 70% commission rate to reverse-calculate the sale amount.
           return sum + (commission / 0.70);
       }, 0);
       const payouts = allReferrals.reduce((sum, r) => sum + (typeof r.commission === 'number' ? r.commission : 0), 0);
@@ -64,12 +76,14 @@ export default function DashboardPage() {
         totalAffiliatePayouts: payouts,
         totalPlatformReferrals: allReferrals.length,
         totalGrossSales: grossSales,
+        totalUsers: usersCount,
+        totalAffiliates: affiliatesCount,
       };
     } catch (e) {
       console.error("Error calculating platform stats:", e);
-      return { platformRevenue: 0, totalAffiliatePayouts: 0, totalPlatformReferrals: 0, totalGrossSales: 0 };
+      return { platformRevenue: 0, totalAffiliatePayouts: 0, totalPlatformReferrals: 0, totalGrossSales: 0, totalUsers: usersCount, totalAffiliates: affiliatesCount };
     }
-  }, [allReferrals, isAdmin]);
+  }, [allReferrals, allUsers, isAdmin]);
 
   const recentAllReferrals = useMemo(() => 
       allReferrals?.sort((a, b) => b.date.toMillis() - a.date.toMillis()).slice(0, 5) ?? [],
@@ -85,10 +99,8 @@ export default function DashboardPage() {
       const totalCommission = personalReferrals.reduce((sum, r) => sum + r.commission, 0);
       const unpaidCommissions = personalReferrals.filter(r => r.status === 'unpaid').reduce((sum, r) => sum + r.commission, 0);
       
-      // Reverted Logic: Calculate gross sales from commission to fix display bug.
       const grossSales = personalReferrals.reduce((sum, r) => {
           const commission = typeof r.commission === 'number' ? r.commission : 0;
-          // Assume a 70% commission rate to reverse-calculate the sale amount.
           return sum + (commission / 0.70);
       }, 0);
 
@@ -153,18 +165,24 @@ export default function DashboardPage() {
                             <Info className="h-4 w-4 text-primary" />
                             <AlertTitle className="font-bold text-primary">You are the Platform Owner</AlertTitle>
                             <AlertDescription className="text-foreground/80">
-                                This Admin section shows your <strong>30% revenue share</strong> from <strong>all sales across the entire platform</strong>. The "Your Affiliate Dashboard" section below shows stats for your personal referrals only.
+                               This Admin section shows your <strong>30% revenue share</strong> from <strong>all sales across the entire platform</strong>. The "Your Affiliate Dashboard" section below shows stats for your personal referrals only.
                             </AlertDescription>
                         </Alert>
 
-                        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                             <StatCard
                                 title="Platform Revenue"
                                 value={`$${platformRevenue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                                 icon={<TrendingUp />}
                                 description="Your company's 30% share of revenue from all sales."
                             />
-                            <StatCard
+                             <StatCard
+                                title="Total Gross Sales"
+                                value={`$${totalGrossSales.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+                                icon={<BarChart />}
+                                description="Gross value of all sales on the platform."
+                            />
+                             <StatCard
                                 title="Total Affiliate Payouts"
                                 value={`$${totalAffiliatePayouts.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                                 icon={<DollarSign />}
@@ -173,14 +191,20 @@ export default function DashboardPage() {
                             <StatCard
                                 title="Platform-Wide Referrals"
                                 value={`+${totalPlatformReferrals}`}
-                                icon={<Users />}
+                                icon={<UserPlus />}
                                 description="Total users referred across the entire platform."
                             />
                             <StatCard
-                                title="Total Gross Sales"
-                                value={`$${totalGrossSales.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
-                                icon={<BarChart />}
-                                description="Gross value of all sales on the platform."
+                                title="Total Platform Users"
+                                value={`${totalUsers}`}
+                                icon={<Users />}
+                                description="Total number of user accounts on the platform."
+                            />
+                            <StatCard
+                                title="Total Active Affiliates"
+                                value={`${totalAffiliates}`}
+                                icon={<UserCheck />}
+                                description="Total users who are active affiliates."
                             />
                         </div>
                          <Card>
