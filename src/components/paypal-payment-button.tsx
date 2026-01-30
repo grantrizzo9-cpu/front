@@ -62,6 +62,8 @@ export function PayPalPaymentButton({ planId, onPaymentSuccess, onPaymentStart, 
 
         } catch (error: any) {
             const errorMessage = `A client-side exception occurred while trying to create the order: "${error.message || 'Unknown fetch error'}"`;
+            // DIAGNOSTIC ALERT - This is a temporary measure to capture the raw error.
+            window.alert(`DIAGNOSTIC: An error occurred. Please send this entire message to support:\n\n${errorMessage}\n\nFull Error Details:\n${JSON.stringify(error)}`);
             onPaymentError(errorMessage);
             return Promise.reject(new Error(errorMessage));
         }
