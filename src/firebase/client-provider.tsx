@@ -4,7 +4,7 @@ import React, { useMemo, type ReactNode } from 'react';
 import { FirebaseProvider } from '@/firebase/provider';
 import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
-import { getFirestore, initializeFirestore, persistentLocalCache } from 'firebase/firestore';
+import { getFirestore } from 'firebase/firestore';
 import { firebaseConfig } from '@/firebase/config';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { AlertTriangle } from 'lucide-react';
@@ -22,13 +22,7 @@ export function FirebaseClientProvider({ children }: { children: ReactNode }) {
       }
 
       const auth = getAuth(app);
-      
-      // By calling initializeFirestore here, before any other part of the app can call getFirestore(),
-      // we ensure that persistence is enabled correctly from the very start.
-      // The modern SDK handles being called multiple times on the same app instance gracefully.
-      const firestore = initializeFirestore(app, {
-        localCache: persistentLocalCache({}),
-      });
+      const firestore = getFirestore(app);
 
       return { firebaseApp: app, auth, firestore };
     } catch (e: any) {
