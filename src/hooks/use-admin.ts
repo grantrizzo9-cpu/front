@@ -2,7 +2,7 @@
 'use client';
 
 import { useFirestore, useUser } from '@/firebase';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 import { useState, useEffect } from 'react';
 
 /**
@@ -35,15 +35,23 @@ export function useAdmin() {
       // Hardcoded check for the platform owner's email.
       if (user.email === 'rentapog@gmail.com') {
         try {
+            // Ensure admin role document exists
             const adminRoleRef = doc(firestore, 'roles_admin', user.uid);
             const adminDocSnap = await getDoc(adminRoleRef);
             if (!adminDocSnap.exists()) {
-                // Use await to ensure the role is created before proceeding
                 await setDoc(adminRoleRef, {});
             }
+
+            // Ensure the user's profile has isAffiliate set to true
+            const userDocRef = doc(firestore, 'users', user.uid);
+            const userDocSnap = await getDoc(userDocRef);
+            if (userDocSnap.exists() && !userDocSnap.data()?.isAffiliate) {
+                await updateDoc(userDocRef, { isAffiliate: true });
+            }
+
             setIsAdmin(true);
         } catch (error) {
-            console.error("Error setting admin role for owner:", error);
+            console.error("Error setting admin role/affiliate status for owner:", error);
             setIsAdmin(false); // Fail safely
         } finally {
             setIsLoading(false);
