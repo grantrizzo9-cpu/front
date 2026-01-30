@@ -11,8 +11,6 @@ import { AlertTriangle } from "lucide-react";
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 
-// Next.js replaces this with the actual value at build time.
-const paypalClientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID;
 
 function LoadingSignupForm() {
     return (
@@ -33,23 +31,31 @@ function LoadingSignupForm() {
     );
 }
 
-export default function SignupPage() {
+/**
+ * This is a "gatekeeper" component. It ensures that any code that needs the browser
+ * (like accessing environment variables or loading PayPal) only runs after the
+ * component has safely "mounted" on the client. This prevents server/client
+ * mismatches (hydration errors) that cause a blank screen.
+ */
+function SignupPageContent() {
     const [isClient, setIsClient] = useState(false);
 
-    // This effect ensures that the component only attempts to render
-    // the PayPal provider after it has mounted on the client.
+    // This effect runs only in the browser, after the initial render.
     useEffect(() => {
         setIsClient(true);
     }, []);
 
-    // While waiting for the client to mount, show a loading state.
-    // This prevents any server-side rendering of the PayPal provider.
+    // Until we're sure we are on the client, we render a loading state.
+    // This matches what the server renders, preventing a crash.
     if (!isClient) {
         return <LoadingSignupForm />;
     }
 
-    // Once on the client, check for the PayPal Client ID.
-    // If it's missing or a placeholder, show a clear error message.
+    // Now that we are on the client, we can safely access browser-only things
+    // like environment variables.
+    const paypalClientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID;
+
+    // Check if the PayPal Client ID is missing or is a placeholder.
     if (!paypalClientId || paypalClientId.includes('REPLACE_WITH')) {
         return (
             <Card>
@@ -70,16 +76,24 @@ export default function SignupPage() {
                     </Button>
                 </CardContent>
             </Card>
-        )
+        );
     }
     
-    // Only if we are on the client AND the key is valid do we render the PayPal provider.
-    // This is the only safe way to prevent the page from crashing.
+    // If the keys are present, we can now safely render the PayPal provider.
     return (
-         <PayPalScriptProvider options={{ clientId: paypalClientId, currency: "AUD", intent: "capture" }}>
-            <Suspense fallback={<LoadingSignupForm />}>
-                <SignupForm />
-            </Suspense>
+        <PayPalScriptProvider options={{ clientId: paypalClientId, currency: "AUD", intent: "capture" }}>
+            <SignupForm />
         </PayPalScriptProvider>
     );
+}
+
+
+export default function SignupPage() {
+  // The <Suspense> wrapper is necessary because the SignupForm component
+  // uses `useSearchParams` to read the plan from the URL.
+  return (
+    <Suspense fallback={<LoadingSignupForm />}>
+      <SignupPageContent />
+    </Suspense>
+  );
 }
