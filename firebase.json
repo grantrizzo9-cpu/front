@@ -1,20 +1,8 @@
 {
   "hosting": {
-    "site": "affiliate-ai-host-new",
     "source": ".",
-    "ignore": [
-      "firebase.json",
-      "**/.*",
-      "**/node_modules/**"
-    ],
-    "rewrites": [
-      {
-        "source": "**",
-        "function": {
-          "functionId": "server",
-          "region": "us-central1"
-        }
-      }
-    ]
+    "frameworksBackend": {
+      "region": "us-central1"
+    }
   }
 }
