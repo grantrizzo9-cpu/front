@@ -1,3 +1,6 @@
+
+'use client';
+
 import { Suspense } from 'react';
 import { SignupForm } from './signup-form';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
