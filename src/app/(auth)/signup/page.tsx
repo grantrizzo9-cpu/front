@@ -36,6 +36,8 @@ function SignupLoadingSkeleton() {
 }
 
 export default function SignupPage() {
+  // The Suspense boundary is a critical part of the solution.
+  // It allows the SignupForm component to safely use the useSearchParams hook on the client.
   return (
     <Suspense fallback={<SignupLoadingSkeleton />}>
       <SignupForm />
