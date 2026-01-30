@@ -9,14 +9,147 @@ import type { User as UserType, Referral } from "@/lib/types";
 import { subscriptionTiers } from "@/lib/data";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { PayPalPaymentButton } from "@/components/paypal-payment-button";
 import { PayPalScriptProvider } from "@paypal/react-paypal-js";
 
-const paypalClientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID;
+// This is the component that will be rendered for users without a subscription.
+function NewSubscriptionFlow({ onPaymentSuccess, onPaymentStart, onPaymentError, isProcessing }: {
+    onPaymentSuccess: (tierId: string) => (details: any) => Promise<void>;
+    onPaymentStart: () => void;
+    onPaymentError: () => void;
+    isProcessing: boolean;
+}) {
+    return (
+        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+          {subscriptionTiers.map((tier) => (
+            <Card 
+              key={tier.id} 
+              className={cn(
+                "flex flex-col",
+                tier.isMostPopular ? "border-primary ring-2 ring-primary shadow-lg" : ""
+              )}
+            >
+              {tier.isMostPopular && (
+                <div className="bg-primary text-primary-foreground text-center py-1.5 text-sm font-semibold rounded-t-lg">
+                  Most Popular
+                </div>
+              )}
+              <CardHeader>
+                <CardTitle className="font-headline text-xl">{tier.name}</CardTitle>
+                <div className="flex items-baseline gap-1">
+                  <span className="text-3xl font-bold">${tier.price.toFixed(2)}</span>
+                  <span className="text-muted-foreground">AUD / day</span>
+                </div>
+                <CardDescription>{tier.description}</CardDescription>
+              </CardHeader>
+              <CardContent className="flex-1">
+                <ul className="space-y-3">
+                  {tier.features.map((feature, index) => (
+                    <li key={index} className="flex items-start gap-2">
+                      <CheckCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-green-500" />
+                      <span className="text-sm">{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+              </CardContent>
+              <CardFooter className="flex-col items-stretch">
+                 <div className="relative">
+                    {isProcessing && (
+                        <div className="absolute inset-0 bg-background/80 flex flex-col items-center justify-center z-10 rounded-md">
+                            <Loader2 className="animate-spin h-8 w-8 text-primary" />
+                        </div>
+                    )}
+                    <PayPalPaymentButton 
+                        planId={tier.id}
+                        onPaymentSuccess={onPaymentSuccess(tier.id)}
+                        onPaymentStart={onPaymentStart}
+                        onPaymentError={onPaymentError}
+                        disabled={isProcessing}
+                    />
+                </div>
+              </CardFooter>
+            </Card>
+          ))}
+        </div>
+    );
+}
 
-export default function UpgradePage() {
+// This component is for users who already have a subscription.
+function ExistingSubscriptionFlow({ currentTierId, onPlanChange }: {
+    currentTierId: string;
+    onPlanChange: (tierId: string) => void;
+}) {
+    const currentTier = subscriptionTiers.find(t => t.id === currentTierId);
+    const availableUpgrades = currentTier 
+      ? subscriptionTiers.filter(tier => tier.price > currentTier.price) 
+      : [];
+
+    if (availableUpgrades.length === 0) {
+        return (
+             <Card className="max-w-md">
+                <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                        <BadgeCheck className="h-6 w-6 text-green-500" />
+                        <span>You're on the Top Plan!</span>
+                    </CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <p className="text-muted-foreground">
+                        You already have the best plan available. Thank you for being a valued customer!
+                    </p>
+                </CardContent>
+            </Card>
+        );
+    }
+    
+    return (
+        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+            {availableUpgrades.map((tier) => (
+              <Card 
+                  key={tier.id} 
+                  className={cn(
+                      "flex flex-col",
+                      tier.isMostPopular ? "border-primary ring-2 ring-primary shadow-lg" : ""
+                  )}
+              >
+                {tier.isMostPopular && (
+                  <div className="bg-primary text-primary-foreground text-center py-1.5 text-sm font-semibold rounded-t-lg">
+                    Most Popular
+                  </div>
+                )}
+                <CardHeader>
+                  <CardTitle className="font-headline text-xl">{tier.name}</CardTitle>
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-3xl font-bold">${tier.price.toFixed(2)}</span>
+                    <span className="text-muted-foreground">AUD / day</span>
+                  </div>
+                  <CardDescription>{tier.description}</CardDescription>
+                </CardHeader>
+                <CardContent className="flex-1">
+                  <ul className="space-y-3">
+                    {tier.features.map((feature, index) => (
+                      <li key={index} className="flex items-start gap-2">
+                        <CheckCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-green-500" />
+                        <span className="text-sm">{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </CardContent>
+                <CardFooter>
+                    <Button className="w-full" variant={tier.isMostPopular ? "default" : "outline"} onClick={() => onPlanChange(tier.id)}>
+                        <ArrowUpCircle className="mr-2" />
+                        Upgrade to {tier.name}
+                    </Button>
+                </CardFooter>
+              </Card>
+            ))}
+        </div>
+    );
+}
+
+function UpgradePageContent() {
   const { user, isUserLoading } = useUser();
   const firestore = useFirestore();
   const { toast } = useToast();
@@ -99,12 +232,68 @@ export default function UpgradePage() {
     );
   }
 
-  // SCENARIO 1: User has NO subscription
-  if (!userData?.subscription) {
-      // Sub-case: PayPal is not configured. Show an error and stop.
-      if (!paypalClientId || paypalClientId.includes('REPLACE_WITH')) {
+  const hasSubscription = !!userData?.subscription;
+  const isOnTrial = hasSubscription && userData.subscription.trialEndDate && userData.subscription.trialEndDate.toDate() > new Date();
+  const referralCount = referrals?.length ?? 0;
+  const canEarlyUpgrade = isOnTrial && referralCount >= 2;
+
+  return (
+      <div className="space-y-8">
+        <div>
+            <h1 className="text-3xl font-bold font-headline">
+                {hasSubscription ? "Upgrade Your Plan" : "Choose Your Plan"}
+            </h1>
+            <p className="text-muted-foreground mt-2">
+                {hasSubscription 
+                    ? `You are currently on the ${subscriptionTiers.find(t => t.id === userData.subscription?.tierId)?.name} plan. Unlock more features by upgrading.`
+                    : "You don't have an active subscription. Choose and pay for a plan below to get started."
+                }
+            </p>
+        </div>
+
+        {canEarlyUpgrade && (
+            <Alert className="border-accent bg-accent/5 max-w-2xl">
+                <Star className="h-4 w-4 text-accent" />
+                <AlertTitle className="font-bold text-accent">Unlock Your Commissions Now!</AlertTitle>
+                <AlertDescription>
+                    You've referred {referralCount} people during your trial! You can end your trial now to start your paid subscription and begin earning commissions from your referrals immediately.
+                    <Button onClick={handleEarlyUpgrade} disabled={isProcessing} className="mt-4 w-full sm:w-auto">
+                        {isProcessing ? (
+                            <><Loader2 className="animate-spin mr-2" /> Upgrading...</>
+                        ) : (
+                            "Upgrade Now & Start Earning"
+                        )}
+                    </Button>
+                </AlertDescription>
+            </Alert>
+        )}
+
+        {hasSubscription ? (
+            <ExistingSubscriptionFlow 
+                currentTierId={userData.subscription!.tierId}
+                onPlanChange={handlePlanChange}
+            />
+        ) : (
+            <NewSubscriptionFlow
+                onPaymentSuccess={handlePaymentSuccess}
+                onPaymentStart={() => setIsProcessing(true)}
+                onPaymentError={() => setIsProcessing(false)}
+                isProcessing={isProcessing}
+            />
+        )}
+      </div>
+  );
+}
+
+export default function UpgradePage() {
+    const paypalClientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID;
+
+    // The PayPalScriptProvider MUST be rendered conditionally based on a valid client ID.
+    // This is the root cause of the blank page issue.
+    // By checking here, we prevent the provider from ever initializing with a bad key.
+    if (!paypalClientId || paypalClientId.includes('REPLACE_WITH')) {
         return (
-            <div className="space-y-8">
+             <div className="space-y-8">
                 <div>
                     <h1 className="text-3xl font-bold font-headline">Choose Your Plan</h1>
                     <p className="text-muted-foreground mt-2">You don't have an active subscription. Please configure payment services to subscribe.</p>
@@ -117,165 +306,13 @@ export default function UpgradePage() {
                     </AlertDescription>
                 </Alert>
             </div>
-        )
-      }
-
-      // Sub-case: PayPal is configured. Show payment options.
-      return (
+        );
+    }
+    
+    // If the key is valid, we wrap the entire content flow with the provider.
+    return (
         <PayPalScriptProvider options={{ clientId: paypalClientId, currency: "AUD", intent: "capture" }}>
-          <div className="space-y-8">
-            <div>
-              <h1 className="text-3xl font-bold font-headline">Choose Your Plan</h1>
-              <p className="text-muted-foreground mt-2">You don't have an active subscription. Choose and pay for a plan below to get started.</p>
-            </div>
-            <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-              {subscriptionTiers.map((tier) => (
-                <Card 
-                  key={tier.id} 
-                  className={cn(
-                    "flex flex-col",
-                    tier.isMostPopular ? "border-primary ring-2 ring-primary shadow-lg" : ""
-                  )}
-                >
-                  {tier.isMostPopular && (
-                    <div className="bg-primary text-primary-foreground text-center py-1.5 text-sm font-semibold rounded-t-lg">
-                      Most Popular
-                    </div>
-                  )}
-                  <CardHeader>
-                    <CardTitle className="font-headline text-xl">{tier.name}</CardTitle>
-                    <div className="flex items-baseline gap-1">
-                      <span className="text-3xl font-bold">${tier.price.toFixed(2)}</span>
-                      <span className="text-muted-foreground">AUD / day</span>
-                    </div>
-                    <CardDescription>{tier.description}</CardDescription>
-                  </CardHeader>
-                  <CardContent className="flex-1">
-                    <ul className="space-y-3">
-                      {tier.features.map((feature, index) => (
-                        <li key={index} className="flex items-start gap-2">
-                          <CheckCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-green-500" />
-                          <span className="text-sm">{feature}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </CardContent>
-                  <CardFooter className="flex-col items-stretch">
-                     <div className="relative">
-                        {isProcessing && (
-                            <div className="absolute inset-0 bg-background/80 flex flex-col items-center justify-center z-10 rounded-md">
-                                <Loader2 className="animate-spin h-8 w-8 text-primary" />
-                            </div>
-                        )}
-                        <PayPalPaymentButton 
-                            planId={tier.id}
-                            onPaymentSuccess={handlePaymentSuccess(tier.id)}
-                            onPaymentStart={() => setIsProcessing(true)}
-                            onPaymentError={() => setIsProcessing(false)}
-                            disabled={isProcessing}
-                        />
-                    </div>
-                  </CardFooter>
-                </Card>
-              ))}
-            </div>
-          </div>
+           <UpgradePageContent />
         </PayPalScriptProvider>
-      );
-  }
-  
-  // SCENARIO 2: User HAS a subscription, show them upgrade options.
-  const currentTier = subscriptionTiers.find(t => t.id === userData.subscription?.tierId);
-  const availableUpgrades = currentTier 
-    ? subscriptionTiers.filter(tier => tier.price > currentTier.price) 
-    : [];
-  const isOnTrial = userData?.subscription?.trialEndDate && userData.subscription.trialEndDate.toDate() > new Date();
-  const referralCount = referrals?.length ?? 0;
-  const canEarlyUpgrade = isOnTrial && referralCount >= 2;
-
-  return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold font-headline">Upgrade Your Plan</h1>
-        <p className="text-muted-foreground">
-            You are currently on the <span className="font-semibold text-primary">{currentTier?.name}</span> plan. Unlock more features by upgrading.
-        </p>
-      </div>
-      
-      {canEarlyUpgrade && (
-        <Alert className="border-accent bg-accent/5 max-w-2xl">
-            <Star className="h-4 w-4 text-accent" />
-            <AlertTitle className="font-bold text-accent">Unlock Your Commissions Now!</AlertTitle>
-            <AlertDescription>
-                You've referred {referralCount} people during your trial! You can end your trial now to start your paid subscription and begin earning commissions from your referrals immediately.
-                <Button onClick={handleEarlyUpgrade} disabled={isProcessing} className="mt-4 w-full sm:w-auto">
-                    {isProcessing ? (
-                        <><Loader2 className="animate-spin mr-2" /> Upgrading...</>
-                    ) : (
-                        "Upgrade Now & Start Earning"
-                    )}
-                </Button>
-            </AlertDescription>
-        </Alert>
-      )}
-      
-      {availableUpgrades.length > 0 ? (
-        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-            {availableUpgrades.map((tier) => (
-              <Card 
-                  key={tier.id} 
-                  className={cn(
-                      "flex flex-col",
-                      tier.isMostPopular ? "border-primary ring-2 ring-primary shadow-lg" : ""
-                  )}
-              >
-                {tier.isMostPopular && (
-                  <div className="bg-primary text-primary-foreground text-center py-1.5 text-sm font-semibold rounded-t-lg">
-                    Most Popular
-                  </div>
-                )}
-                <CardHeader>
-                  <CardTitle className="font-headline text-xl">{tier.name}</CardTitle>
-                  <div className="flex items-baseline gap-1">
-                    <span className="text-3xl font-bold">${tier.price.toFixed(2)}</span>
-                    <span className="text-muted-foreground">AUD / day</span>
-                  </div>
-                  <CardDescription>{tier.description}</CardDescription>
-                </CardHeader>
-                <CardContent className="flex-1">
-                  <ul className="space-y-3">
-                    {tier.features.map((feature, index) => (
-                      <li key={index} className="flex items-start gap-2">
-                        <CheckCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-green-500" />
-                        <span className="text-sm">{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </CardContent>
-                <CardFooter>
-                    <Button className="w-full" variant={tier.isMostPopular ? "default" : "outline"} onClick={() => handlePlanChange(tier.id)}>
-                        <ArrowUpCircle className="mr-2" />
-                        Upgrade to {tier.name}
-                    </Button>
-                </CardFooter>
-              </Card>
-            ))}
-          </div>
-      ) : (
-        <Card className="max-w-md">
-            <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                    <BadgeCheck className="h-6 w-6 text-green-500" />
-                    <span>You're on the Top Plan!</span>
-                </CardTitle>
-            </CardHeader>
-            <CardContent>
-                <p className="text-muted-foreground">
-                    You already have the best plan available. Thank you for being a valued customer!
-                </p>
-            </CardContent>
-        </Card>
-      )}
-    </div>
-  );
+    )
 }

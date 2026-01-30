@@ -8,6 +8,7 @@ import { AlertTriangle } from "lucide-react";
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 
+// It's important to read this env var here, at the top level of the component.
 const paypalClientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID;
 
 // A loading component to show while the form is loading
@@ -33,6 +34,9 @@ function LoadingSignupForm() {
 
 export default function SignupPage() {
 
+    // This is the critical check. If the PayPal ID isn't valid, we show an error and
+    // NEVER attempt to render the PayPalScriptProvider, which prevents the crash.
+    // The check is more robust, looking for falsy values (like an empty string) too.
     if (!paypalClientId || paypalClientId.includes('REPLACE_WITH')) {
         return (
             <Card>
@@ -45,7 +49,7 @@ export default function SignupPage() {
                         <AlertTriangle className="h-4 w-4" />
                         <AlertTitle>Payment Service Not Configured</AlertTitle>
                         <AlertDescription>
-                            The application owner needs to configure the PayPal Client ID in the environment variables to enable new signups.
+                            The application owner needs to configure the PayPal Client ID in the environment variables to enable new signups. Please add your `NEXT_PUBLIC_PAYPAL_CLIENT_ID` to the `.env` file.
                         </AlertDescription>
                     </Alert>
                     <Button variant="link" asChild className="mt-4">
@@ -55,7 +59,8 @@ export default function SignupPage() {
             </Card>
         )
     }
-
+    
+    // Only if the paypalClientId is valid do we proceed to render the provider.
     return (
          <PayPalScriptProvider options={{ clientId: paypalClientId, currency: "AUD", intent: "capture" }}>
             <Suspense fallback={<LoadingSignupForm />}>
