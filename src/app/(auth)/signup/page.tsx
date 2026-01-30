@@ -1,9 +1,7 @@
 
-'use client';
-
 import { Suspense } from 'react';
 import { SignupForm } from './signup-form';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from '@/components/ui/skeleton';
 
 function LoadingSignupForm() {
@@ -26,11 +24,14 @@ function LoadingSignupForm() {
 }
 
 export default function SignupPage() {
-  // The <Suspense> wrapper is necessary because the SignupForm component
-  // uses `useSearchParams` to read the plan from the URL.
+  // Wrapping the form in Suspense is a best practice for components that use hooks
+  // like `useSearchParams`. It ensures the server can stream the page while the client-side
+  // part of the component loads.
   return (
     <Suspense fallback={<LoadingSignupForm />}>
       <SignupForm />
     </Suspense>
   );
 }
+
+    
