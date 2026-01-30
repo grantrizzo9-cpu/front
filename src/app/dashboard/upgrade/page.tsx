@@ -14,13 +14,82 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { PayPalPaymentButton } from "@/components/paypal-payment-button";
 import { PayPalScriptProvider } from "@paypal/react-paypal-js";
 
-// This is the component that will be rendered for users without a subscription.
+
+// THIS IS THE NEW COMPONENT. It guarantees only one PayPal button is ever rendered.
 function NewSubscriptionFlow({ onPaymentSuccess, onPaymentStart, onPaymentError, isProcessing }: {
     onPaymentSuccess: (tierId: string) => (details: any) => Promise<void>;
     onPaymentStart: () => void;
     onPaymentError: () => void;
     isProcessing: boolean;
 }) {
+    const [selectedTierId, setSelectedTierId] = useState<string | null>(null);
+
+    // If a plan has been selected, show the payment view for that single plan.
+    if (selectedTierId) {
+        const tier = subscriptionTiers.find(t => t.id === selectedTierId);
+        if (!tier) {
+            // Fallback in case of an error.
+            return (
+                <div className="text-center">
+                    <Alert variant="destructive">
+                        <AlertTriangle className="h-4 w-4" />
+                        <AlertTitle>Error</AlertTitle>
+                        <AlertDescription>The selected plan could not be found. Please go back and try again.</AlertDescription>
+                    </Alert>
+                    <Button onClick={() => setSelectedTierId(null)} variant="link" className="mt-4">
+                        Go Back
+                    </Button>
+                </div>
+            );
+        }
+
+        // --- PAYMENT MODE ---
+        return (
+            <Card className="max-w-md mx-auto animate-in fade-in-50">
+                <CardHeader>
+                    <CardTitle>Confirm Your Plan</CardTitle>
+                    <CardDescription>You are purchasing the <span className="font-bold text-primary">{tier.name}</span> plan.</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                    <div className="flex items-baseline gap-2">
+                        <span className="text-4xl font-bold">${tier.price.toFixed(2)}</span>
+                        <span className="text-muted-foreground">AUD / day</span>
+                    </div>
+                     <ul className="space-y-3">
+                      {tier.features.map((feature, index) => (
+                        <li key={index} className="flex items-start gap-2">
+                          <CheckCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-green-500" />
+                          <span className="text-sm">{feature}</span>
+                        </li>
+                      ))}
+                    </ul>
+                </CardContent>
+                <CardFooter className="flex-col items-stretch gap-4">
+                    <div className="relative">
+                        {isProcessing && (
+                            <div className="absolute inset-0 bg-background/80 flex flex-col items-center justify-center z-10 rounded-md">
+                                <Loader2 className="animate-spin h-8 w-8 text-primary" />
+                                <p className="mt-2 text-sm text-muted-foreground">Processing...</p>
+                            </div>
+                        )}
+                        <PayPalPaymentButton 
+                            planId={tier.id}
+                            onPaymentSuccess={onPaymentSuccess(tier.id)}
+                            onPaymentStart={onPaymentStart}
+                            onPaymentError={onPaymentError}
+                            disabled={isProcessing}
+                        />
+                    </div>
+                    <Button variant="ghost" onClick={() => setSelectedTierId(null)} disabled={isProcessing}>
+                        Choose a different plan
+                    </Button>
+                </CardFooter>
+            </Card>
+        );
+    }
+
+    // --- SELECTION MODE ---
+    // If no plan is selected yet, show all plans with "Select" buttons.
     return (
         <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
           {subscriptionTiers.map((tier) => (
@@ -54,21 +123,10 @@ function NewSubscriptionFlow({ onPaymentSuccess, onPaymentStart, onPaymentError,
                   ))}
                 </ul>
               </CardContent>
-              <CardFooter className="flex-col items-stretch">
-                 <div className="relative">
-                    {isProcessing && (
-                        <div className="absolute inset-0 bg-background/80 flex flex-col items-center justify-center z-10 rounded-md">
-                            <Loader2 className="animate-spin h-8 w-8 text-primary" />
-                        </div>
-                    )}
-                    <PayPalPaymentButton 
-                        planId={tier.id}
-                        onPaymentSuccess={onPaymentSuccess(tier.id)}
-                        onPaymentStart={onPaymentStart}
-                        onPaymentError={onPaymentError}
-                        disabled={isProcessing}
-                    />
-                </div>
+              <CardFooter>
+                 <Button className="w-full" variant={tier.isMostPopular ? "default" : "outline"} onClick={() => setSelectedTierId(tier.id)}>
+                    Select {tier.name}
+                 </Button>
               </CardFooter>
             </Card>
           ))}
@@ -76,7 +134,8 @@ function NewSubscriptionFlow({ onPaymentSuccess, onPaymentStart, onPaymentError,
     );
 }
 
-// This component is for users who already have a subscription.
+
+// This component is for users who already have a subscription. It doesn't use PayPal so it's fine.
 function ExistingSubscriptionFlow({ currentTierId, onPlanChange }: {
     currentTierId: string;
     onPlanChange: (tierId: string) => void;
@@ -223,7 +282,6 @@ function UpgradePageContent() {
     }, 1500);
   }
 
-  // Loading State
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-full p-8">
@@ -246,7 +304,7 @@ function UpgradePageContent() {
             <p className="text-muted-foreground mt-2">
                 {hasSubscription 
                     ? `You are currently on the ${subscriptionTiers.find(t => t.id === userData.subscription?.tierId)?.name} plan. Unlock more features by upgrading.`
-                    : "You don't have an active subscription. Choose and pay for a plan below to get started."
+                    : "You don't have an active subscription. Choose a plan below to get started."
                 }
             </p>
         </div>
@@ -288,9 +346,6 @@ function UpgradePageContent() {
 export default function UpgradePage() {
     const paypalClientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID;
 
-    // The PayPalScriptProvider MUST be rendered conditionally based on a valid client ID.
-    // This is the root cause of the blank page issue.
-    // By checking here, we prevent the provider from ever initializing with a bad key.
     if (!paypalClientId || paypalClientId.includes('REPLACE_WITH')) {
         return (
              <div className="space-y-8">
@@ -309,7 +364,6 @@ export default function UpgradePage() {
         );
     }
     
-    // If the key is valid, we wrap the entire content flow with the provider.
     return (
         <PayPalScriptProvider options={{ clientId: paypalClientId, currency: "AUD", intent: "capture" }}>
            <UpgradePageContent />
