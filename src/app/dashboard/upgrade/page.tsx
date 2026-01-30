@@ -12,12 +12,13 @@ import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { PayPalPaymentButton } from "@/components/paypal-payment-button";
 
 export default function UpgradePage() {
   const { user, isUserLoading } = useUser();
   const firestore = useFirestore();
   const { toast } = useToast();
-  const [isUpgrading, setIsUpgrading] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const userDocRef = useMemoFirebase(() => {
     if (!user || !firestore) return null;
@@ -25,7 +26,6 @@ export default function UpgradePage() {
   }, [firestore, user?.uid]);
   const { data: userData, isLoading: isUserDataLoading } = useDoc<UserType>(userDocRef);
 
-  // Fetch referrals to check for the early upgrade condition
   const referralsQuery = useMemoFirebase(() => {
     if (!user || !firestore) return null;
     return collection(firestore, 'users', user.uid, 'referrals');
@@ -47,7 +47,7 @@ export default function UpgradePage() {
     });
   };
 
-  const handlePurchaseClick = (tierId: string) => {
+  const handlePaymentSuccess = (tierId: string) => async (details: any) => {
     if (!user || !userDocRef) return;
     
     const trialEndDate = new Date();
@@ -73,7 +73,7 @@ export default function UpgradePage() {
   
   const handleEarlyUpgrade = () => {
     if (!user || !userDocRef) return;
-    setIsUpgrading(true);
+    setIsProcessing(true);
 
     updateDocumentNonBlocking(userDocRef, {
         'subscription.trialEndDate': null,
@@ -84,7 +84,7 @@ export default function UpgradePage() {
             title: "Upgrade Complete!",
             description: "Your trial has ended and your full subscription is active. You can now earn commissions.",
         });
-        setIsUpgrading(false);
+        setIsProcessing(false);
     }, 1500);
   }
 
@@ -100,13 +100,12 @@ export default function UpgradePage() {
   const referralCount = referrals?.length ?? 0;
   const canEarlyUpgrade = isOnTrial && referralCount >= 2;
 
-  // SCENARIO 1: User has NO subscription. Show all plans for purchase.
   if (!userData?.subscription) {
       return (
           <div className="space-y-8">
             <div>
               <h1 className="text-3xl font-bold font-headline">Choose Your Plan</h1>
-              <p className="text-muted-foreground mt-2">You don't have an active subscription. Choose a plan below to get started.</p>
+              <p className="text-muted-foreground mt-2">You don't have an active subscription. Choose and pay for a plan below to get started.</p>
             </div>
             <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
               {subscriptionTiers.map((tier) => (
@@ -140,10 +139,21 @@ export default function UpgradePage() {
                       ))}
                     </ul>
                   </CardContent>
-                  <CardFooter>
-                     <Button className="w-full" variant={tier.isMostPopular ? "default" : "outline"} onClick={() => handlePurchaseClick(tier.id)}>
-                        Choose Plan
-                    </Button>
+                  <CardFooter className="flex-col items-stretch">
+                     <div className="relative">
+                        {isProcessing && (
+                            <div className="absolute inset-0 bg-background/80 flex flex-col items-center justify-center z-10 rounded-md">
+                                <Loader2 className="animate-spin h-8 w-8 text-primary" />
+                            </div>
+                        )}
+                        <PayPalPaymentButton 
+                            planId={tier.id}
+                            onPaymentSuccess={handlePaymentSuccess(tier.id)}
+                            onPaymentStart={() => setIsProcessing(true)}
+                            onPaymentError={() => setIsProcessing(false)}
+                            disabled={isProcessing}
+                        />
+                    </div>
                   </CardFooter>
                 </Card>
               ))}
@@ -152,7 +162,6 @@ export default function UpgradePage() {
       )
   }
   
-  // SCENARIO 2: User HAS a subscription (could be trial or full).
   const currentTier = subscriptionTiers.find(t => t.id === userData.subscription?.tierId);
   const availableUpgrades = currentTier 
     ? subscriptionTiers.filter(tier => tier.price > currentTier.price) 
@@ -173,8 +182,8 @@ export default function UpgradePage() {
             <AlertTitle className="font-bold text-accent">Unlock Your Commissions Now!</AlertTitle>
             <AlertDescription>
                 You've referred {referralCount} people during your trial! You can end your trial now to start your paid subscription and begin earning commissions from your referrals immediately.
-                <Button onClick={handleEarlyUpgrade} disabled={isUpgrading} className="mt-4 w-full sm:w-auto">
-                    {isUpgrading ? (
+                <Button onClick={handleEarlyUpgrade} disabled={isProcessing} className="mt-4 w-full sm:w-auto">
+                    {isProcessing ? (
                         <><Loader2 className="animate-spin mr-2" /> Upgrading...</>
                     ) : (
                         "Upgrade Now & Start Earning"
