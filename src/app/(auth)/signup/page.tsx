@@ -1,4 +1,3 @@
-
 import { Suspense } from 'react';
 import { SignupForm } from './signup-form';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
@@ -36,11 +35,13 @@ function SignupLoadingSkeleton() {
 }
 
 export default function SignupPage() {
-  // The Suspense boundary is a critical part of the solution.
-  // It allows the SignupForm component to safely use the useSearchParams hook on the client.
+  // This Server Component reads the environment variable...
+  const paypalClientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || '';
+
+  // ...and passes it as a prop to the Client Component.
   return (
     <Suspense fallback={<SignupLoadingSkeleton />}>
-      <SignupForm />
+      <SignupForm paypalClientId={paypalClientId} />
     </Suspense>
   );
 }
