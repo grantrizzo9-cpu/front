@@ -36,22 +36,29 @@ export function PayPalPaymentButton({ planId, onPaymentSuccess, onPaymentStart, 
         onPaymentStart();
         try {
             const result = await createPaypalOrder(planId);
-            
-            // This is the new, more aggressive error check.
-            if (result.debug) {
-                const errorMessage = `A server-side error occurred. Please see the details below.\n\nDebug Info: ${result.debug}`;
+
+            if (!result) {
+                const errorMessage = "The server returned an empty or invalid response. This indicates a critical server issue.";
                 onPaymentError(errorMessage);
                 return Promise.reject(new Error(errorMessage));
             }
 
-            if (result.error || !result.orderId) {
-                const errorMessage = result.error || 'The server responded but could not create a PayPal order.';
+            if (result.error || result.debug) {
+                const errorMessage = `PayPal order creation failed: ${result.error}. ${result.debug ? `(Debug: ${result.debug})` : ''}`;
                 onPaymentError(errorMessage);
                 return Promise.reject(new Error(errorMessage));
             }
+
+            if (!result.orderId) {
+                const errorMessage = "The server did not return a PayPal order ID, even though it reported success.";
+                onPaymentError(errorMessage);
+                return Promise.reject(new Error(errorMessage));
+            }
+
             return result.orderId;
+
         } catch (error: any) {
-            const errorMessage = `A client-server communication error occurred: "${error.message}". Check the server logs for more details.`;
+            const errorMessage = `A client-server communication error occurred. The server might be down or misconfigured. Please check the server logs. Client-side error: "${error.message || 'Unknown fetch error'}"`;
             onPaymentError(errorMessage);
             return Promise.reject(error);
         }
@@ -61,9 +68,8 @@ export function PayPalPaymentButton({ planId, onPaymentSuccess, onPaymentStart, 
         try {
             const result = await capturePaypalOrder(data.orderID);
 
-            // New debug check
-            if (result.debug) {
-                const errorMessage = `Payment capture failed. See details below.\n\nDebug Info: ${result.debug}`;
+            if (!result) {
+                const errorMessage = "The server returned an empty or invalid response after payment approval.";
                 onPaymentError(errorMessage);
                 return;
             }
@@ -75,7 +81,7 @@ export function PayPalPaymentButton({ planId, onPaymentSuccess, onPaymentStart, 
                 });
                 await onPaymentSuccess(result.orderData);
             } else {
-                const errorMessage = result.error || 'An error occurred while processing your payment after approval. You have not been charged.';
+                const errorMessage = `Payment capture failed: ${result.error}. ${result.debug ? `(Debug: ${result.debug})` : ''}`;
                 onPaymentError(errorMessage);
             }
         } catch (error: any) {
@@ -85,11 +91,9 @@ export function PayPalPaymentButton({ planId, onPaymentSuccess, onPaymentStart, 
     };
     
     const onError = (err: any) => {
-        // This is PayPal's own error handler. It will be triggered if handleCreateOrder rejects.
         console.error("PAYPAL_CLIENT_ERROR:", err);
         const message = err.message || 'An unknown error occurred inside the PayPal script.';
         const finalMessage = `The PayPal window closed because of an error. The error was: "${message}"`;
-        // We call onPaymentError here instead of showing a toast directly
         onPaymentError(finalMessage);
     }
 
