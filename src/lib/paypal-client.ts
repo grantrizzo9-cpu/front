@@ -2,11 +2,12 @@
 
 import paypal from '@paypal/checkout-server-sdk';
 
+// This is the important change: The client is not created here.
 let client: paypal.core.PayPalHttpClient | null = null;
 
 /**
- * Initializes and returns a PayPal HTTP client.
- * Caches the client to avoid re-creating it on every call.
+ * Initializes and returns a PayPal HTTP client ON DEMAND.
+ * Caches the client to avoid re-creating it on every call within a single server instance's lifetime.
  * Returns null and logs a warning if credentials are not properly configured.
  */
 export function getClient(): paypal.core.PayPalHttpClient | null {
@@ -23,7 +24,7 @@ export function getClient(): paypal.core.PayPalHttpClient | null {
         console.warn("WARNING: PAYPAL_CLIENT_ID or PAYPAL_CLIENT_SECRET are not set correctly in your .env file.");
         console.warn("PayPal server actions will fail. Please add your credentials to the .env file.");
         console.warn("**************************************************************************************************");
-        return null;
+        return null; // Return null instead of crashing
     }
 
     try {
@@ -36,6 +37,6 @@ export function getClient(): paypal.core.PayPalHttpClient | null {
         return client;
     } catch (error) {
         console.error("Failed to initialize PayPal client. Your credentials may be invalid.", error);
-        return null;
+        return null; // Return null on error
     }
 }
