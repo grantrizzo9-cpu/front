@@ -10,7 +10,7 @@ import { subscriptionTiers } from '@/lib/data';
  * @returns An object containing the orderId or an error.
  */
 export async function createPaypalOrder(planId: string) {
-    const client = getClient();
+    const client = await getClient();
     if (!client) {
         return { error: 'PayPal service is not configured on the server. Please check the environment variables.' };
     }
@@ -53,7 +53,7 @@ export async function createPaypalOrder(planId: string) {
  * @returns An object indicating success and the captured data, or an error.
  */
 export async function capturePaypalOrder(orderId: string) {
-    const client = getClient();
+    const client = await getClient();
     if (!client) {
         return { success: false, error: 'PayPal service is not configured on the server. Please check environment variables.' };
     }

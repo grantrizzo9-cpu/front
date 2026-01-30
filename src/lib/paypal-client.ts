@@ -10,7 +10,7 @@ let client: paypal.core.PayPalHttpClient | null = null;
  * Caches the client to avoid re-creating it on every call within a single server instance's lifetime.
  * Returns null and logs a warning if credentials are not properly configured.
  */
-export function getClient(): paypal.core.PayPalHttpClient | null {
+export async function getClient(): Promise<paypal.core.PayPalHttpClient | null> {
     // Return the cached client if it exists
     if (client) {
         return client;
