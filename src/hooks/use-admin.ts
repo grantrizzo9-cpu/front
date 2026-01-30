@@ -2,7 +2,7 @@
 'use client';
 
 import { useFirestore, useUser } from '@/firebase';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc, writeBatch } from 'firebase/firestore';
 import { useState, useEffect } from 'react';
 
 /**
@@ -18,73 +18,96 @@ export function useAdmin() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    async function checkAdminStatus() {
-      if (isUserLoading) {
+    async function setupAdminUser() {
+        if (!user || !firestore || user.email !== 'rentapog@gmail.com') return;
+
         setIsLoading(true);
-        return;
-      }
-
-      if (!user) {
-        setIsAdmin(false);
-        setIsLoading(false);
-        return;
-      }
-      
-      setIsLoading(true);
-
-      // Hardcoded check for the platform owner's email.
-      if (user.email === 'rentapog@gmail.com') {
         try {
-            // Ensure admin role document exists. This grants DB permissions.
-            const adminRoleRef = doc(firestore, 'roles_admin', user.uid);
-            await setDoc(adminRoleRef, {}, { merge: true });
-
-            // Now, ensure the corresponding user profile is complete.
             const userDocRef = doc(firestore, 'users', user.uid);
-            const userDocSnap = await getDoc(userDocRef);
+            const adminRoleRef = doc(firestore, 'roles_admin', user.uid);
             
-            // Determine username: use existing one if present, otherwise create a default.
-            // This prevents the username from changing on every load if displayName changes.
-            const username = userDocSnap.data()?.username || user.displayName || user.email?.split('@')[0] || `admin_${user.uid.substring(0,5)}`;
+            const userDoc = await getDoc(userDocRef);
+            let username = userDoc.data()?.username;
 
-            const requiredAdminData = {
+            // Step 1: Ensure user has a username. If not, generate a unique one.
+            if (!username) {
+                let potentialUsername = (user.displayName || user.email?.split('@')[0] || `admin`).replace(/[^a-zA-Z0-9]/g, '');
+                let isUsernameUnique = false;
+                while (!isUsernameUnique) {
+                    const usernameCheckDoc = await getDoc(doc(firestore, "usernames", potentialUsername));
+                    if (!usernameCheckDoc.exists()) {
+                        isUsernameUnique = true;
+                        username = potentialUsername;
+                    } else {
+                        // If username is taken, add a random number to make it unique
+                        potentialUsername = `${potentialUsername}${Math.floor(100 + Math.random() * 900)}`;
+                    }
+                }
+            }
+            
+            // Step 2: Write all necessary admin documents in a single, atomic batch.
+            const batch = writeBatch(firestore);
+
+            // Doc 1: The admin role document itself.
+            batch.set(adminRoleRef, {});
+
+            // Doc 2: The user's profile, ensuring key fields are set.
+            // Using merge: true makes this operation idempotent.
+            batch.set(userDocRef, {
+                id: user.uid,
+                email: user.email,
                 username: username,
                 isAffiliate: true,
-                // We also set email and id to ensure the doc is complete if it's new
-                email: user.email,
-                id: user.uid,
-            };
+            }, { merge: true });
 
-            // Use set with merge to create or update the user document idempotently.
-            // This ensures all required fields are present without overwriting other data
-            // like subscription, paypalEmail, etc., if they were added manually.
-            await setDoc(userDocRef, requiredAdminData, { merge: true });
+            // Doc 3: The public username mapping for the affiliate link.
+            const usernameDocRef = doc(firestore, 'usernames', username!);
+            batch.set(usernameDocRef, { uid: user.uid });
+            
+            // Commit all writes at once.
+            await batch.commit();
 
-            // Finally, ensure the public username mapping exists for the affiliate link to work.
-            const usernameDocRef = doc(firestore, 'usernames', username);
-            await setDoc(usernameDocRef, { uid: user.uid });
-
+            // If we get here, all writes were successful.
             setIsAdmin(true);
-        } catch (error) {
-            console.error("Error ensuring admin user profile and role exists:", error);
-            setIsAdmin(false); // Fail safely if any DB operation fails
+            
+        } catch (e) {
+            console.error("CRITICAL: Failed to set up admin user. This may be due to security rules.", e);
+            setIsAdmin(false);
         } finally {
             setIsLoading(false);
         }
-        return; // Important: exit after handling the admin user.
-      }
+    }
 
-      // If not the hardcoded admin, check the database for an admin role document.
-      try {
-        const adminRoleRef = doc(firestore, 'roles_admin', user.uid);
-        const adminDocSnap = await getDoc(adminRoleRef);
-        setIsAdmin(adminDocSnap.exists());
-      } catch (error) {
-        console.error("Error checking admin status:", error);
-        setIsAdmin(false);
-      } finally {
-        setIsLoading(false);
-      }
+    async function checkAdminStatus() {
+        if (isUserLoading) {
+            setIsLoading(true);
+            return;
+        }
+
+        if (!user) {
+            setIsAdmin(false);
+            setIsLoading(false);
+            return;
+        }
+        
+        // This is the main logic path for the special, hardcoded admin user.
+        if (user.email === 'rentapog@gmail.com') {
+            await setupAdminUser();
+            return;
+        }
+
+        // This is the path for any other user who might have an admin role document.
+        setIsLoading(true);
+        try {
+            const adminRoleRef = doc(firestore, 'roles_admin', user.uid);
+            const adminDocSnap = await getDoc(adminRoleRef);
+            setIsAdmin(adminDocSnap.exists());
+        } catch (error) {
+            console.error("Error checking admin status:", error);
+            setIsAdmin(false);
+        } finally {
+            setIsLoading(false);
+        }
     }
 
     checkAdminStatus();
