@@ -1,7 +1,7 @@
 
 'use client';
 
-import { Suspense } from 'react';
+import { Suspense, useState, useEffect } from 'react';
 import { SignupForm } from './signup-form';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from '@/components/ui/skeleton';
@@ -11,11 +11,9 @@ import { AlertTriangle } from "lucide-react";
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 
-// It's important to read this env var here. In a client component,
 // Next.js replaces this with the actual value at build time.
 const paypalClientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID;
 
-// A loading component to show while the form is loading
 function LoadingSignupForm() {
     return (
         <Card>
@@ -35,10 +33,23 @@ function LoadingSignupForm() {
     );
 }
 
-
 export default function SignupPage() {
+    const [isClient, setIsClient] = useState(false);
 
-    // This check now safely runs on the client-side, preventing any crash.
+    // This effect ensures that the component only attempts to render
+    // the PayPal provider after it has mounted on the client.
+    useEffect(() => {
+        setIsClient(true);
+    }, []);
+
+    // While waiting for the client to mount, show a loading state.
+    // This prevents any server-side rendering of the PayPal provider.
+    if (!isClient) {
+        return <LoadingSignupForm />;
+    }
+
+    // Once on the client, check for the PayPal Client ID.
+    // If it's missing or a placeholder, show a clear error message.
     if (!paypalClientId || paypalClientId.includes('REPLACE_WITH')) {
         return (
             <Card>
@@ -51,7 +62,7 @@ export default function SignupPage() {
                         <AlertTriangle className="h-4 w-4" />
                         <AlertTitle>Payment Service Not Configured</AlertTitle>
                         <AlertDescription>
-                            The application owner needs to configure the PayPal Client ID in the environment variables to enable new signups. Please add your `NEXT_PUBLIC_PAYPAL_CLIENT_ID` to the `.env` file.
+                            The application owner needs to configure the PayPal Client ID. Please add your `NEXT_PUBLIC_PAYPAL_CLIENT_ID` to the `.env` file and **restart the development server** for the change to take effect.
                         </AlertDescription>
                     </Alert>
                     <Button variant="link" asChild className="mt-4">
@@ -62,7 +73,8 @@ export default function SignupPage() {
         )
     }
     
-    // Only if the paypalClientId is valid do we proceed to render the provider.
+    // Only if we are on the client AND the key is valid do we render the PayPal provider.
+    // This is the only safe way to prevent the page from crashing.
     return (
          <PayPalScriptProvider options={{ clientId: paypalClientId, currency: "AUD", intent: "capture" }}>
             <Suspense fallback={<LoadingSignupForm />}>
