@@ -2,7 +2,7 @@
 'use client';
 
 import { useFirestore, useUser } from '@/firebase';
-import { doc, getDoc, setDoc, serverTimestamp, updateDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { useState, useEffect } from 'react';
 
 /**
@@ -35,53 +35,43 @@ export function useAdmin() {
       // Hardcoded check for the platform owner's email.
       if (user.email === 'rentapog@gmail.com') {
         try {
-            // Ensure admin role document exists
+            // Ensure admin role document exists. This grants DB permissions.
             const adminRoleRef = doc(firestore, 'roles_admin', user.uid);
-            const adminDocSnap = await getDoc(adminRoleRef);
-            if (!adminDocSnap.exists()) {
-                await setDoc(adminRoleRef, {});
-            }
+            await setDoc(adminRoleRef, {}, { merge: true });
 
-            // Ensure the user's profile document exists and is correctly configured
+            // Now, ensure the corresponding user profile is complete.
             const userDocRef = doc(firestore, 'users', user.uid);
             const userDocSnap = await getDoc(userDocRef);
+            
+            // Determine username: use existing one if present, otherwise create a default.
+            // This prevents the username from changing on every load if displayName changes.
+            const username = userDocSnap.data()?.username || user.displayName || user.email?.split('@')[0] || `admin_${user.uid.substring(0,5)}`;
 
-            if (!userDocSnap.exists()) {
-                // If the user document for the admin doesn't exist, create it.
-                // This is crucial for the app to function correctly for the admin user.
-                const username = user.displayName || user.email.split('@')[0];
-                const adminUserData = {
-                    id: user.uid,
-                    email: user.email,
-                    username: username,
-                    isAffiliate: true,
-                    createdAt: serverTimestamp(),
-                    referredBy: null,
-                    subscription: null, // Admins typically don't need a subscription
-                    paypalEmail: '',
-                    customDomain: null
-                };
-                await setDoc(userDocRef, adminUserData);
+            const requiredAdminData = {
+                username: username,
+                isAffiliate: true,
+                // We also set email and id to ensure the doc is complete if it's new
+                email: user.email,
+                id: user.uid,
+            };
 
-                // Also create the public username document for the affiliate link to work
-                const usernameDocRef = doc(firestore, 'usernames', username);
-                await setDoc(usernameDocRef, { uid: user.uid });
+            // Use set with merge to create or update the user document idempotently.
+            // This ensures all required fields are present without overwriting other data
+            // like subscription, paypalEmail, etc., if they were added manually.
+            await setDoc(userDocRef, requiredAdminData, { merge: true });
 
-            } else {
-                // If the document exists, ensure the `isAffiliate` flag is true.
-                if (!userDocSnap.data().isAffiliate) {
-                    await updateDoc(userDocRef, { isAffiliate: true });
-                }
-            }
+            // Finally, ensure the public username mapping exists for the affiliate link to work.
+            const usernameDocRef = doc(firestore, 'usernames', username);
+            await setDoc(usernameDocRef, { uid: user.uid });
 
             setIsAdmin(true);
         } catch (error) {
-            console.error("Error ensuring admin user profile exists:", error);
-            setIsAdmin(false); // Fail safely
+            console.error("Error ensuring admin user profile and role exists:", error);
+            setIsAdmin(false); // Fail safely if any DB operation fails
         } finally {
             setIsLoading(false);
         }
-        return;
+        return; // Important: exit after handling the admin user.
       }
 
       // If not the hardcoded admin, check the database for an admin role document.
