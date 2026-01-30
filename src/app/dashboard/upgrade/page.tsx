@@ -142,8 +142,6 @@ function NewSubscriptionFlow({ onPaymentSuccess, onPaymentStart, onPaymentError,
                             <AlertTitle>Payment Service Not Configured</AlertTitle>
                             <AlertDescription>
                                 The application is failing to read your PayPal Client ID from the `.env` file. Please ensure the `NEXT_PUBLIC_PAYPAL_CLIENT_ID` is set correctly and restart the server.
-                                <br/><br/>
-                                <code className="text-xs">Debug: Value read by the app: "{paypalClientId}"</code>
                             </AlertDescription>
                         </Alert>
                     </CardContent>
