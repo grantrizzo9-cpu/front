@@ -1,12 +1,13 @@
 {
   "hosting": {
-    "rewrites": [
-      {
-        "source": "**",
-        "apphosting": {
-          "backendId": "affiliate-ai-host-new"
-        }
-      }
-    ]
+    "source": ".",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "frameworksBackend": {
+      "region": "us-central1"
+    }
   }
 }
