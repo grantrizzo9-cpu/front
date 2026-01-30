@@ -1,10 +1,6 @@
-
 'use client';
 
-import { PayPalButtons, usePayPalScriptReducer } from '@paypal/react-paypal-js';
-import { useToast } from '@/hooks/use-toast';
-import { Loader2 } from 'lucide-react';
-import { useEffect } from 'react';
+import { PayPalButtons } from '@paypal/react-paypal-js';
 
 interface PayPalPaymentButtonProps {
     planId: string;
@@ -15,29 +11,11 @@ interface PayPalPaymentButtonProps {
 }
 
 export function PayPalPaymentButton({ planId, onPaymentSuccess, onPaymentStart, onPaymentError, disabled }: PayPalPaymentButtonProps) {
-    const { toast } = useToast();
-    const [{ isPending, isRejected }] = usePayPalScriptReducer();
 
-    useEffect(() => {
-        if (isRejected) {
-             const errorMessage = 'CRITICAL: The PayPal script failed to load. This can be caused by an invalid Client ID in your .env file (check NEXT_PUBLIC_PAYPAL_CLIENT_ID), a network issue, or an ad blocker.';
-             window.alert(`DIAGNOSTIC STEP 1 FAILED: PayPal script load error. DETAILS: ${errorMessage}`);
-             toast({
-                variant: 'destructive',
-                title: 'PayPal Script Load Error',
-                description: errorMessage,
-                duration: 15000,
-            });
-            onPaymentError(errorMessage);
-        }
-    }, [isRejected, toast, onPaymentError]);
-
-
-    const handleCreateOrder = async (): Promise<string> => {
+    const createOrder = async (): Promise<string> => {
+        alert("DIAGNOSTIC: Step 1 - createOrder has been called. Attempting to contact the server to create an order.");
         onPaymentStart();
         try {
-            window.alert('DIAGNOSTIC STEP 2: createOrder function has been called. Now attempting to contact the server...');
-            
             const response = await fetch('/api/paypal', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -47,40 +25,36 @@ export function PayPalPaymentButton({ planId, onPaymentSuccess, onPaymentStart, 
                 }),
             });
             
-            window.alert(`DIAGNOSTIC STEP 3: Server responded with status ${response.status}. Now attempting to parse the response as JSON.`);
-
             const result = await response.json();
-            window.alert('DIAGNOSTIC STEP 4: Server response parsed successfully.');
-
-
+            
             if (!response.ok || !result.success) {
-                const errorText = `Server Error: ${result.error || `An unexpected server error occurred with status ${response.status}`}. ${result.debug ? `(Debug: ${JSON.stringify(result.debug)})` : ''}`;
-                window.alert(`DIAGNOSTIC STEP 5 FAILED: Server returned an error. DETAILS: ${errorText}`);
+                const errorText = `Server Error: ${result.error || 'An unexpected error occurred.'} ${result.debug ? `(Debug: ${result.debug})` : ''}`;
+                alert(`DIAGNOSTIC: Step 2 FAILED - Server returned an error: ${errorText}`);
                 onPaymentError(errorText);
                 return Promise.reject(new Error(errorText));
             }
             
             if (!result.orderId) {
-                const errorMessage = "The server succeeded but did not return a PayPal order ID.";
-                window.alert(`DIAGNOSTIC STEP 5 FAILED: No order ID. DETAILS: ${errorMessage}`);
+                const errorMessage = "Server succeeded but did not return a PayPal order ID.";
+                alert(`DIAGNOSTIC: Step 2 FAILED - No order ID: ${errorMessage}`);
                 onPaymentError(errorMessage);
                 return Promise.reject(new Error(errorMessage));
             }
             
-            window.alert(`DIAGNOSTIC STEP 5 SUCCEEDED: Got Order ID ${result.orderId}. Handing off to PayPal.`);
+            alert(`DIAGNOSTIC: Step 2 SUCCEEDED - Got Order ID: ${result.orderId}. Handing off to PayPal.`);
             return result.orderId;
 
         } catch (error: any) {
-            window.alert(`DIAGNOSTIC STEP 3/4 FAILED: A critical error occurred while fetching or parsing. DETAILS: ${error.message}`);
-            const errorMessage = `A client-side exception occurred: "${error.message || 'Unknown fetch error'}"`;
+            const errorMessage = `A critical client-side error occurred while trying to create the order: ${error.message}`;
+            alert(`DIAGNOSTIC: Step 2 FAILED - A critical error occurred during fetch: ${errorMessage}`);
             onPaymentError(errorMessage);
             return Promise.reject(new Error(errorMessage));
         }
     };
 
-    const handleOnApprove = async (data: { orderID: string }) => {
+    const onApprove = async (data: { orderID: string }) => {
+        alert(`DIAGNOSTIC: Step 3 - Payment approved by user. Order ID: ${data.orderID}. Now attempting to capture on server.`);
         try {
-            window.alert(`DIAGNOSTIC STEP 6: Payment approved by user. Order ID: ${data.orderID}. Now capturing on server...`);
             const response = await fetch('/api/paypal', {
                  method: 'POST',
                  headers: { 'Content-Type': 'application/json' },
@@ -92,61 +66,34 @@ export function PayPalPaymentButton({ planId, onPaymentSuccess, onPaymentStart, 
 
             const result = await response.json();
 
-            if (!response.ok || result.error || !result.success) {
-                 const errorMessage = `Payment capture failed: ${result.error || 'Unknown server error'}. ${result.debug ? `(Debug: ${JSON.stringify(result.debug)})` : ''}`;
-                window.alert(`DIAGNOSTIC STEP 7 FAILED: Server capture failed. DETAILS: ${errorMessage}`);
-                onPaymentError(errorMessage);
-                return;
+            if (!response.ok || !result.success) {
+                 const errorMessage = `Payment capture failed: ${result.error || 'Unknown server error.'} ${result.debug ? `(Debug: ${result.debug})` : ''}`;
+                 alert(`DIAGNOSTIC: Step 4 FAILED - Server capture failed: ${errorMessage}`);
+                 onPaymentError(errorMessage);
+                 return;
             }
 
-            if (result.success && result.orderData) {
-                window.alert('DIAGNOSTIC STEP 7 SUCCEEDED: Capture successful. Calling onPaymentSuccess...');
-                toast({
-                    title: 'Payment Successful!',
-                    description: "Finalizing your subscription...",
-                });
-                await onPaymentSuccess(result.orderData);
-            } else {
-                 const errorMessage = `Payment not completed. Status: ${result.orderData?.status}`;
-                 window.alert(`DIAGNOSTIC STEP 7 FAILED: Payment not completed. DETAILS: ${errorMessage}`);
-                 onPaymentError(errorMessage);
-            }
+            alert('DIAGNOSTIC: Step 4 SUCCEEDED - Capture successful. Finalizing subscription.');
+            await onPaymentSuccess(result.orderData);
+
         } catch (error: any) {
-             const errorMessage = `An unexpected error occurred during payment capture: ${error.message}`;
-             window.alert(`DIAGNOSTIC STEP 7 FAILED: Critical error during capture. DETAILS: ${errorMessage}`);
+             const errorMessage = `A critical error occurred during payment capture: ${error.message}`;
+             alert(`DIAGNOSTIC: Step 4 FAILED - Critical error during capture fetch: ${errorMessage}`);
              onPaymentError(errorMessage);
         }
     };
     
     const onError = (err: any) => {
-        const message = `The PayPal window closed unexpectedly or an error occurred. Raw PayPal Script Error: "${err.toString()}"`;
-        window.alert(`DIAGNOSTIC: PayPal's generic onError event was triggered. DETAILS: ${message}`);
+        const message = `The PayPal script encountered an error or the window was closed unexpectedly. This can happen if you close the popup manually. Raw PayPal Error: "${err.toString()}"`;
+        alert(`DIAGNOSTIC: The generic 'onError' event was triggered. This often means the popup was closed or there was an issue within PayPal's system. Details: ${message}`);
         onPaymentError(message);
     }
-
-    if (isPending) {
-        return (
-            <div className="flex h-[44px] w-full items-center justify-center rounded-md bg-muted">
-                <Loader2 className="h-5 w-5 animate-spin" />
-            </div>
-        );
-    }
-    
-    if (isRejected) {
-        return (
-            <div className="flex h-[44px] w-full items-center justify-center rounded-md border border-destructive bg-destructive/10 text-center text-sm text-destructive">
-                Error: PayPal script failed to load. Check Client ID.
-            </div>
-        );
-    }
-    
-    window.alert('DIAGNOSTIC STEP 1: PayPal button is rendering. Script has loaded successfully.');
 
     return (
         <PayPalButtons
             style={{ layout: "vertical", label: "pay", tagline: false, height: 44 }}
-            createOrder={handleCreateOrder}
-            onApprove={handleOnApprove}
+            createOrder={createOrder}
+            onApprove={onApprove}
             onError={onError}
             disabled={disabled}
             forceReRender={[planId, disabled]}

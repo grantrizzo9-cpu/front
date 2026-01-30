@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,12 +9,10 @@ import type { User as UserType } from "@/lib/types";
 import { subscriptionTiers } from "@/lib/data";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
-import { useState, Suspense } from "react";
+import { useState } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { PayPalPaymentButton } from "@/components/paypal-payment-button";
 import { PayPalScriptProvider } from "@paypal/react-paypal-js";
-import { Skeleton } from "@/components/ui/skeleton";
-
 
 // Component for users with a paid subscription, allowing them to upgrade. No PayPal needed here.
 function ExistingSubscriptionFlow({ currentTierId, onPlanChange }: {
@@ -116,6 +113,18 @@ function NewSubscriptionFlow({ onPaymentSuccess, onPaymentStart, onPaymentError,
         onPaymentError(''); // Clear previous errors
         setSelectedTierId(tierId);
     }
+
+    if (!paypalClientId || paypalClientId.includes('REPLACE_WITH')) {
+        return (
+            <Alert variant="destructive">
+                <AlertTriangle className="h-4 w-4" />
+                <AlertTitle>PayPal Configuration Error</AlertTitle>
+                <AlertDescription>
+                    The PayPal Client ID is missing. Please add your `NEXT_PUBLIC_PAYPAL_CLIENT_ID` to the `.env` file in the project's root directory.
+                </AlertDescription>
+            </Alert>
+        );
+    }
     
     // If a plan has been selected, show the payment view for that single plan.
     if (selectedTierId) {
@@ -136,7 +145,7 @@ function NewSubscriptionFlow({ onPaymentSuccess, onPaymentStart, onPaymentError,
         }
 
         return (
-             <PayPalScriptProvider options={{ clientId: paypalClientId, currency: "USD", intent: "capture" }}>
+            <PayPalScriptProvider options={{ clientId: paypalClientId, currency: "USD", intent: "capture" }}>
                 <Card className="max-w-md mx-auto animate-in fade-in-50">
                     <CardHeader>
                         <CardTitle>Confirm Your Plan</CardTitle>
@@ -236,7 +245,7 @@ function NewSubscriptionFlow({ onPaymentSuccess, onPaymentStart, onPaymentError,
     );
 }
 
-function UpgradePageContent() {
+export default function UpgradePage() {
     const { user, isUserLoading } = useUser();
     const firestore = useFirestore();
     const { toast } = useToast();
@@ -320,29 +329,5 @@ function UpgradePageContent() {
                 />
             )}
         </div>
-    );
-}
-
-function UpgradeLoadingSkeleton() {
-    return (
-        <div className="space-y-8">
-            <div className='space-y-2'>
-                <Skeleton className="h-8 w-1/2" />
-                <Skeleton className="h-4 w-3/4" />
-            </div>
-            <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-                <Skeleton className="h-96 w-full" />
-                <Skeleton className="h-96 w-full" />
-                <Skeleton className="h-96 w-full" />
-            </div>
-        </div>
-    );
-}
-
-export default function UpgradePage() {
-    return (
-        <Suspense fallback={<UpgradeLoadingSkeleton />}>
-            <UpgradePageContent />
-        </Suspense>
     );
 }
