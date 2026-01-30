@@ -10,7 +10,7 @@ interface PayPalPaymentButtonProps {
     planId: string;
     onPaymentSuccess: (details: any) => Promise<void>;
     onPaymentStart: () => void;
-    onPaymentError: () => void;
+    onPaymentError: (error: string) => void;
     disabled: boolean;
 }
 
@@ -20,65 +20,52 @@ export function PayPalPaymentButton({ planId, onPaymentSuccess, onPaymentStart, 
 
     useEffect(() => {
         if (isRejected) {
+             const errorMessage = 'The PayPal script failed to load. This can be caused by an invalid Client ID in your .env file, a network issue, or an ad blocker. Please verify your NEXT_PUBLIC_PAYPAL_CLIENT_ID and restart the server.';
              toast({
                 variant: 'destructive',
                 title: 'PayPal Script Load Error',
-                description: 'The PayPal script failed to load. This can be caused by an invalid Client ID in your .env file, a network issue, or an ad blocker. Please verify your NEXT_PUBLIC_PAYPAL_CLIENT_ID and restart the server.',
+                description: errorMessage,
                 duration: 10000,
             });
+            onPaymentError(errorMessage);
         }
-    }, [isRejected, toast]);
+    }, [isRejected, toast, onPaymentError]);
 
 
-    const handleCreateOrder = () => {
+    const handleCreateOrder = async (): Promise<string> => {
         onPaymentStart();
-        
-        return createPaypalOrder(planId).then(result => {
+        try {
+            const result = await createPaypalOrder(planId);
             if (result.error || !result.orderId) {
-                // This path is for when the server responds successfully, but with a logical error.
-                toast({
-                    variant: 'destructive',
-                    title: 'PayPal Server Error',
-                    description: result.error || 'The server responded but could not create a PayPal order. Please try again.',
-                    duration: 15000,
-                });
-                onPaymentError();
-                // Reject the promise to trigger PayPal's onError handler.
-                return Promise.reject(new Error(result.error || 'Could not create PayPal order.'));
+                const errorMessage = result.error || 'The server responded but could not create a PayPal order.';
+                onPaymentError(errorMessage);
+                return Promise.reject(new Error(errorMessage));
             }
-            // Success, resolve with the orderId.
             return result.orderId;
-        }).catch(error => {
-            // This path is for when the server action itself fails (e.g., network error, server crash).
-            // This is the aggressive catch-all.
-            toast({
-                variant: 'destructive',
-                title: 'Failed to Create Order',
-                description: `A client-server communication error occurred. This is the error that was caught: "${error.message}". Please check the server logs.`,
-                duration: 15000,
-            });
-            onPaymentError();
-            // Re-throw the error to ensure PayPal's onError is also triggered.
-            throw error;
-        });
+        } catch (error: any) {
+            const errorMessage = `A client-server communication error occurred: "${error.message}". Check the server logs for more details.`;
+            onPaymentError(errorMessage);
+            return Promise.reject(error);
+        }
     };
 
-    const handleOnApprove = async (data: { orderID: string }, actions: any) => {
-        const result = await capturePaypalOrder(data.orderID);
+    const handleOnApprove = async (data: { orderID: string }) => {
+        try {
+            const result = await capturePaypalOrder(data.orderID);
 
-        if (result.success && result.orderData) {
-            toast({
-                title: 'Payment Successful!',
-                description: "We're now creating your account...",
-            });
-            await onPaymentSuccess(result.orderData);
-        } else {
-            toast({
-                variant: 'destructive',
-                title: 'Payment Capture Failed',
-                description: result.error || 'An error occurred while processing your payment after approval. You have not been charged.',
-            });
-            onPaymentError();
+            if (result.success && result.orderData) {
+                toast({
+                    title: 'Payment Successful!',
+                    description: "We're now creating your account...",
+                });
+                await onPaymentSuccess(result.orderData);
+            } else {
+                const errorMessage = result.error || 'An error occurred while processing your payment after approval. You have not been charged.';
+                onPaymentError(errorMessage);
+            }
+        } catch (error: any) {
+             const errorMessage = `An unexpected error occurred during payment capture: ${error.message}`;
+             onPaymentError(errorMessage);
         }
     };
     
@@ -86,13 +73,9 @@ export function PayPalPaymentButton({ planId, onPaymentSuccess, onPaymentStart, 
         // This is PayPal's own error handler. It will be triggered if handleCreateOrder rejects.
         console.error("PAYPAL_CLIENT_ERROR:", err);
         const message = err.message || 'An unknown error occurred inside the PayPal script.';
-        toast({
-            variant: "destructive",
-            title: "PayPal Transaction Error",
-            description: `The PayPal window closed because of an error. The error was: "${message}"`,
-            duration: 15000,
-        });
-        onPaymentError();
+        const finalMessage = `The PayPal window closed because of an error. The error was: "${message}"`;
+        // We call onPaymentError here instead of showing a toast directly
+        onPaymentError(finalMessage);
     }
 
     if (isPending) {

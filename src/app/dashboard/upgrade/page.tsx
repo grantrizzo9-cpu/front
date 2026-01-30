@@ -103,15 +103,19 @@ function ExistingSubscriptionFlow({ currentTierId, onPlanChange }: {
 // Component for users without a subscription or on a trial. This is where payment happens.
 function NewSubscriptionFlow({ onPaymentSuccess, onPaymentStart, onPaymentError, isProcessing, paypalClientId }: {
     onPaymentSuccess: (tierId: string) => (details: any) => Promise<void>;
-    onPaymentStart: () => void;
-    onPaymentError: () => void;
+    onPaymentStart: (tierId: string) => void;
+    onPaymentError: (error: string) => void;
     isProcessing: boolean;
     paypalClientId: string;
 }) {
     const [selectedTierId, setSelectedTierId] = useState<string | null>(null);
+    const [paymentError, setPaymentError] = useState<string | null>(null);
 
-    const isPaypalConfigured = paypalClientId && !paypalClientId.includes('REPLACE_WITH');
-
+    const handleSelectTier = (tierId: string) => {
+        setPaymentError(null);
+        setSelectedTierId(tierId);
+    }
+    
     // If a plan has been selected, show the payment view for that single plan.
     if (selectedTierId) {
         const tier = subscriptionTiers.find(t => t.id === selectedTierId);
@@ -130,28 +134,6 @@ function NewSubscriptionFlow({ onPaymentSuccess, onPaymentStart, onPaymentError,
             );
         }
 
-        if (!isPaypalConfigured) {
-            return (
-                <Card className="max-w-md mx-auto">
-                    <CardHeader>
-                        <CardTitle>Payment Service Error</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <Alert variant="destructive">
-                            <AlertTriangle className="h-4 w-4" />
-                            <AlertTitle>Payment Service Not Configured</AlertTitle>
-                            <AlertDescription>
-                                The application is failing to read your PayPal Client ID from the `.env` file. Please ensure the `NEXT_PUBLIC_PAYPAL_CLIENT_ID` is set correctly and restart the server.
-                            </AlertDescription>
-                        </Alert>
-                    </CardContent>
-                    <CardFooter>
-                        <Button variant="ghost" onClick={() => setSelectedTierId(null)}>Choose a different plan</Button>
-                    </CardFooter>
-                </Card>
-            )
-        }
-
         return (
              <PayPalScriptProvider options={{ clientId: paypalClientId, currency: "USD", intent: "capture" }}>
                 <Card className="max-w-md mx-auto animate-in fade-in-50">
@@ -160,6 +142,13 @@ function NewSubscriptionFlow({ onPaymentSuccess, onPaymentStart, onPaymentError,
                         <CardDescription>You are purchasing the <span className="font-bold text-primary">{tier.name}</span> plan.</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
+                         {paymentError && (
+                            <Alert variant="destructive">
+                                <AlertTriangle className="h-4 w-4" />
+                                <AlertTitle>Payment Error</AlertTitle>
+                                <AlertDescription>{paymentError}</AlertDescription>
+                            </Alert>
+                        )}
                         <div className="flex items-baseline gap-2">
                             <span className="text-4xl font-bold">${tier.price.toFixed(2)}</span>
                             <span className="text-muted-foreground">USD / day</span>
@@ -184,8 +173,14 @@ function NewSubscriptionFlow({ onPaymentSuccess, onPaymentStart, onPaymentError,
                             <PayPalPaymentButton 
                                 planId={tier.id}
                                 onPaymentSuccess={onPaymentSuccess(tier.id)}
-                                onPaymentStart={onPaymentStart}
-                                onPaymentError={onPaymentError}
+                                onPaymentStart={() => {
+                                    setPaymentError(null);
+                                    onPaymentStart(tier.id);
+                                }}
+                                onPaymentError={(error) => {
+                                    setPaymentError(error);
+                                    onPaymentError(error);
+                                }}
                                 disabled={isProcessing}
                             />
                         </div>
@@ -233,7 +228,7 @@ function NewSubscriptionFlow({ onPaymentSuccess, onPaymentStart, onPaymentError,
                 </ul>
               </CardContent>
               <CardFooter>
-                 <Button className="w-full" variant={tier.isMostPopular ? "default" : "outline"} onClick={() => setSelectedTierId(tier.id)}>
+                 <Button className="w-full" variant={tier.isMostPopular ? "default" : "outline"} onClick={() => handleSelectTier(tier.id)}>
                     Select {tier.name}
                  </Button>
               </CardFooter>

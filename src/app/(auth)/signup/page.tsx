@@ -36,6 +36,7 @@ function SignupFormComponent() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [isProcessing, setIsProcessing] = useState(false);
+    const [paymentError, setPaymentError] = useState<string | null>(null);
     
     const planId = searchParams.get("plan") || 'starter';
     const referralCode = searchParams.get("ref");
@@ -154,32 +155,8 @@ function SignupFormComponent() {
     };
     
     const paypalClientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || '';
-    const isPaypalConfigured = paypalClientId && !paypalClientId.includes('REPLACE_WITH');
     
     if (step === 'payment') {
-        if (!isPaypalConfigured) {
-             return (
-                <Card>
-                    <CardHeader>
-                        <CardTitle className="font-headline text-2xl">Payment Service Error</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <Alert variant="destructive">
-                            <AlertTriangle className="h-4 w-4" />
-                            <AlertTitle>Payment Service Not Configured</AlertTitle>
-                            <AlertDescription>
-                                The application is failing to read your PayPal Client ID from the `.env` file. Please ensure the `NEXT_PUBLIC_PAYPAL_CLIENT_ID` is set correctly and restart the server.
-                            </AlertDescription>
-                        </Alert>
-                    </CardContent>
-                     <CardFooter className="flex-col items-stretch gap-4">
-                        <Button variant="ghost" onClick={() => setStep('details')} disabled={isProcessing}>
-                            Back to details
-                        </Button>
-                     </CardFooter>
-                </Card>
-             )
-        }
         return (
             <PayPalScriptProvider options={{ clientId: paypalClientId, currency: "USD", intent: "capture" }}>
                 <Card className="max-w-md mx-auto animate-in fade-in-50">
@@ -190,6 +167,13 @@ function SignupFormComponent() {
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
+                        {paymentError && (
+                            <Alert variant="destructive">
+                                <AlertTriangle className="h-4 w-4" />
+                                <AlertTitle>Payment Error</AlertTitle>
+                                <AlertDescription>{paymentError}</AlertDescription>
+                            </Alert>
+                        )}
                         <div className="flex items-baseline gap-2">
                             <span className="text-4xl font-bold">${plan.price.toFixed(2)}</span>
                             <span className="text-muted-foreground">USD / day</span>
@@ -214,8 +198,14 @@ function SignupFormComponent() {
                             <PayPalPaymentButton 
                                 planId={plan.id}
                                 onPaymentSuccess={handlePaymentSuccess}
-                                onPaymentStart={() => setIsProcessing(true)}
-                                onPaymentError={() => setIsProcessing(false)}
+                                onPaymentStart={() => {
+                                    setIsProcessing(true);
+                                    setPaymentError(null);
+                                }}
+                                onPaymentError={(error) => {
+                                    setIsProcessing(false);
+                                    setPaymentError(error);
+                                }}
                                 disabled={isProcessing}
                             />
                         </div>
