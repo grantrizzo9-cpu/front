@@ -148,6 +148,15 @@ export default function DashboardPage() {
                             <h1 className="text-3xl font-bold font-headline">Admin Dashboard</h1>
                             <p className="text-muted-foreground">Platform-wide affiliate activity summary.</p>
                         </div>
+
+                        <Alert className="bg-primary/5 border-primary/20 text-primary-foreground">
+                            <Info className="h-4 w-4 text-primary" />
+                            <AlertTitle className="font-bold text-primary">You are the Platform Owner</AlertTitle>
+                            <AlertDescription className="text-foreground/80">
+                                This Admin section shows your <strong>30% revenue share</strong> from <strong>all sales across the entire platform</strong>. The "Your Affiliate Dashboard" section below shows stats for your personal referrals only.
+                            </AlertDescription>
+                        </Alert>
+
                         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                             <StatCard
                                 title="Platform Revenue"
