@@ -1,29 +1,17 @@
 'use client';
 
-import { firebaseConfig } from '@/firebase/config';
-import { initializeApp, getApps, getApp, type FirebaseApp } from 'firebase/app';
-import { getAuth, type Auth } from 'firebase/auth';
-import { getFirestore, type Firestore } from 'firebase/firestore';
+// This file is now a barrel file for re-exporting Firebase hooks and providers.
+// The initialization logic has been moved into the FirebaseClientProvider.
+
+import { type FirebaseApp } from 'firebase/app';
+import { type Auth } from 'firebase/auth';
+import { type Firestore } from 'firebase/firestore';
 
 export interface FirebaseServices {
   firebaseApp: FirebaseApp;
   auth: Auth;
   firestore: Firestore;
 }
-
-// Defer initialization until this function is called.
-export function initializeFirebase(): FirebaseServices {
-  const app: FirebaseApp = !getApps().length ? initializeApp(firebaseConfig) : getApp();
-  const auth: Auth = getAuth(app);
-  const firestore: Firestore = getFirestore(app);
-  
-  return {
-    firebaseApp: app,
-    auth,
-    firestore,
-  };
-}
-
 
 export * from './provider';
 export * from './client-provider';
