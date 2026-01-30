@@ -33,7 +33,9 @@ export function PayPalPaymentButton({ planId, onPaymentSuccess, onPaymentStart, 
 
     const handleCreateOrder = async (): Promise<string> => {
         onPaymentStart();
+        console.log('[PayPal Debug] handleCreateOrder started.');
         try {
+            console.log('[PayPal Debug] Calling /api/paypal to create order...');
             const response = await fetch('/api/paypal', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -42,28 +44,48 @@ export function PayPalPaymentButton({ planId, onPaymentSuccess, onPaymentStart, 
                     planId: planId
                 }),
             });
+            console.log(`[PayPal Debug] Server responded with status: ${response.status}`);
 
-            const result = await response.json();
+            // IMPORTANT: To debug potential non-JSON responses, we get the body as text first.
+            const responseText = await response.text();
+            console.log(`[PayPal Debug] Server response body: ${responseText}`);
+            
+            let result;
+            try {
+                result = JSON.parse(responseText);
+            } catch (e) {
+                 const parseError = `CRITICAL: Failed to parse server response as JSON. This usually means the server crashed and returned an HTML error page. Server Status: ${response.status}. Response Body: "${responseText}"`;
+                 console.error(parseError, e);
+                 onPaymentError(parseError);
+                 window.alert(parseError); // Force display
+                 return Promise.reject(new Error(parseError));
+            }
+
 
             if (!response.ok || !result.success) {
-                // This will catch missing .env errors, PayPal API errors, etc.
                 const errorText = `Server Error: ${result.error || `An unexpected server error occurred with status ${response.status}`}. ${result.debug ? `(Debug: ${JSON.stringify(result.debug)})` : ''}`;
+                console.error('[PayPal Debug] Server returned an error:', errorText);
                 onPaymentError(errorText);
+                window.alert(`[PayPal Debug] Server returned an error: ${errorText}`); // Force display
                 return Promise.reject(new Error(errorText));
             }
             
             if (!result.orderId) {
                 const errorMessage = "The server action succeeded but did not return a PayPal order ID. This is a bug.";
+                console.error('[PayPal Debug] No orderId in success response:', errorMessage);
                 onPaymentError(errorMessage);
+                window.alert(`[PayPal Debug] No orderId in success response: ${errorMessage}`); // Force display
                 return Promise.reject(new Error(errorMessage));
             }
             
+            console.log(`[PayPal Debug] Successfully created order ID: ${result.orderId}`);
             return result.orderId;
 
         } catch (error: any) {
-            // This catches network errors where the client can't even reach the server.
-            const errorMessage = `A client-side exception occurred while trying to create the order. The server might be down or misconfigured. Error: "${error.message || 'Unknown fetch error'}"`;
+            const errorMessage = `A client-side exception occurred while trying to create the order. This usually indicates a network problem or that the server is completely unreachable. Error: "${error.message || 'Unknown fetch error'}"`;
+            console.error('[PayPal Debug] CATCH BLOCK ERROR:', errorMessage);
             onPaymentError(errorMessage);
+            window.alert(`[PayPal Debug] CATCH BLOCK ERROR: ${errorMessage}`); // Force display
             return Promise.reject(new Error(errorMessage));
         }
     };
