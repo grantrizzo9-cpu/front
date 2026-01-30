@@ -3,7 +3,8 @@
 import { PayPalButtons, PayPalScriptProvider } from '@paypal/react-paypal-js';
 import { createPaypalOrder, capturePaypalOrder } from '@/app/actions/paypal-actions';
 import { useToast } from '@/hooks/use-toast';
-import { Button } from './ui/button';
+import { useEffect, useState } from 'react';
+import { Skeleton } from './ui/skeleton';
 
 interface PayPalPaymentButtonProps {
     planId: string;
@@ -17,6 +18,18 @@ const clientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID;
 
 export function PayPalPaymentButton({ planId, onPaymentSuccess, onPaymentStart, onPaymentError, disabled }: PayPalPaymentButtonProps) {
     const { toast } = useToast();
+    const [isClient, setIsClient] = useState(false);
+
+    useEffect(() => {
+        // This ensures the component only renders on the client side,
+        // preventing hydration errors and crashes from server-side rendering attempts.
+        setIsClient(true);
+    }, []);
+
+    if (!isClient) {
+        // Show a skeleton loader while waiting for the client to mount.
+        return <Skeleton className="h-11 w-full" />;
+    }
     
     if (!clientId || clientId.includes('REPLACE_WITH')) {
         return (
