@@ -217,12 +217,13 @@ function NewSubscriptionFlow({ onPaymentSuccess, onPaymentStart, onPaymentError,
 }
 
 // "Gatekeeper" component to safely render PayPal provider only on the client
-function UpgradePageContent({ paypalClientId }: { paypalClientId?: string }) {
+function UpgradePageContent() {
     const { user, isUserLoading } = useUser();
     const firestore = useFirestore();
     const { toast } = useToast();
     const [isProcessing, setIsProcessing] = useState(false);
     const [isClient, setIsClient] = useState(false);
+    const paypalClientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID;
 
     useEffect(() => {
         setIsClient(true);
@@ -321,8 +322,6 @@ function UpgradePageContent({ paypalClientId }: { paypalClientId?: string }) {
 
 // The main page component that orchestrates everything.
 export default function UpgradePage() {
-    const paypalClientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID;
-
     return (
         <Suspense fallback={
             <div className="space-y-8">
@@ -334,7 +333,7 @@ export default function UpgradePage() {
                 </div>
             </div>
         }>
-            <UpgradePageContent paypalClientId={paypalClientId} />
+            <UpgradePageContent />
         </Suspense>
     )
 }
