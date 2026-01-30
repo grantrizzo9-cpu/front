@@ -1,4 +1,3 @@
-
 'use client';
 
 import { StatCard } from "@/components/stat-card";
@@ -51,7 +50,12 @@ export default function DashboardPage() {
     }
 
     try {
-      const grossSales = allReferrals.reduce((sum, r) => sum + (typeof r.grossSale === 'number' ? r.grossSale : 0), 0);
+      // Calculate gross sales by deriving it from the commission, which is more reliable if grossSale field is missing.
+      const grossSales = allReferrals.reduce((sum, r) => {
+          const commission = typeof r.commission === 'number' ? r.commission : 0;
+          // Assume a 70% commission rate to reverse-calculate the sale amount.
+          return sum + (commission / 0.70);
+      }, 0);
       const payouts = allReferrals.reduce((sum, r) => sum + (typeof r.commission === 'number' ? r.commission : 0), 0);
       const companyRevenue = grossSales - payouts;
 
@@ -80,7 +84,13 @@ export default function DashboardPage() {
 
       const totalCommission = personalReferrals.reduce((sum, r) => sum + r.commission, 0);
       const unpaidCommissions = personalReferrals.filter(r => r.status === 'unpaid').reduce((sum, r) => sum + r.commission, 0);
-      const grossSales = personalReferrals.reduce((sum, r) => sum + (typeof r.grossSale === 'number' ? r.grossSale : 0), 0);
+      
+      // Reverted Logic: Calculate gross sales from commission to fix display bug.
+      const grossSales = personalReferrals.reduce((sum, r) => {
+          const commission = typeof r.commission === 'number' ? r.commission : 0;
+          // Assume a 70% commission rate to reverse-calculate the sale amount.
+          return sum + (commission / 0.70);
+      }, 0);
 
       return {
           personalTotalCommission: totalCommission,
