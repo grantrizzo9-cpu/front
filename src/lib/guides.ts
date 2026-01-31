@@ -262,7 +262,7 @@ export const allGuides: Guide[] = [
             <p>Hi there,</p>
             <p>Thank you for subscribing! I'm excited to share the checklist that can help you get a real, income-generating website up and running in just one day.</p>
             <p>Here is your exclusive guide: <strong>The 5-Step Checklist to Launching a Profitable Affiliate Website in 24 Hours.</strong></p>
-            <p><em>(Paste the content from the "5-Step Checklist" guide here)</em></p>
+            <p><em>(You can copy the content from the "5-Step Checklist" guide and paste it here in MailerLite)</em></p>
             <p>To your success,</p>
             <p>Grant Rizzoli</p>
         </blockquote>
