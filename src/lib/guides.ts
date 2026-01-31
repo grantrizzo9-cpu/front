@@ -79,35 +79,46 @@ export const allGuides: Guide[] = [
     level: "plus",
     content: `
       <p>An email list is a direct line to your audience and one of your most valuable assets. Unlike social media, you OWN your list.</p>
-      <p>We recommend using a service like <strong>MailerLite</strong>. They offer a great free plan and are very easy to use. To connect your website to MailerLite, you will need an API key.</p>
-      <p><strong>Please see our guide titled "Email Marketing with MailerLite" for detailed instructions on how to find your API key.</strong></p>
+      <p>We recommend using a service like <strong>MailerLite</strong>. They offer a great free plan and are very easy to use. To connect your website to MailerLite, you will need an API key and a Group ID.</p>
+      <p><strong>Please see our guide titled "Connecting to the MailerLite API" for detailed instructions on how to find these credentials.</strong></p>
       <strong>General Steps to Start Your List:</strong>
       <ol>
           <li><strong>Choose a Service:</strong> Start with <a href="https://www.mailerlite.com/" target="_blank" rel="noopener noreferrer" class="text-primary hover:underline">MailerLite</a>.</li>
-          <li><strong>Create a 'Lead Magnet':</strong> Offer something valuable for free in exchange for an email. Examples: a simple checklist ("5 Things Your New Website Needs") or a short PDF guide.</li>
-          <li><strong>Add a Sign-up Form:</strong> Put a form on your website or blog offering your lead magnet.</li>
-          <li><strong>Nurture Your List:</strong> Send a welcome email, followed by a mix of helpful content and promotional emails. A good ratio is 3 helpful emails for every 1 promotional email.</li>
+          <li><strong>Create a 'Lead Magnet':</strong> Offer something valuable for free in exchange for an email. Examples: "The 5-Step Checklist to Launching a Profitable Affiliate Website in 24 Hours".</li>
+          <li><strong>Add a Sign-up Form:</strong> Use the form on your homepage to capture emails.</li>
+          <li><strong>Nurture Your List:</strong> Send a welcome email with the lead magnet, followed by a mix of helpful content and promotional emails. A good ratio is 3 helpful emails for every 1 promotional email.</li>
       </ol>
       <p>In your promotional emails, share the benefits of Affiliate AI Host and include your affiliate link.</p>
     `
   },
   {
-    title: "Email Marketing with MailerLite",
+    title: "Connecting to the MailerLite API",
     level: "plus",
     content: `
-      <p>MailerLite is a powerful yet user-friendly email marketing service that's perfect for affiliates. This guide will show you how to get your API key, which you'll need to connect your website to your MailerLite account for features like automated newsletter sign-ups.</p>
-      <h3>How to Find Your MailerLite API Key</h3>
+      <p>MailerLite is a powerful yet user-friendly email marketing service that's perfect for affiliates. This guide will show you how to get your API key and Group ID, which you'll need to connect your website to your MailerLite account for features like automated newsletter sign-ups.</p>
+      
+      <h3>1. How to Find Your MailerLite API Key</h3>
       <p>Follow these simple steps to locate your API key:</p>
       <ol>
           <li>Log in to your <a href="https://dashboard.mailerlite.com" target="_blank" rel="noopener noreferrer" class="text-primary hover:underline">MailerLite dashboard</a>.</li>
           <li>In the left-hand navigation menu, click on <strong>Integrations</strong>.</li>
           <li>On the Integrations page, find the <strong>Developer API</strong> section and click the <strong>Use</strong> button.</li>
           <li>Your API key will be displayed on the next screen. You can click the <strong>Copy</strong> button to copy it to your clipboard.</li>
+          <li>Paste this key into your <code>.env</code> file for the <code>MAILERLITE_API_KEY</code> variable.</li>
       </ol>
-      <h3>Securing Your API Key</h3>
-      <p>Your API key is secret and should be treated like a password. The best practice is to store it in an environment variable file (like a <code>.env</code> file) in your project, for example:</p>
-      <code>MAILERLITE_API_KEY=your_api_key_here</code>
-      <p>This allows your application to use the key securely without exposing it in your code.</p>
+
+      <h3>2. How to Find Your MailerLite Group ID</h3>
+      <p>You need a Group ID to tell MailerLite which list to add your new subscribers to.</p>
+      <ol>
+          <li>From your MailerLite dashboard, click on <strong>Subscribers</strong> in the top menu.</li>
+          <li>Click on the <strong>Groups</strong> tab.</li>
+          <li>If you don't have a group, create one now (e.g., "Website Subscribers").</li>
+          <li>Find your desired group in the list. The <strong>Group ID</strong> is the number displayed next to the group name.</li>
+          <li>Copy this ID and paste it into your <code>.env</code> file for the <code>MAILERLITE_GROUP_ID</code> variable.</li>
+      </ol>
+
+      <h3>Securing Your Credentials</h3>
+      <p>Your API key is secret and should be treated like a password. Storing it in the <code>.env</code> file keeps it secure and allows your application to use it without exposing it in the client-side code.</p>
     `
   },
 

@@ -41,7 +41,7 @@ export function NewsletterForm() {
         <div className="flex flex-col items-center justify-center text-center gap-4 p-8 bg-green-50 border border-green-200 rounded-lg dark:bg-green-950 dark:border-green-800">
             <MailCheck className="h-12 w-12 text-green-600 dark:text-green-400" />
             <h3 className="font-semibold text-xl text-green-800 dark:text-green-200">Thank You for Subscribing!</h3>
-            <p className="text-muted-foreground">You're on the list. Keep an eye on your inbox for updates.</p>
+            <p className="text-muted-foreground">You're on the list. Keep an eye on your inbox for your free checklist.</p>
         </div>
     );
   }
@@ -61,7 +61,7 @@ export function NewsletterForm() {
         {isLoading ? (
           <Loader2 className="animate-spin" />
         ) : (
-          'Subscribe'
+          'Get Free Checklist'
         )}
       </Button>
     </form>

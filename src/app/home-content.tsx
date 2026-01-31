@@ -270,10 +270,10 @@ export function HomeContent() {
         <section className="w-full py-20 md:py-32 bg-card">
           <div className="container text-center max-w-3xl">
             <h2 className="font-headline text-3xl font-bold tracking-tight sm:text-4xl">
-              Stay Ahead of the Curve
+              Get Your Free Affiliate Launch Checklist
             </h2>
             <p className="mt-4 max-w-2xl mx-auto text-lg text-muted-foreground">
-              Join our newsletter to get the latest updates on affiliate strategies, AI tools, and platform features delivered straight to your inbox.
+              Enter your email to receive our exclusive guide: "The 5-Step Checklist to Launching a Profitable Affiliate Website in 24 Hours".
             </p>
             <div className="mt-8 flex justify-center">
               <NewsletterForm />
