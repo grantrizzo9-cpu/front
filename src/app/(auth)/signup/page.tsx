@@ -132,7 +132,7 @@ function SignupFormComponent() {
             <CardHeader>
                 <CardTitle className="font-headline text-2xl">Create Your Account</CardTitle>
                 <CardDescription>
-                    You're creating an account to subscribe to the <strong>{plan.name}</strong> plan. You'll confirm payment on the next step.
+                    You're creating an account for the <strong>{plan.name}</strong> plan. On the next step, you'll pay a one-time activation fee to start your 3-day trial.
                 </CardDescription>
             </CardHeader>
             <CardContent>

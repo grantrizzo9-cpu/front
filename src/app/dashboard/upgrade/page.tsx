@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from "@/components/ui/button";
 import { Loader2, CheckCircle, AlertTriangle } from "lucide-react";
 import { useUser, useFirestore, useDoc, useMemoFirebase } from "@/firebase";
-import { doc, serverTimestamp, writeBatch, collection, getDoc, getDocs } from "firebase/firestore";
+import { doc, serverTimestamp, writeBatch, Timestamp } from "firebase/firestore";
 import type { User as UserType } from "@/lib/types";
 import { subscriptionTiers } from "@/lib/data";
 import { useToast } from "@/hooks/use-toast";
@@ -66,19 +66,23 @@ export default function UpgradePage() {
             return Promise.reject(new Error(errorMsg));
         }
 
-        const response = await fetch('/api/paypal', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action: 'create_order', planId: selectedTierId }),
-        });
+        try {
+            const response = await fetch('/api/paypal', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'create_order', planId: selectedTierId }),
+            });
 
-        const orderData = await response.json();
-        if (orderData.orderId) {
-            return orderData.orderId;
-        } else {
-            const errorMsg = orderData.debug || orderData.error || "Failed to create order on the server.";
-            setPaymentError(errorMsg);
-            return Promise.reject(new Error(errorMsg));
+            const orderData = await response.json();
+            if (response.ok && orderData.orderId) {
+                return orderData.orderId;
+            } else {
+                const errorMsg = orderData.debug || orderData.error || "Failed to create order on the server.";
+                throw new Error(errorMsg);
+            }
+        } catch (e: any) {
+            setPaymentError(`Network error or server is unreachable: ${e.message}`);
+            return Promise.reject(e);
         }
     };
 
@@ -106,52 +110,36 @@ export default function UpgradePage() {
                 
                 const batch = writeBatch(firestore);
 
-                // Create referral document if this is the first payment and user was referred
-                if (!userData.subscription && userData.referredBy) {
-                    const affiliateUsername = userData.referredBy;
-                    const affiliateUsernameDocRef = doc(firestore, "usernames", affiliateUsername);
-                    const affiliateUsernameDoc = await getDoc(affiliateUsernameDocRef);
+                if (!userData.subscription) { // This is a new user's first payment
+                    const trialEnd = new Date();
+                    trialEnd.setDate(trialEnd.getDate() + 3);
 
-                    if (affiliateUsernameDoc.exists()) {
-                        const affiliateUid = affiliateUsernameDoc.data().uid;
-                        
-                        // Check if user is already a super affiliate to set correct commission rate
-                        const affiliateReferralsColRef = collection(firestore, 'users', affiliateUid, 'referrals');
-                        const affiliateReferralsSnapshot = await getDocs(affiliateReferralsColRef);
-                        const isSuperAffiliate = affiliateReferralsSnapshot.size >= 10;
-                        
-                        const commissionRate = isSuperAffiliate ? 0.75 : 0.70;
-                        const commission = tier.price * commissionRate;
-                        
-                        const referralRef = doc(collection(firestore, 'users', affiliateUid, 'referrals'));
-                        batch.set(referralRef, {
-                            id: referralRef.id,
-                            affiliateId: affiliateUid,
-                            referredUserId: user.uid,
-                            referredUserUsername: userData.username,
-                            planPurchased: tier.name,
-                            grossSale: tier.price,
-                            date: serverTimestamp(),
-                            commission: commission,
-                            status: 'unpaid',
-                            subscriptionId: data.orderID,
-                        });
-                    }
+                    const newSubscription = {
+                        tierId: selectedTierId,
+                        status: 'active' as const,
+                        startDate: serverTimestamp(),
+                        endDate: null,
+                        trialEndDate: Timestamp.fromDate(trialEnd),
+                    };
+                    
+                    // This is the first payment (activation fee) and it goes to the platform owner.
+                    // DO NOT create a referral/commission document here for the affiliate.
+                    // Affiliate commission logic will apply to subsequent (recurring) payments after the trial.
+                    
+                    batch.update(userDocRef, { subscription: newSubscription });
+                    
+                    toast({ title: "Trial Activated!", description: `Your 3-day trial for the ${tier.name} plan has begun.` });
+
+                } else { // This is an existing user upgrading
+                    const newSubscription = {
+                        ...userData.subscription,
+                        tierId: selectedTierId,
+                    };
+                    batch.update(userDocRef, { subscription: newSubscription });
+                    toast({ title: "Subscription Upgraded!", description: `You've successfully upgraded to the ${tier.name} plan.` });
                 }
 
-                // Update the user's subscription
-                const newSubscription = {
-                    tierId: selectedTierId,
-                    status: 'active' as const,
-                    startDate: serverTimestamp(),
-                    endDate: null,
-                    trialEndDate: null, 
-                };
-                batch.update(userDocRef, { subscription: newSubscription });
-
                 await batch.commit();
-
-                toast({ title: "Subscription Activated!", description: `You've successfully subscribed to the ${tier.name} plan.` });
                 setSelectedTierId(null);
             } else {
                 throw new Error("User session or selected plan not found after payment. Please try again.");
@@ -170,6 +158,12 @@ export default function UpgradePage() {
         setPaymentError(errorMsg);
         setIsProcessing(false);
     };
+    
+    const pageTitle = userData?.subscription ? "Upgrade Your Plan" : "Activate Your Plan";
+    const pageDescription = userData?.subscription 
+        ? `You are currently on the ${subscriptionTiers.find(t => t.id === userData?.subscription?.tierId)?.name || 'Unknown'} plan. Unlock more features by upgrading.`
+        : "Pay the one-time activation fee to start your 3-day trial and get instant access to all tools.";
+
 
     if (isLoading) {
         return (
@@ -183,8 +177,8 @@ export default function UpgradePage() {
       return (
           <div className="space-y-8">
               <div>
-                <h1 className="text-3xl font-bold font-headline">Choose Your Plan</h1>
-                <p className="text-muted-foreground mt-2">Choose a plan below to start your paid subscription.</p>
+                <h1 className="text-3xl font-bold font-headline">{pageTitle}</h1>
+                <p className="text-muted-foreground mt-2">{pageDescription}</p>
               </div>
               <Alert variant="destructive">
                   <AlertTriangle className="h-4 w-4" />
@@ -200,15 +194,8 @@ export default function UpgradePage() {
     return (
         <div className="space-y-8">
             <div>
-                <h1 className="text-3xl font-bold font-headline">
-                    {userData?.subscription ? "Upgrade Your Plan" : "Choose Your Plan"}
-                </h1>
-                <p className="text-muted-foreground mt-2">
-                    {userData?.subscription 
-                        ? `You are currently on the ${subscriptionTiers.find(t => t.id === userData?.subscription?.tierId)?.name || 'Unknown'} plan. Unlock more features by upgrading.`
-                        : "Choose a plan below to start your paid subscription."
-                    }
-                </p>
+                <h1 className="text-3xl font-bold font-headline">{pageTitle}</h1>
+                <p className="text-muted-foreground mt-2">{pageDescription}</p>
             </div>
 
             {paymentError && (
@@ -224,16 +211,22 @@ export default function UpgradePage() {
                     (() => {
                         const tier = subscriptionTiers.find(t => t.id === selectedTierId);
                         if (!tier) return null;
+                        const isNewUser = !userData?.subscription;
                         return (
                             <Card className="max-w-md mx-auto animate-in fade-in-50">
                                 <CardHeader>
                                     <CardTitle>Confirm Your Plan</CardTitle>
-                                    <CardDescription>You are purchasing the <span className="font-bold text-primary">{tier.name}</span> plan.</CardDescription>
+                                    <CardDescription>
+                                        {isNewUser 
+                                            ? <>You are paying a one-time fee to activate a 3-day trial for the <span className="font-bold text-primary">{tier.name}</span> plan.</>
+                                            : <>You are upgrading to the <span className="font-bold text-primary">{tier.name}</span> plan.</>
+                                        }
+                                    </CardDescription>
                                 </CardHeader>
                                 <CardContent className="space-y-4">
                                     <div className="flex items-baseline gap-2">
                                         <span className="text-4xl font-bold">${tier.price.toFixed(2)}</span>
-                                        <span className="text-muted-foreground">USD / day</span>
+                                        <span className="text-muted-foreground">{isNewUser ? 'One-Time Fee' : 'USD / day'}</span>
                                     </div>
                                     <ul className="space-y-3">
                                         {tier.features.map((feature, index) => (

@@ -48,7 +48,7 @@ export default function PricingPage() {
               Find the Perfect Plan
             </h1>
             <p className="mt-6 max-w-2xl mx-auto text-lg text-muted-foreground md:text-xl">
-              Choose a plan to get started. Payment is required to activate your account and affiliate link. All plans come with a 70% affiliate commission.
+              All plans start with a 3-day trial. A one-time activation fee, equal to one day's price, is required to get started. This admin fee goes to the platform owner.
             </p>
           </div>
         </section>

@@ -32,7 +32,7 @@ export function HomeContent() {
     {
         icon: <DollarSign className="w-8 h-8 text-primary" />,
         title: 'Generous 70% Commissions',
-        description: 'Earn a massive 70% commission on every sale. Super affiliates who refer over 10 customers unlock an even higher 75% commission rate!',
+        description: 'Earn a massive 70% commission on every recurring sale. Super affiliates who refer over 10 customers unlock an even higher 75% commission rate!',
     },
     {
       icon: <Zap className="w-8 h-8 text-primary" />,
@@ -42,7 +42,7 @@ export function HomeContent() {
     {
       icon: <Users className="w-8 h-8 text-primary" />,
       title: 'Permanent Referrals',
-      description: 'Once you refer a user, they are linked to you for life. You earn commissions on their initial purchase and all future upgrades.',
+      description: 'Once you refer a user, they are linked to you for life. You earn commissions on their recurring subscription payments after their trial ends.',
     },
     {
       icon: <BrainCircuit className="w-8 h-8 text-primary" />,
@@ -68,11 +68,11 @@ export function HomeContent() {
   ];
 
   const faqs = [
-    { q: "How does the referral tracking work?", a: "When someone clicks your unique affiliate link, a cookie is stored in their browser that lasts forever. When they sign up, they are permanently linked to your account, and you will receive a 70% commission on their payments, rising to 75% after your 10th referral." },
+    { q: "How does the referral tracking work?", a: "When someone clicks your unique affiliate link, a cookie is stored in their browser that lasts forever. When they sign up, they are permanently linked to your account. You will receive a 70% commission on all their recurring subscription payments after their 3-day trial, rising to 75% after your 10th referral." },
     { q: "How and when do I get paid?", a: "We process all commission payouts daily. All your earned commissions from the previous day are automatically sent to the PayPal account you have on file. It's fully automated." },
-    { q: "What am I selling?", a: "You are promoting our subscription plans which include high-quality web hosting, a suite of powerful AI tools, and access to an exclusive, tiered library of marketing guides designed to help users build and grow their online businesses and make more sales." },
+    { q: "What am I selling?", a: "You are promoting our subscription plans which include high-quality web hosting, a suite of powerful AI tools, and access to an exclusive, tiered library of marketing guides. All plans begin with a 3-day trial, initiated by a one-time activation fee." },
     { q: "Is there a limit to how much I can earn?", a: "Absolutely not! There is no cap on your potential earnings. The more customers you refer, the more you earn. With a base 70% commission rate that rises to 75% for top affiliates, the sky is the limit." },
-    { q: "What is your refund policy?", a: "We want you to be satisfied. After you make your first payment, you have 24 hours to request a full refund if the service isn't for you." },
+    { q: "What is your refund policy?", a: "The one-time activation fee to start your trial is non-refundable. However, you can cancel your subscription at any time during your 3-day trial without any further charges." },
   ];
 
   return (
@@ -130,22 +130,22 @@ export function HomeContent() {
                 <li className="flex gap-4">
                   <div className="flex-shrink-0 w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-bold">1</div>
                   <div>
-                    <h3 className="font-semibold text-lg">Create Your Account</h3>
-                    <p className="text-muted-foreground">Sign up and choose a plan to get your unique referral link.</p>
+                    <h3 className="font-semibold text-lg">Create Your Account & Choose a Plan</h3>
+                    <p className="text-muted-foreground">Sign up to get your unique referral link.</p>
                   </div>
                 </li>
                 <li className="flex gap-4">
                   <div className="flex-shrink-0 w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-bold">2</div>
                   <div>
-                    <h3 className="font-semibold text-lg">Promote & Refer</h3>
-                    <p className="text-muted-foreground">Share your link through your blog, social media, or email list. Our high-value offer converts visitors into customers.</p>
+                    <h3 className="font-semibold text-lg">Activate Your 3-Day Trial</h3>
+                    <p className="text-muted-foreground">Pay a one-time activation fee to get started. This fee goes to the platform owner, not your referrer.</p>
                   </div>
                 </li>
                 <li className="flex gap-4">
                   <div className="flex-shrink-0 w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-bold">3</div>
                   <div>
-                    <h3 className="font-semibold text-lg">Get Paid Daily</h3>
-                    <p className="text-muted-foreground">Earn a 70-75% commission for every sale, paid out automatically to your PayPal every single day.</p>
+                    <h3 className="font-semibold text-lg">Promote, Refer & Get Paid Daily</h3>
+                    <p className="text-muted-foreground">Earn 70-75% commission on recurring sales from your referrals after their trial ends. Payouts are sent automatically to your PayPal every day.</p>
                   </div>
                 </li>
               </ul>
