@@ -51,22 +51,25 @@ export default function DashboardPage() {
   const isPlatformDataEmpty = isAdmin && !allReferralsLoading && allReferrals?.length === 0;
 
   // --- Platform-Wide Stats (for Admins) ---
-  const { platformRevenue, totalAffiliatePayouts, totalPlatformReferrals, totalGrossSales, totalUsers, totalAffiliates } = useMemo(() => {
+  const { platformRevenue, totalAffiliatePayouts, totalPlatformReferrals, totalGrossSales, totalUsers, totalAffiliates, pendingActivations } = useMemo(() => {
     if (!isAdmin) {
-      return { platformRevenue: 0, totalAffiliatePayouts: 0, totalPlatformReferrals: 0, totalGrossSales: 0, totalUsers: 0, totalAffiliates: 0 };
+      return { platformRevenue: 0, totalAffiliatePayouts: 0, totalPlatformReferrals: 0, totalGrossSales: 0, totalUsers: 0, totalAffiliates: 0, pendingActivations: 0 };
     }
 
     const usersCount = allUsers?.length ?? 0;
     const affiliatesCount = allUsers?.filter(u => u.isAffiliate).length ?? 0;
 
     if (!allReferrals || allReferrals.length === 0) {
-      return { platformRevenue: 0, totalAffiliatePayouts: 0, totalPlatformReferrals: 0, totalGrossSales: 0, totalUsers: usersCount, totalAffiliates: affiliatesCount };
+      return { platformRevenue: 0, totalAffiliatePayouts: 0, totalPlatformReferrals: 0, totalGrossSales: 0, totalUsers: usersCount, totalAffiliates: affiliatesCount, pendingActivations: 0 };
     }
 
     try {
-      // Calculate gross sales by deriving it from the commission, which is more reliable if grossSale field is missing.
-      const grossSales = allReferrals.reduce((sum, r) => sum + (r.grossSale || 0), 0);
-      const payouts = allReferrals.reduce((sum, r) => sum + (r.commission || 0), 0);
+      const pending = allReferrals.filter(r => r.activationStatus === 'pending').length;
+      const activatedReferrals = allReferrals.filter(r => r.activationStatus === 'activated');
+      
+      // Gross sales and revenue should only be calculated from activated referrals
+      const grossSales = activatedReferrals.reduce((sum, r) => sum + (r.grossSale || 0), 0);
+      const payouts = activatedReferrals.reduce((sum, r) => sum + (r.commission || 0), 0);
       const companyRevenue = grossSales - payouts;
 
       return {
@@ -76,10 +79,11 @@ export default function DashboardPage() {
         totalGrossSales: grossSales,
         totalUsers: usersCount,
         totalAffiliates: affiliatesCount,
+        pendingActivations: pending,
       };
     } catch (e) {
       console.error("Error calculating platform stats:", e);
-      return { platformRevenue: 0, totalAffiliatePayouts: 0, totalPlatformReferrals: 0, totalGrossSales: 0, totalUsers: usersCount, totalAffiliates: affiliatesCount };
+      return { platformRevenue: 0, totalAffiliatePayouts: 0, totalPlatformReferrals: 0, totalGrossSales: 0, totalUsers: usersCount, totalAffiliates: affiliatesCount, pendingActivations: 0 };
     }
   }, [allReferrals, allUsers, isAdmin]);
 
@@ -165,18 +169,18 @@ export default function DashboardPage() {
                             </AlertDescription>
                         </Alert>
 
-                        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                             <StatCard
                                 title="Platform Revenue"
                                 value={`$${platformRevenue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                                 icon={<TrendingUp />}
-                                description="Your company's revenue from all sales."
+                                description="Revenue from completed activations and sales."
                             />
                              <StatCard
                                 title="Total Gross Sales"
                                 value={`$${totalGrossSales.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                                 icon={<BarChart />}
-                                description="Gross value of all sales on the platform."
+                                description="Gross value of all completed sales on the platform."
                             />
                              <StatCard
                                 title="Total Affiliate Payouts"
@@ -189,6 +193,12 @@ export default function DashboardPage() {
                                 value={`+${totalPlatformReferrals}`}
                                 icon={<UserPlus />}
                                 description="Total users referred across the entire platform."
+                            />
+                            <StatCard
+                                title="Pending Activations"
+                                value={`${pendingActivations}`}
+                                icon={<AlertCircle />}
+                                description="Users who signed up but have not yet paid."
                             />
                             <StatCard
                                 title="Total Platform Users"
