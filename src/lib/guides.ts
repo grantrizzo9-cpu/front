@@ -26,7 +26,7 @@ export const allGuides: Guide[] = [
         <h3>Step 2: Launch Your Website (Next 2 Hours)</h3>
         <p>This is the easy part. Our platform is built for speed.</p>
         <ul>
-            <li><strong>Sign Up:</strong> If you haven't already, sign up for an Affiliate AI Host plan using this link: <strong>https://hostproai.com/?ref=[YOUR_USERNAME_HERE]</strong></li>
+            <li><strong>Sign Up:</strong> If you haven't already, sign up for an Affiliate AI Host plan using this link: <strong>https://hostproai.com/?ref=rentahost</strong></li>
             <li><strong>Connect Domain:</strong> Follow our "Pre-Launch Checklist" guide to connect your domain to our hosting. While you wait for it to go live, you can start on the next step.</li>
         </ul>
 
@@ -126,46 +126,15 @@ export const allGuides: Guide[] = [
     level: "plus",
     content: `
       <p>An email list is a direct line to your audience and one of your most valuable assets. Unlike social media, you OWN your list.</p>
-      <p>We recommend using a service like <strong>MailerLite</strong>. They offer a great free plan and are very easy to use. To connect your website to MailerLite, you will need an API key and a Group ID.</p>
-      <p><strong>Please see our guide titled "Connecting to the MailerLite API" for detailed instructions on how to find these credentials.</strong></p>
+      <p>To start building your list, you'll need an email marketing service. There are many great options available like MailerLite, ConvertKit, or Brevo, many of which offer free starting plans.</p>
       <strong>General Steps to Start Your List:</strong>
       <ol>
-          <li><strong>Choose a Service:</strong> Start with <a href="https://www.mailerlite.com/" target="_blank" rel="noopener noreferrer" class="text-primary hover:underline">MailerLite</a>.</li>
-          <li><strong>Create a 'Lead Magnet':</strong> Offer something valuable for free in exchange for an email. Examples: "The 5-Step Checklist to Launching a Profitable Affiliate Website in 24 Hours".</li>
-          <li><strong>Add a Sign-up Form:</strong> Use the form on your homepage to capture emails.</li>
-          <li><strong>Nurture Your List:</strong> Send a welcome email with the lead magnet, followed by a mix of helpful content and promotional emails. A good ratio is 3 helpful emails for every 1 promotional email.</li>
+          <li><strong>Choose a Service:</strong> Sign up for a reputable email marketing platform.</li>
+          <li><strong>Create a 'Lead Magnet':</strong> Offer something valuable for free in exchange for an email. Your "5-Step Launch Checklist" is perfect for this.</li>
+          <li><strong>Add a Sign-up Form:</strong> Your chosen email service will provide you with an HTML form to embed on your site or a link to a landing page.</li>
+          <li><strong>Nurture Your List:</strong> Send a welcome email with the lead magnet, followed by a mix of helpful content and promotional emails. The 7-Day sequence in your guides is a great starting point.</li>
       </ol>
       <p>In your promotional emails, share the benefits of Affiliate AI Host and include your affiliate link.</p>
-    `
-  },
-  {
-    title: "Connecting to the MailerLite API",
-    level: "plus",
-    content: `
-      <p>MailerLite is a powerful yet user-friendly email marketing service that's perfect for affiliates. This guide will show you how to get your API key and Group ID, which you'll need to connect your website to your MailerLite account for features like automated newsletter sign-ups.</p>
-      
-      <h3>1. How to Find Your MailerLite API Key</h3>
-      <p>Follow these simple steps to locate your API key:</p>
-      <ol>
-          <li>Log in to your <a href="https://dashboard.mailerlite.com" target="_blank" rel="noopener noreferrer" class="text-primary hover:underline">MailerLite dashboard</a>.</li>
-          <li>In the left-hand navigation menu, click on <strong>Integrations</strong>.</li>
-          <li>On the Integrations page, find the <strong>Developer API</strong> section and click the <strong>Use</strong> button.</li>
-          <li>Your API key will be displayed on the next screen. You can click the <strong>Copy</strong> button to copy it to your clipboard.</li>
-          <li>Paste this key into your <code>.env</code> file for the <code>MAILERLITE_API_KEY</code> variable.</li>
-      </ol>
-
-      <h3>2. How to Find Your MailerLite Group ID</h3>
-      <p>You need a Group ID to tell MailerLite which list to add your new subscribers to.</p>
-      <ol>
-          <li>From your MailerLite dashboard, click on <strong>Subscribers</strong> in the top menu.</li>
-          <li>Click on the <strong>Groups</strong> tab.</li>
-          <li>If you don't have a group, create one now (e.g., "Website Subscribers").</li>
-          <li>Find your desired group in the list. The <strong>Group ID</strong> is the number displayed next to the group name.</li>
-          <li>Copy this ID and paste it into your <code>.env</code> file for the <code>MAILERLITE_GROUP_ID</code> variable.</li>
-      </ol>
-
-      <h3>Securing Your Credentials</h3>
-      <p>Your API key is secret and should be treated like a password. Storing it in the <code>.env</code> file keeps it secure and allows your application to use it without exposing it in the client-side code.</p>
     `
   },
 
@@ -180,7 +149,7 @@ export const allGuides: Guide[] = [
         <p>Your <code>.env</code> file holds the keys to your external services. Before launch, you must switch from testing (sandbox) keys to live (production) keys.</p>
         <ul>
             <li><strong>PayPal:</strong> Log in to your PayPal Developer Dashboard and get your <strong>Live</strong> credentials. Update the <code>PAYPAL_CLIENT_ID</code> and <code>PAYPAL_CLIENT_SECRET</code> in your <code>.env</code> file. Also ensure <code>NEXT_PUBLIC_PAYPAL_CLIENT_ID</code> matches your live client ID.</li>
-            <li><strong>MailerLite & Gemini:</strong> Ensure you have your final, production-ready API keys in the <code>.env</code> file for <code>MAILERLITE_API_KEY</code>, <code>MAILERLITE_GROUP_ID</code>, and <code>GEMINI_API_KEY</code>.</li>
+            <li><strong>Gemini:</strong> Ensure you have your final, production-ready API key in the <code>.env</code> file for <code>GEMINI_API_KEY</code>.</li>
         </ul>
 
         <h3>Step 2: Connect Your Custom Domain</h3>
@@ -252,7 +221,7 @@ export const allGuides: Guide[] = [
     title: "Your 7-Day Automated Email Follow-up Sequence",
     level: "pro",
     content: `
-        <p>This is your complete, 7-day email sequence, ready to copy and paste into your MailerLite automation. This sequence is designed to build trust, demonstrate value, and guide your subscribers toward signing up.</p>
+        <p>This is your complete, 7-day email sequence, ready to use with any email marketing provider (like MailerLite, ConvertKit, etc.). This sequence is designed to build trust, demonstrate value, and guide your subscribers toward signing up.</p>
 
         <hr class="my-6 border-border" />
 
@@ -262,7 +231,7 @@ export const allGuides: Guide[] = [
             <p>Hi there,</p>
             <p>Thank you for subscribing! I'm excited to share the checklist that can help you get a real, income-generating website up and running in just one day.</p>
             <p>Here is your exclusive guide: <strong>The 5-Step Checklist to Launching a Profitable Affiliate Website in 24 Hours.</strong></p>
-            <p><em>(You can copy the content from the "5-Step Checklist" guide and paste it here in MailerLite)</em></p>
+            <p><em>(You can copy the content from the "5-Step Checklist" guide and paste it here)</em></p>
             <p>To your success,</p>
             <p>Grant Rizzoli</p>
         </blockquote>

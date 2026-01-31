@@ -11,7 +11,6 @@ import Link from 'next/link';
 import { Footer } from '@/components/footer';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { NewsletterForm } from '@/components/newsletter-form';
 import { useSearchParams } from 'next/navigation';
 
 export function HomeContent() {
@@ -265,21 +264,6 @@ export function HomeContent() {
           </div>
         </section>
 
-        {/* Newsletter Section */}
-        <section className="w-full py-20 md:py-32 bg-card">
-          <div className="container text-center max-w-3xl">
-            <h2 className="font-headline text-3xl font-bold tracking-tight sm:text-4xl">
-              Get Your Free Affiliate Launch Checklist
-            </h2>
-            <p className="mt-4 max-w-2xl mx-auto text-lg text-muted-foreground">
-              Enter your email to receive our exclusive guide: "The 5-Step Checklist to Launching a Profitable Affiliate Website in 24 Hours".
-            </p>
-            <div className="mt-8 flex justify-center">
-              <NewsletterForm />
-            </div>
-          </div>
-        </section>
-        
         {/* CTA Section */}
         <section className="w-full py-20 md:py-32">
           <div className="container text-center">
