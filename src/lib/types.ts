@@ -4,7 +4,7 @@ export type SubscriptionTier = {
   id: string;
   name: string;
   price: number; // daily price
-  priceId: string; // for payment gateway
+  paypalPlanId: string; // ID for the subscription plan in PayPal
   description: string;
   features: string[];
   isMostPopular?: boolean;
@@ -25,6 +25,7 @@ export type User = {
     startDate: Timestamp;
     endDate: Timestamp | null;
     trialEndDate?: Timestamp | null;
+    paypalSubscriptionId?: string; // To manage the subscription in PayPal
   };
   paypalEmail?: string;
   customDomain?: {

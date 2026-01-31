@@ -3,9 +3,9 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { format } from "date-fns";
-import { ArrowRight, Loader2 } from "lucide-react";
+import { ArrowRight, Loader2, PartyPopper, TrendingUp } from "lucide-react";
 import Link from "next/link";
-import type { Payout, User as UserType } from "@/lib/types";
+import type { Payout, User as UserType, Referral } from "@/lib/types";
 import { useUser, useFirestore, useCollection, useMemoFirebase, useDoc, updateDocumentNonBlocking } from "@/firebase";
 import { collection, doc } from "firebase/firestore";
 import { Button } from "@/components/ui/button";
@@ -29,8 +29,15 @@ export default function PayoutsPage() {
     return doc(firestore, 'users', user.uid);
   }, [firestore, user?.uid]);
   const { data: userData, isLoading: isUserDataLoading } = useDoc<UserType>(userDocRef);
+  
+  const referralsRef = useMemoFirebase(() => {
+    if (!user || !firestore) return null;
+    return collection(firestore, 'users', user.uid, 'referrals');
+  }, [firestore, user?.uid]);
+  const { data: referrals, isLoading: referralsLoading } = useCollection<Referral>(referralsRef);
 
-  const isLoading = isUserLoading || payoutsLoading || isUserDataLoading;
+  const isLoading = isUserLoading || payoutsLoading || isUserDataLoading || referralsLoading;
+  const referralCount = referrals?.length ?? 0;
 
   const handleSaveChanges = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -61,6 +68,30 @@ export default function PayoutsPage() {
         <h1 className="text-3xl font-bold font-headline">Payouts</h1>
         <p className="text-muted-foreground">Manage your payout settings and view your payout history.</p>
       </div>
+
+       {referralCount >= 2 ? (
+            <Card className="bg-green-50 border-green-200 dark:bg-green-950 dark:border-green-800">
+                <CardHeader className="flex-row items-center gap-4">
+                    <PartyPopper className="h-8 w-8 text-green-600 dark:text-green-400 flex-shrink-0" />
+                    <div>
+                        <CardTitle className="text-green-800 dark:text-green-200">Payouts Unlocked!</CardTitle>
+                        <CardDescription className="text-green-700 dark:text-green-300">Congratulations on getting {referralCount} referrals! Your recurring commissions will be paid out daily.</CardDescription>
+                    </div>
+                </CardHeader>
+            </Card>
+        ) : (
+             <Card className="bg-amber-50 border-amber-200 dark:bg-amber-950 dark:border-amber-800">
+                <CardHeader className="flex-row items-center gap-4">
+                     <TrendingUp className="h-8 w-8 text-amber-600 dark:text-amber-400 flex-shrink-0" />
+                    <div>
+                        <CardTitle className="text-amber-800 dark:text-amber-200">Activate Your Payouts</CardTitle>
+                        <CardDescription className="text-amber-700 dark:text-amber-300">
+                            You have {referralCount} of 2 required referrals. Get 2 referrals to start earning from their recurring subscription payments.
+                        </CardDescription>
+                    </div>
+                </CardHeader>
+            </Card>
+        )}
       
       <Card>
         <form onSubmit={handleSaveChanges}>

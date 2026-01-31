@@ -4,7 +4,7 @@
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Loader2, CheckCircle, AlertTriangle, Info } from "lucide-react";
-import { useUser, useFirestore, useDoc, useMemoFirebase, updateDocumentNonBlocking } from "@/firebase";
+import { useUser, useFirestore, useDoc, useMemoFirebase } from "@/firebase";
 import { doc, serverTimestamp, writeBatch, Timestamp, updateDoc } from "firebase/firestore";
 import type { User as UserType } from "@/lib/types";
 import { subscriptionTiers } from "@/lib/data";
@@ -14,7 +14,7 @@ import { useState, useMemo, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
-import type { OnApproveData, CreateOrderData } from "@paypal/paypal-js";
+import type { OnApproveData, CreateSubscriptionData } from "@paypal/paypal-js";
 
 
 export default function UpgradePage() {
@@ -53,17 +53,10 @@ export default function UpgradePage() {
         return subscriptionTiers.filter(t => t.price > currentTierPrice);
     }, [userData]);
 
-    const createOrder = async (data: CreateOrderData): Promise<string> => {
+    const createSubscription = async (data: CreateSubscriptionData): Promise<string> => {
         setPaymentError(null);
-        if (!selectedTierId) {
-            const errorMsg = "No subscription tier was selected.";
-            setPaymentError(errorMsg);
-            return Promise.reject(new Error(errorMsg));
-        }
-
-        const tier = subscriptionTiers.find(t => t.id === selectedTierId);
-        if (!tier) {
-            const errorMsg = `Could not find details for selected tier ID: ${selectedTierId}`;
+        if (!selectedTierId || !user) {
+            const errorMsg = "No subscription tier selected or user not logged in.";
             setPaymentError(errorMsg);
             return Promise.reject(new Error(errorMsg));
         }
@@ -72,14 +65,14 @@ export default function UpgradePage() {
             const response = await fetch('/api/paypal', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action: 'create_order', planId: selectedTierId }),
+                body: JSON.stringify({ action: 'create_subscription', planId: selectedTierId, customId: user.uid }),
             });
 
-            const orderData = await response.json();
-            if (response.ok && orderData.orderId) {
-                return orderData.orderId;
+            const responseData = await response.json();
+            if (response.ok && responseData.subscriptionId) {
+                return responseData.subscriptionId;
             } else {
-                const errorMsg = orderData.debug || orderData.error || "Failed to create order on the server.";
+                const errorMsg = responseData.debug || responseData.error || "Failed to create subscription on the server.";
                 throw new Error(errorMsg);
             }
         } catch (e: any) {
@@ -93,63 +86,41 @@ export default function UpgradePage() {
         setPaymentError(null);
 
         try {
-            const response = await fetch('/api/paypal', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action: 'capture_order', orderId: data.orderID }),
-            });
-
-            const captureData = await response.json();
-
-            if (!response.ok || !captureData.success) {
-                const errorMsg = captureData.debug || captureData.error || 'Failed to capture PayPal payment on the server.';
-                throw new Error(errorMsg);
+            if (!userDocRef || !selectedTierId || !firestore || !user || !userData) {
+                throw new Error("User session or plan not found after payment.");
             }
             
-            if (userDocRef && selectedTierId && firestore && user && userData) {
-                const tier = subscriptionTiers.find(t => t.id === selectedTierId);
-                if (!tier) throw new Error("Selected plan details not found after payment.");
-                
-                const batch = writeBatch(firestore);
-                const isNewUserActivation = userData.subscription?.status === 'inactive';
+            const tier = subscriptionTiers.find(t => t.id === selectedTierId);
+            if (!tier) throw new Error("Selected plan details not found after payment.");
+            
+            const batch = writeBatch(firestore);
+            
+            const trialEnd = new Date();
+            trialEnd.setDate(trialEnd.getDate() + 3);
 
-                if (isNewUserActivation) {
-                    const trialEnd = new Date();
-                    trialEnd.setDate(trialEnd.getDate() + 3);
+            const isUpgrade = userData.subscription?.status === 'active';
 
-                    const newSubscription = {
-                        tierId: selectedTierId,
-                        status: 'active' as const,
-                        startDate: serverTimestamp(),
-                        endDate: null,
-                        trialEndDate: Timestamp.fromDate(trialEnd),
-                    };
-                    
-                    batch.update(userDocRef, { subscription: newSubscription });
-                    
-                    // If the user was referred, update their referral record
-                    if (userData.referredBy) {
-                        const referralDocRef = doc(firestore, 'users', userData.referredBy, 'referrals', user.uid);
-                        // We use a non-blocking update here as it's a secondary action.
-                        updateDocumentNonBlocking(referralDocRef, { activationStatus: 'activated' });
-                    }
-                    
-                    toast({ title: "Trial Activated!", description: `Your 3-day trial for the ${tier.name} plan has begun.` });
-
-                } else { // This is an existing user upgrading
-                    const newSubscription = {
-                        ...userData.subscription,
-                        tierId: selectedTierId,
-                    };
-                    batch.update(userDocRef, { subscription: newSubscription });
-                    toast({ title: "Subscription Upgraded!", description: `You've successfully upgraded to the ${tier.name} plan.` });
-                }
-
-                await batch.commit();
-                setSelectedTierId(null);
-            } else {
-                throw new Error("User session or selected plan not found after payment. Please try again.");
+            const newSubscriptionData = {
+                tierId: selectedTierId,
+                status: 'active' as const,
+                startDate: serverTimestamp(),
+                endDate: null,
+                trialEndDate: isUpgrade ? null : Timestamp.fromDate(trialEnd),
+                paypalSubscriptionId: data.subscriptionID,
+            };
+            
+            batch.update(userDocRef, { subscription: newSubscriptionData });
+            
+            if (!isUpgrade && userData.referredBy) {
+                const referralDocRef = doc(firestore, 'users', userData.referredBy, 'referrals', user.uid);
+                await updateDoc(referralDocRef, { activationStatus: 'activated' }).catch(err => console.error("Non-critical error updating referral status:", err));
             }
+            
+            await batch.commit();
+
+            toast({ title: isUpgrade ? "Subscription Upgraded!" : "Trial Activated!", description: `You now have access to the ${tier.name} plan.` });
+            setSelectedTierId(null);
+
         } catch (error: any) {
              const errorMsg = `Post-payment processing failed: ${error.message}`;
              setPaymentError(errorMsg);
@@ -209,7 +180,7 @@ export default function UpgradePage() {
                 <Info className="h-4 w-4" />
                 <AlertTitle>Important Information</AlertTitle>
                 <AlertDescription>
-                    You can activate your account at any time. After you have two successful referrals, you can upgrade your plan to access more advanced marketing guides.
+                    Your first payment is a one-time activation fee. This fee goes to the platform owner and starts your 3-day trial. Recurring daily payments begin automatically after the trial.
                 </AlertDescription>
             </Alert>
 
@@ -222,7 +193,7 @@ export default function UpgradePage() {
                 </Alert>
             )}
             
-            <PayPalScriptProvider options={{ clientId: paypalClientId!, currency: "USD", intent: "capture" }}>
+            <PayPalScriptProvider options={{ clientId: paypalClientId!, vault: true, intent: "subscription" }}>
                 {selectedTierId ? (
                     (() => {
                         const tier = subscriptionTiers.find(t => t.id === selectedTierId);
@@ -233,7 +204,7 @@ export default function UpgradePage() {
                                     <CardTitle>Confirm Your Plan</CardTitle>
                                     <CardDescription>
                                         {isNewUser 
-                                            ? <>You are paying a one-time fee to activate a 3-day trial for the <span className="font-bold text-primary">{tier.name}</span> plan.</>
+                                            ? <>You are activating a 3-day trial for the <span className="font-bold text-primary">{tier.name}</span> plan.</>
                                             : <>You are upgrading to the <span className="font-bold text-primary">{tier.name}</span> plan.</>
                                         }
                                     </CardDescription>
@@ -262,8 +233,8 @@ export default function UpgradePage() {
                                         )}
                                         <PayPalButtons
                                             key={selectedTierId}
-                                            style={{ layout: "vertical", label: "pay", tagline: false, height: 44 }}
-                                            createOrder={createOrder}
+                                            style={{ layout: "vertical", label: "subscribe", tagline: false, height: 44 }}
+                                            createSubscription={createSubscription}
                                             onApprove={onApprove}
                                             onError={onError}
                                             disabled={isProcessing}
