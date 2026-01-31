@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -60,7 +61,7 @@ export default function UpgradePage() {
         }
 
         try {
-            const response = await fetch('/api/paypal/route', {
+            const response = await fetch('/api/paypal', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ action: 'create_order', planId: selectedTierId }),
@@ -69,7 +70,7 @@ export default function UpgradePage() {
             const orderData = await response.json();
 
             if (!response.ok || !orderData.success) {
-                const errorMsg = orderData.error || 'Failed to create PayPal order on the server.';
+                const errorMsg = orderData.debug || orderData.error || 'Failed to create PayPal order on the server.';
                 setPaymentError(errorMsg);
                 setIsProcessing(false);
                 throw new Error(errorMsg);
@@ -86,7 +87,7 @@ export default function UpgradePage() {
 
     const onApprove = async (data: OnApproveData, actions: OnApproveActions): Promise<void> => {
         try {
-            const response = await fetch('/api/paypal/route', {
+            const response = await fetch('/api/paypal', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ action: 'capture_order', orderId: data.orderID }),
@@ -95,7 +96,7 @@ export default function UpgradePage() {
             const captureData = await response.json();
 
             if (!response.ok || !captureData.success) {
-                const errorMsg = captureData.error || 'Failed to capture PayPal payment on the server.';
+                const errorMsg = captureData.debug || captureData.error || 'Failed to capture PayPal payment on the server.';
                 setPaymentError(errorMsg);
                 setIsProcessing(false);
                 return;
