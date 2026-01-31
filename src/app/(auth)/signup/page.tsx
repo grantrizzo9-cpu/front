@@ -12,8 +12,8 @@ import { useToast } from "@/hooks/use-toast";
 import { subscriptionTiers } from "@/lib/data";
 import { Loader2, Users } from "lucide-react";
 import { useAuth, useFirestore } from "@/firebase";
-import { createUserWithEmailAndPassword, updateProfile, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
-import { doc, getDoc, writeBatch, serverTimestamp, Timestamp, collection } from "firebase/firestore";
+import { createUserWithEmailAndPassword, updateProfile, GoogleAuthProvider, signInWithPopup, User } from "firebase/auth";
+import { doc, getDoc, writeBatch, serverTimestamp, setDoc } from "firebase/firestore";
 import { Skeleton } from '@/components/ui/skeleton';
 
 
@@ -40,12 +40,63 @@ function SignupFormComponent() {
 
     const isFormValid = username.length > 2 && email.includes('@') && password.length >= 6;
 
+    const postSignupFlow = async (user: User, finalUsername: string) => {
+        const batch = writeBatch(firestore);
+        const userDocRef = doc(firestore, "users", user.uid);
+        
+        let referrerUid: string | null = null;
+        if (referralCode) {
+            const referrerUsernameDoc = await getDoc(doc(firestore, "usernames", referralCode));
+            if (referrerUsernameDoc.exists()) {
+                referrerUid = referrerUsernameDoc.data().uid;
+            }
+        }
+
+        const userData = {
+            id: user.uid, email: user.email, username: finalUsername, referredBy: referrerUid, isAffiliate: true, createdAt: serverTimestamp(),
+            subscription: {
+                tierId: plan.id,
+                status: 'inactive' as const,
+                startDate: serverTimestamp(),
+                endDate: null,
+            },
+            paypalEmail: '', customDomain: null
+        };
+        batch.set(userDocRef, userData);
+
+        const usernameDocForWriteRef = doc(firestore, "usernames", finalUsername);
+        batch.set(usernameDocForWriteRef, { uid: user.uid });
+
+        // If there was a referrer, create the referral document in their subcollection
+        if (referrerUid) {
+            const referralDocRef = doc(firestore, 'users', referrerUid, 'referrals', user.uid);
+            const referralData = {
+                id: user.uid,
+                affiliateId: referrerUid,
+                referredUserId: user.uid,
+                referredUserUsername: finalUsername,
+                planPurchased: plan.name,
+                grossSale: 0,
+                commission: 0,
+                status: 'paid' as const, // 'paid' because commission is 0
+                activationStatus: 'pending' as const,
+                date: serverTimestamp(),
+                subscriptionId: user.uid, // Using user's UID as a unique ID for this
+            };
+            batch.set(referralDocRef, referralData);
+        }
+
+        await batch.commit();
+
+        toast({ title: "Account Created!", description: "Welcome! We're redirecting you to activate your plan." });
+        router.push(`/dashboard/upgrade?plan=${plan.id}`);
+    };
+
     const handleSignup = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setIsProcessing(true);
         
         try {
-            // Check if username is taken
             const usernameDocRef = doc(firestore, "usernames", username);
             const usernameDoc = await getDoc(usernameDocRef);
             if (usernameDoc.exists()) {
@@ -54,29 +105,9 @@ function SignupFormComponent() {
                 return;
             }
 
-            // Create user with email and password
             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-            const user = userCredential.user;
-            await updateProfile(user, { displayName: username });
-
-            // Set up Firestore documents in a batch
-            const batch = writeBatch(firestore);
-            const userDocRef = doc(firestore, "users", user.uid);
-            
-            const userData = {
-                id: user.uid, email: user.email, username: username, referredBy: referralCode || null, isAffiliate: true, createdAt: serverTimestamp(),
-                subscription: null, // Subscription is set after payment
-                paypalEmail: '', customDomain: null
-            };
-            batch.set(userDocRef, userData);
-
-            const usernameDocForWriteRef = doc(firestore, "usernames", username);
-            batch.set(usernameDocForWriteRef, { uid: user.uid });
-
-            await batch.commit();
-
-            toast({ title: "Account Created!", description: "Welcome! We're redirecting you to activate your plan." });
-            router.push(planId ? `/dashboard/upgrade?plan=${planId}` : "/dashboard/upgrade");
+            await updateProfile(userCredential.user, { displayName: username });
+            await postSignupFlow(userCredential.user, username);
 
         } catch (error: any) {
             let description;
@@ -86,7 +117,6 @@ function SignupFormComponent() {
                 default: description = error.message || "An unknown error occurred while creating your account.";
             }
             toast({ variant: "destructive", title: "Account Creation Failed", description: description });
-        } finally {
             setIsProcessing(false);
         }
     };
@@ -101,29 +131,18 @@ function SignupFormComponent() {
             const userDoc = await getDoc(userDocRef);
 
             if (!userDoc.exists()) {
-                const batch = writeBatch(firestore);
                 let g_username = (user.displayName || user.email?.split('@')[0] || `user${user.uid.substring(0,5)}`).replace(/[^a-zA-Z0-9]/g, '');
                 const initialUsernameDoc = await getDoc(doc(firestore, "usernames", g_username));
                 if (initialUsernameDoc.exists()) g_username = `${g_username}${Math.floor(100 + Math.random() * 900)}`;
-                batch.set(doc(firestore, "usernames", g_username), { uid: user.uid });
-
-                batch.set(userDocRef, {
-                    id: user.uid, email: user.email, username: g_username, referredBy: referralCode, isAffiliate: true, createdAt: serverTimestamp(),
-                    subscription: null, // Set after payment
-                    paypalEmail: '', customDomain: null
-                });
-
-                await batch.commit();
-                toast({ title: "Account Created!", description: "Welcome! Let's get your plan activated." });
-                router.push(planId ? `/dashboard/upgrade?plan=${planId}` : "/dashboard/upgrade");
+                
+                await postSignupFlow(user, g_username);
             } else {
                  toast({ title: "Login Successful", description: "Welcome back!" });
                  router.push("/dashboard");
             }
         } catch (error: any) {
              toast({ variant: "destructive", title: "Google Sign-In Failed", description: error.message });
-        } finally {
-            setIsProcessing(false);
+             setIsProcessing(false);
         }
     };
     
@@ -156,7 +175,7 @@ function SignupFormComponent() {
                         </div>
                     )}
                     <Button type="submit" className="w-full" disabled={!isFormValid || isProcessing}>
-                        {isProcessing ? <Loader2 className="animate-spin" /> : "Create Account"}
+                        {isProcessing ? <Loader2 className="animate-spin" /> : "Create Account & Proceed to Payment"}
                     </Button>
                 </form>
                 <div className="relative my-4">

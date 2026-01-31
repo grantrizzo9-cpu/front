@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -41,7 +42,7 @@ export default function ReferralsPage() {
         <CardHeader>
           <CardTitle>All Referrals</CardTitle>
           <CardDescription>
-            You have a total of {referrals?.length ?? 0} referrals.
+            You have a total of {referrals?.length ?? 0} referrals. Commissions are paid on recurring payments after the user activates and completes their trial.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -52,7 +53,7 @@ export default function ReferralsPage() {
                   <TableHead>Username</TableHead>
                   <TableHead>Plan</TableHead>
                   <TableHead>Commission</TableHead>
-                  <TableHead>Status</TableHead>
+                  <TableHead>Activation Status</TableHead>
                   <TableHead className="text-right">Date</TableHead>
                 </TableRow>
               </TableHeader>
@@ -61,10 +62,10 @@ export default function ReferralsPage() {
                   <TableRow key={referral.id}>
                     <TableCell className="font-medium">{referral.referredUserUsername}</TableCell>
                     <TableCell>{referral.planPurchased}</TableCell>
-                    <TableCell>${referral.commission.toFixed(2)}</TableCell>
+                    <TableCell>${(referral.commission || 0).toFixed(2)}</TableCell>
                     <TableCell>
-                      <Badge variant={referral.status === 'paid' ? 'secondary' : 'default'} className={referral.status === 'unpaid' ? 'bg-green-500 text-white hover:bg-green-600' : ''}>
-                        {referral.status}
+                      <Badge variant={referral.activationStatus === 'activated' ? 'default' : 'secondary'} className={referral.activationStatus === 'activated' ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800'}>
+                        {referral.activationStatus}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right">{format(referral.date.toDate(), 'PPpp')}</TableCell>

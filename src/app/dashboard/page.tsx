@@ -1,10 +1,11 @@
+
 'use client';
 
 import { StatCard } from "@/components/stat-card";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { format } from "date-fns";
-import { DollarSign, Users, BarChart, BrainCircuit, ArrowRight, Loader2, TrendingUp, Info, UserCheck, UserPlus } from "lucide-react";
+import { DollarSign, Users, BarChart, BrainCircuit, ArrowRight, Loader2, TrendingUp, Info, UserCheck, UserPlus, AlertCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import Link from 'next/link';
 import { Button } from "@/components/ui/button";
@@ -46,7 +47,7 @@ export default function DashboardPage() {
   }, [isAdmin, firestore]);
   const { data: allReferrals, isLoading: allReferralsLoading } = useCollection<Referral>(allReferralsQuery);
   
-  const initialLoading = isUserLoading || isAdminLoading;
+  const initialLoading = isUserLoading || isAdminLoading || isUserDataLoading;
   const isPlatformDataEmpty = isAdmin && !allReferralsLoading && allReferrals?.length === 0;
 
   // --- Platform-Wide Stats (for Admins) ---
@@ -64,11 +65,8 @@ export default function DashboardPage() {
 
     try {
       // Calculate gross sales by deriving it from the commission, which is more reliable if grossSale field is missing.
-      const grossSales = allReferrals.reduce((sum, r) => {
-          const commission = typeof r.commission === 'number' ? r.commission : 0;
-          return sum + (commission / 0.70);
-      }, 0);
-      const payouts = allReferrals.reduce((sum, r) => sum + (typeof r.commission === 'number' ? r.commission : 0), 0);
+      const grossSales = allReferrals.reduce((sum, r) => sum + (r.grossSale || 0), 0);
+      const payouts = allReferrals.reduce((sum, r) => sum + (r.commission || 0), 0);
       const companyRevenue = grossSales - payouts;
 
       return {
@@ -96,13 +94,9 @@ export default function DashboardPage() {
           return { personalTotalCommission: 0, personalTotalReferrals: 0, personalUnpaidCommissions: 0, personalGrossSalesValue: 0 };
       }
 
-      const totalCommission = personalReferrals.reduce((sum, r) => sum + r.commission, 0);
-      const unpaidCommissions = personalReferrals.filter(r => r.status === 'unpaid').reduce((sum, r) => sum + r.commission, 0);
-      
-      const grossSales = personalReferrals.reduce((sum, r) => {
-          const commission = typeof r.commission === 'number' ? r.commission : 0;
-          return sum + (commission / 0.70);
-      }, 0);
+      const totalCommission = personalReferrals.reduce((sum, r) => sum + (r.commission || 0), 0);
+      const unpaidCommissions = personalReferrals.filter(r => r.status === 'unpaid').reduce((sum, r) => sum + (r.commission || 0), 0);
+      const grossSales = personalReferrals.reduce((sum, r) => sum + (r.grossSale || 0), 0);
 
       return {
           personalTotalCommission: totalCommission,
@@ -113,8 +107,10 @@ export default function DashboardPage() {
   }, [personalReferrals]);
 
   const recentPersonalReferrals = personalReferrals?.sort((a, b) => b.date.toMillis() - a.date.toMillis()).slice(0, 5) ?? [];
+  
+  const isSubscriptionInactive = userData?.subscription?.status === 'inactive';
   const trialEndDate = userData?.subscription?.trialEndDate?.toDate();
-  const isTrialActive = trialEndDate && trialEndDate > new Date();
+  const isTrialActive = userData?.subscription?.status === 'active' && trialEndDate && trialEndDate > new Date();
 
   if (initialLoading) {
       return (
@@ -165,7 +161,7 @@ export default function DashboardPage() {
                             <Info className="h-4 w-4 text-primary" />
                             <AlertTitle className="font-bold text-primary">You are the Platform Owner</AlertTitle>
                             <AlertDescription className="text-foreground/80">
-                               This Admin section shows your <strong>30% revenue share</strong> from <strong>all sales across the entire platform</strong>. The "Your Affiliate Dashboard" section below shows stats for your personal referrals only.
+                               This Admin section shows platform-wide revenue. The first payment from every new user is a 100% platform fee. Commissions are earned on subsequent recurring payments.
                             </AlertDescription>
                         </Alert>
 
@@ -174,7 +170,7 @@ export default function DashboardPage() {
                                 title="Platform Revenue"
                                 value={`$${platformRevenue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                                 icon={<TrendingUp />}
-                                description="Your company's 30% share of revenue from all sales."
+                                description="Your company's revenue from all sales."
                             />
                              <StatCard
                                 title="Total Gross Sales"
@@ -186,7 +182,7 @@ export default function DashboardPage() {
                                 title="Total Affiliate Payouts"
                                 value={`$${totalAffiliatePayouts.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                                 icon={<DollarSign />}
-                                description="Total 70% commissions generated by all affiliates."
+                                description="Total commissions generated by all affiliates."
                             />
                             <StatCard
                                 title="Platform-Wide Referrals"
@@ -218,9 +214,9 @@ export default function DashboardPage() {
                                         <TableHeader>
                                             <TableRow>
                                                 <TableHead>Referred User</TableHead>
-                                                <TableHead>Affiliate ID</TableHead>
+                                                <TableHead>Affiliate</TableHead>
                                                 <TableHead>Plan</TableHead>
-                                                <TableHead>Initial Commission</TableHead>
+                                                <TableHead>Status</TableHead>
                                             </TableRow>
                                         </TableHeader>
                                         <TableBody>
@@ -229,7 +225,11 @@ export default function DashboardPage() {
                                                     <TableCell className="font-medium">{referral.referredUserUsername}</TableCell>
                                                     <TableCell className="font-mono text-xs">{referral.affiliateId}</TableCell>
                                                     <TableCell>{referral.planPurchased}</TableCell>
-                                                    <TableCell>${referral.commission.toFixed(2)}</TableCell>
+                                                    <TableCell>
+                                                        <Badge variant={referral.activationStatus === 'activated' ? 'secondary' : 'default'} className={referral.activationStatus === 'activated' ? 'bg-green-500 text-white' : 'bg-amber-500 text-white'}>
+                                                            {referral.activationStatus}
+                                                        </Badge>
+                                                    </TableCell>
                                                 </TableRow>
                                             ))}
                                         </TableBody>
@@ -254,12 +254,25 @@ export default function DashboardPage() {
             <p className="text-muted-foreground">Welcome back! Here's a summary of your personal affiliate activity.</p>
         </div>
 
+        {isSubscriptionInactive && (
+             <Alert variant="destructive">
+                <AlertCircle className="h-4 w-4" />
+                <AlertTitle>Your Account is Inactive!</AlertTitle>
+                <AlertDescription>
+                    You must pay the one-time activation fee to start your trial and get access to your tools.
+                    <Button asChild size="sm" className="ml-4">
+                        <Link href={`/dashboard/upgrade?plan=${userData?.subscription?.tierId || 'starter'}`}>Activate Your Plan</Link>
+                    </Button>
+                </AlertDescription>
+            </Alert>
+        )}
+
         {isTrialActive && (
             <Alert className="border-accent/50 bg-accent/5">
                 <Info className="h-4 w-4 text-accent" />
                 <AlertTitle className="text-accent">You're on a Trial!</AlertTitle>
                 <AlertDescription>
-                    Your 3-day free trial will end on {format(trialEndDate, 'PP')}. Start referring to keep the momentum going!
+                    Your 3-day trial will end on {format(trialEndDate, 'PP')}. Start referring to keep the momentum going!
                 </AlertDescription>
             </Alert>
         )}
@@ -269,25 +282,25 @@ export default function DashboardPage() {
                 title="Your Total Earnings"
                 value={`$${personalTotalCommission.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                 icon={<DollarSign />}
-                description="Your 70% commission from your direct sales."
+                description="Your commission from recurring sales."
             />
             <StatCard
                 title="Your Total Referrals"
                 value={`+${personalTotalReferrals}`}
                 icon={<Users />}
-                description="Users who signed up for a plan directly using your link."
+                description="Users who signed up using your link."
             />
             <StatCard
                 title="Your Gross Sales Value"
                 value={`$${personalGrossSalesValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                 icon={<BarChart />}
-                description="Gross value of sales made from your direct referrals."
+                description="Gross value of recurring sales from your referrals."
             />
             <StatCard
                 title="Your Unpaid Commissions"
                 value={`$${personalUnpaidCommissions.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                 icon={<DollarSign className="text-green-500" />}
-                description="Your 70% share from direct sales, to be paid out."
+                description="Your share from recurring sales, to be paid out."
             />
         </div>
 
@@ -304,8 +317,7 @@ export default function DashboardPage() {
                                 <TableRow>
                                     <TableHead>Username</TableHead>
                                     <TableHead>Plan</TableHead>
-                                    <TableHead>Commission</TableHead>
-                                    <TableHead>Status</TableHead>
+                                    <TableHead>Activation</TableHead>
                                     <TableHead className="text-right">Date</TableHead>
                                 </TableRow>
                             </TableHeader>
@@ -314,10 +326,9 @@ export default function DashboardPage() {
                                     <TableRow key={referral.id}>
                                         <TableCell className="font-medium">{referral.referredUserUsername}</TableCell>
                                         <TableCell>{referral.planPurchased}</TableCell>
-                                        <TableCell>${referral.commission.toFixed(2)}</TableCell>
                                         <TableCell>
-                                            <Badge variant={referral.status === 'paid' ? 'secondary' : 'default'} className={referral.status === 'unpaid' ? 'bg-green-500 text-white' : ''}>
-                                                {referral.status}
+                                            <Badge variant={referral.activationStatus === 'activated' ? 'default' : 'secondary'} className={referral.activationStatus === 'activated' ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800'}>
+                                                {referral.activationStatus}
                                             </Badge>
                                         </TableCell>
                                         <TableCell className="text-right">{format(referral.date.toDate(), 'PP')}</TableCell>

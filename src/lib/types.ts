@@ -16,7 +16,7 @@ export type User = {
   uid: string;
   email: string | null;
   username: string;
-  referredBy: string | null;
+  referredBy: string | null; // This will now store the Referrer's UID
   isAffiliate: boolean;
   createdAt: Timestamp;
   subscription?: {
@@ -41,11 +41,10 @@ export type Referral = {
   planPurchased: string;
   grossSale: number;
   commission: number;
-  status: 'paid' | 'unpaid';
+  status: 'paid' | 'unpaid'; // For future recurring commission payments
+  activationStatus: 'pending' | 'activated'; // For the initial admin fee
   date: Timestamp;
   subscriptionId: string;
-  // This property is added for security rule validation during creation.
-  triggeringUserReferredBy?: string;
 };
 
 export type Payout = {

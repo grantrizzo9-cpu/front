@@ -68,11 +68,11 @@ export function HomeContent() {
   ];
 
   const faqs = [
-    { q: "How does the referral tracking work?", a: "When someone clicks your unique affiliate link, a cookie is stored in their browser that lasts forever. When they sign up, they are permanently linked to your account. You will receive a 70% commission on all their recurring subscription payments after their 3-day trial, rising to 75% after your 10th referral." },
-    { q: "How and when do I get paid?", a: "We process all commission payouts daily. All your earned commissions from the previous day are automatically sent to the PayPal account you have on file. It's fully automated." },
-    { q: "What am I selling?", a: "You are promoting our subscription plans which include high-quality web hosting, a suite of powerful AI tools, and access to an exclusive, tiered library of marketing guides. All plans begin with a 3-day trial, initiated by a one-time activation fee." },
+    { q: "How does the referral tracking work?", a: "When someone clicks your unique affiliate link, our system permanently links their account to yours. You will see them on your dashboard immediately as 'Pending Activation'. Once they pay their one-time activation fee, you will earn 70-75% commission on all their subsequent daily subscription payments." },
+    { q: "How and when do I get paid?", a: "We process all commission payouts daily. All your earned commissions from recurring payments are automatically sent to the PayPal account you have on file." },
+    { q: "What am I selling?", a: "You are promoting our subscription plans which include web hosting and AI tools. To start, every new user pays a one-time activation fee (which goes to the platform owner). This fee activates their 3-day trial. After the trial, their daily subscription begins, and you earn commissions on those payments." },
     { q: "Is there a limit to how much I can earn?", a: "Absolutely not! There is no cap on your potential earnings. The more customers you refer, the more you earn. With a base 70% commission rate that rises to 75% for top affiliates, the sky is the limit." },
-    { q: "What is your refund policy?", a: "The one-time activation fee to start your trial is non-refundable. However, you can cancel your subscription at any time during your 3-day trial without any further charges." },
+    { q: "Can I get a refund on the activation fee?", a: "The one-time activation fee is non-refundable as it covers account setup and access to the tools. However, you can cancel your subscription at any time during your 3-day trial without any further charges." },
   ];
 
   return (
@@ -131,21 +131,21 @@ export function HomeContent() {
                   <div className="flex-shrink-0 w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-bold">1</div>
                   <div>
                     <h3 className="font-semibold text-lg">Create Your Account & Choose a Plan</h3>
-                    <p className="text-muted-foreground">Sign up to get your unique referral link.</p>
+                    <p className="text-muted-foreground">Sign up to get your unique referral link. Your referred users will immediately appear on your dashboard.</p>
                   </div>
                 </li>
                 <li className="flex gap-4">
                   <div className="flex-shrink-0 w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-bold">2</div>
                   <div>
                     <h3 className="font-semibold text-lg">Activate Your 3-Day Trial</h3>
-                    <p className="text-muted-foreground">Pay a one-time activation fee to get started. This fee goes to the platform owner, not your referrer.</p>
+                    <p className="text-muted-foreground">Pay a one-time activation fee to get instant access to your dashboard and tools. This fee goes to the platform owner, not your referrer.</p>
                   </div>
                 </li>
                 <li className="flex gap-4">
                   <div className="flex-shrink-0 w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-bold">3</div>
                   <div>
                     <h3 className="font-semibold text-lg">Promote, Refer & Get Paid Daily</h3>
-                    <p className="text-muted-foreground">Earn 70-75% commission on recurring sales from your referrals after their trial ends. Payouts are sent automatically to your PayPal every day.</p>
+                    <p className="text-muted-foreground">Earn 70-75% commission on recurring daily sales from your referrals after their trial ends. Payouts are sent automatically to your PayPal every day.</p>
                   </div>
                 </li>
               </ul>

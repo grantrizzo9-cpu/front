@@ -3,9 +3,9 @@
 
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Loader2, CheckCircle, AlertTriangle } from "lucide-react";
-import { useUser, useFirestore, useDoc, useMemoFirebase } from "@/firebase";
-import { doc, serverTimestamp, writeBatch, Timestamp } from "firebase/firestore";
+import { Loader2, CheckCircle, AlertTriangle, Info } from "lucide-react";
+import { useUser, useFirestore, useDoc, useMemoFirebase, updateDocumentNonBlocking } from "@/firebase";
+import { doc, serverTimestamp, writeBatch, Timestamp, updateDoc } from "firebase/firestore";
 import type { User as UserType } from "@/lib/types";
 import { subscriptionTiers } from "@/lib/data";
 import { useToast } from "@/hooks/use-toast";
@@ -38,13 +38,15 @@ export default function UpgradePage() {
         const planId = searchParams.get('plan');
         if (planId && subscriptionTiers.some(t => t.id === planId)) {
             setSelectedTierId(planId);
+        } else if (userData?.subscription?.status === 'inactive' && userData.subscription.tierId) {
+            setSelectedTierId(userData.subscription.tierId);
         }
-    }, [searchParams]);
+    }, [searchParams, userData]);
 
     const isLoading = isUserLoading || isUserDataLoading;
     
     const availableTiers = useMemo(() => {
-        if (!userData?.subscription) {
+        if (!userData?.subscription || userData.subscription.status === 'inactive') {
             return subscriptionTiers;
         }
         const currentTierPrice = subscriptionTiers.find(t => t.id === userData.subscription?.tierId)?.price ?? 0;
@@ -109,8 +111,9 @@ export default function UpgradePage() {
                 if (!tier) throw new Error("Selected plan details not found after payment.");
                 
                 const batch = writeBatch(firestore);
+                const isNewUserActivation = userData.subscription?.status === 'inactive';
 
-                if (!userData.subscription) { // This is a new user's first payment
+                if (isNewUserActivation) {
                     const trialEnd = new Date();
                     trialEnd.setDate(trialEnd.getDate() + 3);
 
@@ -122,11 +125,14 @@ export default function UpgradePage() {
                         trialEndDate: Timestamp.fromDate(trialEnd),
                     };
                     
-                    // This is the first payment (activation fee) and it goes to the platform owner.
-                    // DO NOT create a referral/commission document here for the affiliate.
-                    // Affiliate commission logic will apply to subsequent (recurring) payments after the trial.
-                    
                     batch.update(userDocRef, { subscription: newSubscription });
+                    
+                    // If the user was referred, update their referral record
+                    if (userData.referredBy) {
+                        const referralDocRef = doc(firestore, 'users', userData.referredBy, 'referrals', user.uid);
+                        // We use a non-blocking update here as it's a secondary action.
+                        updateDocumentNonBlocking(referralDocRef, { activationStatus: 'activated' });
+                    }
                     
                     toast({ title: "Trial Activated!", description: `Your 3-day trial for the ${tier.name} plan has begun.` });
 
@@ -159,10 +165,11 @@ export default function UpgradePage() {
         setIsProcessing(false);
     };
     
-    const pageTitle = userData?.subscription ? "Upgrade Your Plan" : "Activate Your Plan";
-    const pageDescription = userData?.subscription 
-        ? `You are currently on the ${subscriptionTiers.find(t => t.id === userData?.subscription?.tierId)?.name || 'Unknown'} plan. Unlock more features by upgrading.`
-        : "Pay the one-time activation fee to start your 3-day trial and get instant access to all tools.";
+    const isNewUser = !userData?.subscription || userData.subscription.status === 'inactive';
+    const pageTitle = isNewUser ? "Activate Your Plan" : "Upgrade Your Plan";
+    const pageDescription = isNewUser 
+        ? "Pay the one-time activation fee to start your 3-day trial and get instant access to all tools."
+        : `You are currently on the ${subscriptionTiers.find(t => t.id === userData?.subscription?.tierId)?.name || 'Unknown'} plan. Unlock more features by upgrading.`;
 
 
     if (isLoading) {
@@ -197,6 +204,15 @@ export default function UpgradePage() {
                 <h1 className="text-3xl font-bold font-headline">{pageTitle}</h1>
                 <p className="text-muted-foreground mt-2">{pageDescription}</p>
             </div>
+            
+            <Alert>
+                <Info className="h-4 w-4" />
+                <AlertTitle>Important Information</AlertTitle>
+                <AlertDescription>
+                    You can activate your account at any time. After you have two successful referrals, you can upgrade your plan to access more advanced marketing guides.
+                </AlertDescription>
+            </Alert>
+
 
             {paymentError && (
                 <Alert variant="destructive">
@@ -211,7 +227,6 @@ export default function UpgradePage() {
                     (() => {
                         const tier = subscriptionTiers.find(t => t.id === selectedTierId);
                         if (!tier) return null;
-                        const isNewUser = !userData?.subscription;
                         return (
                             <Card className="max-w-md mx-auto animate-in fade-in-50">
                                 <CardHeader>
@@ -226,7 +241,7 @@ export default function UpgradePage() {
                                 <CardContent className="space-y-4">
                                     <div className="flex items-baseline gap-2">
                                         <span className="text-4xl font-bold">${tier.price.toFixed(2)}</span>
-                                        <span className="text-muted-foreground">{isNewUser ? 'One-Time Fee' : 'USD / day'}</span>
+                                        <span className="text-muted-foreground">{isNewUser ? 'One-Time Activation Fee' : 'USD / day'}</span>
                                     </div>
                                     <ul className="space-y-3">
                                         {tier.features.map((feature, index) => (
@@ -297,7 +312,7 @@ export default function UpgradePage() {
                             </CardContent>
                             <CardFooter>
                                 <Button className="w-full" variant={tier.isMostPopular ? "default" : "outline"} onClick={() => setSelectedTierId(tier.id)}>
-                                {userData?.subscription ? "Upgrade to " : "Select "}
+                                {isNewUser ? "Activate " : "Upgrade to "}
                                 {tier.name}
                                 </Button>
                             </CardFooter>
