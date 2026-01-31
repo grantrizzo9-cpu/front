@@ -61,13 +61,6 @@ export async function POST(request: Request) {
       const payload = {
         plan_id: tier.paypalPlanId,
         custom_id: customId, // Pass the Firebase UID
-        application_context: {
-          brand_name: 'Affiliate AI Host',
-          shipping_preference: 'NO_SHIPPING',
-          user_action: 'SUBSCRIBE_NOW',
-          return_url: 'https://example.com/return',
-          cancel_url: 'https://example.com/cancel',
-        }
       };
 
       const subResponse = await fetch(`${PAYPAL_API_BASE}/v1/billing/subscriptions`, {
