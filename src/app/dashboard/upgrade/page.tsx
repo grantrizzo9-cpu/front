@@ -3,9 +3,9 @@
 
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Loader2, CheckCircle, ArrowUpCircle, BadgeCheck, AlertTriangle } from "lucide-react";
+import { Loader2, CheckCircle, ArrowUpCircle, AlertTriangle } from "lucide-react";
 import { useUser, useFirestore, useDoc, useMemoFirebase, updateDocumentNonBlocking } from "@/firebase";
-import { doc, serverTimestamp, Timestamp } from "firebase/firestore";
+import { doc, serverTimestamp } from "firebase/firestore";
 import type { User as UserType } from "@/lib/types";
 import { subscriptionTiers } from "@/lib/data";
 import { useToast } from "@/hooks/use-toast";
@@ -13,7 +13,7 @@ import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
-import type { OnApproveData, OnApproveActions, CreateOrderData, CreateOrderActions } from "@paypal/paypal-js";
+import type { OnApproveData, CreateOrderData, CreateOrderActions } from "@paypal/paypal-js";
 
 
 export default function UpgradePage() {
@@ -34,58 +34,50 @@ export default function UpgradePage() {
     
     const isLoading = isUserLoading || isUserDataLoading;
     
-    const isOnTrial = userData?.subscription?.trialEndDate && userData.subscription.trialEndDate.toDate() > new Date();
-    const hasPaidSubscription = userData?.subscription && !isOnTrial;
+    const hasActiveSubscription = userData?.subscription && (!userData.subscription.trialEndDate || userData.subscription.trialEndDate.toDate() < new Date());
 
-    const handlePlanChange = (tierId: string) => {
-        if (!userDocRef) return;
-        setIsProcessing(true);
-        const newSubscriptionData = {
-            ...userData?.subscription,
-            tierId: tierId,
-        };
-        updateDocumentNonBlocking(userDocRef, { subscription: newSubscriptionData });
-        toast({ title: "Plan Upgraded!", description: `Your plan has been successfully upgraded.` });
-        setIsProcessing(false);
-    };
-
-    const createOrder = async (): Promise<string> => {
-        setIsProcessing(true);
+    const createOrder = (data: CreateOrderData, actions: CreateOrderActions): Promise<string> => {
+        console.log("DIAGNOSTIC: Step 1 - createOrder function has been called.");
         setPaymentError(null);
 
         if (!selectedTierId) {
-            const errorMsg = "No subscription tier was selected.";
+            const errorMsg = "DIAGNOSTIC ERROR: No subscription tier was selected before createOrder was called.";
+            console.error(errorMsg);
             setPaymentError(errorMsg);
-            setIsProcessing(false);
-            throw new Error(errorMsg);
+            return Promise.reject(new Error(errorMsg));
         }
 
-        try {
-            const response = await fetch('/api/paypal', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action: 'create_order', planId: selectedTierId }),
-            });
-
-            const orderData = await response.json();
-
-            if (!response.ok || !orderData.success) {
-                const errorMsg = orderData.debug || orderData.error || 'Failed to create PayPal order on the server.';
-                setPaymentError(errorMsg);
-                setIsProcessing(false);
-                throw new Error(errorMsg);
+        const tier = subscriptionTiers.find(t => t.id === selectedTierId);
+        if (!tier) {
+            const errorMsg = `DIAGNOSTIC ERROR: Could not find details for selected tier ID: ${selectedTierId}`;
+            console.error(errorMsg);
+            setPaymentError(errorMsg);
+            return Promise.reject(new Error(errorMsg));
+        }
+        
+        console.log(`DIAGNOSTIC: Step 2 - Creating order for ${tier.name} at price ${tier.price.toFixed(2)}`);
+        return actions.order.create({
+            purchase_units: [{
+                amount: {
+                    value: tier.price.toFixed(2),
+                    currency_code: 'USD'
+                },
+                description: `First day payment for ${tier.name} Plan at Affiliate AI Host`,
+            }],
+            application_context: {
+                shipping_preference: 'NO_SHIPPING',
             }
-
-            return orderData.orderId;
-        } catch (error: any) {
-            const errorMsg = `Network error or server is unreachable: ${error.message}`;
-            setPaymentError(errorMsg);
-            setIsProcessing(false);
-            throw new Error(errorMsg);
-        }
+        }).then((orderID) => {
+            console.log(`DIAGNOSTIC: Step 3 - Successfully created Order ID: ${orderID}`);
+            return orderID;
+        });
     };
 
-    const onApprove = async (data: OnApproveData, actions: OnApproveActions): Promise<void> => {
+    const onApprove = async (data: OnApproveData): Promise<void> => {
+        console.log("DIAGNOSTIC: Step 4 - onApprove function called with Order ID:", data.orderID);
+        setIsProcessing(true);
+        setPaymentError(null);
+
         try {
             const response = await fetch('/api/paypal', {
                 method: 'POST',
@@ -97,10 +89,10 @@ export default function UpgradePage() {
 
             if (!response.ok || !captureData.success) {
                 const errorMsg = captureData.debug || captureData.error || 'Failed to capture PayPal payment on the server.';
-                setPaymentError(errorMsg);
-                setIsProcessing(false);
-                return;
+                throw new Error(errorMsg);
             }
+            
+            console.log("DIAGNOSTIC: Step 5 - Server successfully captured payment.");
 
             if (userDocRef) {
                 const newSubscription = {
@@ -112,9 +104,11 @@ export default function UpgradePage() {
                 };
                 updateDocumentNonBlocking(userDocRef, { subscription: newSubscription });
                 toast({ title: "Subscription Activated!", description: "You've successfully subscribed." });
+                setSelectedTierId(null);
             }
         } catch (error: any) {
-             const errorMsg = `Network error while capturing payment: ${error.message}`;
+             const errorMsg = `Payment capture failed: ${error.message}`;
+             console.error("DIAGNOSTIC ERROR:", errorMsg);
              setPaymentError(errorMsg);
         } finally {
             setIsProcessing(false);
@@ -122,7 +116,17 @@ export default function UpgradePage() {
     };
     
     const onError = (err: any) => {
-        setPaymentError(`A client-side error occurred with PayPal. This is often due to a configuration issue or network problem. Raw error: ${err.toString()}`);
+        const errorMsg = `A client-side error occurred with the PayPal script. This is often due to an invalid Client ID in your .env file or a network issue. Raw error: ${err.toString()}`;
+        console.error("DIAGNOSTIC: PayPal onError callback triggered.", err);
+        setPaymentError(errorMsg);
+        setIsProcessing(false);
+    };
+    
+    const handlePlanChange = (tierId: string) => {
+        if (!userDocRef || !userData?.subscription) return;
+        setIsProcessing(true);
+        updateDocumentNonBlocking(userDocRef, { 'subscription.tierId': tierId });
+        toast({ title: "Plan Upgraded!", description: `Your plan has been successfully upgraded.` });
         setIsProcessing(false);
     };
 
@@ -134,7 +138,7 @@ export default function UpgradePage() {
         );
     }
     
-    if (!hasPaidSubscription && (!paypalClientId || paypalClientId.includes('REPLACE_WITH'))) {
+    if (!hasActiveSubscription && (!paypalClientId || paypalClientId.includes('REPLACE_WITH'))) {
       return (
           <div className="space-y-8">
               <div>
@@ -152,23 +156,29 @@ export default function UpgradePage() {
       );
     }
 
-    const showPaymentFlow = !hasPaidSubscription;
-
     return (
         <div className="space-y-8">
             <div>
                 <h1 className="text-3xl font-bold font-headline">
-                    {hasPaidSubscription ? "Upgrade Your Plan" : (isOnTrial ? "End Trial & Choose Plan" : "Choose Your Plan")}
+                    {hasActiveSubscription ? "Upgrade Your Plan" : "Choose Your Plan"}
                 </h1>
                 <p className="text-muted-foreground mt-2">
-                    {hasPaidSubscription 
+                    {hasActiveSubscription 
                         ? `You are currently on the ${subscriptionTiers.find(t => t.id === userData?.subscription?.tierId)?.name || 'Unknown'} plan. Unlock more features by upgrading.`
                         : "Choose a plan below to start your paid subscription."
                     }
                 </p>
             </div>
 
-            {showPaymentFlow ? (
+            {paymentError && (
+                <Alert variant="destructive">
+                    <AlertTriangle className="h-4 w-4" />
+                    <AlertTitle>A Payment Error Occurred</AlertTitle>
+                    <AlertDescription className="break-words">{paymentError}</AlertDescription>
+                </Alert>
+            )}
+
+            {!hasActiveSubscription ? (
                 <PayPalScriptProvider options={{ clientId: paypalClientId!, currency: "USD", intent: "capture" }}>
                     {selectedTierId ? (
                         (() => {
@@ -181,13 +191,6 @@ export default function UpgradePage() {
                                        <CardDescription>You are purchasing the <span className="font-bold text-primary">{tier.name}</span> plan.</CardDescription>
                                    </CardHeader>
                                    <CardContent className="space-y-4">
-                                        {paymentError && (
-                                           <Alert variant="destructive">
-                                               <AlertTriangle className="h-4 w-4" />
-                                               <AlertTitle>Payment Error</AlertTitle>
-                                               <AlertDescription className="break-words">{paymentError}</AlertDescription>
-                                           </Alert>
-                                       )}
                                        <div className="flex items-baseline gap-2">
                                            <span className="text-4xl font-bold">${tier.price.toFixed(2)}</span>
                                            <span className="text-muted-foreground">USD / day</span>
@@ -210,15 +213,16 @@ export default function UpgradePage() {
                                                </div>
                                            )}
                                            <PayPalButtons
+                                                key={selectedTierId}
                                                 style={{ layout: "vertical", label: "pay", tagline: false, height: 44 }}
                                                 createOrder={createOrder}
                                                 onApprove={onApprove}
                                                 onError={onError}
                                                 disabled={isProcessing}
-                                                forceReRender={[selectedTierId, isProcessing]}
+                                                forceReRender={[selectedTierId]}
                                             />
                                        </div>
-                                       <Button variant="ghost" onClick={() => setSelectedTierId(null)} disabled={isProcessing}>
+                                       <Button variant="ghost" onClick={() => { setSelectedTierId(null); setPaymentError(null); }} disabled={isProcessing}>
                                            Choose a different plan
                                        </Button>
                                    </CardFooter>
@@ -314,5 +318,3 @@ export default function UpgradePage() {
         </div>
     );
 }
-
-    
