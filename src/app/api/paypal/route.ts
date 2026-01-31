@@ -2,9 +2,7 @@
 import { NextResponse } from 'next/server';
 import { subscriptionTiers } from '@/lib/data';
 
-const PAYPAL_API_BASE = process.env.NODE_ENV === 'production' 
-    ? "https://api-m.paypal.com" 
-    : "https://api-m.sandbox.paypal.com";
+const PAYPAL_API_BASE = "https://api-m.paypal.com";
 
 // This function gets an access token from PayPal
 async function getPayPalAccessToken() {
