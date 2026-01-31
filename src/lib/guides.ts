@@ -248,6 +248,119 @@ export const allGuides: Guide[] = [
       <p>Use a tool like <a href="https://optimize.google.com" target="_blank" rel="noopener noreferrer" class="text-primary hover:underline">Google Optimize</a> (free) or <a href="https://vwo.com" target="_blank" rel="noopener noreferrer" class="text-primary hover:underline">VWO</a> to run these tests. Only change one element at a time to know what made the difference. Even a 1% increase in conversion rate can have a massive impact on your daily income.</p>
     `
   },
+  {
+    title: "Your 7-Day Automated Email Follow-up Sequence",
+    level: "pro",
+    content: `
+        <p>This is your complete, 7-day email sequence, ready to copy and paste into your MailerLite automation. This sequence is designed to build trust, demonstrate value, and guide your subscribers toward signing up.</p>
+
+        <hr class="my-6 border-border" />
+
+        <h3>Email 1: Welcome Email with Checklist (Sent Immediately)</h3>
+        <p><strong>Subject:</strong> Your Free 24-Hour Launch Checklist is Here!</p>
+        <blockquote class="border-l-4 pl-4 italic">
+            <p>Hi there,</p>
+            <p>Thank you for subscribing! I'm excited to share the checklist that can help you get a real, income-generating website up and running in just one day.</p>
+            <p>Here is your exclusive guide: <strong>The 5-Step Checklist to Launching a Profitable Affiliate Website in 24 Hours.</strong></p>
+            <p><em>(Paste the content from the "5-Step Checklist" guide here)</em></p>
+            <p>To your success,</p>
+            <p>Grant Rizzoli</p>
+        </blockquote>
+
+        <hr class="my-6 border-border" />
+
+        <h3>Email 2: The #1 Mistake New Affiliates Make (Send on Day 2)</h3>
+        <p><strong>Subject:</strong> The #1 Mistake Nearly All New Affiliates Make</p>
+        <blockquote class="border-l-4 pl-4 italic">
+            <p>Hi there,</p>
+            <p>Yesterday you received the 24-hour launch checklist. It’s designed to get you moving fast.</p>
+            <p>But before you go any further, I want to share the biggest trap I see new affiliates fall into: <strong>They try to sell, instead of trying to help.</strong></p>
+            <p>Your job as an affiliate isn't to be a pushy salesperson. It's to be a trusted guide. When you find a great tool that solves a real problem, your only job is to share it with people who have that problem.</p>
+            <p>Affiliate AI Host solves three main problems for entrepreneurs: needing reliable hosting, creating content, and wanting a clear path to making money. When you recommend it, you're offering a complete solution.</p>
+            <p>Focus on being helpful first, and the sales will naturally follow.</p>
+            <p>To your success,</p>
+            <p>Grant Rizzoli</p>
+        </blockquote>
+
+        <hr class="my-6 border-border" />
+
+        <h3>Email 3: A Behind-the-Scenes Look (Send on Day 3)</h3>
+        <p><strong>Subject:</strong> A quick look inside my affiliate command center</p>
+        <blockquote class="border-l-4 pl-4 italic">
+            <p>Hi,</p>
+            <p>I’ve recommended Affiliate AI Host, but I wanted to show you *why* it's the engine behind my own affiliate business.</p>
+            <p>It’s not just about the incredible 70-75% daily commissions. It’s about the tools that make earning them easier. My favorite feature is the <strong>AI Content Generator</strong>.</p>
+            <p>If you want to see the platform and tools I use every day, you can check it out here:</p>
+            <p><strong>https://hostproai.com/?ref=rentahost</strong></p>
+            <p>It’s worth a look just to see how the platform is structured for affiliate success.</p>
+            <p>Best,</p>
+            <p>Grant Rizzoli</p>
+        </blockquote>
+        
+        <hr class="my-6 border-border" />
+
+        <h3>Email 4: Your First "Money-Making Asset" (Send on Day 4)</h3>
+        <p><strong>Subject:</strong> Let's create your first money-making asset</p>
+        <blockquote class="border-l-4 pl-4 italic">
+            <p>Hey there,</p>
+            <p>Let’s talk about creating an asset that can earn you money while you sleep: a <strong>product review blog post</strong>.</p>
+            <p>One great review, ranked well on Google, can bring you sales for years. Here’s a simple template:
+            <ul>
+                <li><strong>Title:</strong> "Affiliate AI Host Review 2024: Is 70% Daily Commission Legit?"</li>
+                <li><strong>Intro:</strong> Start with the biggest benefit – the daily payouts.</li>
+                <li><strong>Why you love it:</strong> Talk about your favorite feature.</li>
+                <li><strong>Call to Action:</strong> End with a strong recommendation and your link.</li>
+            </ul>
+            </p>
+            <p>To post a review, you need a website. If you're ready to build your first real online asset, this is the platform I recommend to get it done fast:</p>
+            <p><strong>https://hostproai.com/?ref=rentahost</strong></p>
+            <p>Cheers,</p>
+            <p>Grant Rizzoli</p>
+        </blockquote>
+
+        <hr class="my-6 border-border" />
+
+        <h3>Email 5: Let's Do Some Quick Math (Send on Day 5)</h3>
+        <p><strong>Subject:</strong> Can you spare 5 minutes? Let's talk numbers.</p>
+        <blockquote class="border-l-4 pl-4 italic">
+            <p>Hi,</p>
+            <p>Let's break down the real power of this affiliate program. The "Pro" plan costs $49.95/day. Your commission is 70%. That's <strong>$34.96 per day... from a single referral.</strong></p>
+            <p>Now, imagine you refer just <strong>5 people</strong> who choose that plan. That's over $5,200 a month, paid out to your PayPal account automatically, every single day.</p>
+            <p>This isn't a get-rich-quick scheme. It's simple, powerful math.</p>
+            <p>Want to start your own daily income stream? <a href="https://hostproai.com/?ref=rentahost" target="_blank" rel="noopener noreferrer">Click here to see the plans and get started.</a></p>
+            <p>Best,</p>
+            <p>Grant Rizzoli</p>
+        </blockquote>
+
+        <hr class="my-6 border-border" />
+
+        <h3>Email 6: From Zero to Daily Payouts (Send on Day 6)</h3>
+        <p><strong>Subject:</strong> How Sarah went from $0 to daily income</p>
+        <blockquote class="border-l-4 pl-4 italic">
+            <p>Hi there,</p>
+            <p>I want to share a quick story about Sarah. She was new to affiliate marketing and frustrated with slow, monthly payouts. She signed up for Affiliate AI Host, paid her one-time activation fee, and got to work.</p>
+            <p>She used the AI tools to write a few posts and promote them. Within a week, she got her first two referrals. After their trial, she saw her first commission in her PayPal. Then another the next day. And the next.</p>
+            <p>That daily motivation is powerful. You can follow the exact same path. It all starts with the right platform. <a href="https://hostproai.com/?ref=rentahost" target="_blank" rel="noopener noreferrer">Get the same tools Sarah used right here.</a></p>
+            <p>Talk soon,</p>
+            <p>Grant Rizzoli</p>
+        </blockquote>
+        
+        <hr class="my-6 border-border" />
+
+        <h3>Email 7: Is this goodbye? (Send on Day 7)</h3>
+        <p><strong>Subject:</strong> Final call: Your risk-free chance to start</p>
+        <blockquote class="border-l-4 pl-4 italic">
+            <p>Hi,</p>
+            <p>It’s been about a week since you downloaded the launch checklist. If you haven't started yet, what's holding you back?</p>
+            <p>Maybe you're worried it's not for you. That's why there's a <strong>24-hour, no-questions-asked refund policy</strong> on the one-time activation fee. You can try it with zero risk.</p>
+            <p>The opportunity to build a daily income stream is right in front of you. The best time to start was yesterday. The second-best time is now.</p>
+            <p><a href="https://hostproai.com/?ref=rentahost" target="_blank" rel="noopener noreferrer"><strong>Click Here to Create Your Account & Launch Your Affiliate Business Today.</strong></a></p>
+            <p>This is your moment. Don't let it pass you by.</p>
+            <p>To your success,</p>
+            <p>Grant Rizzoli</p>
+        </blockquote>
+    `
+  },
 
   // Enterprise Guide
   {
