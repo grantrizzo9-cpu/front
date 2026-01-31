@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from "@/components/ui/button";
 import { Loader2, CheckCircle, AlertTriangle, Info } from "lucide-react";
 import { useUser, useFirestore, useDoc, useMemoFirebase } from "@/firebase";
-import { doc, serverTimestamp, writeBatch, Timestamp, updateDoc } from "firebase/firestore";
+import { doc, serverTimestamp, writeBatch, Timestamp } from "firebase/firestore";
 import type { User as UserType } from "@/lib/types";
 import { subscriptionTiers } from "@/lib/data";
 import { useToast } from "@/hooks/use-toast";
@@ -112,9 +112,18 @@ export default function UpgradePage() {
             
             batch.update(userDocRef, { subscription: newSubscriptionData });
             
+            // If this is a new user activation AND they were referred...
             if (!isUpgrade && userData.referredBy) {
+                // Find the referral document in the referrer's subcollection.
                 const referralDocRef = doc(firestore, 'users', userData.referredBy, 'referrals', user.uid);
-                await updateDoc(referralDocRef, { activationStatus: 'activated' }).catch(err => console.error("Non-critical error updating referral status:", err));
+                
+                // Update the referral doc to mark it 'activated' and record the sale.
+                // The commission is 0 because the platform owner keeps the activation fee.
+                batch.update(referralDocRef, { 
+                    activationStatus: 'activated',
+                    grossSale: tier.price, // Record the activation fee as a gross sale.
+                    commission: 0,       // No commission is paid on the activation fee.
+                });
             }
             
             await batch.commit();
