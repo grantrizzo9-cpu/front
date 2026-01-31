@@ -35,6 +35,9 @@ async function getPayPalAccessToken() {
 
 
 export async function POST(request: Request) {
+  const environment = process.env.NODE_ENV === 'production' ? 'PRODUCTION' : 'SANDBOX';
+  console.log(`PayPal API route called. Using ${environment} environment.`);
+
   try {
     const { action, planId, customId } = await request.json();
     const accessToken = await getPayPalAccessToken();
@@ -44,7 +47,7 @@ export async function POST(request: Request) {
 
       const tier = subscriptionTiers.find(t => t.id === planId);
       if (!tier || !tier.paypalPlanId || tier.paypalPlanId.includes('REPLACE_WITH')) {
-        const errorMsg = `The selected plan '${planId}' does not have a valid PayPal Plan ID configured.`;
+        const errorMsg = `The selected plan '${planId}' does not have a valid PayPal Plan ID configured. Make sure you are using your ${environment} Plan IDs in src/lib/data.ts.`;
         console.error(errorMsg);
         return NextResponse.json({ success: false, error: errorMsg }, { status: 404 });
       }
@@ -73,9 +76,14 @@ export async function POST(request: Request) {
 
       const subData = await subResponse.json();
       if (!subResponse.ok) {
+        console.error("PAYPAL_SUBSCRIPTION_ERROR:", {
+            status: subResponse.status,
+            paypalResponse: subData,
+            sentPayload: payload,
+        });
         const issue = subData.details?.[0]?.issue || subData.name || "SUBSCRIPTION_CREATION_FAILED";
         const description = subData.details?.[0]?.description || subData.message || "An error occurred.";
-        return NextResponse.json({ success: false, error: `PayPal Error: ${issue}`, debug: description }, { status: subResponse.status });
+        return NextResponse.json({ success: false, error: `PayPal Error: ${issue}`, debug: `${description} (Hint: This often happens if the Plan ID does not exist in the ${environment} environment.)` }, { status: subResponse.status });
       }
 
       return NextResponse.json({ success: true, subscriptionId: subData.id });
