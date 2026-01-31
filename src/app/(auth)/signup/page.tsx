@@ -75,6 +75,7 @@ function SignupFormComponent() {
                 affiliateId: referrerUid,
                 referredUserId: user.uid,
                 referredUserUsername: finalUsername,
+                referredUserEmail: user.email!,
                 planPurchased: plan.name,
                 grossSale: 0,
                 commission: 0,

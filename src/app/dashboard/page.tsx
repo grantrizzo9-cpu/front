@@ -214,6 +214,7 @@ export default function DashboardPage() {
                                         <TableHeader>
                                             <TableRow>
                                                 <TableHead>Referred User</TableHead>
+                                                <TableHead>Email</TableHead>
                                                 <TableHead>Affiliate</TableHead>
                                                 <TableHead>Plan</TableHead>
                                                 <TableHead>Status</TableHead>
@@ -223,6 +224,7 @@ export default function DashboardPage() {
                                             {recentAllReferrals.map((referral) => (
                                                 <TableRow key={referral.id}>
                                                     <TableCell className="font-medium">{referral.referredUserUsername}</TableCell>
+                                                    <TableCell>{referral.referredUserEmail}</TableCell>
                                                     <TableCell className="font-mono text-xs">{referral.affiliateId}</TableCell>
                                                     <TableCell>{referral.planPurchased}</TableCell>
                                                     <TableCell>

@@ -212,6 +212,11 @@
           "type": "string",
           "description": "Username of the referred user."
         },
+        "referredUserEmail": {
+            "type": "string",
+            "description": "Email of the referred user.",
+            "format": "email"
+        },
         "planPurchased": {
           "type": "string",
           "description": "The name of the subscription plan purchased by the referred user."
@@ -249,6 +254,7 @@
         "affiliateId",
         "referredUserId",
         "referredUserUsername",
+        "referredUserEmail",
         "planPurchased",
         "date",
         "commission",

@@ -38,6 +38,7 @@ export type Referral = {
   affiliateId: string;
   referredUserId: string;
   referredUserUsername: string;
+  referredUserEmail: string;
   planPurchased: string;
   grossSale: number;
   commission: number;
