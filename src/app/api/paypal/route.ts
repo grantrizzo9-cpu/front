@@ -55,7 +55,7 @@ export async function POST(request: Request) {
       if (!tier.paypalPlanId || tier.paypalPlanId.includes('REPLACE_WITH')) {
         const errorMsg = `The PayPal Plan ID for the '${planId}' plan is not configured in src/lib/data.ts. Please add your Sandbox Plan ID for testing or your Live Plan ID for production.`;
         console.error(errorMsg);
-        return NextResponse.json({ success: false, error: errorMsg }, { status: 404 });
+        return NextResponse.json({ success: false, error: errorMsg }, { status: 500 });
       }
 
       const payload = {
