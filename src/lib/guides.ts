@@ -291,7 +291,7 @@ export const allGuides: Guide[] = [
             <p>I’ve recommended Affiliate AI Host, but I wanted to show you *why* it's the engine behind my own affiliate business.</p>
             <p>It’s not just about the incredible 70-75% daily commissions. It’s about the tools that make earning them easier. My favorite feature is the <strong>AI Content Generator</strong>.</p>
             <p>If you want to see the platform and tools I use every day, you can check it out here:</p>
-            <p><strong>https://hostproai.com/?ref=rentahost</strong></p>
+            <p><a href="https://hostproai.com/?ref=rentahost" target="_blank" rel="noopener noreferrer"><strong>https://hostproai.com/?ref=rentahost</strong></a></p>
             <p>It’s worth a look just to see how the platform is structured for affiliate success.</p>
             <p>Best,</p>
             <p>Grant Rizzoli</p>
@@ -313,7 +313,7 @@ export const allGuides: Guide[] = [
             </ul>
             </p>
             <p>To post a review, you need a website. If you're ready to build your first real online asset, this is the platform I recommend to get it done fast:</p>
-            <p><strong>https://hostproai.com/?ref=rentahost</strong></p>
+            <p><a href="https://hostproai.com/?ref=rentahost" target="_blank" rel="noopener noreferrer"><strong>https://hostproai.com/?ref=rentahost</strong></a></p>
             <p>Cheers,</p>
             <p>Grant Rizzoli</p>
         </blockquote>
@@ -327,7 +327,7 @@ export const allGuides: Guide[] = [
             <p>Let's break down the real power of this affiliate program. The "Pro" plan costs $49.95/day. Your commission is 70%. That's <strong>$34.96 per day... from a single referral.</strong></p>
             <p>Now, imagine you refer just <strong>5 people</strong> who choose that plan. That's over $5,200 a month, paid out to your PayPal account automatically, every single day.</p>
             <p>This isn't a get-rich-quick scheme. It's simple, powerful math.</p>
-            <p>Want to start your own daily income stream? <a href="https://hostproai.com/?ref=rentahost" target="_blank" rel="noopener noreferrer">Click here to see the plans and get started.</a></p>
+            <p>Want to start your own daily income stream? <a href="https://hostproai.com/?ref=rentahost" target="_blank" rel="noopener noreferrer"><strong>Click here to see the plans and get started.</strong></a></p>
             <p>Best,</p>
             <p>Grant Rizzoli</p>
         </blockquote>
@@ -340,7 +340,7 @@ export const allGuides: Guide[] = [
             <p>Hi there,</p>
             <p>I want to share a quick story about Sarah. She was new to affiliate marketing and frustrated with slow, monthly payouts. She signed up for Affiliate AI Host, paid her one-time activation fee, and got to work.</p>
             <p>She used the AI tools to write a few posts and promote them. Within a week, she got her first two referrals. After their trial, she saw her first commission in her PayPal. Then another the next day. And the next.</p>
-            <p>That daily motivation is powerful. You can follow the exact same path. It all starts with the right platform. <a href="https://hostproai.com/?ref=rentahost" target="_blank" rel="noopener noreferrer">Get the same tools Sarah used right here.</a></p>
+            <p>That daily motivation is powerful. You can follow the exact same path. It all starts with the right platform. <a href="https://hostproai.com/?ref=rentahost" target="_blank" rel="noopener noreferrer"><strong>Get the same tools Sarah used right here.</strong></a></p>
             <p>Talk soon,</p>
             <p>Grant Rizzoli</p>
         </blockquote>
@@ -361,8 +361,6 @@ export const allGuides: Guide[] = [
         </blockquote>
     `
   },
-
-  // Enterprise Guide
   {
     title: "Developing Strategic Partnerships & Joint Ventures",
     level: "enterprise",
