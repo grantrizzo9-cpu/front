@@ -14,7 +14,7 @@ export const allGuides: Guide[] = [
     content: `
         <p>Welcome to the first step of your affiliate journey! This guide will make you comfortable with your two most important tools: your affiliate link and your dashboard.</p>
         <strong>1. Your Unique Affiliate Link:</strong>
-        <p>Your affiliate link is your personal signature. It looks something like this: <code>https://hostproai.com/?ref=your-username</code>. When someone clicks this link, our system places a special tracking cookie in their browser. This cookie tells us that YOU sent them. If they sign up (even days or weeks later), the sale is credited to you.</p>
+        <p>Your affiliate link is your personal signature. It looks something like this: <code>https://hostproai.com/?ref=[YOUR_USERNAME_HERE]</code>. When someone clicks this link, our system places a special tracking cookie in their browser. This cookie tells us that YOU sent them. If they sign up (even days or weeks later), the sale is credited to you.</p>
         <ul>
             <li><strong>Where to find it:</strong> Go to your <a href="/dashboard/settings" class="text-primary hover:underline">Settings</a> page. It's right there at the top.</li>
             <li><strong>Rule #1:</strong> Always use your full, unique link. Don't shorten it or alter it, or the tracking might not work.</li>
