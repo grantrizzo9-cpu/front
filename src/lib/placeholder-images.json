@@ -50,15 +50,15 @@
     },
     {
       "id": "guide-checklist-launch",
-      "description": "A checklist on a clipboard with a rocket icon, symbolizing a quick launch.",
-      "imageUrl": "https://images.unsplash.com/photo-1529228899349-a2c699a1390b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxjaGVja2xpc3QlMjByb2NrZXR8ZW58MHx8fHwxNzE5ODU0MjUwfDA&ixlib=rb-4.0.3&q=80&w=1080",
-      "imageHint": "checklist launch"
+      "description": "A person pointing at a screen with charts, looks like planning a launch.",
+      "imageUrl": "https://images.unsplash.com/photo-1556742502-ec7c0e9f34b1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxsYXVuY2glMjBjaGVja2xpc3R8ZW58MHx8fHwxNzE5OTI0MTg4fDA&ixlib=rb-4.0.3&q=80&w=1080",
+      "imageHint": "launch planning"
     },
     {
       "id": "guide-dashboard-link",
-      "description": "A digital dashboard showing analytics and connection lines.",
-      "imageUrl": "https://images.unsplash.com/photo-1630514936398-fce49b3979ed?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxhbmFseXRpY3MlMjBkYXNoYm9hcmR8ZW58MHx8fHwxNzE5ODU0NDMwfDA&ixlib=rb-4.0.3&q=80&w=1080",
-      "imageHint": "dashboard analytics"
+      "description": "A clean dashboard on a laptop.",
+      "imageUrl": "https://images.unsplash.com/photo-1611926653458-09294b3142bf?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxhbmFseXRpY3MlMjBkYXNoYm9hcmR8ZW58MHx8fHwxNzE5ODU0NDMwfDA&ixlib=rb-4.0.3&q=80&w=1080",
+      "imageHint": "analytics dashboard"
     },
     {
       "id": "guide-social-media",
@@ -74,8 +74,8 @@
     },
     {
       "id": "guide-email-marketing",
-      "description": "A visual representation of email marketing with envelopes flying out of a laptop.",
-      "imageUrl": "https://images.unsplash.com/photo-1586953208448-b95a898d9237?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxlbWFpbCUyMG1hcmtldGluZ3xlbnwwfHx8fDE3MTk4NTQ1ODV8MA&ixlib=rb-4.0.3&q=80&w=1080",
+      "description": "A person holding a phone with an envelope icon.",
+      "imageUrl": "https://images.unsplash.com/photo-1557200134-90327ee9f695?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxlbWFpbCUyMG1hcmtldGluZyUyMGNvbmNlcHR8ZW58MHx8fHwxNzE5OTI0MzYyfDA&ixlib=rb-4.0.3&q=80&w=1080",
       "imageHint": "email marketing"
     },
     {
@@ -86,9 +86,9 @@
     },
     {
       "id": "guide-ppc-ads",
-      "description": "A magnifying glass over the word 'PPC' with ad-related icons.",
-      "imageUrl": "https://images.unsplash.com/photo-1557804506-669a67965ba0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxwYWMlMjBhZHZlcnRpc2luZ3xlbnwwfHx8fDE3MTk4NTQ3MTB8MA&ixlib=rb-4.0.3&q=80&w=1080",
-      "imageHint": "PPC advertising"
+      "description": "People in a meeting looking at analytics on a screen.",
+      "imageUrl": "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxkaWdpdGFsJTIwYWR2ZXJ0aXNpbmd8ZW58MHx8fHwxNzE5OTI0NDI3fDA&ixlib=rb-4.0.3&q=80&w=1080",
+      "imageHint": "digital advertising"
     },
     {
       "id": "guide-cro-fundamentals",
@@ -105,7 +105,7 @@
     {
       "id": "guide-partnerships",
       "description": "Two business professionals shaking hands in a modern office.",
-      "imageUrl": "https://images.unsplash.com/photo-1681505531034-8d67054e07f6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxjb3Jwb3JhdGUlMjBoYW5kc2hha2V8ZW58MHx8fHwxNzY5ODY5Njc3fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageUrl": "https://images.unsplash.com/photo-1681505531034-8d67054e07f6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxjb3Jwb3JhdGUlMjBoYW5kc2hha2V8ZW58MHx8fHwxNzY5ODY5Njc3fDA&ixlib-rb-4.1.0&q=80&w=1080",
       "imageHint": "business handshake"
     }
   ]
