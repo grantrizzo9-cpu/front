@@ -1,13 +1,11 @@
+
 import type { Timestamp } from 'firebase/firestore';
 
 export type SubscriptionTier = {
   id: string;
   name: string;
   price: number; // daily price
-  paypalPlanId: {
-    sandbox: string;
-    production: string;
-  };
+  paypalPlanId: string;
   description: string;
   features: string[];
   isMostPopular?: boolean;
@@ -78,7 +76,3 @@ export type RefundRequest = {
   status: 'pending' | 'processed' | 'denied';
   requestedAt: Timestamp;
 };
-
-    
-
-    
