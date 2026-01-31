@@ -47,6 +47,42 @@
       "description": "Abstract background for dashboard stat cards",
       "imageUrl": "https://images.unsplash.com/photo-1605106702842-01a887a31122?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxhYnN0cmFjdCUyMHBhdHRlcm58ZW58MHx8fHwxNzY5MzAwMDkwfDA&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "abstract pattern"
+    },
+    {
+      "id": "guide-starter",
+      "description": "Feet walking up stairs, representing the first steps in affiliate marketing.",
+      "imageUrl": "https://images.unsplash.com/photo-1552318965-6e6be7484ada?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxmZWV0JTIwb24lMjBzdGFpcnN8ZW58MHx8fHwxNzE5ODUzMzU1fDA&ixlib=rb-4.0.3&q=80&w=1080",
+      "imageHint": "steps startup"
+    },
+    {
+      "id": "guide-plus",
+      "description": "Laptop screen showing financial charts and graphs for promotion strategies.",
+      "imageUrl": "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxzdG9jayUyMG1hcmtldCUyMGNoYXJ0fGVufDB8fHx8MTcxOTg1MzQyNnww&ixlib=rb-4.0.3&q=80&w=1080",
+      "imageHint": "analytics chart"
+    },
+    {
+      "id": "guide-pro",
+      "description": "A man in a suit walking away in an office, representing advanced business strategies.",
+      "imageUrl": "https://images.unsplash.com/photo-1556452296-9cf5548d0e1a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxtYW4lMjB3YWxraW5nJTIwYXdheSUyMGluJTIwb2ZmaWNlfGVufDB8fHx8MTcxOTg1MzQ4NHww&ixlib=rb-4.0.3&q=80&w=1080",
+      "imageHint": "business professional"
+    },
+    {
+      "id": "guide-business",
+      "description": "Image for business level guides",
+      "imageUrl": "https://images.unsplash.com/photo-1650978810653-112cb6018092?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxidXNpbmVzcyUyMHN0cmF0ZWd5fGVufDB8fHx8MTc2OTg2OTY3Nnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "business strategy"
+    },
+    {
+      "id": "guide-scale",
+      "description": "Image for scale level guides",
+      "imageUrl": "https://images.unsplash.com/photo-1738737271801-d404a575d870?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxncm93dGglMjBjaGFydHxlbnwwfHx8fDE3Njk4NDYyMTh8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "growth chart"
+    },
+    {
+      "id": "guide-enterprise",
+      "description": "Image for enterprise level guides",
+      "imageUrl": "https://images.unsplash.com/photo-1681505531034-8d67054e07f6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxjb3Jwb3JhdGUlMjBoYW5kc2hha2V8ZW58MHx8fHwxNzY5ODY5Njc3fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "corporate handshake"
     }
   ]
 }

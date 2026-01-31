@@ -1,58 +1,36 @@
-
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useUser, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
 import { doc } from 'firebase/firestore';
 import type { User as UserType } from '@/lib/types';
 import { subscriptionTiers } from '@/lib/data';
 import { allGuides, Guide } from '@/lib/guides';
-import { Loader2, BookOpen, Lock, Download, BadgeCheck } from 'lucide-react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { Loader2, Lock, Download, ArrowRight } from 'lucide-react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { useAdmin } from '@/hooks/use-admin';
+import { Badge } from '@/components/ui/badge';
+import Image from 'next/image';
+import { PlaceHolderImages } from '@/lib/placeholder-images';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from '@/components/ui/dialog';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
-// Helper component for rendering the guide list
-function GuideList({ guides, onDownload }: { guides: Guide[], onDownload: (guide: Guide) => void }) {
-    if (guides.length === 0) {
-        return (
-            <div className="text-center py-12 text-muted-foreground">
-                <p>No guides available for your current plan.</p>
-            </div>
-        );
-    }
-    return (
-        <Accordion type="single" collapsible className="w-full">
-            {guides.map((guide, index) => (
-                <AccordionItem value={`item-${index}`} key={index}>
-                    <AccordionTrigger className="text-lg">
-                        <div className="flex items-center gap-3">
-                            <BookOpen className="h-5 w-5 text-primary" />
-                            <span>{guide.title}</span>
-                        </div>
-                    </AccordionTrigger>
-                    <AccordionContent className="space-y-4">
-                        <div 
-                            className="text-base text-muted-foreground [&_a]:text-primary [&_a:hover]:underline [&_strong]:text-foreground [&_code]:bg-muted [&_code]:p-1 [&_code]:rounded-sm [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 [&_blockquote]:pl-4 [&_blockquote]:border-l-4 [&_blockquote]:border-border [&_blockquote]:italic"
-                            dangerouslySetInnerHTML={{ __html: guide.content }} 
-                        />
-                        <Button variant="outline" size="sm" onClick={() => onDownload(guide)}>
-                            <Download className="mr-2 h-4 w-4" />
-                            Download as .txt
-                        </Button>
-                    </AccordionContent>
-                </AccordionItem>
-            ))}
-        </Accordion>
-    );
-}
+// Helper function to find a guide image, with a fallback
+const getGuideImage = (level: string) => {
+    const specificImage = PlaceHolderImages.find(p => p.id === `guide-${level}`);
+    if (specificImage) return specificImage;
+    // Fallback to a generic feature image if a specific guide image isn't found
+    return PlaceHolderImages.find(p => p.id === 'feature-2')!; 
+};
+
 
 export default function GuidesPage() {
   const { user, isUserLoading } = useUser();
   const firestore = useFirestore();
   const { isAdmin, isLoading: isAdminLoading } = useAdmin();
+  const [selectedGuide, setSelectedGuide] = useState<Guide | null>(null);
 
   const userDocRef = useMemoFirebase(() => {
     if (!user || !firestore) return null;
@@ -62,6 +40,12 @@ export default function GuidesPage() {
   const { data: userData, isLoading: isUserDataLoading } = useDoc<UserType>(userDocRef);
 
   const { currentTier, accessibleGuides } = useMemo(() => {
+    // Admin gets all guides
+    if (isAdmin) {
+      const adminTier = subscriptionTiers.find(t => t.id === 'enterprise');
+      return { currentTier: adminTier, accessibleGuides: allGuides };
+    }
+
     if (!userData?.subscription) {
         return { currentTier: null, accessibleGuides: [] };
     }
@@ -79,14 +63,13 @@ export default function GuidesPage() {
     });
 
     return { currentTier: tier, accessibleGuides: guides };
-  }, [userData]);
+  }, [userData, isAdmin]);
   
   const lockedGuides = useMemo(() => 
     allGuides.filter(guide => !accessibleGuides.some(g => g.title === guide.title)),
     [accessibleGuides]
   );
   
-  const isHighestPlan = currentTier?.id === 'enterprise';
   const isLoading = isUserLoading || isUserDataLoading || isAdminLoading;
 
   const handleDownload = (guide: Guide) => {
@@ -119,46 +102,13 @@ export default function GuidesPage() {
     );
   }
 
-  // ADMIN VIEW: This is the first check. If the user is an admin, show all guides immediately.
-  if (isAdmin) {
-    return (
-        <div className="space-y-8">
-            <div>
-                <h1 className="text-3xl font-bold font-headline">Marketing Guides</h1>
-                <p className="text-muted-foreground">You have admin access to all guides.</p>
-            </div>
-            <Card>
-                <CardHeader>
-                    <CardTitle>All Available Guides</CardTitle>
-                    <CardDescription>As an admin, you have access to all guides across all subscription tiers.</CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <GuideList guides={allGuides} onDownload={handleDownload} />
-                </CardContent>
-            </Card>
-             <Card className="max-w-md bg-green-50 border-green-200 dark:bg-green-950 dark:border-green-800">
-                <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-green-800 dark:text-green-200">
-                        <BadgeCheck className="h-6 w-6" />
-                        <span>Admin Access Confirmed</span>
-                    </CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <p className="text-green-700 dark:text-green-300">
-                        You are viewing this page as an administrator.
-                    </p>
-                </CardContent>
-            </Card>
-        </div>
-    );
-  }
-
   // NO SUBSCRIPTION VIEW: If not admin and no subscription exists.
-  if (!userData?.subscription) {
+  if (!isAdmin && !userData?.subscription) {
       return (
           <div className="space-y-8">
             <div>
                 <h1 className="text-3xl font-bold font-headline">Marketing Guides</h1>
+                <p className="text-muted-foreground">Exclusive guides to help you maximize your affiliate earnings.</p>
             </div>
             <div className="text-center border rounded-lg p-12">
               <h2 className="text-2xl font-bold">No Subscription Found</h2>
@@ -171,43 +121,112 @@ export default function GuidesPage() {
       )
   }
 
-  // SUBSCRIBED USER VIEW
   return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold font-headline">Marketing Guides</h1>
-        <p className="text-muted-foreground">You are on the {currentTier?.name} plan. Here are your unlocked guides.</p>
-      </div>
+    <Dialog onOpenChange={(isOpen) => !isOpen && setSelectedGuide(null)}>
+      <div className="space-y-8">
+        <div>
+          <h1 className="text-3xl font-bold font-headline">Marketing Guides</h1>
+          <p className="text-muted-foreground">
+            {isAdmin 
+                ? "You have admin access to all guides." 
+                : `You are on the ${currentTier?.name} plan. Here are your unlocked guides.`
+            }
+          </p>
+        </div>
 
-      <Card>
-        <CardHeader>
-            <CardTitle>Your Unlocked Guides</CardTitle>
-            <CardDescription>Click on any guide to read its content. Upgrade your plan to unlock more advanced strategies.</CardDescription>
-        </CardHeader>
-        <CardContent>
-            <GuideList guides={accessibleGuides} onDownload={handleDownload} />
-        </CardContent>
-      </Card>
-      
-      { !isHighestPlan && lockedGuides.length > 0 && (
-         <Card>
-            <CardHeader>
-                <CardTitle>Locked Guides</CardTitle>
-                <CardDescription>Upgrade your plan to unlock these more advanced guides.</CardDescription>
-            </CardHeader>
-             <CardContent>
-                <div className="space-y-3">
-                    {lockedGuides.map((guide, index) => (
-                        <div key={index} className="flex items-center gap-3 p-3 bg-secondary/50 rounded-md">
-                            <Lock className="h-5 w-5 text-muted-foreground" />
-                            <span className="text-muted-foreground">{guide.title}</span>
-                            <span className="ml-auto text-xs font-semibold uppercase text-primary bg-primary/10 px-2 py-1 rounded-full">{guide.level} Plan</span>
-                        </div>
-                    ))}
+        {/* Unlocked Guides */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {accessibleGuides.map((guide) => {
+            const guideImage = getGuideImage(guide.level);
+            return (
+              <Card key={guide.title} className="flex flex-col">
+                <div className="relative h-40 w-full">
+                    <Image
+                        src={guideImage.imageUrl}
+                        alt={guide.title}
+                        data-ai-hint={guideImage.imageHint}
+                        fill
+                        className="object-cover rounded-t-lg"
+                    />
                 </div>
-            </CardContent>
-        </Card>
-      )}
-    </div>
+                <CardHeader>
+                    <CardTitle className="flex items-start justify-between gap-2">
+                        <span className="font-headline text-lg">{guide.title}</span>
+                        <Badge variant="outline" className="capitalize flex-shrink-0">{guide.level}</Badge>
+                    </CardTitle>
+                    <CardDescription className="line-clamp-2 pt-2">
+                        {guide.content.replace(/<[^>]+>/g, '').substring(0, 100)}...
+                    </CardDescription>
+                </CardHeader>
+                <CardFooter className="mt-auto">
+                    <DialogTrigger asChild>
+                        <Button className="w-full" onClick={() => setSelectedGuide(guide)}>
+                            Read Guide <ArrowRight className="ml-2 h-4 w-4" />
+                        </Button>
+                    </DialogTrigger>
+                </CardFooter>
+              </Card>
+            );
+          })}
+           {lockedGuides.map((guide) => {
+            const guideImage = getGuideImage(guide.level);
+            return (
+              <Card key={guide.title} className="flex flex-col relative overflow-hidden">
+                <div className="relative h-40 w-full">
+                    <Image
+                        src={guideImage.imageUrl}
+                        alt={guide.title}
+                        data-ai-hint={guideImage.imageHint}
+                        fill
+                        className="object-cover rounded-t-lg filter grayscale"
+                    />
+                     <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                        <Lock className="h-8 w-8 text-white" />
+                    </div>
+                </div>
+                <CardHeader>
+                    <CardTitle className="flex items-start justify-between gap-2">
+                        <span className="font-headline text-lg text-muted-foreground">{guide.title}</span>
+                         <Badge variant="secondary" className="capitalize flex-shrink-0">{guide.level}</Badge>
+                    </CardTitle>
+                    <CardDescription className="line-clamp-2 pt-2 text-muted-foreground">
+                        Upgrade to the {guide.level} plan or higher to unlock this guide.
+                    </CardDescription>
+                </CardHeader>
+                <CardFooter className="mt-auto">
+                    <Button className="w-full" variant="secondary" asChild>
+                        <Link href="/dashboard/upgrade">
+                            Upgrade to Unlock
+                        </Link>
+                    </Button>
+                </CardFooter>
+              </Card>
+            );
+          })}
+        </div>
+      </div>
+      
+       {/* Dialog Content */}
+      <DialogContent className="sm:max-w-2xl">
+        <DialogHeader>
+          <DialogTitle className="font-headline text-2xl">{selectedGuide?.title}</DialogTitle>
+          <DialogDescription>
+             Exclusive guide for the <span className="capitalize font-semibold text-primary">{selectedGuide?.level}</span> plan.
+          </DialogDescription>
+        </DialogHeader>
+        <ScrollArea className="h-[60vh] pr-4">
+            <div 
+                className="prose prose-sm dark:prose-invert max-w-none text-base text-muted-foreground [&_a]:text-primary [&_a:hover]:underline [&_strong]:text-foreground [&_code]:bg-muted [&_code]:p-1 [&_code]:rounded-sm [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 [&_blockquote]:pl-4 [&_blockquote]:border-l-4 [&_blockquote]:border-border [&_blockquote]:italic"
+                dangerouslySetInnerHTML={{ __html: selectedGuide?.content ?? "" }} 
+            />
+        </ScrollArea>
+        <CardFooter>
+            <Button variant="outline" onClick={() => selectedGuide && handleDownload(selectedGuide)}>
+                <Download className="mr-2 h-4 w-4" />
+                Download as .txt
+            </Button>
+        </CardFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
