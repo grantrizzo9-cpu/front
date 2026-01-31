@@ -49,40 +49,64 @@
       "imageHint": "abstract pattern"
     },
     {
-      "id": "guide-starter",
-      "description": "Feet walking up stairs, representing the first steps in affiliate marketing.",
-      "imageUrl": "https://images.unsplash.com/photo-1552318965-6e6be7484ada?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxmZWV0JTIwb24lMjBzdGFpcnN8ZW58MHx8fHwxNzE5ODUzMzU1fDA&ixlib=rb-4.0.3&q=80&w=1080",
-      "imageHint": "steps startup"
+      "id": "guide-checklist-launch",
+      "description": "A checklist on a clipboard with a rocket icon, symbolizing a quick launch.",
+      "imageUrl": "https://images.unsplash.com/photo-1529228899349-a2c699a1390b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxjaGVja2xpc3QlMjByb2NrZXR8ZW58MHx8fHwxNzE5ODU0MjUwfDA&ixlib=rb-4.0.3&q=80&w=1080",
+      "imageHint": "checklist launch"
     },
     {
-      "id": "guide-plus",
-      "description": "Laptop screen showing financial charts and graphs for promotion strategies.",
-      "imageUrl": "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxzdG9jayUyMG1hcmtldCUyMGNoYXJ0fGVufDB8fHx8MTcxOTg1MzQyNnww&ixlib=rb-4.0.3&q=80&w=1080",
-      "imageHint": "analytics chart"
+      "id": "guide-dashboard-link",
+      "description": "A digital dashboard showing analytics and connection lines.",
+      "imageUrl": "https://images.unsplash.com/photo-1630514936398-fce49b3979ed?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxhbmFseXRpY3MlMjBkYXNoYm9hcmR8ZW58MHx8fHwxNzE5ODU0NDMwfDA&ixlib=rb-4.0.3&q=80&w=1080",
+      "imageHint": "dashboard analytics"
     },
     {
-      "id": "guide-pro",
-      "description": "A man in a suit walking away in an office, representing advanced business strategies.",
-      "imageUrl": "https://images.unsplash.com/photo-1556452296-9cf5548d0e1a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxtYW4lMjB3YWxraW5nJTIwYXdheSUyMGluJTIwb2ZmaWNlfGVufDB8fHx8MTcxOTg1MzQ4NHww&ixlib=rb-4.0.3&q=80&w=1080",
-      "imageHint": "business professional"
+      "id": "guide-social-media",
+      "description": "A collection of popular social media app icons on a smartphone screen.",
+      "imageUrl": "https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxzb2NpYWwlMjBtZWRpYSUyMGljb25zfGVufDB8fHx8MTcxOTg1NDQ4NHww&ixlib=rb-4.0.3&q=80&w=1080",
+      "imageHint": "social media"
     },
     {
-      "id": "guide-business",
-      "description": "Image for business level guides",
-      "imageUrl": "https://images.unsplash.com/photo-1650978810653-112cb6018092?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxidXNpbmVzcyUyMHN0cmF0ZWd5fGVufDB8fHx8MTc2OTg2OTY3Nnww&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "business strategy"
+      "id": "guide-content-writing",
+      "description": "A person writing in a notebook at a desk with a laptop.",
+      "imageUrl": "https://images.unsplash.com/photo-1455390582262-044cdead277a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHx3cml0aW5nJTIwY29udGVudHxlbnwwfHx8fDE3MTk4NTQ1MzR8MA&ixlib=rb-4.0.3&q=80&w=1080",
+      "imageHint": "content writing"
     },
     {
-      "id": "guide-scale",
-      "description": "Image for scale level guides",
-      "imageUrl": "https://images.unsplash.com/photo-1738737271801-d404a575d870?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxncm93dGglMjBjaGFydHxlbnwwfHx8fDE3Njk4NDYyMTh8MA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "growth chart"
+      "id": "guide-email-marketing",
+      "description": "A visual representation of email marketing with envelopes flying out of a laptop.",
+      "imageUrl": "https://images.unsplash.com/photo-1586953208448-b95a898d9237?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxlbWFpbCUyMG1hcmtldGluZ3xlbnwwfHx8fDE3MTk4NTQ1ODV8MA&ixlib=rb-4.0.3&q=80&w=1080",
+      "imageHint": "email marketing"
     },
     {
-      "id": "guide-enterprise",
-      "description": "Image for enterprise level guides",
+      "id": "guide-pre-launch",
+      "description": "A checklist with items for a product launch.",
+      "imageUrl": "https://images.unsplash.com/photo-1542382257-80dedb725088?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxwcm9kdWN0JTIwbGF1bmNoJTIwY2hlY2tsaXN0fGVufDB8fHx8MTcxOTg1NDY1NHww&ixlib=rb-4.0.3&q=80&w=1080",
+      "imageHint": "launch checklist"
+    },
+    {
+      "id": "guide-ppc-ads",
+      "description": "A magnifying glass over the word 'PPC' with ad-related icons.",
+      "imageUrl": "https://images.unsplash.com/photo-1557804506-669a67965ba0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxwYWMlMjBhZHZlcnRpc2luZ3xlbnwwfHx8fDE3MTk4NTQ3MTB8MA&ixlib=rb-4.0.3&q=80&w=1080",
+      "imageHint": "PPC advertising"
+    },
+    {
+      "id": "guide-cro-fundamentals",
+      "description": "A chart showing an upward trend, symbolizing conversion rate optimization.",
+      "imageUrl": "https://images.unsplash.com/photo-1634942537034-142828558437?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxvIHRpbWl6YXRpb24lMjBjaGFydHxlbnwwfHx8fDE3MTk4NTQ3ODR8MA&ixlib=rb-4.0.3&q=80&w=1080",
+      "imageHint": "optimization chart"
+    },
+    {
+      "id": "guide-email-sequence",
+      "description": "A flowchart showing a sequence of automated emails.",
+      "imageUrl": "https://images.unsplash.com/photo-1556740758-90de374c12ad?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxlbWFpbCUyMGF1dG9tYXRpb258ZW58MHx8fHwxNzE5ODU0ODM4fDA&ixlib=rb-4.0.3&q=80&w=1080",
+      "imageHint": "email automation"
+    },
+    {
+      "id": "guide-partnerships",
+      "description": "Two business professionals shaking hands in a modern office.",
       "imageUrl": "https://images.unsplash.com/photo-1681505531034-8d67054e07f6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxjb3Jwb3JhdGUlMjBoYW5kc2hha2V8ZW58MHx8fHwxNzY5ODY5Njc3fDA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "corporate handshake"
+      "imageHint": "business handshake"
     }
   ]
 }

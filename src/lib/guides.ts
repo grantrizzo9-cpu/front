@@ -4,6 +4,7 @@ export type Guide = {
   title: string;
   level: 'starter' | 'plus' | 'pro' | 'business' | 'scale' | 'enterprise';
   content: string;
+  imageId: string;
 };
 
 export const allGuides: Guide[] = [
@@ -11,6 +12,7 @@ export const allGuides: Guide[] = [
   {
     title: "The 5-Step Checklist to Launching a Profitable Affiliate Website in 24 Hours",
     level: "starter",
+    imageId: "guide-checklist-launch",
     content: `
         <p>Congratulations! This exclusive checklist is your rapid-launch plan. Follow these five steps to get your affiliate site live and ready to earn in just 24 hours.</p>
 
@@ -58,6 +60,7 @@ export const allGuides: Guide[] = [
   {
     title: "Understanding Your Affiliate Link & Dashboard",
     level: "starter",
+    imageId: "guide-dashboard-link",
     content: `
         <p>Welcome to the first step of your affiliate journey! This guide will make you comfortable with your two most important tools: your affiliate link and your dashboard.</p>
         <strong>1. Your Unique Affiliate Link:</strong>
@@ -80,6 +83,7 @@ export const allGuides: Guide[] = [
   {
     title: "Social Media Marketing 101: Your First Ads",
     level: "starter",
+    imageId: "guide-social-media",
     content: `
         <p>Social media is the fastest way to get your link in front of people. But don't just spam it! The key is to be helpful and genuine. Here are copy-paste templates for your first posts.</p>
         
@@ -106,6 +110,7 @@ export const allGuides: Guide[] = [
   {
     title: "Content is King: Writing Compelling Product Reviews",
     level: "plus",
+    imageId: "guide-content-writing",
     content: `
         <p>A detailed, honest product review is one of the most powerful affiliate marketing tools. Your review is your sales page. Go beyond the feature list. Talk about your personal experience, the pros and cons, and who would benefit most from the service. Use screenshots and be authentic.</p>
         <strong>Review Structure to Follow:</strong>
@@ -124,6 +129,7 @@ export const allGuides: Guide[] = [
   {
     title: "Email Marketing Basics: Building Your First List",
     level: "plus",
+    imageId: "guide-email-marketing",
     content: `
       <p>An email list is a direct line to your audience and one of your most valuable assets. Unlike social media, you OWN your list.</p>
       <p>To start building your list, you'll need an email marketing service. There are many great options available like MailerLite, ConvertKit, or Brevo, many of which offer free starting plans.</p>
@@ -142,6 +148,7 @@ export const allGuides: Guide[] = [
   {
     title: "Your Pre-Launch Checklist",
     level: "pro",
+    imageId: "guide-pre-launch",
     content: `
         <p>This is your definitive checklist to follow before you launch your affiliate site to the world. Following these steps will ensure a smooth, professional launch.</p>
         
@@ -183,6 +190,7 @@ export const allGuides: Guide[] = [
   {
     title: "Pay-Per-Click (PPC) Advertising for Affiliates",
     level: "pro",
+    imageId: "guide-ppc-ads",
     content: `
       <p>PPC platforms like Google Ads and Microsoft (Bing) Ads can drive immediate, targeted traffic. You pay only when someone clicks your ad. It's a powerful way to scale.</p>
       <strong>Getting Started with Google Ads:</strong>
@@ -205,6 +213,7 @@ export const allGuides: Guide[] = [
   {
     title: "Conversion Rate Optimization (CRO) Fundamentals",
     level: "pro",
+    imageId: "guide-cro-fundamentals",
     content: `
       <p>CRO is the art of turning more of your website visitors into customers. A small tweak can lead to a big increase in sales.</p>
       <strong>Key Areas to Test (A/B Testing):</strong>
@@ -220,6 +229,7 @@ export const allGuides: Guide[] = [
   {
     title: "Your 7-Day Automated Email Follow-up Sequence",
     level: "pro",
+    imageId: "guide-email-sequence",
     content: `
         <p>This is your complete, 7-day email sequence, ready to use with any email marketing provider (like MailerLite, ConvertKit, etc.). This sequence is designed to build trust, demonstrate value, and guide your subscribers toward signing up.</p>
 
@@ -333,6 +343,7 @@ export const allGuides: Guide[] = [
   {
     title: "Developing Strategic Partnerships & Joint Ventures",
     level: "enterprise",
+    imageId: "guide-partnerships",
     content: `
       <p>At this level, you scale by leveraging other people's audiences. This is the fastest way to explosive growth.</p>
       <strong>Finding Partners:</strong>

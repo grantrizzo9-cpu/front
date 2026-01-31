@@ -19,8 +19,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { ScrollArea } from '@/components/ui/scroll-area';
 
 // Helper function to find a guide image, with a fallback
-const getGuideImage = (level: string) => {
-    const specificImage = PlaceHolderImages.find(p => p.id === `guide-${level}`);
+const getGuideImage = (guide: Guide) => {
+    const specificImage = PlaceHolderImages.find(p => p.id === guide.imageId);
     if (specificImage) return specificImage;
     // Fallback to a generic feature image if a specific guide image isn't found
     return PlaceHolderImages.find(p => p.id === 'feature-2')!; 
@@ -151,7 +151,7 @@ export default function GuidesPage() {
         {/* Unlocked Guides */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {accessibleGuides.map((guide) => {
-            const guideImage = getGuideImage(guide.level);
+            const guideImage = getGuideImage(guide);
             return (
               <Card key={guide.title} className="flex flex-col">
                 <div className="relative h-40 w-full">
@@ -183,7 +183,7 @@ export default function GuidesPage() {
             );
           })}
            {lockedGuides.map((guide) => {
-            const guideImage = getGuideImage(guide.level);
+            const guideImage = getGuideImage(guide);
             return (
               <Card key={guide.title} className="flex flex-col relative overflow-hidden">
                 <div className="relative h-40 w-full">
