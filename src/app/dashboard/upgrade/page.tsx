@@ -4,8 +4,8 @@
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Loader2, CheckCircle, ArrowUpCircle, AlertTriangle } from "lucide-react";
-import { useUser, useFirestore, useDoc, useMemoFirebase, updateDocumentNonBlocking } from "@/firebase";
-import { doc, serverTimestamp } from "firebase/firestore";
+import { useUser, useFirestore, useDoc, useMemoFirebase } from "@/firebase";
+import { doc, serverTimestamp, updateDoc } from "firebase/firestore";
 import type { User as UserType } from "@/lib/types";
 import { subscriptionTiers } from "@/lib/data";
 import { useToast } from "@/hooks/use-toast";
@@ -13,7 +13,7 @@ import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
-import type { OnApproveData, CreateOrderData, CreateOrderActions } from "@paypal/paypal-js";
+import type { OnApproveData, CreateOrderData } from "@paypal/paypal-js";
 
 
 export default function UpgradePage() {
@@ -34,47 +34,42 @@ export default function UpgradePage() {
     
     const isLoading = isUserLoading || isUserDataLoading;
     
+    // This logic is now simplified: a user has an "active" subscription if the subscription object exists
+    // AND it's not a trial (or the trial has expired).
     const hasActiveSubscription = userData?.subscription && (!userData.subscription.trialEndDate || userData.subscription.trialEndDate.toDate() < new Date());
 
-    const createOrder = (data: CreateOrderData, actions: CreateOrderActions): Promise<string> => {
-        console.log("DIAGNOSTIC: Step 1 - createOrder function has been called.");
+    const createOrder = async (data: CreateOrderData): Promise<string> => {
         setPaymentError(null);
-
         if (!selectedTierId) {
-            const errorMsg = "DIAGNOSTIC ERROR: No subscription tier was selected before createOrder was called.";
-            console.error(errorMsg);
+            const errorMsg = "No subscription tier was selected.";
             setPaymentError(errorMsg);
             return Promise.reject(new Error(errorMsg));
         }
 
         const tier = subscriptionTiers.find(t => t.id === selectedTierId);
         if (!tier) {
-            const errorMsg = `DIAGNOSTIC ERROR: Could not find details for selected tier ID: ${selectedTierId}`;
-            console.error(errorMsg);
+            const errorMsg = `Could not find details for selected tier ID: ${selectedTierId}`;
             setPaymentError(errorMsg);
             return Promise.reject(new Error(errorMsg));
         }
-        
-        console.log(`DIAGNOSTIC: Step 2 - Creating order for ${tier.name} at price ${tier.price.toFixed(2)}`);
-        return actions.order.create({
-            purchase_units: [{
-                amount: {
-                    value: tier.price.toFixed(2),
-                    currency_code: 'USD'
-                },
-                description: `First day payment for ${tier.name} Plan at Affiliate AI Host`,
-            }],
-            application_context: {
-                shipping_preference: 'NO_SHIPPING',
-            }
-        }).then((orderID) => {
-            console.log(`DIAGNOSTIC: Step 3 - Successfully created Order ID: ${orderID}`);
-            return orderID;
+
+        const response = await fetch('/api/paypal', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'create_order', planId: selectedTierId }),
         });
+
+        const orderData = await response.json();
+        if (orderData.orderId) {
+            return orderData.orderId;
+        } else {
+            const errorMsg = orderData.debug || orderData.error || "Failed to create order on the server.";
+            setPaymentError(errorMsg);
+            return Promise.reject(new Error(errorMsg));
+        }
     };
 
     const onApprove = async (data: OnApproveData): Promise<void> => {
-        console.log("DIAGNOSTIC: Step 4 - onApprove function called with Order ID:", data.orderID);
         setIsProcessing(true);
         setPaymentError(null);
 
@@ -92,23 +87,26 @@ export default function UpgradePage() {
                 throw new Error(errorMsg);
             }
             
-            console.log("DIAGNOSTIC: Step 5 - Server successfully captured payment.");
-
-            if (userDocRef) {
+            if (userDocRef && selectedTierId) {
                 const newSubscription = {
                     tierId: selectedTierId,
-                    status: 'active' as 'active',
+                    status: 'active' as const,
                     startDate: serverTimestamp(),
                     endDate: null,
                     trialEndDate: null, 
                 };
-                updateDocumentNonBlocking(userDocRef, { subscription: newSubscription });
+
+                // CRITICAL CHANGE: Using a blocking `updateDoc` call inside a try/catch.
+                // This ensures the database is updated before we show a success message.
+                await updateDoc(userDocRef, { subscription: newSubscription });
+
                 toast({ title: "Subscription Activated!", description: "You've successfully subscribed." });
                 setSelectedTierId(null);
+            } else {
+                throw new Error("User session or selected plan not found after payment. Please try again.");
             }
         } catch (error: any) {
-             const errorMsg = `Payment capture failed: ${error.message}`;
-             console.error("DIAGNOSTIC ERROR:", errorMsg);
+             const errorMsg = `Post-payment processing failed: ${error.message}`;
              setPaymentError(errorMsg);
         } finally {
             setIsProcessing(false);
@@ -116,18 +114,23 @@ export default function UpgradePage() {
     };
     
     const onError = (err: any) => {
-        const errorMsg = `A client-side error occurred with the PayPal script. This is often due to an invalid Client ID in your .env file or a network issue. Raw error: ${err.toString()}`;
-        console.error("DIAGNOSTIC: PayPal onError callback triggered.", err);
+        const errorMsg = `A client-side error occurred with PayPal. This could be due to an invalid Client ID, network issue, or a problem with your PayPal account. Raw error: ${err.toString()}`;
+        console.error("PayPal onError callback triggered.", err);
         setPaymentError(errorMsg);
         setIsProcessing(false);
     };
     
-    const handlePlanChange = (tierId: string) => {
+    const handlePlanChange = async (tierId: string) => {
         if (!userDocRef || !userData?.subscription) return;
         setIsProcessing(true);
-        updateDocumentNonBlocking(userDocRef, { 'subscription.tierId': tierId });
-        toast({ title: "Plan Upgraded!", description: `Your plan has been successfully upgraded.` });
-        setIsProcessing(false);
+        try {
+            await updateDoc(userDocRef, { 'subscription.tierId': tierId });
+            toast({ title: "Plan Upgraded!", description: `Your plan has been successfully upgraded.` });
+        } catch (error: any) {
+            toast({ variant: "destructive", title: "Upgrade Failed", description: error.message });
+        } finally {
+            setIsProcessing(false);
+        }
     };
 
     if (isLoading) {

@@ -10,7 +10,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth, useFirestore } from "@/firebase";
 import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
-import { doc, getDoc, writeBatch, serverTimestamp } from "firebase/firestore";
+import { doc, getDoc, writeBatch, serverTimestamp, collection } from "firebase/firestore";
 import { useState } from "react";
 import { Loader2 } from "lucide-react";
 import { subscriptionTiers } from "@/lib/data";
@@ -77,14 +77,16 @@ export default function LoginPage() {
         const userDoc = await getDoc(userDocRef);
 
         if (!userDoc.exists()) {
-            // New user, create their document
+            const batch = writeBatch(firestore);
+            
+            // Create a unique username
             let username = (user.displayName || user.email?.split('@')[0] || `user${user.uid.substring(0,5)}`).replace(/[^a-zA-Z0-9]/g, '');
             const usernameDocRef = doc(firestore, "usernames", username);
             const usernameDoc = await getDoc(usernameDocRef);
-
             if (usernameDoc.exists()) {
                 username = `${username}${Math.floor(100 + Math.random() * 900)}`;
             }
+            batch.set(doc(firestore, "usernames", username), { uid: user.uid });
 
             const refCode = searchParams.get('ref');
             const planId = searchParams.get("plan");
@@ -110,10 +112,31 @@ export default function LoginPage() {
                 paypalEmail: '',
                 customDomain: null
             };
-
-            const batch = writeBatch(firestore);
             batch.set(userDocRef, newUserDocData);
-            batch.set(doc(firestore, "usernames", username), { uid: user.uid });
+
+            // Create referral document for affiliate
+            if (refCode && plan) {
+                const affiliateUsernameDoc = await getDoc(doc(firestore, "usernames", refCode));
+                if (affiliateUsernameDoc.exists()) {
+                    const affiliateUid = affiliateUsernameDoc.data().uid;
+                    const commission = plan.price * 0.70;
+                    const grossSale = plan.price;
+                    const referralRef = doc(collection(firestore, 'users', affiliateUid, 'referrals'));
+                    batch.set(referralRef, {
+                        id: referralRef.id,
+                        affiliateId: affiliateUid,
+                        referredUserId: user.uid,
+                        referredUserUsername: username,
+                        planPurchased: plan.name,
+                        grossSale: grossSale,
+                        date: serverTimestamp(),
+                        commission: commission,
+                        status: 'unpaid',
+                        subscriptionId: 'initial_signup'
+                    });
+                }
+            }
+
             await batch.commit();
              toast({
                 title: "Account Created!",

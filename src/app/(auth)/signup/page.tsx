@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, Suspense } from 'react';
@@ -12,7 +13,7 @@ import { subscriptionTiers } from "@/lib/data";
 import { Loader2, Users } from "lucide-react";
 import { useAuth, useFirestore } from "@/firebase";
 import { createUserWithEmailAndPassword, updateProfile, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
-import { doc, getDoc, writeBatch, serverTimestamp, Timestamp } from "firebase/firestore";
+import { doc, getDoc, writeBatch, serverTimestamp, Timestamp, collection } from "firebase/firestore";
 import { Skeleton } from '@/components/ui/skeleton';
 
 
@@ -58,6 +59,17 @@ function SignupFormComponent() {
             const user = userCredential.user;
             await updateProfile(user, { displayName: username });
 
+            // Get referrer UID if referralCode exists
+            let affiliateUid: string | null = null;
+            if (referralCode) {
+                const affiliateUsernameDoc = await getDoc(doc(firestore, "usernames", referralCode));
+                if (affiliateUsernameDoc.exists()) {
+                    affiliateUid = affiliateUsernameDoc.data().uid;
+                } else {
+                    console.warn(`Referral code "${referralCode}" used, but no matching username found.`);
+                }
+            }
+
             // Set up Firestore documents in a batch
             const batch = writeBatch(firestore);
             const userDocRef = doc(firestore, "users", user.uid);
@@ -74,6 +86,25 @@ function SignupFormComponent() {
 
             const usernameDocForWriteRef = doc(firestore, "usernames", username);
             batch.set(usernameDocForWriteRef, { uid: user.uid });
+
+            // Create the referral document for the affiliate
+            if (affiliateUid && plan) {
+                const commission = plan.price * 0.70;
+                const grossSale = plan.price;
+                const referralRef = doc(collection(firestore, 'users', affiliateUid, 'referrals'));
+                batch.set(referralRef, {
+                    id: referralRef.id,
+                    affiliateId: affiliateUid,
+                    referredUserId: user.uid,
+                    referredUserUsername: username,
+                    planPurchased: plan.name,
+                    grossSale: grossSale,
+                    date: serverTimestamp(),
+                    commission: commission,
+                    status: 'unpaid',
+                    subscriptionId: 'initial_signup'
+                });
+            }
 
             await batch.commit();
 
@@ -117,6 +148,30 @@ function SignupFormComponent() {
                     subscription: { tierId: plan.id, status: 'active', startDate: serverTimestamp(), endDate: null, trialEndDate: Timestamp.fromDate(trialEndDate) },
                     paypalEmail: '', customDomain: null
                 });
+
+                // Create referral for Google Sign In
+                if (referralCode) {
+                    const affiliateUsernameDoc = await getDoc(doc(firestore, "usernames", referralCode));
+                    if (affiliateUsernameDoc.exists()) {
+                        const affiliateUid = affiliateUsernameDoc.data().uid;
+                        const commission = plan.price * 0.70;
+                        const grossSale = plan.price;
+                        const referralRef = doc(collection(firestore, 'users', affiliateUid, 'referrals'));
+                        batch.set(referralRef, {
+                            id: referralRef.id,
+                            affiliateId: affiliateUid,
+                            referredUserId: user.uid,
+                            referredUserUsername: g_username,
+                            planPurchased: plan.name,
+                            grossSale: grossSale,
+                            date: serverTimestamp(),
+                            commission: commission,
+                            status: 'unpaid',
+                            subscriptionId: 'initial_signup'
+                        });
+                    }
+                }
+
                 await batch.commit();
                 toast({ title: "Account Created!", description: "Welcome! Your 3-day trial is active. You can upgrade from your dashboard." });
             } else {
