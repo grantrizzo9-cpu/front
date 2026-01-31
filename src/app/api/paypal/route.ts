@@ -50,18 +50,14 @@ export async function POST(request: Request) {
         return NextResponse.json({ success: false, error: `Subscription tier with id '${planId}' not found.` }, { status: 404 });
       }
 
-      const planIdForEnv = environment === 'PRODUCTION'
-        ? tier.paypalPlanId.production
-        : tier.paypalPlanId.sandbox;
-
-      if (!planIdForEnv || planIdForEnv.includes('REPLACE_WITH')) {
-        const errorMsg = `The PayPal Plan ID for the '${planId}' plan is not configured for the current ${environment} environment. Please add it to src/lib/data.ts.`;
+      if (!tier.paypalPlanId || tier.paypalPlanId.includes('REPLACE_WITH')) {
+        const errorMsg = `The PayPal Plan ID for the '${planId}' plan is not configured in src/lib/data.ts. Please add your Sandbox Plan ID for testing or your Live Plan ID for production.`;
         console.error(errorMsg);
         return NextResponse.json({ success: false, error: errorMsg }, { status: 404 });
       }
 
       const payload = {
-        plan_id: planIdForEnv,
+        plan_id: tier.paypalPlanId,
         custom_id: customId, // Pass the Firebase UID
         application_context: {
           brand_name: 'Affiliate AI Host',
@@ -91,7 +87,7 @@ export async function POST(request: Request) {
         });
         const issue = subData.details?.[0]?.issue || subData.name || "SUBSCRIPTION_CREATION_FAILED";
         const description = subData.details?.[0]?.description || subData.message || "An error occurred.";
-        return NextResponse.json({ success: false, error: `PayPal Error: ${issue}`, debug: `${description} (Hint: This often happens if the Plan ID does not exist in the ${environment} environment.)` }, { status: subResponse.status });
+        return NextResponse.json({ success: false, error: `PayPal Error: ${issue}`, debug: `${description} (Hint: This often happens if the Plan ID does not exist in your PayPal ${environment} account.)` }, { status: subResponse.status });
       }
 
       return NextResponse.json({ success: true, subscriptionId: subData.id });
