@@ -2,7 +2,9 @@
 import { NextResponse } from 'next/server';
 import { subscriptionTiers } from '@/lib/data';
 
-const PAYPAL_API_BASE = "https://api-m.sandbox.paypal.com";
+const PAYPAL_API_BASE = process.env.NODE_ENV === 'production' 
+    ? "https://api-m.paypal.com" 
+    : "https://api-m.sandbox.paypal.com";
 
 async function getPayPalAccessToken(): Promise<{ token?: string; error?: string }> {
   const clientId = process.env.PAYPAL_CLIENT_ID;
@@ -24,17 +26,15 @@ async function getPayPalAccessToken(): Promise<{ token?: string; error?: string 
             Authorization: `Basic ${auth}`,
             "Content-Type": "application/x-www-form-urlencoded",
         },
-        // More aggressive timeout
         signal: AbortSignal.timeout(8000) 
     });
 
+    const data = await response.json();
+
     if (!response.ok) {
-        const data = await response.json();
         console.error("PAYPAL_TOKEN_ERROR:", JSON.stringify(data, null, 2));
         return { error: `Failed to get PayPal access token. Status: ${response.status}. Response: ${JSON.stringify(data)}` };
     }
-
-    const data = await response.json();
 
     if (!data.access_token) {
         console.error("PAYPAL_TOKEN_ERROR: No access_token in response", JSON.stringify(data, null, 2));
@@ -49,11 +49,10 @@ async function getPayPalAccessToken(): Promise<{ token?: string; error?: string 
 }
 
 export async function POST(request: Request) {
-  // CRITICAL: Check for environment variables first to prevent silent crashes.
+  // CRITICAL: Check for environment variables first.
   const clientId = process.env.PAYPAL_CLIENT_ID;
-  const clientSecret = process.env.PAYPAL_CLIENT_SECRET;
-  if (!clientId || !clientSecret || clientId.includes('REPLACE_WITH') || clientSecret.includes('REPLACE_WITH')) {
-    const errorMsg = "PayPal server credentials (PAYPAL_CLIENT_ID, PAYPAL_CLIENT_SECRET) are not configured. Please add them to your .env file.";
+  if (!clientId || clientId.includes('REPLACE_WITH')) {
+    const errorMsg = "PayPal server credentials are not configured. Please add PAYPAL_CLIENT_ID and PAYPAL_CLIENT_SECRET to your .env file.";
     console.error("PayPal API Error:", errorMsg);
     return NextResponse.json({ success: false, error: errorMsg, debug: "Server-side environment variables are missing." }, { status: 500 });
   }
@@ -112,7 +111,7 @@ export async function POST(request: Request) {
       if (!response.ok) {
         const issue = data.details?.[0]?.issue || data.name || "UNKNOWN_ISSUE";
         const description = data.details?.[0]?.description || data.message || "An error occurred while creating the order.";
-        return NextResponse.json({ success: false, error: `PayPal Error: ${issue}`, debug: description }, { status: 500 });
+        return NextResponse.json({ success: false, error: `PayPal Error: ${issue}`, debug: description }, { status: response.status });
       }
 
       if (!data.id) {
@@ -142,7 +141,7 @@ export async function POST(request: Request) {
       if (!response.ok) {
         const issue = data.details?.[0]?.issue || data.name || "CAPTURE_FAILED";
         const description = data.details?.[0]?.description || data.message || "Could not capture the payment.";
-        return NextResponse.json({ success: false, error: `PayPal capture failed: ${issue}`, debug: description }, { status: 500 });
+        return NextResponse.json({ success: false, error: `PayPal capture failed: ${issue}`, debug: description }, { status: response.status });
       }
 
       if (data.status === 'COMPLETED') {
@@ -155,7 +154,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ success: false, error: 'Invalid action specified.' }, { status: 400 });
 
   } catch (e: any) {
-    console.error("[CRITICAL] Top-level error in /api/paypal route:", e);
+    console.error("[CRITICAL] Top-level error in /api/paypal/route:", e);
     return NextResponse.json({ success: false, error: "A critical server error occurred.", debug: e.message }, { status: 500 });
   }
 }
