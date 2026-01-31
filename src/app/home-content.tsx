@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Header } from '@/components/header';
@@ -71,7 +72,7 @@ export function HomeContent() {
     { q: "How and when do I get paid?", a: "We process all commission payouts daily. All your earned commissions from the previous day are automatically sent to the PayPal account you have on file. It's fully automated." },
     { q: "What am I selling?", a: "You are promoting our subscription plans which include high-quality web hosting, a suite of powerful AI tools, and access to an exclusive, tiered library of marketing guides designed to help users build and grow their online businesses and make more sales." },
     { q: "Is there a limit to how much I can earn?", a: "Absolutely not! There is no cap on your potential earnings. The more customers you refer, the more you earn. With a base 70% commission rate that rises to 75% for top affiliates, the sky is the limit." },
-    { q: "What is your trial and refund policy?", a: "We offer a 3-day free trial on all plans. Sign up and explore the full platform without any commitment. If you're not satisfied, you can cancel at any time during the trial. After the trial, you can request a refund for your first day's payment if you're not happy." },
+    { q: "What is your refund policy?", a: "We want you to be satisfied. After you make your first payment, you have 24 hours to request a full refund if the service isn't for you." },
   ];
 
   return (
@@ -85,11 +86,11 @@ export function HomeContent() {
               Earn 70%-75% Daily Commissions with <span className="text-primary">AI-Powered Hosting</span>
             </h1>
             <p className="mt-6 max-w-2xl mx-auto text-lg text-muted-foreground md:text-xl">
-              Start your 3-day free trial today. Get paid daily for every referral you make. Our automated system handles everything.
+              Get started today and get paid daily for every referral you make. Our automated system handles everything.
             </p>
             <div className="mt-10 flex justify-center gap-4">
               <Button size="lg" asChild>
-                <Link href={pricingLink}>Start Your Free Trial</Link>
+                <Link href={pricingLink}>Get Started</Link>
               </Button>
               <Button size="lg" variant="outline" asChild>
                 <Link href="#features">Learn More</Link>
@@ -129,8 +130,8 @@ export function HomeContent() {
                 <li className="flex gap-4">
                   <div className="flex-shrink-0 w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-bold">1</div>
                   <div>
-                    <h3 className="font-semibold text-lg">Start Your Free Trial</h3>
-                    <p className="text-muted-foreground">Sign up for any plan to start your 3-day trial and instantly get your unique referral link.</p>
+                    <h3 className="font-semibold text-lg">Create Your Account</h3>
+                    <p className="text-muted-foreground">Sign up and choose a plan to get your unique referral link.</p>
                   </div>
                 </li>
                 <li className="flex gap-4">
@@ -290,7 +291,7 @@ export function HomeContent() {
             <div className="mt-8">
               <Button size="lg" asChild className="text-lg py-7 px-10">
                 <Link href={pricingLink}>
-                  Start Your Free Trial Now
+                  Get Started Now
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
               </Button>

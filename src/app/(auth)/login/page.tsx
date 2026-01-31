@@ -14,7 +14,6 @@ import { doc, getDoc, writeBatch, serverTimestamp, collection } from "firebase/f
 import { useState } from "react";
 import { Loader2 } from "lucide-react";
 import { subscriptionTiers } from "@/lib/data";
-import { Timestamp } from "firebase/firestore";
 
 const GoogleIcon = () => (
     <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" className="mr-2 h-4 w-4 fill-current"><title>Google</title><path d="M12.48 10.92v3.28h7.84c-.24 1.84-.85 3.18-1.73 4.1-1.02 1.02-2.62 1.98-4.48 1.98-3.62 0-6.55-2.92-6.55-6.55s2.93-6.55 6.55-6.55c2.03 0 3.33.82 4.1 1.59l2.48-2.48C17.22 3.43 15.14 2 12.48 2 7.08 2 3 6.08 3 11.48s4.08 9.48 9.48 9.48c5.13 0 9.1-3.48 9.1-9.28 0-.6-.08-1.12-.2-1.68H3.48v.01z"></path></svg>
@@ -75,6 +74,7 @@ export default function LoginPage() {
 
         const userDocRef = doc(firestore, "users", user.uid);
         const userDoc = await getDoc(userDocRef);
+        const planId = searchParams.get("plan");
 
         if (!userDoc.exists()) {
             const batch = writeBatch(firestore);
@@ -89,12 +89,7 @@ export default function LoginPage() {
             batch.set(doc(firestore, "usernames", username), { uid: user.uid });
 
             const refCode = searchParams.get('ref');
-            const planId = searchParams.get("plan");
-            const plan = planId ? subscriptionTiers.find(p => p.id === planId) : null;
             
-            const trialEndDate = new Date();
-            trialEndDate.setDate(trialEndDate.getDate() + 3);
-
             const newUserDocData = {
                 id: user.uid,
                 email: user.email,
@@ -102,54 +97,25 @@ export default function LoginPage() {
                 referredBy: refCode || null,
                 isAffiliate: true,
                 createdAt: serverTimestamp(),
-                subscription: plan ? {
-                    tierId: plan.id,
-                    status: 'active' as const,
-                    startDate: serverTimestamp(),
-                    endDate: null,
-                    trialEndDate: Timestamp.fromDate(trialEndDate),
-                } : null,
+                subscription: null, // Subscription is set after payment
                 paypalEmail: '',
                 customDomain: null
             };
             batch.set(userDocRef, newUserDocData);
 
-            // Create referral document for affiliate
-            if (refCode && plan) {
-                const affiliateUsernameDoc = await getDoc(doc(firestore, "usernames", refCode));
-                if (affiliateUsernameDoc.exists()) {
-                    const affiliateUid = affiliateUsernameDoc.data().uid;
-                    const commission = plan.price * 0.70;
-                    const grossSale = plan.price;
-                    const referralRef = doc(collection(firestore, 'users', affiliateUid, 'referrals'));
-                    batch.set(referralRef, {
-                        id: referralRef.id,
-                        affiliateId: affiliateUid,
-                        referredUserId: user.uid,
-                        referredUserUsername: username,
-                        planPurchased: plan.name,
-                        grossSale: grossSale,
-                        date: serverTimestamp(),
-                        commission: commission,
-                        status: 'unpaid',
-                        subscriptionId: 'initial_signup'
-                    });
-                }
-            }
-
             await batch.commit();
              toast({
                 title: "Account Created!",
-                description: "Welcome! We've set up your new account.",
+                description: "Welcome! Let's get your plan activated.",
             });
+            router.push(planId ? `/dashboard/upgrade?plan=${planId}` : "/dashboard/upgrade");
         } else {
              toast({
                 title: "Login Successful",
                 description: "Welcome back!",
             });
+            router.push("/dashboard");
         }
-
-        router.push("/dashboard");
 
     } catch (error: any) {
         let description = "An unknown error occurred. Please try again.";

@@ -59,27 +59,13 @@ function SignupFormComponent() {
             const user = userCredential.user;
             await updateProfile(user, { displayName: username });
 
-            // Get referrer UID if referralCode exists
-            let affiliateUid: string | null = null;
-            if (referralCode) {
-                const affiliateUsernameDoc = await getDoc(doc(firestore, "usernames", referralCode));
-                if (affiliateUsernameDoc.exists()) {
-                    affiliateUid = affiliateUsernameDoc.data().uid;
-                } else {
-                    console.warn(`Referral code "${referralCode}" used, but no matching username found.`);
-                }
-            }
-
             // Set up Firestore documents in a batch
             const batch = writeBatch(firestore);
             const userDocRef = doc(firestore, "users", user.uid);
             
-            const trialEndDate = new Date();
-            trialEndDate.setDate(trialEndDate.getDate() + 3);
-
             const userData = {
                 id: user.uid, email: user.email, username: username, referredBy: referralCode || null, isAffiliate: true, createdAt: serverTimestamp(),
-                subscription: { tierId: plan.id, status: 'active' as const, startDate: serverTimestamp(), endDate: null, trialEndDate: Timestamp.fromDate(trialEndDate) },
+                subscription: null, // Subscription is set after payment
                 paypalEmail: '', customDomain: null
             };
             batch.set(userDocRef, userData);
@@ -87,29 +73,10 @@ function SignupFormComponent() {
             const usernameDocForWriteRef = doc(firestore, "usernames", username);
             batch.set(usernameDocForWriteRef, { uid: user.uid });
 
-            // Create the referral document for the affiliate
-            if (affiliateUid && plan) {
-                const commission = plan.price * 0.70;
-                const grossSale = plan.price;
-                const referralRef = doc(collection(firestore, 'users', affiliateUid, 'referrals'));
-                batch.set(referralRef, {
-                    id: referralRef.id,
-                    affiliateId: affiliateUid,
-                    referredUserId: user.uid,
-                    referredUserUsername: username,
-                    planPurchased: plan.name,
-                    grossSale: grossSale,
-                    date: serverTimestamp(),
-                    commission: commission,
-                    status: 'unpaid',
-                    subscriptionId: 'initial_signup'
-                });
-            }
-
             await batch.commit();
 
-            toast({ title: "Account Created & Trial Started!", description: "Welcome! Your 3-day free trial is active. We're redirecting you to your dashboard." });
-            router.push("/dashboard");
+            toast({ title: "Account Created!", description: "Welcome! We're redirecting you to activate your plan." });
+            router.push(planId ? `/dashboard/upgrade?plan=${planId}` : "/dashboard/upgrade");
 
         } catch (error: any) {
             let description;
@@ -140,44 +107,19 @@ function SignupFormComponent() {
                 if (initialUsernameDoc.exists()) g_username = `${g_username}${Math.floor(100 + Math.random() * 900)}`;
                 batch.set(doc(firestore, "usernames", g_username), { uid: user.uid });
 
-                const trialEndDate = new Date();
-                trialEndDate.setDate(trialEndDate.getDate() + 3);
-
                 batch.set(userDocRef, {
                     id: user.uid, email: user.email, username: g_username, referredBy: referralCode, isAffiliate: true, createdAt: serverTimestamp(),
-                    subscription: { tierId: plan.id, status: 'active', startDate: serverTimestamp(), endDate: null, trialEndDate: Timestamp.fromDate(trialEndDate) },
+                    subscription: null, // Set after payment
                     paypalEmail: '', customDomain: null
                 });
 
-                // Create referral for Google Sign In
-                if (referralCode) {
-                    const affiliateUsernameDoc = await getDoc(doc(firestore, "usernames", referralCode));
-                    if (affiliateUsernameDoc.exists()) {
-                        const affiliateUid = affiliateUsernameDoc.data().uid;
-                        const commission = plan.price * 0.70;
-                        const grossSale = plan.price;
-                        const referralRef = doc(collection(firestore, 'users', affiliateUid, 'referrals'));
-                        batch.set(referralRef, {
-                            id: referralRef.id,
-                            affiliateId: affiliateUid,
-                            referredUserId: user.uid,
-                            referredUserUsername: g_username,
-                            planPurchased: plan.name,
-                            grossSale: grossSale,
-                            date: serverTimestamp(),
-                            commission: commission,
-                            status: 'unpaid',
-                            subscriptionId: 'initial_signup'
-                        });
-                    }
-                }
-
                 await batch.commit();
-                toast({ title: "Account Created!", description: "Welcome! Your 3-day trial is active. You can upgrade from your dashboard." });
+                toast({ title: "Account Created!", description: "Welcome! Let's get your plan activated." });
+                router.push(planId ? `/dashboard/upgrade?plan=${planId}` : "/dashboard/upgrade");
             } else {
                  toast({ title: "Login Successful", description: "Welcome back!" });
+                 router.push("/dashboard");
             }
-            router.push("/dashboard");
         } catch (error: any) {
              toast({ variant: "destructive", title: "Google Sign-In Failed", description: error.message });
         } finally {
@@ -190,7 +132,7 @@ function SignupFormComponent() {
             <CardHeader>
                 <CardTitle className="font-headline text-2xl">Create Your Account</CardTitle>
                 <CardDescription>
-                    Start your 3-day free trial on the <strong>{plan.name}</strong> plan. No payment required today.
+                    You're creating an account to subscribe to the <strong>{plan.name}</strong> plan. You'll confirm payment on the next step.
                 </CardDescription>
             </CardHeader>
             <CardContent>
@@ -214,7 +156,7 @@ function SignupFormComponent() {
                         </div>
                     )}
                     <Button type="submit" className="w-full" disabled={!isFormValid || isProcessing}>
-                        {isProcessing ? <Loader2 className="animate-spin" /> : "Start Free Trial"}
+                        {isProcessing ? <Loader2 className="animate-spin" /> : "Create Account"}
                     </Button>
                 </form>
                 <div className="relative my-4">

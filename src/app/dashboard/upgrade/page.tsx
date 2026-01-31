@@ -1,15 +1,17 @@
+
 'use client';
 
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Loader2, CheckCircle, AlertTriangle } from "lucide-react";
 import { useUser, useFirestore, useDoc, useMemoFirebase } from "@/firebase";
-import { doc, serverTimestamp, updateDoc } from "firebase/firestore";
+import { doc, serverTimestamp, writeBatch, collection, getDoc, getDocs } from "firebase/firestore";
 import type { User as UserType } from "@/lib/types";
 import { subscriptionTiers } from "@/lib/data";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 import type { OnApproveData, CreateOrderData } from "@paypal/paypal-js";
@@ -24,6 +26,7 @@ export default function UpgradePage() {
     const [selectedTierId, setSelectedTierId] = useState<string | null>(null);
 
     const paypalClientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID;
+    const searchParams = useSearchParams();
 
     const userDocRef = useMemoFirebase(() => {
         if (!user || !firestore) return null;
@@ -31,6 +34,13 @@ export default function UpgradePage() {
     }, [firestore, user?.uid]);
     const { data: userData, isLoading: isUserDataLoading } = useDoc<UserType>(userDocRef);
     
+    useEffect(() => {
+        const planId = searchParams.get('plan');
+        if (planId && subscriptionTiers.some(t => t.id === planId)) {
+            setSelectedTierId(planId);
+        }
+    }, [searchParams]);
+
     const isLoading = isUserLoading || isUserDataLoading;
     
     const availableTiers = useMemo(() => {
@@ -90,7 +100,46 @@ export default function UpgradePage() {
                 throw new Error(errorMsg);
             }
             
-            if (userDocRef && selectedTierId) {
+            if (userDocRef && selectedTierId && firestore && user && userData) {
+                const tier = subscriptionTiers.find(t => t.id === selectedTierId);
+                if (!tier) throw new Error("Selected plan details not found after payment.");
+                
+                const batch = writeBatch(firestore);
+
+                // Create referral document if this is the first payment and user was referred
+                if (!userData.subscription && userData.referredBy) {
+                    const affiliateUsername = userData.referredBy;
+                    const affiliateUsernameDocRef = doc(firestore, "usernames", affiliateUsername);
+                    const affiliateUsernameDoc = await getDoc(affiliateUsernameDocRef);
+
+                    if (affiliateUsernameDoc.exists()) {
+                        const affiliateUid = affiliateUsernameDoc.data().uid;
+                        
+                        // Check if user is already a super affiliate to set correct commission rate
+                        const affiliateReferralsColRef = collection(firestore, 'users', affiliateUid, 'referrals');
+                        const affiliateReferralsSnapshot = await getDocs(affiliateReferralsColRef);
+                        const isSuperAffiliate = affiliateReferralsSnapshot.size >= 10;
+                        
+                        const commissionRate = isSuperAffiliate ? 0.75 : 0.70;
+                        const commission = tier.price * commissionRate;
+                        
+                        const referralRef = doc(collection(firestore, 'users', affiliateUid, 'referrals'));
+                        batch.set(referralRef, {
+                            id: referralRef.id,
+                            affiliateId: affiliateUid,
+                            referredUserId: user.uid,
+                            referredUserUsername: userData.username,
+                            planPurchased: tier.name,
+                            grossSale: tier.price,
+                            date: serverTimestamp(),
+                            commission: commission,
+                            status: 'unpaid',
+                            subscriptionId: data.orderID,
+                        });
+                    }
+                }
+
+                // Update the user's subscription
                 const newSubscription = {
                     tierId: selectedTierId,
                     status: 'active' as const,
@@ -98,10 +147,11 @@ export default function UpgradePage() {
                     endDate: null,
                     trialEndDate: null, 
                 };
-                
-                await updateDoc(userDocRef, { subscription: newSubscription });
+                batch.update(userDocRef, { subscription: newSubscription });
 
-                toast({ title: "Subscription Activated!", description: "You've successfully subscribed." });
+                await batch.commit();
+
+                toast({ title: "Subscription Activated!", description: `You've successfully subscribed to the ${tier.name} plan.` });
                 setSelectedTierId(null);
             } else {
                 throw new Error("User session or selected plan not found after payment. Please try again.");
