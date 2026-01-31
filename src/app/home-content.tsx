@@ -5,11 +5,10 @@ import { Header } from '@/components/header';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { CheckCircle, Zap, Users, Shield, ArrowRight, DollarSign, BrainCircuit, BarChart, BookOpen } from 'lucide-react';
+import { CheckCircle, Zap, Users, Shield, ArrowRight, DollarSign, BrainCircuit, BookOpen } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Footer } from '@/components/footer';
-import { Logo } from '@/components/logo';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { NewsletterForm } from '@/components/newsletter-form';
@@ -72,7 +71,7 @@ export function HomeContent() {
     { q: "How and when do I get paid?", a: "We process all commission payouts daily. All your earned commissions from recurring payments are automatically sent to the PayPal account you have on file." },
     { q: "What am I selling?", a: "You are promoting our subscription plans which include web hosting and AI tools. To start, every new user pays a one-time activation fee (which goes to the platform owner). This fee activates their 3-day trial. After the trial, their daily subscription begins, and you earn commissions on those payments." },
     { q: "Is there a limit to how much I can earn?", a: "Absolutely not! There is no cap on your potential earnings. The more customers you refer, the more you earn. With a base 70% commission rate that rises to 75% for top affiliates, the sky is the limit." },
-    { q: "Can I get a refund on the activation fee?", a: "The one-time activation fee is non-refundable as it covers account setup and access to the tools. However, you can cancel your subscription at any time during your 3-day trial without any further charges." },
+    { q: "Can I get a refund on the activation fee?", a: "Yes. We offer a no-questions-asked refund on your one-time activation fee if you request it within 24 hours of joining. We want you to be happy. If you decide it's not for you, just let us know, and we'll process it with no hard feelings. Please note that if you choose to receive a refund, your account will be closed, and you will no longer be able to log in." },
   ];
 
   return (
