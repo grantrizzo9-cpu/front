@@ -1,3 +1,4 @@
+
 import type { SubscriptionTier, Referral, Payout, AdminPayout } from './types';
 
 export const subscriptionTiers: SubscriptionTier[] = [
@@ -5,7 +6,7 @@ export const subscriptionTiers: SubscriptionTier[] = [
     id: 'starter',
     name: 'Starter',
     price: 4.95,
-    paypalPlanId: 'REPLACE_WITH_YOUR_SANDBOX_PLAN_ID',
+    paypalPlanId: 'P-89F158303B481334BNF63NXY',
     description: 'Launch your affiliate journey with these essential tools.',
     guideAccessLevel: 'starter',
     features: [
@@ -23,7 +24,7 @@ export const subscriptionTiers: SubscriptionTier[] = [
     id: 'plus',
     name: 'Plus',
     price: 19.95,
-    paypalPlanId: 'REPLACE_WITH_YOUR_SANDBOX_PLAN_ID',
+    paypalPlanId: 'P-49018410L25660413NF63O7A',
     description: 'Everything in Starter, plus more power and speed.',
     guideAccessLevel: 'plus',
     features: [
@@ -42,7 +43,7 @@ export const subscriptionTiers: SubscriptionTier[] = [
     id: 'pro',
     name: 'Pro',
     price: 49.95,
-    paypalPlanId: 'REPLACE_WITH_YOUR_SANDBOX_PLAN_ID',
+    paypalPlanId: 'P-49018410L25660413NF63O7A',
     description: 'Everything in Plus, with professional tools for serious affiliates.',
     guideAccessLevel: 'pro',
     features: [
@@ -63,7 +64,7 @@ export const subscriptionTiers: SubscriptionTier[] = [
     id: 'business',
     name: 'Business',
     price: 99.95,
-    paypalPlanId: 'REPLACE_WITH_YOUR_SANDBOX_PLAN_ID',
+    paypalPlanId: 'P-91R8013209080602NNF63P6A',
     description: 'Everything in Pro, with business tools for established agencies.',
     guideAccessLevel: 'business',
     features: [
@@ -84,7 +85,7 @@ export const subscriptionTiers: SubscriptionTier[] = [
     id: 'scale',
     name: 'Scale',
     price: 299.95,
-    paypalPlanId: 'REPLACE_WITH_YOUR_SANDBOX_PLAN_ID',
+    paypalPlanId: 'P-60D154676J733463WNF63ULA',
     description: 'Everything in Business, plus tools for scaling your operations.',
     guideAccessLevel: 'scale',
     features: [
@@ -105,7 +106,7 @@ export const subscriptionTiers: SubscriptionTier[] = [
     id: 'enterprise',
     name: 'Enterprise',
     price: 499.95,
-    paypalPlanId: 'REPLACE_WITH_YOUR_SANDBOX_PLAN_ID',
+    paypalPlanId: 'P-81451695TF637114KNF63RTA',
     description: 'Everything in Scale, plus enterprise-grade tools for power-users.',
     guideAccessLevel: 'enterprise',
     features: [
