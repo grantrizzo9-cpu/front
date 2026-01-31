@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useMemo, useState } from 'react';
@@ -71,6 +72,19 @@ export default function GuidesPage() {
   );
   
   const isLoading = isUserLoading || isUserDataLoading || isAdminLoading;
+  
+  const processedContent = useMemo(() => {
+    if (!selectedGuide?.content) return "";
+    if (!userData?.username) return selectedGuide.content;
+
+    const affiliateLink = `https://hostproai.com/?ref=${userData.username}`;
+    const placeholder = 'https://hostproai.com/?ref=[YOUR_USERNAME_HERE]';
+    
+    // A safe way to do a global replace for a URL-like string
+    return selectedGuide.content.split(placeholder).join(
+        `<a href="${affiliateLink}" target="_blank" rel="noopener noreferrer" class="font-semibold text-primary hover:underline break-all">${affiliateLink}</a>`
+    );
+  }, [selectedGuide, userData?.username]);
 
   const handleDownload = (guide: Guide) => {
     const stripHtml = (html: string) => {
@@ -217,7 +231,7 @@ export default function GuidesPage() {
         <ScrollArea className="h-[60vh] pr-4">
             <div 
                 className="prose prose-sm dark:prose-invert max-w-none text-base text-muted-foreground [&_a]:text-primary [&_a:hover]:underline [&_strong]:text-foreground [&_code]:bg-muted [&_code]:p-1 [&_code]:rounded-sm [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 [&_blockquote]:pl-4 [&_blockquote]:border-l-4 [&_blockquote]:border-border [&_blockquote]:italic"
-                dangerouslySetInnerHTML={{ __html: selectedGuide?.content ?? "" }} 
+                dangerouslySetInnerHTML={{ __html: processedContent }} 
             />
         </ScrollArea>
         <CardFooter>

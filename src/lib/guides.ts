@@ -40,7 +40,7 @@ export const allGuides: Guide[] = [
         <blockquote>
             <p>Been exploring some incredible AI-powered tools for building websites and growing a business online. Affiliate AI Host combines high-speed hosting with a content generator that's actually useful.</p>
             <p>Plus, their affiliate program is one of the best I've seen (70% commissions, paid daily!). If you're looking to start an online project or side-hustle, this is a great place to begin. They have a trial where you only pay for the first day to check it out.</p>
-            <p>Check it out here: <strong>[Your Affiliate Link]</strong></p>
+            <p>Check it out here: <strong>https://hostproai.com/?ref=[YOUR_USERNAME_HERE]</strong></p>
             <p>#webhosting #aicontent #affiliatemarketing #sidehustle</p>
         </blockquote>
 
@@ -48,7 +48,7 @@ export const allGuides: Guide[] = [
         <blockquote>
             <p>Just found a hosting platform that pays its affiliates 70% commissions DAILY via PayPal. 🤯</p>
             <p>Affiliate AI Host bundles hosting with AI content tools. It's a super easy offer for anyone wanting to build a site or start an online business.</p>
-            <p>Worth a look 👇<br><strong>[Your Affiliate Link]</strong></p>
+            <p>Worth a look 👇<br><strong>https://hostproai.com/?ref=[YOUR_USERNAME_HERE]</strong></p>
             <p>#affiliatemarketing #saas #mrr</p>
         </blockquote>
         <p><strong>Where to post:</strong> Your personal profile, relevant Facebook groups (check rules first!), LinkedIn articles, and your X/Twitter feed. Customize the message to fit your voice!</p>
