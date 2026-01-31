@@ -7,6 +7,53 @@ export type Guide = {
 };
 
 export const allGuides: Guide[] = [
+  // New Lead Magnet Guide
+  {
+    title: "The 5-Step Checklist to Launching a Profitable Affiliate Website in 24 Hours",
+    level: "starter",
+    content: `
+        <p>Congratulations! This exclusive checklist is your rapid-launch plan. Follow these five steps to get your affiliate site live and ready to earn in just 24 hours.</p>
+
+        <h3>Step 1: Choose Your Domain & Niche (First 2 Hours)</h3>
+        <p>A great domain name is memorable and relevant. Your niche is the specific audience you're targeting.</p>
+        <ul>
+            <li><strong>Brainstorm:</strong> List 10 domain names related to 'AI', 'hosting', 'affiliate', or 'passive income'.</li>
+            <li><strong>Check Availability:</strong> Use a registrar like Name.com to see if your top choices are available.</li>
+            <li><strong>Keep it Simple:</strong> Aim for a .com that's easy to say and spell.</li>
+            <li><strong>Decision:</strong> Purchase your domain. This is your digital real estate!</li>
+        </ul>
+
+        <h3>Step 2: Launch Your Website (Next 2 Hours)</h3>
+        <p>This is the easy part. Our platform is built for speed.</p>
+        <ul>
+            <li><strong>Sign Up:</strong> If you haven't already, sign up for an Affiliate AI Host plan using this link: <strong>https://hostproai.com/?ref=[YOUR_USERNAME_HERE]</strong></li>
+            <li><strong>Connect Domain:</strong> Follow our "Pre-Launch Checklist" guide to connect your domain to our hosting. While you wait for it to go live, you can start on the next step.</li>
+        </ul>
+
+        <h3>Step 3: Create Your Core Content (Next 8 Hours)</h3>
+        <p>Content is what attracts visitors. You need two key pages to start.</p>
+        <ul>
+            <li><strong>'About Me' Page:</strong> Write a short page introducing yourself and why you're recommending Affiliate AI Host. Build trust by being authentic.</li>
+            <li><strong>The "Money" Page - Your Review:</strong> Write a detailed review of Affiliate AI Host. Use the "Content is King" guide for a full template. Include your personal experience, screenshots, and sprinkle your affiliate link throughout. This is your most important sales tool.</li>
+        </ul>
+
+        <h3>Step 4: Your First Promotion Blitz (Next 10 Hours)</h3>
+        <p>A great site with no visitors earns nothing. It's time for outreach.</p>
+        <ul>
+            <li><strong>Social Media:</strong> Use the templates from our "Social Media Marketing 101" guide to post on Facebook, X/Twitter, and LinkedIn.</li>
+            <li><strong>Relevant Communities:</strong> Find 3 online communities where your target audience hangs out (e.g., Reddit's r/affiliatemarketing, Facebook groups). Share your review, but be helpful first! Answer questions before you post your link.</li>
+            <li><strong>Tell Your Friends:</strong> Send a personal message to 5 friends who might be interested in starting an online business.</li>
+        </ul>
+
+        <h3>Step 5: Review & Track (Final 2 Hours)</h3>
+        <p>Check your work and get ready for results.</p>
+        <ul>
+            <li><strong>Check Your Links:</strong> Click every link on your new website to make sure they work, especially your affiliate links!</li>
+            <li><strong>Monitor Your Dashboard:</strong> Keep an eye on your Affiliate AI Host dashboard to see new referrals as they come in.</li>
+            <li><strong>Celebrate:</strong> You've just launched a real online business. Well done!</li>
+        </ul>
+    `
+  },
   // Starter Guides
   {
     title: "Understanding Your Affiliate Link & Dashboard",
