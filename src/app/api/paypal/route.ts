@@ -46,14 +46,22 @@ export async function POST(request: Request) {
       if (!planId) return NextResponse.json({ success: false, error: "Plan ID is required." }, { status: 400 });
 
       const tier = subscriptionTiers.find(t => t.id === planId);
-      if (!tier || !tier.paypalPlanId || tier.paypalPlanId.includes('REPLACE_WITH')) {
-        const errorMsg = `The selected plan '${planId}' does not have a valid PayPal Plan ID configured. Make sure you are using your ${environment} Plan IDs in src/lib/data.ts.`;
+      if (!tier) {
+        return NextResponse.json({ success: false, error: `Subscription tier with id '${planId}' not found.` }, { status: 404 });
+      }
+
+      const planIdForEnv = environment === 'PRODUCTION'
+        ? tier.paypalPlanId.production
+        : tier.paypalPlanId.sandbox;
+
+      if (!planIdForEnv || planIdForEnv.includes('REPLACE_WITH')) {
+        const errorMsg = `The PayPal Plan ID for the '${planId}' plan is not configured for the current ${environment} environment. Please add it to src/lib/data.ts.`;
         console.error(errorMsg);
         return NextResponse.json({ success: false, error: errorMsg }, { status: 404 });
       }
 
       const payload = {
-        plan_id: tier.paypalPlanId,
+        plan_id: planIdForEnv,
         custom_id: customId, // Pass the Firebase UID
         application_context: {
           brand_name: 'Affiliate AI Host',

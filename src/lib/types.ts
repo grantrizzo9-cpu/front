@@ -4,7 +4,10 @@ export type SubscriptionTier = {
   id: string;
   name: string;
   price: number; // daily price
-  paypalPlanId: string; // ID for the subscription plan in PayPal
+  paypalPlanId: {
+    sandbox: string;
+    production: string;
+  };
   description: string;
   features: string[];
   isMostPopular?: boolean;
