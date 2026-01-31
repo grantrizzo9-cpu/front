@@ -11,7 +11,7 @@ import { subscriptionTiers } from "@/lib/data";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { useState, useMemo, useEffect } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 import type { OnApproveData, CreateSubscriptionData } from "@paypal/paypal-js";
@@ -21,6 +21,7 @@ export default function UpgradePage() {
     const { user, isUserLoading } = useUser();
     const firestore = useFirestore();
     const { toast } = useToast();
+    const router = useRouter();
     const [isProcessing, setIsProcessing] = useState(false);
     const [paymentError, setPaymentError] = useState<string | null>(null);
     const [selectedTierId, setSelectedTierId] = useState<string | null>(null);
@@ -119,7 +120,7 @@ export default function UpgradePage() {
             await batch.commit();
 
             toast({ title: isUpgrade ? "Subscription Upgraded!" : "Trial Activated!", description: `You now have access to the ${tier.name} plan.` });
-            setSelectedTierId(null);
+            router.push('/dashboard');
 
         } catch (error: any) {
              const errorMsg = `Post-payment processing failed: ${error.message}`;
