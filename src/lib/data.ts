@@ -6,7 +6,7 @@ export const subscriptionTiers: SubscriptionTier[] = [
     id: 'starter',
     name: 'Starter',
     price: 4.95,
-    paypalPlanId: 'Ad-vggeI5KSyFtipTjrpiNqj4GEviISsm3JO02eRit8oN8m5A3Ey9DOXXTrL8Ju5S0W5Vf16A6K8zfVm',
+    paypalPlanId: 'REPLACE_WITH_YOUR_SANDBOX_PLAN_ID',
     description: 'Launch your affiliate journey with these essential tools.',
     guideAccessLevel: 'starter',
     features: [
@@ -24,7 +24,7 @@ export const subscriptionTiers: SubscriptionTier[] = [
     id: 'plus',
     name: 'Plus',
     price: 19.95,
-    paypalPlanId: 'Ad-vggeI5KSyFtipTjrpiNqj4GEviISsm3JO02eRit8oN8m5A3Ey9DOXXTrL8Ju5S0W5Vf16A6K8zfVm',
+    paypalPlanId: 'REPLACE_WITH_YOUR_SANDBOX_PLAN_ID',
     description: 'Everything in Starter, plus more power and speed.',
     guideAccessLevel: 'plus',
     features: [
@@ -43,7 +43,7 @@ export const subscriptionTiers: SubscriptionTier[] = [
     id: 'pro',
     name: 'Pro',
     price: 49.95,
-    paypalPlanId: 'Ad-vggeI5KSyFtipTjrpiNqj4GEviISsm3JO02eRit8oN8m5A3Ey9DOXXTrL8Ju5S0W5Vf16A6K8zfVm',
+    paypalPlanId: 'REPLACE_WITH_YOUR_SANDBOX_PLAN_ID',
     description: 'Everything in Plus, with professional tools for serious affiliates.',
     guideAccessLevel: 'pro',
     features: [
@@ -64,7 +64,7 @@ export const subscriptionTiers: SubscriptionTier[] = [
     id: 'business',
     name: 'Business',
     price: 99.95,
-    paypalPlanId: 'Ad-vggeI5KSyFtipTjrpiNqj4GEviISsm3JO02eRit8oN8m5A3Ey9DOXXTrL8Ju5S0W5Vf16A6K8zfVm',
+    paypalPlanId: 'REPLACE_WITH_YOUR_SANDBOX_PLAN_ID',
     description: 'Everything in Pro, with business tools for established agencies.',
     guideAccessLevel: 'business',
     features: [
@@ -85,7 +85,7 @@ export const subscriptionTiers: SubscriptionTier[] = [
     id: 'scale',
     name: 'Scale',
     price: 299.95,
-    paypalPlanId: 'Ad-vggeI5KSyFtipTjrpiNqj4GEviISsm3JO02eRit8oN8m5A3Ey9DOXXTrL8Ju5S0W5Vf16A6K8zfVm',
+    paypalPlanId: 'REPLACE_WITH_YOUR_SANDBOX_PLAN_ID',
     description: 'Everything in Business, plus tools for scaling your operations.',
     guideAccessLevel: 'scale',
     features: [
@@ -106,7 +106,7 @@ export const subscriptionTiers: SubscriptionTier[] = [
     id: 'enterprise',
     name: 'Enterprise',
     price: 499.95,
-    paypalPlanId: 'Ad-vggeI5KSyFtipTjrpiNqj4GEviISsm3JO02eRit8oN8m5A3Ey9DOXXTrL8Ju5S0W5Vf16A6K8zfVm',
+    paypalPlanId: 'REPLACE_WITH_YOUR_SANDBOX_PLAN_ID',
     description: 'Everything in Scale, plus enterprise-grade tools for power-users.',
     guideAccessLevel: 'enterprise',
     features: [

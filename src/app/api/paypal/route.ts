@@ -1,3 +1,4 @@
+
 import { NextResponse } from 'next/server';
 import { subscriptionTiers } from '@/lib/data';
 
@@ -87,7 +88,7 @@ export async function POST(request: Request) {
         });
         const issue = subData.details?.[0]?.issue || subData.name || "SUBSCRIPTION_CREATION_FAILED";
         const description = subData.details?.[0]?.description || subData.message || "An error occurred.";
-        return NextResponse.json({ success: false, error: `PayPal Error: ${issue}`, debug: `${description} (Hint: This often happens if the Plan ID does not exist in your PayPal ${environment} account.)` }, { status: subResponse.status });
+        return NextResponse.json({ success: false, error: `PayPal Error: ${issue}`, debug: `${description} (Hint: This often happens if the Plan ID, which should start with 'P-...', does not exist in your PayPal ${environment} account.)` }, { status: subResponse.status });
       }
 
       return NextResponse.json({ success: true, subscriptionId: subData.id });
