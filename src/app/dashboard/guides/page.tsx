@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useMemo, useState } from 'react';
@@ -18,25 +17,9 @@ import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
-// A default placeholder to prevent crashes if an image is missing
-const defaultImagePlaceholder = {
-    id: 'default-fallback',
-    description: 'A placeholder image for a guide',
-    imageUrl: 'https://picsum.photos/seed/default/600/400',
-    imageHint: 'placeholder'
-};
-
-// Helper function to find a guide image, with a fallback
+// Helper function to find a guide image.
 const getGuideImage = (guide: Guide) => {
-    const specificImage = PlaceHolderImages.find(p => p.id === guide.imageId);
-    if (specificImage) return specificImage;
-
-    const fallbackImage = PlaceHolderImages.find(p => p.id === 'feature-2');
-    if (fallbackImage) return fallbackImage;
-    
-    // If even the fallback is missing, return a failsafe default to prevent a crash
-    console.warn(`Image for guide "${guide.title}" and fallback 'feature-2' not found. Using default.`);
-    return defaultImagePlaceholder;
+    return PlaceHolderImages.find(p => p.id === guide.imageId);
 };
 
 
@@ -167,14 +150,16 @@ export default function GuidesPage() {
             const guideImage = getGuideImage(guide);
             return (
               <Card key={guide.title} className="flex flex-col">
-                <div className="relative h-40 w-full">
-                    <Image
-                        src={guideImage.imageUrl}
-                        alt={guide.title}
-                        data-ai-hint={guideImage.imageHint}
-                        fill
-                        className="object-cover rounded-t-lg"
-                    />
+                <div className="relative h-40 w-full bg-muted">
+                    {guideImage && (
+                        <Image
+                            src={guideImage.imageUrl}
+                            alt={guide.title}
+                            data-ai-hint={guideImage.imageHint}
+                            fill
+                            className="object-cover rounded-t-lg"
+                        />
+                    )}
                 </div>
                 <CardHeader>
                     <CardTitle className="flex items-start justify-between gap-2">
@@ -200,13 +185,15 @@ export default function GuidesPage() {
             return (
               <Card key={guide.title} className="flex flex-col relative overflow-hidden">
                 <div className="relative h-40 w-full">
-                    <Image
-                        src={guideImage.imageUrl}
-                        alt={guide.title}
-                        data-ai-hint={guideImage.imageHint}
-                        fill
-                        className="object-cover rounded-t-lg filter grayscale"
-                    />
+                    {guideImage && (
+                        <Image
+                            src={guideImage.imageUrl}
+                            alt={guide.title}
+                            data-ai-hint={guideImage.imageHint}
+                            fill
+                            className="object-cover rounded-t-lg filter grayscale"
+                        />
+                    )}
                      <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
                         <Lock className="h-8 w-8 text-white" />
                     </div>
