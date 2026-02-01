@@ -268,10 +268,13 @@ ${themeColorsCss}
         <div class="container">
             <div class="footer-logo">${homepage.title}</div>
             <div class="footer-links">${footerLinksHtml}</div>
-            <p class="footer-legal">&copy; ${new Date().getFullYear()}. All rights reserved.</p>
+            <p class="footer-legal">&copy; <span id="copyright-year"></span>. All rights reserved.</p>
             <p class="footer-legal">This is an independent affiliate website. We may earn a commission from purchases made through links on this site.</p>
         </div>
     </footer>
+    <script>
+      document.getElementById('copyright-year').textContent = new Date().getFullYear();
+    </script>
 </body>
 </html>
     `;
@@ -512,3 +515,5 @@ const WebsitePreviewSkeleton = () => (
         </CardContent>
     </Card>
 );
+
+    
