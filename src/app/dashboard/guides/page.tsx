@@ -2,9 +2,7 @@
 'use client';
 
 import { useState } from 'react';
-import Image from 'next/image';
 import { allGuides, type Guide } from '@/lib/guides';
-import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -19,6 +17,19 @@ import {
 export default function GuidesPage() {
   const [selectedGuide, setSelectedGuide] = useState<Guide | null>(null);
 
+  // This is a safety check. If the guides data is not loaded correctly,
+  // it will prevent the page from crashing and show a helpful message.
+  if (!allGuides || !Array.isArray(allGuides)) {
+    return (
+        <div className="space-y-8">
+            <h1 className="text-3xl font-bold font-headline">Marketing Guides</h1>
+            <p className="text-muted-foreground">
+                There was an error loading the marketing guides. Please try refreshing the page.
+            </p>
+        </div>
+    );
+  }
+
   return (
     <div className="space-y-8">
       <div>
@@ -29,21 +40,8 @@ export default function GuidesPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {allGuides.map((guide) => {
-          const image = PlaceHolderImages.find((p) => p.id === guide.imageId);
-          return (
+        {allGuides.map((guide) => (
             <Card key={guide.title} className="flex flex-col overflow-hidden">
-              {image && (
-                <div className="relative h-40 w-full">
-                  <Image
-                    src={image.imageUrl}
-                    alt={guide.title}
-                    data-ai-hint={image.imageHint}
-                    fill
-                    className="object-cover"
-                  />
-                </div>
-              )}
               <CardHeader>
                 <CardTitle>{guide.title}</CardTitle>
               </CardHeader>
@@ -58,8 +56,7 @@ export default function GuidesPage() {
                 </Button>
               </CardFooter>
             </Card>
-          );
-        })}
+        ))}
       </div>
 
       <Dialog
