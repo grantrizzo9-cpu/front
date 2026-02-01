@@ -225,7 +225,7 @@ const allGuides: Guide[] = [
         <h3>Step 2: Connect Your Custom Domain</h3>
         <p>This is the most critical step. You need to point your domain (e.g., <code>your-domain.com</code>) to our cloud hosting servers.</p>
         <ol>
-            <li><strong>Navigate to Your Hosting Console:</strong> To get the required DNS records, you need to visit your project's hosting console. <a href="https://console.firebase.google.com/project/affiliate-ai-host-new/hosting/custom-domains" target="_blank" rel="noopener noreferrer" class="text-primary font-semibold hover:underline">Click here to open your hosting console</a> and then click "Add custom domain".</li>
+            <li><strong>Navigate to Your Hosting Console:</strong> To get the required DNS records from your host, you need to visit your project's cloud console. <a href="https://console.firebase.google.com/project/affiliate-ai-host-new/hosting/custom-domains" target="_blank" rel="noopener noreferrer" class="text-primary font-semibold hover:underline">Click here to open your hosting console</a> and then click "Add custom domain".</li>
             <li><strong>Verify Ownership (TXT Record):</strong> The console wizard will ask you to verify you own the domain. It will provide a <strong>TXT record</strong> value. Copy this value. Go to your domain registrar (e.g., your <a href="https://rizzosai.shopco.com/" target="_blank" rel="noopener noreferrer" class="text-primary font-semibold hover:underline">integrated reseller store</a>), find its DNS settings, and add a new TXT record for your main domain (the host is usually '@'). Paste the value from the console and save. Wait for verification, which can take up to an hour.</li>
             <li><strong>Go Live (A Records):</strong> After verification, the console will give you two <strong>A Records</strong> (IP addresses). Go back to your domain registrar's DNS settings. <strong>Delete any old A records</strong> for your root domain ('@') to prevent conflicts. Then, create two new A records, one for each IP address provided.</li>
         </ol>
@@ -600,3 +600,5 @@ export default function GuidesPage() {
     </div>
   );
 }
+
+    

@@ -340,7 +340,7 @@ export default function DashboardPage() {
                 </CardContent>
                 <CardFooter className="flex-col items-start gap-2 pt-0">
                     <Progress value={usagePercentage} aria-label={`${usagePercentage.toFixed(0)}% used`} />
-                    <p className="text-xs text-muted-foreground">{usedStorage} GB of {totalStorage} GB used</p>
+                    <p className="text-xs text-muted-foreground">{usedStorage.toFixed(2)} GB of {totalStorage} GB used</p>
                 </CardFooter>
             </Card>
             <StatCard
@@ -420,3 +420,5 @@ export default function DashboardPage() {
     </div>
   );
 }
+
+    
