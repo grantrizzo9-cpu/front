@@ -9,7 +9,7 @@ import { Copy, Loader2, PartyPopper, Info } from "lucide-react";
 import { useUser, useFirestore, useDoc, updateDocumentNonBlocking, useMemoFirebase } from "@/firebase";
 import { doc, setDoc } from "firebase/firestore";
 import type { User as UserType } from "@/lib/types";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useAdmin } from "@/hooks/use-admin";
 
@@ -20,6 +20,13 @@ export default function SettingsPage() {
   const { isAdmin, isLoading: isAdminLoading } = useAdmin();
 
   const [isRepairing, setIsRepairing] = useState(false);
+  const [origin, setOrigin] = useState('');
+
+  useEffect(() => {
+      if (typeof window !== 'undefined') {
+          setOrigin(window.location.origin);
+      }
+  }, []);
 
   const userDocRef = useMemoFirebase(() => {
     if (!user || !firestore) return null;
@@ -35,7 +42,7 @@ export default function SettingsPage() {
   }, [firestore, userData?.username]);
   const { data: usernameDoc, isLoading: isUsernameDocLoading } = useDoc(usernameDocRef);
 
-  const affiliateLink = userData?.username ? `https://rizzosai.shopco.com/?ref=${userData.username}` : '';
+  const affiliateLink = userData?.username && origin ? `${origin}/?ref=${userData.username}` : '';
   const isLinkPubliclyActive = !!usernameDoc;
   
   const handleCopyLink = () => {
@@ -76,7 +83,7 @@ export default function SettingsPage() {
     }
   };
 
-  const isLoading = isUserLoading || isUserDataLoading || isUsernameDocLoading || isAdminLoading;
+  const isLoading = isUserLoading || isUserDataLoading || isUsernameDocLoading || isAdminLoading || !origin;
 
   if (isLoading) {
     return (
@@ -156,5 +163,3 @@ export default function SettingsPage() {
     </div>
   );
 }
-
-    

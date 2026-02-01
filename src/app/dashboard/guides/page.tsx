@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -103,7 +103,7 @@ const allGuides: Guide[] = [
         
         <h3>Part 1: Your Affiliate Link - The Golden Key</h3>
         <p>Your affiliate link is your personal tracking code. It's the mechanism that ensures you get credit for every single customer you send our way. It's absolutely vital that you understand how it works and how to use it correctly.</p>
-        <p>Your link will always follow this format: <a href="https://rizzosai.shopco.com/?ref=[YOUR_USERNAME_HERE]" target="_blank" rel="noopener noreferrer" class="text-primary font-semibold hover:underline"><code>https://rizzosai.shopco.com/?ref=[YOUR_USERNAME_HERE]</code></a></p>
+        <p>Your link will always follow this format: <a href="[YOUR_AFFILIATE_LINK_HERE]" target="_blank" rel="noopener noreferrer" class="text-primary font-semibold hover:underline"><code>[YOUR_AFFILIATE_LINK_HERE]</code></a></p>
         
         <h4>How Tracking Works: The Cookie</h4>
         <p>When a person clicks on your unique link, a small text file called a "cookie" is placed in their web browser. This cookie contains your unique affiliate ID. It acts as a digital name tag.</p>
@@ -167,7 +167,7 @@ const allGuides: Guide[] = [
       <p>While you won't be forwarding to this link, you still need it for all your other marketing efforts (social media, emails, etc.). It's the unique code that tracks your sales.</p>
       <ol>
         <li>Navigate to your <a href="/dashboard/settings" target="_blank" class="text-primary font-semibold hover:underline">Affiliate Settings Page</a>.</li>
-        <li>Carefully copy your complete, unique affiliate link. It will look exactly like this: <a href="https://rizzosai.shopco.com/?ref=[YOUR_USERNAME_HERE]" target="_blank" rel="noopener noreferrer" class="text-primary font-semibold hover:underline"><code>https://rizzosai.shopco.com/?ref=[YOUR_USERNAME_HERE]</code></a>.</li>
+        <li>Carefully copy your complete, unique affiliate link. It will look exactly like this: <a href="[YOUR_AFFILIATE_LINK_HERE]" target="_blank" rel="noopener noreferrer" class="text-primary font-semibold hover:underline"><code>[YOUR_AFFILIATE_LINK_HERE]</code></a>.</li>
         <li>Save this link in a secure text file. You will use this link everywhere *except* for your main domain connection.</li>
       </ol>
       
@@ -218,7 +218,7 @@ const allGuides: Guide[] = [
             <p>That's why I was so intrigued when I stumbled upon a platform called Affiliate AI Host. Their model is radically different. They offer a massive 70% commission, but the real game-changer is that they pay out *daily* via PayPal. Seeing that first daily payment, no matter how small, is an incredible motivator.</p>
             <p>The product itself is a powerful combination of high-speed web hosting and a suite of AI content creation tools, which makes it a genuinely useful service for anyone looking to build an online presence. It's not just another affiliate scheme; it's a legitimate business-in-a-box.</p>
             <p>I wrote a full, in-depth review of my experience, breaking down the pros and cons, and who I think it's best for. If you're tired of the traditional affiliate grind, I highly recommend giving it a read.</p>
-            <p>You can read my full review here: [Link to YOUR review page on YOUR custom domain]</p>
+            <p>You can read my full review here: [YOUR_AFFILIATE_LINK_HERE]</p>
             <p>#webhosting #aicontent #affiliatemarketing #sidehustle #entrepreneurship #passivincome</p>
         </blockquote>
 
@@ -227,7 +227,7 @@ const allGuides: Guide[] = [
         <blockquote>
             <p>I just found a hosting platform that pays its affiliates 70% commissions DAILY via PayPal. This is not a drill. 🤯</p>
             <p>Affiliate AI Host bundles hosting with AI content tools. It's a super easy offer for anyone wanting to build a website or start an online business. The product sells itself.</p>
-            <p>I wrote a breakdown of how it works. Worth a look if you're in the affiliate space 👇<br>[Link to YOUR review page on YOUR custom domain]</p>
+            <p>I wrote a breakdown of how it works. Worth a look if you're in the affiliate space 👇<br>[YOUR_AFFILIATE_LINK_HERE]</p>
             <p>#affiliatemarketing #saas #mrr #webdev</p>
         </blockquote>
 
@@ -496,7 +496,7 @@ const allGuides: Guide[] = [
         <strong>Headline 3:</strong> Payouts Sent Daily To PayPal<br/>
         <strong>Description 1:</strong> Stop waiting 90 days for your money. Join the affiliate program that pays you every single day for your recurring sales.<br/>
         <strong>Description 2:</strong> Promote a high-quality product that combines web hosting with powerful AI tools. Get started now and get your first payout tomorrow.<br/>
-        <strong>Final URL:</strong> [Link to YOUR review page on YOUR custom domain]
+        <strong>Final URL:</strong> [YOUR_AFFILIATE_LINK_HERE]
       </blockquote>
       <p><strong>Key Ad Copy Tips:</strong></p>
       <ul>
@@ -647,7 +647,7 @@ const allGuides: Guide[] = [
             <p>We've talked about strategy, but I'm a visual person. I wanted to give you a quick "behind the curtain" look at the platform I actually use to run my affiliate business every day.</p>
             <p>It’s not just about the incredible 70-75% daily commissions (though that’s a huge part of it!). It’s about the tools that make earning them so much easier. My personal favorite is the <strong>AI Content Generator</strong>. I can literally generate a week's worth of social media posts in about 5 minutes. It's a massive time-saver.</p>
             <p>If you're curious to see what the dashboard looks like and how the affiliate tracking works in real-time, you can check out the platform tour here:</p>
-            <p><a href="https://rizzosai.shopco.com/?ref=[YOUR_USERNAME_HERE]" target="_blank" rel="noopener noreferrer"><strong>[Your Affiliate Link Here]</strong></a></p>
+            <p><a href="[YOUR_AFFILIATE_LINK_HERE]" target="_blank" rel="noopener noreferrer"><strong>[Your Affiliate Link Here]</strong></a></p>
             <p>It’s worth a look just to see how a platform built *for* affiliates is structured. No pressure to buy, just wanted to share what's working for me.</p>
             <p>Best,</p>
             <p>[Your Name]</p>
@@ -664,7 +664,7 @@ const allGuides: Guide[] = [
             <p>She decided to try Affiliate AI Host, paid her one-time activation fee, and used the guides to set up her review site over a weekend. Within her first week, she got her first two referrals.</p>
             <p>After their 3-day trial ended, she saw her first commission pop up in her PayPal. Then another the next day. And the next. She told me the motivation from seeing that daily feedback loop—real money, in her account—was the most powerful force she's ever experienced in business.</p>
             <p>This isn't a unique story. It's what happens when you combine a great product with a fair payment system. You can follow the exact same path. It all starts with the right platform.</p>
-            <p><a href="https://rizzosai.shopco.com/?ref=[YOUR_USERNAME_HERE]" target="_blank" rel="noopener noreferrer" class="text-primary font-semibold hover:underline"><strong>Get the same tools and system Sarah used right here.</strong></a></p>
+            <p><a href="[YOUR_AFFILIATE_LINK_HERE]" target="_blank" rel="noopener noreferrer" class="text-primary font-semibold hover:underline"><strong>Get the same tools and system Sarah used right here.</strong></a></p>
             <p>Talk soon,</p>
             <p>[Your Name]</p>
         </blockquote>
@@ -679,7 +679,7 @@ const allGuides: Guide[] = [
             <p>It’s been a week since you downloaded the launch checklist. If you haven't taken that first step yet, I have to ask: what's holding you back?</p>
             <p>Often, it's a fear of risk. "What if I pay for this and it's not for me?" It's a valid concern. And that's why the platform has a **24-hour, no-questions-asked refund policy** on the one-time activation fee. You can literally get inside, use all the tools, see the entire system, and if you decide within 24 hours that it's not the right fit for you, you get a full refund. There is zero financial risk to you.</p>
             <p>The opportunity to build a daily income stream is right in front of you. The best time to start was yesterday. The second-best time is now. Don't let hesitation rob you of a potential breakthrough.</p>
-            <p><a href="https://rizzosai.shopco.com/?ref=[YOUR_USERNAME_HERE]" target="_blank" rel="noopener noreferrer" class="text-primary font-semibold hover:underline"><strong>Click Here to Create Your Account & Launch Your Affiliate Business Today.</strong></a></p>
+            <p><a href="[YOUR_AFFILIATE_LINK_HERE]" target="_blank" rel="noopener noreferrer" class="text-primary font-semibold hover:underline"><strong>Click Here to Create Your Account & Launch Your Affiliate Business Today.</strong></a></p>
             <p>This is your moment. Don't let it pass you by.</p>
             <p>To your success,</p>
             <p>[Your Name]</p>
@@ -758,6 +758,13 @@ export default function GuidesPage() {
   const [selectedGuide, setSelectedGuide] = useState<Guide | null>(null);
   const { user } = useUser();
   const firestore = useFirestore();
+  const [origin, setOrigin] = useState('');
+
+  useEffect(() => {
+      if (typeof window !== 'undefined') {
+          setOrigin(window.location.origin);
+      }
+  }, []);
 
   const userDocRef = useMemoFirebase(() => {
     if (!user) return null;
@@ -767,7 +774,7 @@ export default function GuidesPage() {
   const { data: userData } = useDoc<UserType>(userDocRef);
 
   const processedContent = useMemo(() => {
-    if (!selectedGuide) return '';
+    if (!selectedGuide || !origin) return '';
     let content = selectedGuide.content;
 
     const hasSavedDomain = userData?.customDomain?.name;
@@ -777,12 +784,12 @@ export default function GuidesPage() {
     const affiliateLink = hasSavedDomain
       ? `https://${userData.customDomain.name}`
       : username
-        ? `https://rizzosai.shopco.com/?ref=${username}`
+        ? `${origin}/?ref=${username}`
         : null;
 
     if (affiliateLink) {
-      // Replace the full placeholder affiliate link (most common case)
-      content = content.replace(/https:\/\/rizzosai\.shopco\.com\/\?ref=\[YOUR_USERNAME_HERE\]/g, affiliateLink);
+      // Replace the generic placeholder
+      content = content.replace(/\[YOUR_AFFILIATE_LINK_HERE\]/g, affiliateLink);
     }
     
     // Also replace just the username placeholder if it exists on its own
@@ -791,7 +798,7 @@ export default function GuidesPage() {
     }
     
     return content;
-  }, [selectedGuide, userData]);
+  }, [selectedGuide, userData, origin]);
 
 
   const handleDownload = () => {
