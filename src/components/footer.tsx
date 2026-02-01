@@ -20,6 +20,8 @@ export function Footer() {
     return `${url.pathname}${url.search}`;
   };
 
+  const homeLink = getLinkWithRef('/');
+
   const footerLinks = {
     platform: [
       { href: getLinkWithRef('/pricing'), label: 'Pricing' },
@@ -43,7 +45,7 @@ export function Footer() {
       <div className="container py-12">
         <div className="grid grid-cols-1 gap-8 md:grid-cols-4">
           <div className="flex flex-col gap-4 pr-8">
-            <Logo />
+            <Logo href={homeLink} />
             <p className="text-muted-foreground text-sm">
               The future of affiliate marketing and web hosting, powered by AI.
             </p>

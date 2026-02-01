@@ -91,7 +91,7 @@ export function DashboardSidebar() {
   return (
     <Sidebar>
       <SidebarHeader>
-        <Logo />
+        <Logo href="/dashboard" />
       </SidebarHeader>
       <SidebarContent>
         <SidebarMenu>
