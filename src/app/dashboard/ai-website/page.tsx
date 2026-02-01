@@ -447,6 +447,8 @@ ${themeColorsCss}
 // Preview Component
 const WebsitePreview = ({ site, onCopyHomepage, onCopyLegal, getHomepageHtml, affiliateLink }: { site: GenerateWebsiteOutput, onCopyHomepage: (content: string, title: string) => void, onCopyLegal: (content: string, title: string) => void, getHomepageHtml: (site: GenerateWebsiteOutput, link: string) => string, affiliateLink: string }) => {
     
+    const { toast } = useToast();
+
     const iframeSrcDoc = useMemo(() => {
         if (!site) return '';
         return getHomepageHtml(site, affiliateLink);
@@ -457,9 +459,8 @@ const WebsitePreview = ({ site, onCopyHomepage, onCopyLegal, getHomepageHtml, af
         const html = getHomepageHtml(site, affiliateLink);
         navigator.clipboard.writeText(html);
         toast({ title: 'Copied to Clipboard!', description: `Homepage HTML has been copied.` });
-    }, [site, affiliateLink, getHomepageHtml]);
+    }, [site, affiliateLink, getHomepageHtml, toast]);
     
-    const { toast } = useToast();
 
     return (
     <Tabs defaultValue="preview" className="col-span-full">
