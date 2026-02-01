@@ -81,6 +81,54 @@ export const allGuides: Guide[] = [
     `
   },
   {
+    title: "Your First Affiliate Website: A Step-by-Step Guide for Beginners",
+    level: "starter",
+    imageId: "guide-website-forwarding",
+    content: `
+      <p>Welcome to the most powerful and simple way to start your affiliate business. Forget about coding or building a website from scratch. This guide will show you how to get a professional, ready-to-go affiliate website in under 30 minutes.</p>
+      
+      <h3>The Big Idea: Your Own Domain, Our Powerful Website</h3>
+      <p>Instead of building a website, you're going to use a simple trick that all pro marketers use. You'll get your own custom domain name (like <code>www.joes-ai-reviews.com</code>) and point it directly to the Affiliate AI Host website, but with your special tracking link attached. </p>
+      <p><strong>The result:</strong> When you tell someone to go to your domain, they see a beautiful, professional sales website with all the information they need. And because it uses your special link, you get credit for every single sale!</p>
+      
+      <hr class="my-6 border-border" />
+      
+      <h3>Step 1: Find Your "Golden Key" (Your Affiliate Link)</h3>
+      <p>This is the most important piece of the puzzle. Your affiliate link is what tells us you sent a customer.</p>
+      <ol>
+        <li>Go to your <a href="/dashboard/settings" target="_blank" class="text-primary font-semibold hover:underline">Affiliate Settings Page</a>.</li>
+        <li>Copy your unique affiliate link. It will look like this: <code>https://hostproai.com/?ref=[your-username]</code></li>
+        <li>Paste this link into a notepad or text file. You'll need it in a moment.</li>
+      </ol>
+      
+      <h3>Step 2: Buy Your Piece of the Internet (Your Domain Name)</h3>
+      <p>A domain name makes you look professional. Telling someone to visit <code>www.bills-business.com</code> is much better than a long, complicated link.</p>
+      <ol>
+        <li>Go to a domain registrar website. We recommend <a href="https://name.com" target="_blank" rel="noopener noreferrer" class="text-primary font-semibold hover:underline">Name.com</a> or <a href="https://domains.google" target="_blank" rel="noopener noreferrer" class="text-primary font-semibold hover:underline">Google Domains</a> because they are simple to use.</li>
+        <li>Search for a domain name. Try to include words like 'AI', 'hosting', 'reviews', 'affiliate', or your own name.</li>
+        <li>Choose a <code>.com</code> if you can. It's the most recognized.</li>
+        <li>Buy the domain! It usually costs about $10-15 for a whole year. You now own that piece of the internet.</li>
+      </ol>
+      
+      <h3>Step 3: The Secret Weapon (Domain Forwarding)</h3>
+      <p>This is where the magic happens. You're going to tell your new domain name to "forward" any visitors to your affiliate link.</p>
+      <ol>
+        <li>In your domain registrar's account (like Name.com), find your new domain and look for a setting called <strong>"Forwarding"</strong>, "Domain Forwarding", or "Redirect". It's often in the DNS settings section.</li>
+        <li>You will see a box that asks where you want to forward your domain to.</li>
+        <li>Paste your "Golden Key" (your full affiliate link from Step 1) into this box.</li>
+        <li>Make sure the forwarding type is set to **"Permanent (301)"** if you have the option.</li>
+        <li>Save your changes.</li>
+      </ol>
+      
+      <hr class="my-6 border-border" />
+      
+      <h3>You're Done! What Happens Now?</h3>
+      <p>It can take a few minutes (sometimes up to an hour) for the change to work across the whole internet.</p>
+      <p>Once it's ready, you can open a new browser window and type in your new domain name (e.g., <code>www.joes-ai-reviews.com</code>). You will see it instantly redirect to the Affiliate AI Host homepage. Look at the address bar – you should see your affiliate `?ref=` code at the end of the URL!</p>
+      <p>You now have a fully functional, professional affiliate website. You can now put YOUR simple domain name on your social media profiles, in emails, and on business cards. Congratulations!</p>
+    `
+  },
+  {
     title: "Social Media Marketing 101: Your First Ads",
     level: "starter",
     imageId: "guide-social-media",
@@ -132,12 +180,12 @@ export const allGuides: Guide[] = [
     imageId: "guide-email-marketing",
     content: `
       <p>An email list is a direct line to your audience and one of your most valuable assets. Unlike social media, you OWN your list.</p>
-      <p>To start building your list, you'll need an email marketing service. There are many great options available like MailerLite, ConvertKit, or Brevo, many of which offer free starting plans.</p>
+      <p>To start building your list, you'll need an email marketing service. There are many great options available, many of which offer free starting plans.</p>
       <strong>General Steps to Start Your List:</strong>
       <ol>
-          <li><strong>Choose a Service:</strong> Sign up for a reputable email marketing platform.</li>
+          <li><strong>Choose a Service:</strong> Sign up for a reputable email marketing platform like MailerLite, ConvertKit, or Brevo.</li>
           <li><strong>Create a 'Lead Magnet':</strong> Offer something valuable for free in exchange for an email. Your "5-Step Launch Checklist" is perfect for this.</li>
-          <li><strong>Add a Sign-up Form:</strong> Your chosen email service will provide you with an HTML form to embed on your site or a link to a landing page.</li>
+          <li><strong>Add a Sign-up Form:</strong> Your chosen email service will provide you with a way to add a form to your website or social media bio.</li>
           <li><strong>Nurture Your List:</strong> Send a welcome email with the lead magnet, followed by a mix of helpful content and promotional emails. The 7-Day sequence in your guides is a great starting point.</li>
       </ol>
       <p>In your promotional emails, share the benefits of Affiliate AI Host and include your affiliate link.</p>
@@ -306,7 +354,7 @@ export const allGuides: Guide[] = [
             <p>Let's break down the real power of this affiliate program. The "Pro" plan costs $49.95/day. Your commission is 70%. That's <strong>$34.96 per day... from a single referral.</strong></p>
             <p>Now, imagine you refer just <strong>5 people</strong> who choose that plan. That's over $5,200 a month, paid out to your PayPal account automatically, every single day.</p>
             <p>This isn't a get-rich-quick scheme. It's simple, powerful math.</p>
-            <p>Want to start your own daily income stream? <a href="https://hostproai.com/?ref=rentahost" target="_blank" rel="noopener noreferrer"><strong>Click here to see the plans and get started.</strong></a></p>
+            <p>Want to start your own daily income stream? <a href="https://hostproai.com/?ref=rentahost" target="_blank" rel="noopener noreferrer" class="text-primary font-semibold hover:underline"><strong>Click here to see the plans and get started.</strong></a></p>
             <p>Best,</p>
             <p>Grant Rizzoli</p>
         </blockquote>
@@ -319,7 +367,7 @@ export const allGuides: Guide[] = [
             <p>Hi there,</p>
             <p>I want to share a quick story about Sarah. She was new to affiliate marketing and frustrated with slow, monthly payouts. She signed up for Affiliate AI Host, paid her one-time activation fee, and got to work.</p>
             <p>She used the AI tools to write a few posts and promote them. Within a week, she got her first two referrals. After their trial, she saw her first commission in her PayPal. Then another the next day. And the next.</p>
-            <p>That daily motivation is powerful. You can follow the exact same path. It all starts with the right platform. <a href="https://hostproai.com/?ref=rentahost" target="_blank" rel="noopener noreferrer"><strong>Get the same tools Sarah used right here.</strong></a></p>
+            <p>That daily motivation is powerful. You can follow the exact same path. It all starts with the right platform. <a href="https://hostproai.com/?ref=rentahost" target="_blank" rel="noopener noreferrer" class="text-primary font-semibold hover:underline"><strong>Get the same tools Sarah used right here.</strong></a></p>
             <p>Talk soon,</p>
             <p>Grant Rizzoli</p>
         </blockquote>
@@ -333,7 +381,7 @@ export const allGuides: Guide[] = [
             <p>It’s been about a week since you downloaded the launch checklist. If you haven't started yet, what's holding you back?</p>
             <p>Maybe you're worried it's not for you. That's why there's a <strong>24-hour, no-questions-asked refund policy</strong> on the one-time activation fee. You can try it with zero risk.</p>
             <p>The opportunity to build a daily income stream is right in front of you. The best time to start was yesterday. The second-best time is now.</p>
-            <p><a href="https://hostproai.com/?ref=rentahost" target="_blank" rel="noopener noreferrer"><strong>Click Here to Create Your Account & Launch Your Affiliate Business Today.</strong></a></p>
+            <p><a href="https://hostproai.com/?ref=rentahost" target="_blank" rel="noopener noreferrer" class="text-primary font-semibold hover:underline"><strong>Click Here to Create Your Account & Launch Your Affiliate Business Today.</strong></a></p>
             <p>This is your moment. Don't let it pass you by.</p>
             <p>To your success,</p>
             <p>Grant Rizzoli</p>

@@ -87,8 +87,8 @@
     {
       "id": "guide-ppc-ads",
       "description": "People in a meeting looking at analytics on a screen.",
-      "imageUrl": "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxkaWdpdGFsJTIwYWR2ZXJ0aXNpbmd8ZW58MHx8fHwxNzE5OTI0NDI3fDA&ixlib=rb-4.0.3&q=80&w=1080",
-      "imageHint": "digital advertising"
+      "imageUrl": "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxkYXNoYm9hcmQlMjBhbmFseXRpY3N8ZW58MHx8fHwxNzIxODc3NjYxfDA&ixlib=rb-4.0.3&q=80&w=1080",
+      "imageHint": "dashboard analytics"
     },
     {
       "id": "guide-cro-fundamentals",
@@ -105,8 +105,14 @@
     {
       "id": "guide-partnerships",
       "description": "Two business professionals shaking hands in a modern office.",
-      "imageUrl": "https://images.unsplash.com/photo-1681505531034-8d67054e07f6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxjb3Jwb3JhdGUlMjBoYW5kc2hha2V8ZW58MHx8fHwxNzY5ODY5Njc3fDA&ixlib-rb-4.1.0&q=80&w=1080",
+      "imageUrl": "https://images.unsplash.com/photo-1681505531034-8d67054e07f6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxjb3Jwb3JhdGUlMjBoYW5kc2hha2V8ZW58MHx8fHwxNzY5ODY5Njc3fDA&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "business handshake"
+    },
+    {
+      "id": "guide-website-forwarding",
+      "description": "A simplified diagram showing a domain name pointing to a website.",
+      "imageUrl": "https://images.unsplash.com/photo-1585776245991-a69054178a3f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxkbnMlMjBmb3J3YXJkaW5nfGVufDB8fHx8MTcyMjA0MjU4Nnww&ixlib=rb-4.0.3&q=80&w=1080",
+      "imageHint": "dns forwarding"
     }
   ]
 }

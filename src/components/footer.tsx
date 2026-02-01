@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Logo } from "@/components/logo";
@@ -29,6 +30,7 @@ export function Footer() {
     legal: [
       { href: getLinkWithRef('/terms'), label: 'Terms of Service' },
       { href: getLinkWithRef('/privacy'), label: 'Privacy Policy' },
+      { href: getLinkWithRef('/disclaimer'), label: 'Earnings Disclaimer' },
     ],
     company: [
       { href: getLinkWithRef('/about'), label: 'About Us' },
