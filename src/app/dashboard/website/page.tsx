@@ -168,7 +168,7 @@ export default function WebsiteBuilderPage() {
     try {
       const result = await generateWebsite({ username: user.displayName, themeName: selectedTheme.name });
       if (result.error) {
-        if (result.error.includes("Quota exceeded")) {
+        if (result.error.includes("Quota exceeded") || result.error.includes("Too Many Requests")) {
             const match = result.error.match(/Please retry in ([\d.]+)s/);
             if (match && match[1]) {
                 const delay = Math.ceil(parseFloat(match[1]));
@@ -272,12 +272,29 @@ export default function WebsiteBuilderPage() {
   }
     
   if (error) {
+     const isRateLimitError = error.includes("Quota exceeded") || error.includes("Too Many Requests");
+     const friendlyMessage = isRateLimitError
+         ? "You've made too many requests to the AI service on the free tier. Please wait for the cooldown timer to finish before trying again."
+         : error;
+ 
      return (
          <div className="space-y-8">
             <div><h1 className="text-3xl font-bold font-headline">My Website</h1><p className="text-muted-foreground">Manage your one-click affiliate website.</p></div>
             <Card>
                 <CardHeader><CardTitle className="text-destructive flex items-center gap-2"><AlertTriangle /> Generation Failed</CardTitle></CardHeader>
-                <CardContent><Alert variant="destructive"><AlertTitle>An error occurred.</AlertTitle><AlertDescription>{error}</AlertDescription></Alert></CardContent>
+                <CardContent>
+                    <Alert variant="destructive">
+                        <AlertTitle>{isRateLimitError ? "API Rate Limit Reached" : "An Error Occurred"}</AlertTitle>
+                        <AlertDescription>
+                            {friendlyMessage}
+                            {isRateLimitError && (
+                                <p className="mt-2 text-xs text-muted-foreground">
+                                    This is a restriction of the free AI service, not a bug in the app. To avoid this in the future, you can add a billing account to your Google Cloud project.
+                                </p>
+                            )}
+                        </AlertDescription>
+                    </Alert>
+                </CardContent>
                 <CardFooter>
                     <Button 
                        variant="outline" 
