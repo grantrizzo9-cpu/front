@@ -11,9 +11,12 @@ const PAYPAL_API_BASE = process.env.NODE_ENV === 'production'
 async function getPayPalAccessToken() {
     const clientId = process.env.PAYPAL_CLIENT_ID;
     const clientSecret = process.env.PAYPAL_CLIENT_SECRET;
+    const env = process.env.NODE_ENV === 'production' ? 'PRODUCTION' : 'SANDBOX';
 
     if (!clientId || !clientSecret || clientId.includes('REPLACE_WITH') || clientSecret.includes('REPLACE_WITH')) {
-        throw new Error("PayPal server credentials are not configured correctly in the .env file.");
+        const errorMsg = `Your server-side PayPal API credentials are not configured. The 'PAYPAL_CLIENT_ID' and 'PAYPAL_CLIENT_SECRET' are missing from the .env file. Please get your ${env} API credentials from the PayPal Developer Dashboard and add them to your .env file to proceed.`;
+        console.error(errorMsg);
+        throw new Error(errorMsg);
     }
 
     const auth = Buffer.from(`${clientId}:${clientSecret}`).toString("base64");
@@ -30,6 +33,9 @@ async function getPayPalAccessToken() {
     const data = await response.json();
     if (!response.ok || !data.access_token) {
         console.error("PAYPAL_TOKEN_ERROR:", JSON.stringify(data, null, 2));
+         if (data.error === 'invalid_client') {
+            throw new Error(`PayPal client authentication failed. This means your PAYPAL_CLIENT_ID or PAYPAL_CLIENT_SECRET in the .env file is incorrect for the ${env} environment. Please double-check your credentials from the PayPal Developer Dashboard. Raw error: ${data.error_description}`);
+        }
         throw new Error(`Failed to authenticate with PayPal. Response: ${JSON.stringify(data)}`);
     }
     return data.access_token;
