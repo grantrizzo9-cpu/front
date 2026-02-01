@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useMemo } from 'react';
@@ -41,13 +42,13 @@ const allGuides: Guide[] = [
             <li><strong>Brainstorm:</strong> List 10 domain names related to 'AI', 'hosting', 'affiliate', or 'passive income'.</li>
             <li><strong>Check Availability:</strong> Use the domain search tool on your <strong>Hosting page</strong> to find available domains through your own reseller store.</li>
             <li><strong>Keep it Simple:</strong> Aim for a .com that's easy to say and spell.</li>
-            <li><strong>Decision:</strong> Purchase your domain. This is your digital real estate!</li>
+            <li><strong>Decision:</strong> <a href="https://rizzosai.shopco.com/" target="_blank" rel="noopener noreferrer" class="text-primary font-semibold hover:underline">Purchase your domain</a>. This is your digital real estate!</li>
         </ul>
 
         <h3>Step 2: Launch Your Website (Next 2 Hours)</h3>
         <p>This is the easy part. Our platform is built for speed.</p>
         <ul>
-            <li><strong>Sign Up:</strong> If you haven't already, sign up for an Affiliate AI Host plan using this link: <strong>https://rizzosai.shopco.com/?ref=[YOUR_USERNAME_HERE]</strong></li>
+            <li><strong>Sign Up:</strong> If you haven't already, sign up for an Affiliate AI Host plan using this link: <a href="https://rizzosai.shopco.com/?ref=[YOUR_USERNAME_HERE]" target="_blank" rel="noopener noreferrer" class="text-primary font-semibold hover:underline">https://rizzosai.shopco.com/?ref=[YOUR_USERNAME_HERE]</a></li>
             <li><strong>Connect Domain:</strong> Follow our "Pre-Launch Checklist" guide to connect your domain to our hosting. While you wait for it to go live, you can start on the next step.</li>
         </ul>
 
@@ -82,7 +83,7 @@ const allGuides: Guide[] = [
     content: `
         <p>Welcome to the first step of your affiliate journey! This guide will make you comfortable with your two most important tools: your affiliate link and your dashboard.</p>
         <strong>1. Your Unique Affiliate Link:</strong>
-        <p>Your affiliate link is your personal signature. It looks something like this: <code>https://rizzosai.shopco.com/?ref=[YOUR_USERNAME_HERE]</code>. When someone clicks this link, our system places a special tracking cookie in their browser. This cookie tells us that YOU sent them. If they sign up (even days or weeks later), the sale is credited to you.</p>
+        <p>Your affiliate link is your personal signature. It looks something like this: <a href="https://rizzosai.shopco.com/?ref=[YOUR_USERNAME_HERE]" target="_blank" rel="noopener noreferrer" class="text-primary font-semibold hover:underline"><code>https://rizzosai.shopco.com/?ref=[YOUR_USERNAME_HERE]</code></a>. When someone clicks this link, our system places a special tracking cookie in their browser. This cookie tells us that YOU sent them. If they sign up (even days or weeks later), the sale is credited to you.</p>
         <ul>
             <li><strong>Where to find it:</strong> Go to your <a href="/dashboard/settings" class="text-primary hover:underline">Settings</a> page. It's right there at the top.</li>
             <li><strong>Rule #1:</strong> Always use your full, unique link. Don't shorten it or alter it, or the tracking might not work.</li>
@@ -115,14 +116,14 @@ const allGuides: Guide[] = [
       <p>This is the most important piece of the puzzle. Your affiliate link is what tells us you sent a customer.</p>
       <ol>
         <li>Go to your <a href="/dashboard/settings" target="_blank" class="text-primary font-semibold hover:underline">Affiliate Settings Page</a>.</li>
-        <li>Copy your unique affiliate link. It will look like this: <code>https://rizzosai.shopco.com/?ref=[YOUR_USERNAME_HERE]</code></li>
+        <li>Copy your unique affiliate link. It will look like this: <a href="https://rizzosai.shopco.com/?ref=[YOUR_USERNAME_HERE]" target="_blank" rel="noopener noreferrer" class="text-primary font-semibold hover:underline"><code>https://rizzosai.shopco.com/?ref=[YOUR_USERNAME_HERE]</code></a></li>
         <li>Paste this link into a notepad or text file. You'll need it in a moment.</li>
       </ol>
       
       <h3>Step 2: Buy Your Piece of the Internet (Your Domain Name)</h3>
       <p>A domain name makes you look professional. Telling someone to visit <code>www.bills-business.com</code> is much better than a long, complicated link.</p>
       <ol>
-        <li>Go to your <a href="/dashboard/hosting" target="_blank" class="text-primary font-semibold hover:underline">Hosting Page</a>. Use the domain search tool to find your perfect domain through your integrated reseller store.</li>
+        <li>Go to your <a href="https://rizzosai.shopco.com/" target="_blank" rel="noopener noreferrer" class="text-primary font-semibold hover:underline">integrated reseller store</a> to search for and purchase your perfect domain. You can also use the search tool on your <a href="/dashboard/hosting" target="_blank" class="text-primary font-semibold hover:underline">Hosting Page</a>.</li>
         <li>Search for a domain name. Try to include words like 'AI', 'hosting', 'reviews', 'affiliate', or your own name.</li>
         <li>Choose a <code>.com</code> if you can. It's the most recognized.</li>
         <li>Buy the domain! It usually costs about $10-15 for a whole year. You now own that piece of the internet.</li>
@@ -157,7 +158,7 @@ const allGuides: Guide[] = [
         <blockquote>
             <p>Been exploring some incredible AI-powered tools for building websites and growing a business online. Affiliate AI Host combines high-speed hosting with a content generator that's actually useful.</p>
             <p>Plus, their affiliate program is one of the best I've seen (70% commissions, paid daily!). If you're looking to start an online project or side-hustle, this is a great place to begin. They have a trial where you only pay for the first day to check it out.</p>
-            <p>Check it out here: <strong>https://rizzosai.shopco.com/?ref=[YOUR_USERNAME_HERE]</strong></p>
+            <p>Check it out here: <a href="https://rizzosai.shopco.com/?ref=[YOUR_USERNAME_HERE]" target="_blank" rel="noopener noreferrer" class="text-primary font-semibold hover:underline">https://rizzosai.shopco.com/?ref=[YOUR_USERNAME_HERE]</a></p>
             <p>#webhosting #aicontent #affiliatemarketing #sidehustle</p>
         </blockquote>
 
@@ -165,7 +166,7 @@ const allGuides: Guide[] = [
         <blockquote>
             <p>Just found a hosting platform that pays its affiliates 70% commissions DAILY via PayPal. 🤯</p>
             <p>Affiliate AI Host bundles hosting with AI content tools. It's a super easy offer for anyone wanting to build a site or start an online business.</p>
-            <p>Worth a look 👇<br><strong>https://rizzosai.shopco.com/?ref=[YOUR_USERNAME_HERE]</strong></p>
+            <p>Worth a look 👇<br><a href="https://rizzosai.shopco.com/?ref=[YOUR_USERNAME_HERE]" target="_blank" rel="noopener noreferrer" class="text-primary font-semibold hover:underline">https://rizzosai.shopco.com/?ref=[YOUR_USERNAME_HERE]</a></p>
             <p>#affiliatemarketing #saas #mrr</p>
         </blockquote>
         <p><strong>Where to post:</strong> Your personal profile, relevant Facebook groups (check rules first!), LinkedIn articles, and your X/Twitter feed. Customize the message to fit your voice!</p>
@@ -225,7 +226,7 @@ const allGuides: Guide[] = [
         <p>This is the most critical step. You need to point your domain (e.g., <code>your-domain.com</code>) to our cloud hosting servers.</p>
         <ol>
             <li><strong>Navigate to Firebase Hosting:</strong> Go to this specific URL for your project: <a href="https://console.firebase.google.com/project/affiliate-ai-host-new/hosting/custom-domains" target="_blank" rel="noopener noreferrer">Firebase Hosting Console</a>. Click "Add custom domain".</li>
-            <li><strong>Verify Ownership (TXT Record):</strong> The Firebase wizard will ask you to verify you own the domain. It will provide a <strong>TXT record</strong> value. Copy this value. Go to your domain registrar (e.g., your OpenSRS storefront), find its DNS settings, and add a new TXT record for your main domain (the host is usually '@'). Paste the value from Firebase and save. Wait for Firebase to verify it, which can take up to an hour.</li>
+            <li><strong>Verify Ownership (TXT Record):</strong> The Firebase wizard will ask you to verify you own the domain. It will provide a <strong>TXT record</strong> value. Copy this value. Go to your domain registrar (e.g., your <a href="https://rizzosai.shopco.com/" target="_blank" rel="noopener noreferrer" class="text-primary font-semibold hover:underline">OpenSRS storefront</a>), find its DNS settings, and add a new TXT record for your main domain (the host is usually '@'). Paste the value from Firebase and save. Wait for Firebase to verify it, which can take up to an hour.</li>
             <li><strong>Go Live (A Records):</strong> After verification, Firebase will give you two <strong>A Records</strong> (IP addresses). Go back to your domain registrar's DNS settings. <strong>Delete any old A records</strong> for your root domain ('@') to prevent conflicts. Then, create two new A records, one for each IP address Firebase provided.</li>
         </ol>
         <p>Once these DNS changes propagate across the internet, your site will be live at your custom domain with a secure SSL certificate.</p>
@@ -599,3 +600,5 @@ export default function GuidesPage() {
     </div>
   );
 }
+
+    

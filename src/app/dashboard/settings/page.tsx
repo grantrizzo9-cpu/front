@@ -35,7 +35,7 @@ export default function SettingsPage() {
   }, [firestore, userData?.username]);
   const { data: usernameDoc, isLoading: isUsernameDocLoading } = useDoc(usernameDocRef);
 
-  const affiliateLink = userData?.username ? `https://hostproai.com/?ref=${userData.username}` : '';
+  const affiliateLink = userData?.username ? `https://rizzosai.shopco.com/?ref=${userData.username}` : '';
   const isLinkPubliclyActive = !!usernameDoc;
   
   const handleCopyLink = () => {
@@ -156,3 +156,5 @@ export default function SettingsPage() {
     </div>
   );
 }
+
+    
