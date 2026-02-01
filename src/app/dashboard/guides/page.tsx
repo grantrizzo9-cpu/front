@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -15,6 +15,10 @@ import {
 } from '@/components/ui/dialog';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { BookOpen, Download } from 'lucide-react';
+import { useUser, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
+import type { User as UserType } from '@/lib/types';
+import { doc } from 'firebase/firestore';
+
 
 export type Guide = {
   title: string;
@@ -426,6 +430,34 @@ const allGuides: Guide[] = [
 
 export default function GuidesPage() {
   const [selectedGuide, setSelectedGuide] = useState<Guide | null>(null);
+  const { user } = useUser();
+  const firestore = useFirestore();
+
+  const userDocRef = useMemoFirebase(() => {
+    if (!user) return null;
+    return doc(firestore, 'users', user.uid);
+  }, [firestore, user]);
+
+  const { data: userData } = useDoc<UserType>(userDocRef);
+  const username = userData?.username;
+
+  const processedContent = useMemo(() => {
+    if (!selectedGuide) return '';
+    let content = selectedGuide.content;
+
+    if (username) {
+      const affiliateLink = `https://hostproai.com/?ref=${username}`;
+      // Replace the generic placeholder for the full link
+      content = content.replace(/https:\/\/hostproai\.com\/\?ref=\[YOUR_USERNAME_HERE\]/g, affiliateLink);
+      // Replace just the username placeholder
+      content = content.replace(/\[YOUR_USERNAME_HERE\]/g, username);
+      // Also replace the hardcoded 'rentahost' placeholder as requested by the user
+      content = content.replace(/https:\/\/hostproai\.com\/\?ref=rentahost/g, affiliateLink);
+    }
+    
+    return content;
+  }, [selectedGuide, username]);
+
 
   const handleDownload = () => {
     if (!selectedGuide) return;
@@ -452,7 +484,7 @@ export default function GuidesPage() {
       </head>
       <body>
         <h1>${selectedGuide.title}</h1>
-        ${selectedGuide.content}
+        ${processedContent}
       </body>
       </html>
     `;
@@ -534,7 +566,7 @@ export default function GuidesPage() {
           </DialogHeader>
           <div className="flex-1 overflow-y-auto pr-6 space-y-4 text-foreground/90 [&_h3]:text-xl [&_h3]:font-semibold [&_h3]:mt-6 [&_p]:leading-relaxed [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:space-y-2 [&_li]:pl-2 [&_code]:bg-muted [&_code]:font-mono [&_code]:px-1.5 [&_code]:py-1 [&_code]:rounded-sm [&_a]:text-primary [&_a]:hover:underline [&_blockquote]:border-l-4 [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-muted-foreground">
             <div
-              dangerouslySetInnerHTML={{ __html: selectedGuide?.content || '' }}
+              dangerouslySetInnerHTML={{ __html: processedContent || '' }}
             />
           </div>
           <DialogFooter className="mt-4 sm:justify-start gap-2">
