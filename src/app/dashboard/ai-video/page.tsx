@@ -144,6 +144,13 @@ export default function AiVideoPage() {
                       </a>
                     </Button>
                   )}
+                   {error.includes("Enable the API") && (
+                    <Button asChild variant="default" className="mt-2">
+                      <a href="https://console.cloud.google.com/apis/library/aiplatform.googleapis.com?project=affiliate-ai-host-new" target="_blank" rel="noopener noreferrer">
+                        Enable API for Project
+                      </a>
+                    </Button>
+                  )}
                 </div>
             )}
             {!isLoading && !error && !generatedVideoUrl && (

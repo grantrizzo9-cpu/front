@@ -148,17 +148,24 @@ export default function AiToolsPage() {
                   </p>
                   <div className="text-sm text-muted-foreground p-4 bg-secondary/50 rounded-lg max-w-sm">
                     <p>{error}</p>
-                    {error.includes("API Key") && (
+                    {error.includes("API key") && (
                       <p className="mt-2">
                         Click the link below to get your key, then paste it into the 
                         <code className="bg-muted p-1 rounded-sm mx-1">.env</code> file in the file explorer.
                       </p>
                     )}
                   </div>
-                  {error.includes("API Key") && (
+                  {error.includes("API key") && (
                     <Button asChild variant="link">
                       <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer">
                         Get Gemini API Key
+                      </a>
+                    </Button>
+                  )}
+                   {error.includes("Enable the API") && (
+                    <Button asChild variant="default" className="mt-2">
+                      <a href="https://console.cloud.google.com/apis/library/generativelanguage.googleapis.com?project=affiliate-ai-host-new" target="_blank" rel="noopener noreferrer">
+                        Enable API for Project
                       </a>
                     </Button>
                   )}

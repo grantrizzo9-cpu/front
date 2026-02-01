@@ -36,7 +36,7 @@ const PublishedSite = ({ site, user, onRegenerate }: { site: Website, user: User
                 {user?.customDomain?.name ? (
                      <div className="p-4 border rounded-lg">
                         <p className="text-sm font-medium">Your live domain:</p>
-                        <Link href={`https://${user.customDomain.name}`} target="_blank" rel="noopener noreferrer" className="font-semibold text-primary text-lg hover:underline">
+                        <Link href={`https://{user.customDomain.name}`} target="_blank" rel="noopener noreferrer" className="font-semibold text-primary text-lg hover:underline">
                             {`https://${user.customDomain.name}`}
                         </Link>
                     </div>
@@ -268,11 +268,6 @@ export default function WebsiteBuilderPage() {
   }
     
   if (error) {
-     const isRateLimitError = error.includes("Quota exceeded") || error.includes("API Rate Limit");
-     const friendlyMessage = isRateLimitError
-         ? "You've exceeded the daily/minute request limit for the AI service's free tier. This is not a bug, but a hard limit from the provider. Please wait for the timer to finish, or try again later (e.g., tomorrow). For unlimited access, you can add a billing account to your Google Cloud project."
-         : error;
- 
      return (
          <div className="space-y-8">
             <div><h1 className="text-3xl font-bold font-headline">My Website</h1><p className="text-muted-foreground">Manage your one-click affiliate website.</p></div>
@@ -280,12 +275,12 @@ export default function WebsiteBuilderPage() {
                 <CardHeader><CardTitle className="text-destructive flex items-center gap-2"><AlertTriangle /> Generation Failed</CardTitle></CardHeader>
                 <CardContent>
                     <Alert variant="destructive">
-                        <AlertTitle>{isRateLimitError ? "API Rate Limit Reached" : "An Error Occurred"}</AlertTitle>
-                        <AlertDescription>
-                            {friendlyMessage}
-                             {!isRateLimitError && error.includes("API Key") && (
+                        <AlertTitle>An Error Occurred</AlertTitle>
+                        <AlertDescription className="space-y-4">
+                           <p>{error}</p>
+                           {error.includes("API Key") && (
                                 <>
-                                    <p className="mt-2">
+                                    <p>
                                         Click the link below to get your key, then paste it into the 
                                         <code className="bg-muted p-1 rounded-sm mx-1">.env</code> file in the file explorer.
                                     </p>
@@ -298,6 +293,13 @@ export default function WebsiteBuilderPage() {
                             )}
                         </AlertDescription>
                     </Alert>
+                     {error.includes("Enable the API") && (
+                        <Button asChild variant="default" className="mt-4">
+                        <a href="https://console.cloud.google.com/apis/library/generativelanguage.googleapis.com?project=affiliate-ai-host-new" target="_blank" rel="noopener noreferrer">
+                            Enable API for Project
+                        </a>
+                        </Button>
+                    )}
                 </CardContent>
                 <CardFooter>
                     <Button 

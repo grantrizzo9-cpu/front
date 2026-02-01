@@ -53,10 +53,8 @@ const imageGeneratorFlow = ai.defineFlow(
 
             if (rawErrorMessage.includes("API key not valid")) {
                  userFriendlyError = `Authentication failed. The Gemini API Key you provided in the .env file appears to be invalid. Please double-check that you have copied the entire key correctly. If you just updated the key, you may need to restart the development server. Raw error: "${rawErrorMessage}"`;
-            } else if (rawErrorMessage.includes("Imagen API is only accessible to billed users at this time")) {
-                userFriendlyError = 'Image Generation Blocked: The Imagen API requires a project with billing enabled. This is not a bug in the app. To resolve this, please enable billing on your Google Cloud project. If you have free trial credits, they will be used.';
-            } else if (rawErrorMessage.includes("Quota exceeded") || rawErrorMessage.includes("Too Many Requests")) {
-                userFriendlyError = `API Rate Limit Reached: The Imagen API's free tier has strict limits on requests per minute and per day. You have exceeded these limits. This is not a bug in the app. To remove these limits, please enable billing on your Google Cloud project. If you have free trial credits, they will be used automatically.`;
+            } else if (rawErrorMessage.includes("Quota exceeded") || rawErrorMessage.includes("Too Many Requests") || rawErrorMessage.includes("billing account not found") || rawErrorMessage.includes("API is not enabled")) {
+                userFriendlyError = `Action Required: To use your account's credits, you must enable the 'Cloud AI Companion API' (for Imagen) for this project. Even if billing is active, this specific API needs to be turned on. It's a quick, one-time step. Please use the button that now appears on the screen to enable the API, then try again in a moment. Raw error: "${rawErrorMessage}"`;
             }
 
             return { error: userFriendlyError };
