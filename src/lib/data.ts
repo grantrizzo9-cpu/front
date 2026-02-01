@@ -30,7 +30,7 @@ export const subscriptionTiers: SubscriptionTier[] = [
     name: 'Plus',
     price: 19.95,
     // Replace with your actual Sandbox Plan ID for the Plus tier.
-    paypalPlanId: 'REPLACE_WITH_PLUS_PLAN_ID',
+    paypalPlanId: 'P-1EG68235K3435163JNF7SDFA',
     description: 'Everything in Starter, plus more power and speed.',
     guideAccessLevel: 'plus',
     features: [
