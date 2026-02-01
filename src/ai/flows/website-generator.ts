@@ -184,7 +184,7 @@ const websiteGeneratorFlow = ai.defineFlow(
             const rawErrorMessage = e.message || 'An unknown error occurred.';
             
             let userFriendlyError = `The connection to the AI service failed. This could be a network issue or a problem with your Google Cloud project setup. Please check your environment and configuration. Raw error: "${rawErrorMessage}"`;
-            let retrySeconds: number | null = null;
+            let retrySeconds: number | undefined = undefined;
 
             if (rawErrorMessage.includes("API key not valid")) {
                 userFriendlyError = `Authentication failed. The Gemini API Key you provided in the .env file appears to be invalid. Please double-check that you have copied the entire key correctly. If you just updated the key, you may need to restart the development server. Raw error: "${rawErrorMessage}"`;
@@ -209,5 +209,3 @@ const websiteGeneratorFlow = ai.defineFlow(
         }
     }
 );
-
-    
