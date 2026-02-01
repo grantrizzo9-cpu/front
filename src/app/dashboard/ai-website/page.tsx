@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useCallback, useMemo, useEffect } from 'react';
@@ -13,6 +14,104 @@ import { Textarea } from '@/components/ui/textarea';
 import { Skeleton } from '@/components/ui/skeleton';
 import { websiteThemes, type WebsiteTheme } from '@/lib/data';
 import { cn } from '@/lib/utils';
+
+
+// Skeleton for loading state
+const WebsitePreviewSkeleton = () => (
+    <Card className="col-span-full">
+        <CardHeader>
+            <Skeleton className="h-8 w-1/2" />
+            <Skeleton className="h-4 w-3/4" />
+        </CardHeader>
+        <CardContent>
+            <div className="w-full h-[600px] flex items-center justify-center bg-secondary/30 rounded-lg">
+                <div className="text-center text-muted-foreground space-y-2">
+                    <Loader2 className="w-12 h-12 mx-auto animate-spin" />
+                    <p>Loading generator...</p>
+                </div>
+            </div>
+        </CardContent>
+    </Card>
+);
+
+
+// Preview Component
+const WebsitePreview = ({ site, onCopyLegal, getHomepageHtml, affiliateLink }: { site: GenerateWebsiteOutput, onCopyLegal: (content: string, title: string) => void, getHomepageHtml: (site: GenerateWebsiteOutput, link: string) => string, affiliateLink: string }) => {
+    
+    const { toast } = useToast();
+
+    const iframeSrcDoc = useMemo(() => {
+        if (!site) return '';
+        return getHomepageHtml(site, affiliateLink);
+    }, [site, affiliateLink, getHomepageHtml]);
+
+    const copyHomepageHtml = useCallback(() => {
+        if (!site) return;
+        const html = getHomepageHtml(site, affiliateLink);
+        navigator.clipboard.writeText(html);
+        toast({ title: 'Copied to Clipboard!', description: `Homepage HTML has been copied.` });
+    }, [site, affiliateLink, getHomepageHtml, toast]);
+    
+
+    return (
+    <Tabs defaultValue="preview" className="col-span-full">
+        <div className="flex justify-between items-center pr-1">
+            <TabsList>
+                <TabsTrigger value="preview"><Eye className="mr-2 h-4 w-4" /> Preview</TabsTrigger>
+                <TabsTrigger value="code"><Code className="mr-2 h-4 w-4" /> Get HTML</TabsTrigger>
+            </TabsList>
+             <p className="text-sm text-muted-foreground">Theme: <span className="font-semibold text-foreground">{site.theme.name}</span></p>
+        </div>
+
+        <TabsContent value="preview">
+            <Card className="overflow-hidden">
+                <div className="w-full h-[600px] bg-background">
+                    <iframe srcDoc={iframeSrcDoc} className="w-full h-full border-0" title="Website Preview" />
+                </div>
+            </Card>
+        </TabsContent>
+        <TabsContent value="code">
+            <Card>
+                <CardHeader>
+                    <CardTitle>Your Website Code</CardTitle>
+                    <CardDescription>Copy the HTML for each page and upload them to your web host.</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                     <div className="space-y-2">
+                        <div className="flex justify-between items-center">
+                            <h3 className="font-semibold">Homepage (index.html)</h3>
+                            <Button variant="outline" size="sm" onClick={copyHomepageHtml}><Copy className="mr-2 h-4 w-4"/> Copy HTML</Button>
+                        </div>
+                        <Textarea readOnly value={`<html>... (Full homepage code for '${site.homepage.title}') ...</html>`} className="font-mono text-xs bg-secondary" rows={3}/>
+                    </div>
+                    <div className="space-y-2">
+                        <div className="flex justify-between items-center">
+                            <h3 className="font-semibold">Terms of Service (terms.html)</h3>
+                            <Button variant="outline" size="sm" onClick={() => onCopyLegal(site.terms, 'Terms of Service')}><Copy className="mr-2 h-4 w-4"/> Copy HTML</Button>
+                        </div>
+                        <Textarea readOnly value={site.terms} className="font-mono text-xs bg-secondary" rows={3}/>
+                    </div>
+                    <div className="space-y-2">
+                        <div className="flex justify-between items-center">
+                            <h3 className="font-semibold">Privacy Policy (privacy.html)</h3>
+                             <Button variant="outline" size="sm" onClick={() => onCopyLegal(site.privacy, 'Privacy Policy')}><Copy className="mr-2 h-4 w-4"/> Copy HTML</Button>
+                        </div>
+                        <Textarea readOnly value={site.privacy} className="font-mono text-xs bg-secondary" rows={3}/>
+                    </div>
+                    <div className="space-y-2">
+                        <div className="flex justify-between items-center">
+                            <h3 className="font-semibold">Earnings Disclaimer (disclaimer.html)</h3>
+                            <Button variant="outline" size="sm" onClick={() => onCopyLegal(site.disclaimer, 'Earnings Disclaimer')}><Copy className="mr-2 h-4 w-4"/> Copy HTML</Button>
+                        </div>
+                        <Textarea readOnly value={site.disclaimer} className="font-mono text-xs bg-secondary" rows={3}/>
+                    </div>
+                </CardContent>
+            </Card>
+        </TabsContent>
+    </Tabs>
+);
+}
+
 
 export default function AiWebsitePage() {
   const { toast } = useToast();
@@ -278,8 +377,10 @@ ${themeColorsCss}
         </div>
     </footer>
     <script>
-      const el = document.getElementById('copyright-year');
-      if (el) el.textContent = new Date().getFullYear();
+      document.addEventListener('DOMContentLoaded', function() {
+        const el = document.getElementById('copyright-year');
+        if (el) el.textContent = new Date().getFullYear();
+      });
     </script>
 </body>
 </html>
@@ -351,7 +452,7 @@ ${themeColorsCss}
       );
     }
     if (generatedSite) {
-      return <WebsitePreview site={generatedSite} onCopyHomepage={copyLegalPageHtml} onCopyLegal={copyLegalPageHtml} getHomepageHtml={getHomepageHtml} affiliateLink={affiliateLink} />;
+      return <WebsitePreview site={generatedSite} onCopyLegal={copyLegalPageHtml} getHomepageHtml={getHomepageHtml} affiliateLink={affiliateLink} />;
     }
     return null; // Should not happen in the new flow
   };
@@ -444,98 +545,4 @@ ${themeColorsCss}
   );
 }
 
-// Preview Component
-const WebsitePreview = ({ site, onCopyHomepage, onCopyLegal, getHomepageHtml, affiliateLink }: { site: GenerateWebsiteOutput, onCopyHomepage: (content: string, title: string) => void, onCopyLegal: (content: string, title: string) => void, getHomepageHtml: (site: GenerateWebsiteOutput, link: string) => string, affiliateLink: string }) => {
     
-    const { toast } = useToast();
-
-    const iframeSrcDoc = useMemo(() => {
-        if (!site) return '';
-        return getHomepageHtml(site, affiliateLink);
-    }, [site, affiliateLink, getHomepageHtml]);
-
-    const copyHomepageHtml = useCallback(() => {
-        if (!site) return;
-        const html = getHomepageHtml(site, affiliateLink);
-        navigator.clipboard.writeText(html);
-        toast({ title: 'Copied to Clipboard!', description: `Homepage HTML has been copied.` });
-    }, [site, affiliateLink, getHomepageHtml, toast]);
-    
-
-    return (
-    <Tabs defaultValue="preview" className="col-span-full">
-        <div className="flex justify-between items-center pr-1">
-            <TabsList>
-                <TabsTrigger value="preview"><Eye className="mr-2 h-4 w-4" /> Preview</TabsTrigger>
-                <TabsTrigger value="code"><Code className="mr-2 h-4 w-4" /> Get HTML</TabsTrigger>
-            </TabsList>
-             <p className="text-sm text-muted-foreground">Theme: <span className="font-semibold text-foreground">{site.theme.name}</span></p>
-        </div>
-
-        <TabsContent value="preview">
-            <Card className="overflow-hidden">
-                <div className="w-full h-[600px] bg-background">
-                    <iframe srcDoc={iframeSrcDoc} className="w-full h-full border-0" title="Website Preview" />
-                </div>
-            </Card>
-        </TabsContent>
-        <TabsContent value="code">
-            <Card>
-                <CardHeader>
-                    <CardTitle>Your Website Code</CardTitle>
-                    <CardDescription>Copy the HTML for each page and upload them to your web host.</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                     <div className="space-y-2">
-                        <div className="flex justify-between items-center">
-                            <h3 className="font-semibold">Homepage (index.html)</h3>
-                            <Button variant="outline" size="sm" onClick={copyHomepageHtml}><Copy className="mr-2 h-4 w-4"/> Copy HTML</Button>
-                        </div>
-                        <Textarea readOnly value={`<html>... (Full homepage code for '${site.homepage.title}') ...</html>`} className="font-mono text-xs bg-secondary" rows={3}/>
-                    </div>
-                    <div className="space-y-2">
-                        <div className="flex justify-between items-center">
-                            <h3 className="font-semibold">Terms of Service (terms.html)</h3>
-                            <Button variant="outline" size="sm" onClick={() => onCopyLegal(site.terms, 'Terms of Service')}><Copy className="mr-2 h-4 w-4"/> Copy HTML</Button>
-                        </div>
-                        <Textarea readOnly value={site.terms} className="font-mono text-xs bg-secondary" rows={3}/>
-                    </div>
-                    <div className="space-y-2">
-                        <div className="flex justify-between items-center">
-                            <h3 className="font-semibold">Privacy Policy (privacy.html)</h3>
-                             <Button variant="outline" size="sm" onClick={() => onCopyLegal(site.privacy, 'Privacy Policy')}><Copy className="mr-2 h-4 w-4"/> Copy HTML</Button>
-                        </div>
-                        <Textarea readOnly value={site.privacy} className="font-mono text-xs bg-secondary" rows={3}/>
-                    </div>
-                    <div className="space-y-2">
-                        <div className="flex justify-between items-center">
-                            <h3 className="font-semibold">Earnings Disclaimer (disclaimer.html)</h3>
-                            <Button variant="outline" size="sm" onClick={() => onCopyLegal(site.disclaimer, 'Earnings Disclaimer')}><Copy className="mr-2 h-4 w-4"/> Copy HTML</Button>
-                        </div>
-                        <Textarea readOnly value={site.disclaimer} className="font-mono text-xs bg-secondary" rows={3}/>
-                    </div>
-                </CardContent>
-            </Card>
-        </TabsContent>
-    </Tabs>
-);
-}
-
-
-// Skeleton for loading state
-const WebsitePreviewSkeleton = () => (
-    <Card className="col-span-full">
-        <CardHeader>
-            <Skeleton className="h-8 w-1/2" />
-            <Skeleton className="h-4 w-3/4" />
-        </CardHeader>
-        <CardContent>
-            <div className="w-full h-[600px] flex items-center justify-center bg-secondary/30 rounded-lg">
-                <div className="text-center text-muted-foreground space-y-2">
-                    <Loader2 className="w-12 h-12 mx-auto animate-spin" />
-                    <p>Loading generator...</p>
-                </div>
-            </div>
-        </CardContent>
-    </Card>
-);
