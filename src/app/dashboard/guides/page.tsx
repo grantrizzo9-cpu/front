@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useMemo, useEffect } from 'react';
@@ -103,14 +104,14 @@ const allGuides: Guide[] = [
         
         <h3>Part 1: Your Affiliate Link - The Golden Key</h3>
         <p>Your affiliate link is your personal tracking code. It's the mechanism that ensures you get credit for every single customer you send our way. It's absolutely vital that you understand how it works and how to use it correctly.</p>
-        <p>Your unique affiliate link can be copied from your <a href="/dashboard/settings" class="text-primary font-semibold hover:underline">Settings</a> page. It will follow this format, but using your own username: \\\`<code>https://hostproai.com/?ref=your-username</code>\\\`. Always use the exact link from your settings page to ensure proper tracking.</p>
+        <p>Your unique affiliate link can be copied from your <a href="/dashboard/settings" class="text-primary font-semibold hover:underline">Settings</a> page. Here's a clickable example of what it will look like (using your own username): <a href="[YOUR_AFFILIATE_LINK_HERE]" target="_blank" rel="noopener noreferrer" class="text-primary font-semibold hover:underline">\\\`<code>[YOUR_AFFILIATE_LINK_HERE]</code>\\\`</a>. Always use the exact link from your settings page to ensure proper tracking.</p>
         
         <h4>How Tracking Works: The Cookie</h4>
         <p>When a person clicks on your unique link, a small text file called a "cookie" is placed in their web browser. This cookie contains your unique affiliate ID. It acts as a digital name tag.</p>
         <ul>
             <li><strong>Lifetime Association:</strong> Our program uses a "lifetime" cookie policy. This means that from the moment they click your link, that customer is permanently associated with your affiliate account.</li>
             <li><strong>Delayed Purchase Protection:</strong> Even if they don't sign up immediately—if they come back a day, a week, or even six months later—as long as they are using the same browser and haven't cleared their cookies, the sale will be credited to you. This is a massive advantage over programs with short cookie durations.</li>
-            <li><strong>Where to Find Your Link:</strong> Your unique affiliate link is prominently displayed on your <a href="/dashboard/settings" class="text-primary hover:underline">Settings</a> page. Copy it from there to ensure you have the exact, correct version.</li>
+            <li><strong>Where to Find Your Link:</strong> Your unique affiliate link is prominently displayed on your <a href="/dashboard/settings" class="text-primary font-semibold hover:underline">Settings</a> page. Copy it from there to ensure you have the exact, correct version.</li>
         </ul>
 
         <h4>The Cardinal Rules of Link Usage:</h4>
@@ -123,7 +124,7 @@ const allGuides: Guide[] = [
         <hr class="my-6 border-border" />
 
         <h3>Part 2: Your Dashboard - The Command Center</h3>
-        <p>Your <a href="/dashboard" class="text-primary hover:underline">Dashboard</a> provides a real-time, transparent view of your affiliate performance. It's designed to give you all the data you need to make informed decisions and track your growth. Let's break down the key components:</p>
+        <p>Your <a href="/dashboard" class="text-primary font-semibold hover:underline">Dashboard</a> provides a real-time, transparent view of your affiliate performance. It's designed to give you all the data you need to make informed decisions and track your growth. Let's break down the key components:</p>
         
         <h4>Key Performance Indicators (KPIs):</h4>
         <ul>
@@ -318,8 +319,7 @@ const allGuides: Guide[] = [
         <h4><strong>8. The Grand Finale: Conclusion & Strong Call to Action</strong></h4>
         <p>Summarize your findings and give your final, definitive recommendation. End with a clear, urgent call to action (CTA).</p>
         <blockquote><em>"After a month of use, I can confidently say Affiliate AI Host is a game-changer for new and experienced affiliates alike. The combination of a high-value product and a revolutionary payment structure is unbeatable. If you're serious about building a daily income stream, there is no better platform to get started on today."</em></blockquote>
-        <p>Follow this with a large, can't-miss button:</p>
-        <p><strong>[Click Here to Get Started with Affiliate AI Host and Claim Your 70% Commission]</strong> - This button should use your affiliate link.</p>
+        <p><a href="[YOUR_AFFILIATE_LINK_HERE]" target="_blank" rel="noopener noreferrer" class="text-primary font-semibold hover:underline"><strong>Click Here to Get Started with Affiliate AI Host and Claim Your 70% Commission</strong></a></p>
 
         <p>By following this structure, you'll create a powerful asset that serves your audience, builds your authority, and generates commissions for years to come.</p>
     `
@@ -784,11 +784,9 @@ export default function GuidesPage() {
       ? `https://${customDomainName}`
       : username
         ? `${origin}/?ref=${username}`
-        : null;
+        : '#'; // Fallback link
 
-    if (affiliateLink) {
-      content = content.replace(/\[YOUR_AFFILIATE_LINK_HERE\]/g, affiliateLink);
-    }
+    content = content.replace(/\[YOUR_AFFILIATE_LINK_HERE\]/g, affiliateLink);
     
     if (username) {
         content = content.replace(/\[YOUR_USERNAME_HERE\]/g, username);
