@@ -69,7 +69,10 @@ export default function DashboardPage() {
       const pending = allReferrals.filter(r => r.activationStatus === 'pending').length;
       const activatedReferrals = allReferrals.filter(r => r.activationStatus === 'activated');
       
-      const grossSales = activatedReferrals.reduce((sum, r) => sum + (r.grossSale || 0), 0);
+      const grossSales = activatedReferrals.reduce((sum, r) => {
+          const tier = subscriptionTiers.find(t => t.name === r.planPurchased);
+          return sum + (tier?.price || 0);
+      }, 0);
       const payouts = activatedReferrals.reduce((sum, r) => sum + (r.commission || 0), 0);
       const companyRevenue = grossSales - payouts;
 
@@ -94,18 +97,20 @@ export default function DashboardPage() {
   );
 
   // --- Personal Stats (for the logged-in user, admin or not) ---
-   const { personalTotalCommission, personalTotalReferrals, personalUnpaidCommissions } = useMemo(() => {
+   const { personalTotalCommission, personalTotalReferrals, personalUnpaidCommissions, personalPendingActivations } = useMemo(() => {
       if (!personalReferrals || personalReferrals.length === 0) {
-          return { personalTotalCommission: 0, personalTotalReferrals: 0, personalUnpaidCommissions: 0 };
+          return { personalTotalCommission: 0, personalTotalReferrals: 0, personalUnpaidCommissions: 0, personalPendingActivations: 0 };
       }
 
       const totalCommission = personalReferrals.reduce((sum, r) => sum + (r.commission || 0), 0);
       const unpaidCommissions = personalReferrals.filter(r => r.status === 'unpaid').reduce((sum, r) => sum + (r.commission || 0), 0);
+      const pending = personalReferrals.filter(r => r.activationStatus === 'pending').length;
       
       return {
           personalTotalCommission: totalCommission,
           personalTotalReferrals: personalReferrals.length,
           personalUnpaidCommissions: unpaidCommissions,
+          personalPendingActivations: pending,
       };
   }, [personalReferrals]);
 
@@ -139,6 +144,16 @@ export default function DashboardPage() {
 
     return { totalStorage: total, usedStorage: used, usagePercentage: percentage };
   }, [userTier]);
+
+  const referralDescription = useMemo(() => {
+    if (personalTotalReferrals === 0) {
+        return "Share your link to get your first referral.";
+    }
+    if (personalPendingActivations > 0) {
+        return `${personalPendingActivations} pending activation${personalPendingActivations > 1 ? 's' : ''}.`;
+    }
+    return "All referrals are activated.";
+  }, [personalTotalReferrals, personalPendingActivations]);
 
   if (initialLoading) {
       return (
@@ -324,7 +339,7 @@ export default function DashboardPage() {
                 title="Your Total Referrals"
                 value={`+${personalTotalReferrals}`}
                 icon={<Users />}
-                description="Users who signed up using your link."
+                description={referralDescription}
             />
              <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -419,3 +434,5 @@ export default function DashboardPage() {
     </div>
   );
 }
+
+    
