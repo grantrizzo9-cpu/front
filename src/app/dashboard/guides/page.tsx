@@ -1,8 +1,10 @@
+
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import {
   Dialog,
   DialogContent,
@@ -11,8 +13,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { PlaceHolderImages } from '@/lib/placeholder-images';
+import { BookOpen, Download } from 'lucide-react';
 
-// Define the types and data directly in the component to avoid import issues.
 export type Guide = {
   title: string;
   level: 'starter' | 'plus' | 'pro' | 'business' | 'scale' | 'enterprise';
@@ -424,6 +427,48 @@ const allGuides: Guide[] = [
 export default function GuidesPage() {
   const [selectedGuide, setSelectedGuide] = useState<Guide | null>(null);
 
+  const handleDownload = () => {
+    if (!selectedGuide) return;
+
+    // Create a valid filename from the title
+    const filename = `${selectedGuide.title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}.html`;
+    
+    // Create the full HTML content for the file
+    const fullHtml = `
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>${selectedGuide.title}</title>
+        <style>
+          body { font-family: sans-serif; line-height: 1.6; color: #333; max-width: 800px; margin: 0 auto; padding: 20px; }
+          h3 { color: #1a1a1a; }
+          code { background-color: #f0f0f0; padding: 2px 4px; border-radius: 4px; }
+          a { color: #007bff; }
+          ul, ol { padding-left: 20px; }
+          blockquote { border-left: 4px solid #ccc; padding-left: 10px; margin-left: 0; color: #666; font-style: italic; }
+        </style>
+      </head>
+      <body>
+        <h1>${selectedGuide.title}</h1>
+        ${selectedGuide.content}
+      </body>
+      </html>
+    `;
+    const blob = new Blob([fullHtml], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+
   return (
     <div className="space-y-8">
       <div>
@@ -434,23 +479,40 @@ export default function GuidesPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {allGuides.map((guide) => (
-            <Card key={guide.title} className="flex flex-col overflow-hidden">
-              <CardHeader>
-                <CardTitle>{guide.title}</CardTitle>
-              </CardHeader>
-              <CardContent className="flex-1">
-                 <p className="text-sm text-muted-foreground">
-                    Access Level: <span className="font-semibold text-primary">{guide.level.charAt(0).toUpperCase() + guide.level.slice(1)}</span>
-                </p>
-              </CardContent>
-              <CardFooter>
-                <Button className="w-full" onClick={() => setSelectedGuide(guide)}>
-                  Read Guide
-                </Button>
-              </CardFooter>
-            </Card>
-        ))}
+        {allGuides.map((guide) => {
+            const guideImage = PlaceHolderImages.find(p => p.id === guide.imageId);
+            return (
+                <Card key={guide.title} className="flex flex-col overflow-hidden">
+                    {guideImage ? (
+                        <div className="relative h-48 w-full">
+                            <Image
+                                src={guideImage.imageUrl}
+                                alt={guideImage.description}
+                                data-ai-hint={guideImage.imageHint}
+                                fill
+                                className="object-cover"
+                            />
+                        </div>
+                    ) : (
+                        <div className="relative h-48 w-full bg-secondary flex items-center justify-center">
+                            <BookOpen className="w-12 h-12 text-muted-foreground" />
+                        </div>
+                    )}
+                    <CardHeader>
+                        <CardTitle>{guide.title}</CardTitle>
+                        <CardDescription>
+                            Access Level: <span className="font-semibold text-primary">{guide.level.charAt(0).toUpperCase() + guide.level.slice(1)}</span>
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent className="flex-1" />
+                    <CardFooter>
+                        <Button className="w-full" onClick={() => setSelectedGuide(guide)}>
+                        Read Guide
+                        </Button>
+                    </CardFooter>
+                </Card>
+            )
+        })}
       </div>
 
       <Dialog
@@ -475,7 +537,15 @@ export default function GuidesPage() {
               dangerouslySetInnerHTML={{ __html: selectedGuide?.content || '' }}
             />
           </div>
-          <DialogFooter className="mt-4 sm:justify-start">
+          <DialogFooter className="mt-4 sm:justify-start gap-2">
+            <Button
+                type="button"
+                variant="outline"
+                onClick={handleDownload}
+            >
+                <Download className="mr-2 h-4 w-4" />
+                Download
+            </Button>
             <Button
               type="button"
               variant="secondary"
@@ -489,3 +559,4 @@ export default function GuidesPage() {
     </div>
   );
 }
+
