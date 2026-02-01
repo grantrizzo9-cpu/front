@@ -74,34 +74,69 @@ export default function LoginPage() {
 
         const userDocRef = doc(firestore, "users", user.uid);
         const userDoc = await getDoc(userDocRef);
-        const planId = searchParams.get("plan");
+        
+        const planId = searchParams.get("plan") || 'starter';
+        const plan = subscriptionTiers.find(p => p.id === planId) || subscriptionTiers[0];
+        const referralCode = searchParams.get("ref");
+
 
         if (!userDoc.exists()) {
             const batch = writeBatch(firestore);
             
             // Create a unique username
-            let username = (user.displayName || user.email?.split('@')[0] || `user${user.uid.substring(0,5)}`).replace(/[^a-zA-Z0-9]/g, '');
-            const usernameDocRef = doc(firestore, "usernames", username);
+            let finalUsername = (user.displayName || user.email?.split('@')[0] || `user${user.uid.substring(0,5)}`).replace(/[^a-zA-Z0-9]/g, '');
+            const usernameDocRef = doc(firestore, "usernames", finalUsername);
             const usernameDoc = await getDoc(usernameDocRef);
             if (usernameDoc.exists()) {
-                username = `${username}${Math.floor(100 + Math.random() * 900)}`;
+                finalUsername = `${finalUsername}${Math.floor(100 + Math.random() * 900)}`;
             }
-            batch.set(doc(firestore, "usernames", username), { uid: user.uid });
+            batch.set(doc(firestore, "usernames", finalUsername), { uid: user.uid });
 
-            const refCode = searchParams.get('ref');
+            let referrerUid: string | null = null;
+            if (referralCode) {
+                const referrerUsernameDoc = await getDoc(doc(firestore, "usernames", referralCode));
+                if (referrerUsernameDoc.exists()) {
+                    referrerUid = referrerUsernameDoc.data().uid;
+                }
+            }
             
             const newUserDocData = {
                 id: user.uid,
                 email: user.email,
-                username: username,
-                referredBy: refCode || null,
+                username: finalUsername,
+                referredBy: referrerUid, // Correctly set the referrer's UID
                 isAffiliate: true,
                 createdAt: serverTimestamp(),
-                subscription: null, // Subscription is set after payment
+                subscription: {
+                    tierId: plan.id,
+                    status: 'inactive' as const,
+                    startDate: serverTimestamp(),
+                    endDate: null,
+                },
                 paypalEmail: '',
                 customDomain: null
             };
             batch.set(userDocRef, newUserDocData);
+
+             // If there was a referrer, create the referral document in their subcollection
+            if (referrerUid) {
+                const referralDocRef = doc(firestore, 'users', referrerUid, 'referrals', user.uid);
+                const referralData = {
+                    id: user.uid,
+                    affiliateId: referrerUid,
+                    referredUserId: user.uid,
+                    referredUserUsername: finalUsername,
+                    referredUserEmail: user.email || '',
+                    planPurchased: plan.name,
+                    grossSale: 0,
+                    commission: 0,
+                    status: 'paid' as const, // 'paid' because commission is 0
+                    activationStatus: 'pending' as const,
+                    date: serverTimestamp(),
+                    subscriptionId: user.uid, // Using user's UID as a unique ID for this
+                };
+                batch.set(referralDocRef, referralData);
+            }
 
             await batch.commit();
              toast({
