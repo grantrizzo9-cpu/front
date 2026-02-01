@@ -92,7 +92,7 @@ export default function DashboardPage() {
   }, [allReferrals, allUsers, isAdmin]);
 
   const recentAllReferrals = useMemo(() => 
-      allReferrals?.sort((a, b) => b.date.toMillis() - a.date.toMillis()).slice(0, 5) ?? [],
+      allReferrals?.sort((a, b) => (b.date?.toMillis() ?? 0) - (a.date?.toMillis() ?? 0)).slice(0, 5) ?? [],
       [allReferrals]
   );
 
@@ -114,7 +114,7 @@ export default function DashboardPage() {
       };
   }, [personalReferrals]);
 
-  const recentPersonalReferrals = personalReferrals?.sort((a, b) => b.date.toMillis() - a.date.toMillis()).slice(0, 5) ?? [];
+  const recentPersonalReferrals = personalReferrals?.sort((a, b) => (b.date?.toMillis() ?? 0) - (a.date?.toMillis() ?? 0)).slice(0, 5) ?? [];
   
   const isSubscriptionInactive = userData?.subscription?.status === 'inactive';
   const trialEndDate = userData?.subscription?.trialEndDate?.toDate();
@@ -323,7 +323,7 @@ export default function DashboardPage() {
                 <Info className="h-4 w-4 text-accent" />
                 <AlertTitle className="text-accent">You're on a Trial!</AlertTitle>
                 <AlertDescription>
-                    Your 3-day trial will end on {format(trialEndDate, 'PP')}. Start referring to keep the momentum going!
+                    Your 3-day trial will end on {trialEndDate ? format(trialEndDate, 'PP') : '...'} Start referring to keep the momentum going!
                 </AlertDescription>
             </Alert>
         )}
@@ -392,7 +392,7 @@ export default function DashboardPage() {
                                                 {referral.activationStatus}
                                             </Badge>
                                         </TableCell>
-                                        <TableCell className="text-right">{format(referral.date.toDate(), 'PP')}</TableCell>
+                                        <TableCell className="text-right">{referral.date ? format(referral.date.toDate(), 'PP') : 'N/A'}</TableCell>
                                     </TableRow>
                                 ))}
                             </TableBody>
@@ -434,5 +434,3 @@ export default function DashboardPage() {
     </div>
   );
 }
-
-    

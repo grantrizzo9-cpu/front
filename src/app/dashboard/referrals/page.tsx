@@ -58,7 +58,9 @@ export default function ReferralsPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {referrals.sort((a,b) => b.date.toMillis() - a.date.toMillis()).map((referral) => (
+                {referrals
+                  .sort((a, b) => (b.date?.toMillis() ?? 0) - (a.date?.toMillis() ?? 0))
+                  .map((referral) => (
                   <TableRow key={referral.id}>
                     <TableCell className="font-medium">{referral.referredUserUsername}</TableCell>
                     <TableCell>{referral.planPurchased}</TableCell>
@@ -68,7 +70,7 @@ export default function ReferralsPage() {
                         {referral.activationStatus}
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-right">{format(referral.date.toDate(), 'PPpp')}</TableCell>
+                    <TableCell className="text-right">{referral.date ? format(referral.date.toDate(), 'PPpp') : 'No Date'}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
