@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -20,13 +21,6 @@ export default function SettingsPage() {
   const { isAdmin, isLoading: isAdminLoading } = useAdmin();
 
   const [isRepairing, setIsRepairing] = useState(false);
-  const [origin, setOrigin] = useState('');
-
-  useEffect(() => {
-      if (typeof window !== 'undefined') {
-          setOrigin(window.location.origin);
-      }
-  }, []);
 
   const userDocRef = useMemoFirebase(() => {
     if (!user || !firestore) return null;
@@ -42,7 +36,7 @@ export default function SettingsPage() {
   }, [firestore, userData?.username]);
   const { data: usernameDoc, isLoading: isUsernameDocLoading } = useDoc(usernameDocRef);
 
-  const affiliateLink = userData?.username && origin ? `${origin}/?ref=${userData.username.toLowerCase()}` : '';
+  const affiliateLink = userData?.username ? `https://hostproai.com/?ref=${userData.username.toLowerCase()}` : '';
   const isLinkPubliclyActive = !!usernameDoc;
   
   const handleCopyLink = () => {
@@ -91,7 +85,7 @@ export default function SettingsPage() {
     }
   };
 
-  const isLoading = isUserLoading || isUserDataLoading || isUsernameDocLoading || isAdminLoading || !origin;
+  const isLoading = isUserLoading || isUserDataLoading || isUsernameDocLoading || isAdminLoading;
 
   if (isLoading) {
     return (
