@@ -83,8 +83,8 @@ export default function LoginPage() {
         if (!userDoc.exists()) {
             const batch = writeBatch(firestore);
             
-            // Create a unique username
-            let finalUsername = (user.displayName || user.email?.split('@')[0] || `user${user.uid.substring(0,5)}`).replace(/[^a-zA-Z0-9]/g, '');
+            // Create a unique, lowercase username
+            let finalUsername = (user.displayName || user.email?.split('@')[0] || `user${user.uid.substring(0,5)}`).replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
             const usernameDocRef = doc(firestore, "usernames", finalUsername);
             const usernameDoc = await getDoc(usernameDocRef);
             if (usernameDoc.exists()) {
@@ -94,7 +94,7 @@ export default function LoginPage() {
 
             let referrerUid: string | null = null;
             if (referralCode) {
-                const referrerUsernameDoc = await getDoc(doc(firestore, "usernames", referralCode));
+                const referrerUsernameDoc = await getDoc(doc(firestore, "usernames", referralCode.toLowerCase()));
                 if (referrerUsernameDoc.exists()) {
                     referrerUid = referrerUsernameDoc.data().uid;
                 }
@@ -120,7 +120,7 @@ export default function LoginPage() {
 
              // If there was a referrer, create the referral document in their subcollection
             if (referrerUid) {
-                const referralDocRef = doc(firestore, 'users', referrerUid, 'referrals', user.uid);
+                const referralDocRef = doc(collection(firestore, 'users', referrerUid, 'referrals'), user.uid);
                 const referralData = {
                     id: user.uid,
                     affiliateId: referrerUid,

@@ -13,7 +13,7 @@ import { subscriptionTiers } from "@/lib/data";
 import { Loader2, Users } from "lucide-react";
 import { useAuth, useFirestore } from "@/firebase";
 import { createUserWithEmailAndPassword, updateProfile, GoogleAuthProvider, signInWithPopup, User } from "firebase/auth";
-import { doc, getDoc, writeBatch, serverTimestamp, setDoc } from "firebase/firestore";
+import { doc, getDoc, writeBatch, serverTimestamp, setDoc, collection } from "firebase/firestore";
 import { Skeleton } from '@/components/ui/skeleton';
 
 
@@ -46,7 +46,7 @@ function SignupFormComponent() {
         
         let referrerUid: string | null = null;
         if (referralCode) {
-            const referrerUsernameDoc = await getDoc(doc(firestore, "usernames", referralCode));
+            const referrerUsernameDoc = await getDoc(doc(firestore, "usernames", referralCode.toLowerCase()));
             if (referrerUsernameDoc.exists()) {
                 referrerUid = referrerUsernameDoc.data().uid;
             }
@@ -69,7 +69,7 @@ function SignupFormComponent() {
 
         // If there was a referrer, create the referral document in their subcollection
         if (referrerUid) {
-            const referralDocRef = doc(firestore, 'users', referrerUid, 'referrals', user.uid);
+            const referralDocRef = doc(collection(firestore, 'users', referrerUid, 'referrals'), user.uid);
             const referralData = {
                 id: user.uid,
                 affiliateId: referrerUid,
@@ -97,8 +97,10 @@ function SignupFormComponent() {
         e.preventDefault();
         setIsProcessing(true);
         
+        const finalUsername = username.toLowerCase();
+
         try {
-            const usernameDocRef = doc(firestore, "usernames", username);
+            const usernameDocRef = doc(firestore, "usernames", finalUsername);
             const usernameDoc = await getDoc(usernameDocRef);
             if (usernameDoc.exists()) {
                 toast({ variant: "destructive", title: "Username Taken", description: "This username is already in use. Please choose another one." });
@@ -107,8 +109,8 @@ function SignupFormComponent() {
             }
 
             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-            await updateProfile(userCredential.user, { displayName: username });
-            await postSignupFlow(userCredential.user, username);
+            await updateProfile(userCredential.user, { displayName: finalUsername });
+            await postSignupFlow(userCredential.user, finalUsername);
 
         } catch (error: any) {
             let description;
@@ -132,7 +134,7 @@ function SignupFormComponent() {
             const userDoc = await getDoc(userDocRef);
 
             if (!userDoc.exists()) {
-                let g_username = (user.displayName || user.email?.split('@')[0] || `user${user.uid.substring(0,5)}`).replace(/[^a-zA-Z0-9]/g, '');
+                let g_username = (user.displayName || user.email?.split('@')[0] || `user${user.uid.substring(0,5)}`).replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
                 const initialUsernameDoc = await getDoc(doc(firestore, "usernames", g_username));
                 if (initialUsernameDoc.exists()) g_username = `${g_username}${Math.floor(100 + Math.random() * 900)}`;
                 
