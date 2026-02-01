@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useMemo } from 'react';
@@ -444,11 +443,11 @@ export default function GuidesPage() {
     if (!selectedGuide) return '';
     let content = selectedGuide.content;
 
-    const hasConnectedDomain = userData?.customDomain?.status === 'connected' && userData.customDomain.name;
+    const hasSavedDomain = userData?.customDomain?.name;
     const username = userData?.username;
     
     // Determine the affiliate link based on custom domain or username
-    const affiliateLink = hasConnectedDomain
+    const affiliateLink = hasSavedDomain
       ? `https://${userData.customDomain.name}`
       : username
         ? `https://hostproai.com/?ref=${username}`
