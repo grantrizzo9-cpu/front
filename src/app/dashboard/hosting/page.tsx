@@ -50,14 +50,8 @@ export default function HostingPage() {
             toast({ variant: 'destructive', title: 'Please enter a domain to search.'});
             return;
         }
-        const storeUrl = process.env.NEXT_PUBLIC_DOMAIN_STORE_URL;
-        if (!storeUrl || storeUrl.includes('REPLACE_WITH')) {
-            toast({ variant: 'destructive', title: 'Store URL Not Configured', description: 'Please set your domain reseller URL in the .env file.'});
-            return;
-        }
         // This will open the user's reseller storefront with the domain pre-filled for searching.
-        // The exact URL structure may vary based on the storefront provider.
-        window.open(`https://${storeUrl}/?domain=${domainToSearch}`, '_blank');
+        window.open(`https://rizzosai.shopco.com/site/availability?domain=${domainToSearch}`, '_blank');
     };
 
     const handleSaveDomain = () => {
@@ -116,31 +110,21 @@ export default function HostingPage() {
                         <RegistrarLogo />
                     </div>
                     <CardDescription>
-                        Use your integrated domain store, powered by OpenSRS, to find and register the perfect domain. A great name is your first step to making yourself memorable and professional. You also earn a commission on every sale.
+                        Use your integrated domain store to find and register the perfect domain. A great name is your first step to making yourself memorable and professional. You also earn a commission on every sale.
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
-                    {!process.env.NEXT_PUBLIC_DOMAIN_STORE_URL || process.env.NEXT_PUBLIC_DOMAIN_STORE_URL.includes('REPLACE_WITH') ? (
-                        <Alert variant="destructive">
-                            <AlertTriangle className="h-4 w-4" />
-                            <AlertTitle>Action Required</AlertTitle>
-                            <AlertDescription>
-                                To enable domain search, set your `NEXT_PUBLIC_DOMAIN_STORE_URL` in the `.env` file.
-                            </AlertDescription>
-                        </Alert>
-                    ) : (
-                        <div className="flex gap-2">
-                            <Input
-                                id="domain-search"
-                                placeholder="your-awesome-site.com"
-                                value={domainToSearch}
-                                onChange={(e) => setDomainToSearch(e.target.value)}
-                            />
-                            <Button onClick={handleDomainSearch}>
-                                <Search className="mr-2 h-4 w-4" /> Search
-                            </Button>
-                        </div>
-                    )}
+                    <div className="flex gap-2">
+                        <Input
+                            id="domain-search"
+                            placeholder="your-awesome-site.com"
+                            value={domainToSearch}
+                            onChange={(e) => setDomainToSearch(e.target.value)}
+                        />
+                        <Button onClick={handleDomainSearch}>
+                            <Search className="mr-2 h-4 w-4" /> Search
+                        </Button>
+                    </div>
                 </CardContent>
             </Card>
 

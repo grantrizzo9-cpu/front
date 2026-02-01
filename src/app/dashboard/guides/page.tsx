@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useMemo } from 'react';
@@ -48,7 +47,7 @@ const allGuides: Guide[] = [
         <h3>Step 2: Launch Your Website (Next 2 Hours)</h3>
         <p>This is the easy part. Our platform is built for speed.</p>
         <ul>
-            <li><strong>Sign Up:</strong> If you haven't already, sign up for an Affiliate AI Host plan using this link: <strong>https://hostproai.com/?ref=[YOUR_USERNAME_HERE]</strong></li>
+            <li><strong>Sign Up:</strong> If you haven't already, sign up for an Affiliate AI Host plan using this link: <strong>https://rizzosai.shopco.com/?ref=[YOUR_USERNAME_HERE]</strong></li>
             <li><strong>Connect Domain:</strong> Follow our "Pre-Launch Checklist" guide to connect your domain to our hosting. While you wait for it to go live, you can start on the next step.</li>
         </ul>
 
@@ -83,7 +82,7 @@ const allGuides: Guide[] = [
     content: `
         <p>Welcome to the first step of your affiliate journey! This guide will make you comfortable with your two most important tools: your affiliate link and your dashboard.</p>
         <strong>1. Your Unique Affiliate Link:</strong>
-        <p>Your affiliate link is your personal signature. It looks something like this: <code>https://hostproai.com/?ref=[YOUR_USERNAME_HERE]</code>. When someone clicks this link, our system places a special tracking cookie in their browser. This cookie tells us that YOU sent them. If they sign up (even days or weeks later), the sale is credited to you.</p>
+        <p>Your affiliate link is your personal signature. It looks something like this: <code>https://rizzosai.shopco.com/?ref=[YOUR_USERNAME_HERE]</code>. When someone clicks this link, our system places a special tracking cookie in their browser. This cookie tells us that YOU sent them. If they sign up (even days or weeks later), the sale is credited to you.</p>
         <ul>
             <li><strong>Where to find it:</strong> Go to your <a href="/dashboard/settings" class="text-primary hover:underline">Settings</a> page. It's right there at the top.</li>
             <li><strong>Rule #1:</strong> Always use your full, unique link. Don't shorten it or alter it, or the tracking might not work.</li>
@@ -116,7 +115,7 @@ const allGuides: Guide[] = [
       <p>This is the most important piece of the puzzle. Your affiliate link is what tells us you sent a customer.</p>
       <ol>
         <li>Go to your <a href="/dashboard/settings" target="_blank" class="text-primary font-semibold hover:underline">Affiliate Settings Page</a>.</li>
-        <li>Copy your unique affiliate link. It will look like this: <code>https://hostproai.com/?ref=[YOUR_USERNAME_HERE]</code></li>
+        <li>Copy your unique affiliate link. It will look like this: <code>https://rizzosai.shopco.com/?ref=[YOUR_USERNAME_HERE]</code></li>
         <li>Paste this link into a notepad or text file. You'll need it in a moment.</li>
       </ol>
       
@@ -158,7 +157,7 @@ const allGuides: Guide[] = [
         <blockquote>
             <p>Been exploring some incredible AI-powered tools for building websites and growing a business online. Affiliate AI Host combines high-speed hosting with a content generator that's actually useful.</p>
             <p>Plus, their affiliate program is one of the best I've seen (70% commissions, paid daily!). If you're looking to start an online project or side-hustle, this is a great place to begin. They have a trial where you only pay for the first day to check it out.</p>
-            <p>Check it out here: <strong>https://hostproai.com/?ref=[YOUR_USERNAME_HERE]</strong></p>
+            <p>Check it out here: <strong>https://rizzosai.shopco.com/?ref=[YOUR_USERNAME_HERE]</strong></p>
             <p>#webhosting #aicontent #affiliatemarketing #sidehustle</p>
         </blockquote>
 
@@ -166,7 +165,7 @@ const allGuides: Guide[] = [
         <blockquote>
             <p>Just found a hosting platform that pays its affiliates 70% commissions DAILY via PayPal. 🤯</p>
             <p>Affiliate AI Host bundles hosting with AI content tools. It's a super easy offer for anyone wanting to build a site or start an online business.</p>
-            <p>Worth a look 👇<br><strong>https://hostproai.com/?ref=[YOUR_USERNAME_HERE]</strong></p>
+            <p>Worth a look 👇<br><strong>https://rizzosai.shopco.com/?ref=[YOUR_USERNAME_HERE]</strong></p>
             <p>#affiliatemarketing #saas #mrr</p>
         </blockquote>
         <p><strong>Where to post:</strong> Your personal profile, relevant Facebook groups (check rules first!), LinkedIn articles, and your X/Twitter feed. Customize the message to fit your voice!</p>
@@ -223,10 +222,10 @@ const allGuides: Guide[] = [
         </ul>
 
         <h3>Step 2: Connect Your Custom Domain</h3>
-        <p>This is the most critical step. You need to point your domain (e.g., <code>hostproai.com</code>) to our cloud hosting servers.</p>
+        <p>This is the most critical step. You need to point your domain (e.g., <code>your-domain.com</code>) to our cloud hosting servers.</p>
         <ol>
             <li><strong>Navigate to Firebase Hosting:</strong> Go to this specific URL for your project: <a href="https://console.firebase.google.com/project/affiliate-ai-host-new/hosting/custom-domains" target="_blank" rel="noopener noreferrer">Firebase Hosting Console</a>. Click "Add custom domain".</li>
-            <li><strong>Verify Ownership (TXT Record):</strong> The Firebase wizard will ask you to verify you own the domain. It will provide a <strong>TXT record</strong> value. Copy this value. Go to your domain registrar (wherever you purchased your domain, such as your OpenSRS storefront), find its DNS settings, and add a new TXT record for your main domain (the host is usually '@'). Paste the value from Firebase and save. Wait for Firebase to verify it, which can take up to an hour.</li>
+            <li><strong>Verify Ownership (TXT Record):</strong> The Firebase wizard will ask you to verify you own the domain. It will provide a <strong>TXT record</strong> value. Copy this value. Go to your domain registrar (e.g., your OpenSRS storefront), find its DNS settings, and add a new TXT record for your main domain (the host is usually '@'). Paste the value from Firebase and save. Wait for Firebase to verify it, which can take up to an hour.</li>
             <li><strong>Go Live (A Records):</strong> After verification, Firebase will give you two <strong>A Records</strong> (IP addresses). Go back to your domain registrar's DNS settings. <strong>Delete any old A records</strong> for your root domain ('@') to prevent conflicts. Then, create two new A records, one for each IP address Firebase provided.</li>
         </ol>
         <p>Once these DNS changes propagate across the internet, your site will be live at your custom domain with a secure SSL certificate.</p>
@@ -235,7 +234,7 @@ const allGuides: Guide[] = [
         <p>Once your domain is live, perform one final test.</p>
         <ul>
             <li>Open a new incognito browser window.</li>
-            <li>Go to your live domain: <code>https://hostproai.com</code></li>
+            <li>Go to your live domain: <code>https://your-domain.com</code></li>
             <li>Sign up for the cheapest plan using a new email address and a real credit card or PayPal account. This ensures your payment gateway is working correctly in production.</li>
             <li>After the test, you can request a refund for the transaction.</li>
         </ul>
@@ -333,7 +332,7 @@ const allGuides: Guide[] = [
             <p>I’ve recommended Affiliate AI Host, but I wanted to show you *why* it's the engine behind my own affiliate business.</p>
             <p>It’s not just about the incredible 70-75% daily commissions. It’s about the tools that make earning them easier. My favorite feature is the <strong>AI Content Generator</strong>.</p>
             <p>If you want to see the platform and tools I use every day, you can check it out here:</p>
-            <p><a href="https://hostproai.com/?ref=[YOUR_USERNAME_HERE]" target="_blank" rel="noopener noreferrer"><strong>https://hostproai.com/?ref=[YOUR_USERNAME_HERE]</strong></a></p>
+            <p><a href="https://rizzosai.shopco.com/?ref=[YOUR_USERNAME_HERE]" target="_blank" rel="noopener noreferrer"><strong>https://rizzosai.shopco.com/?ref=[YOUR_USERNAME_HERE]</strong></a></p>
             <p>It’s worth a look just to see how the platform is structured for affiliate success.</p>
             <p>Best,</p>
             <p>Grant Rizzoli</p>
@@ -355,7 +354,7 @@ const allGuides: Guide[] = [
             </ul>
             </p>
             <p>To post a review, you need a website. If you're ready to build your first real online asset, this is the platform I recommend to get it done fast:</p>
-            <p><a href="https://hostproai.com/?ref=[YOUR_USERNAME_HERE]" target="_blank" rel="noopener noreferrer"><strong>https://hostproai.com/?ref=[YOUR_USERNAME_HERE]</strong></a></p>
+            <p><a href="https://rizzosai.shopco.com/?ref=[YOUR_USERNAME_HERE]" target="_blank" rel="noopener noreferrer"><strong>https://rizzosai.shopco.com/?ref=[YOUR_USERNAME_HERE]</strong></a></p>
             <p>Cheers,</p>
             <p>Grant Rizzoli</p>
         </blockquote>
@@ -369,7 +368,7 @@ const allGuides: Guide[] = [
             <p>Let's break down the real power of this affiliate program. The "Pro" plan costs $49.95/day. Your commission is 70%. That's <strong>$34.96 per day... from a single referral.</strong></p>
             <p>Now, imagine you refer just <strong>5 people</strong> who choose that plan. That's over $5,200 a month, paid out to your PayPal account automatically, every single day.</p>
             <p>This isn't a get-rich-quick scheme. It's simple, powerful math.</p>
-            <p>Want to start your own daily income stream? <a href="https://hostproai.com/?ref=[YOUR_USERNAME_HERE]" target="_blank" rel="noopener noreferrer" class="text-primary font-semibold hover:underline"><strong>Click here to see the plans and get started.</strong></a></p>
+            <p>Want to start your own daily income stream? <a href="https://rizzosai.shopco.com/?ref=[YOUR_USERNAME_HERE]" target="_blank" rel="noopener noreferrer" class="text-primary font-semibold hover:underline"><strong>Click here to see the plans and get started.</strong></a></p>
             <p>Best,</p>
             <p>Grant Rizzoli</p>
         </blockquote>
@@ -382,7 +381,7 @@ const allGuides: Guide[] = [
             <p>Hi there,</p>
             <p>I want to share a quick story about Sarah. She was new to affiliate marketing and frustrated with slow, monthly payouts. She signed up for Affiliate AI Host, paid her one-time activation fee, and got to work.</p>
             <p>She used the AI tools to write a few posts and promote them. Within a week, she got her first two referrals. After their trial, she saw her first commission in her PayPal. Then another the next day. And the next.</p>
-            <p>That daily motivation is powerful. You can follow the exact same path. It all starts with the right platform. <a href="https://hostproai.com/?ref=[YOUR_USERNAME_HERE]" target="_blank" rel="noopener noreferrer" class="text-primary font-semibold hover:underline"><strong>Get the same tools Sarah used right here.</strong></a></p>
+            <p>That daily motivation is powerful. You can follow the exact same path. It all starts with the right platform. <a href="https://rizzosai.shopco.com/?ref=[YOUR_USERNAME_HERE]" target="_blank" rel="noopener noreferrer" class="text-primary font-semibold hover:underline"><strong>Get the same tools Sarah used right here.</strong></a></p>
             <p>Talk soon,</p>
             <p>Grant Rizzoli</p>
         </blockquote>
@@ -396,7 +395,7 @@ const allGuides: Guide[] = [
             <p>It’s been about a week since you downloaded the launch checklist. If you haven't started yet, what's holding you back?</p>
             <p>Maybe you're worried it's not for you. That's why there's a <strong>24-hour, no-questions-asked refund policy</strong> on the one-time activation fee. You can try it with zero risk.</p>
             <p>The opportunity to build a daily income stream is right in front of you. The best time to start was yesterday. The second-best time is now.</p>
-            <p><a href="https://hostproai.com/?ref=[YOUR_USERNAME_HERE]" target="_blank" rel="noopener noreferrer" class="text-primary font-semibold hover:underline"><strong>Click Here to Create Your Account & Launch Your Affiliate Business Today.</strong></a></p>
+            <p><a href="https://rizzosai.shopco.com/?ref=[YOUR_USERNAME_HERE]" target="_blank" rel="noopener noreferrer" class="text-primary font-semibold hover:underline"><strong>Click Here to Create Your Account & Launch Your Affiliate Business Today.</strong></a></p>
             <p>This is your moment. Don't let it pass you by.</p>
             <p>To your success,</p>
             <p>Grant Rizzoli</p>
@@ -451,12 +450,12 @@ export default function GuidesPage() {
     const affiliateLink = hasSavedDomain
       ? `https://${userData.customDomain.name}`
       : username
-        ? `https://hostproai.com/?ref=${username}`
+        ? `https://rizzosai.shopco.com/?ref=${username}`
         : null;
 
     if (affiliateLink) {
       // Replace the full placeholder affiliate link (most common case)
-      content = content.replace(/https:\/\/hostproai\.com\/\?ref=\[YOUR_USERNAME_HERE\]/g, affiliateLink);
+      content = content.replace(/https:\/\/rizzosai\.shopco\.com\/\?ref=\[YOUR_USERNAME_HERE\]/g, affiliateLink);
     }
     
     // Also replace just the username placeholder if it exists on its own
