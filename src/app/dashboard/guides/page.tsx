@@ -1,18 +1,100 @@
+
 'use client';
 
+import { useState } from 'react';
+import Image from 'next/image';
+import { allGuides, type Guide } from '@/lib/guides';
+import { PlaceHolderImages } from '@/lib/placeholder-images';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+
 export default function GuidesPage() {
+  const [selectedGuide, setSelectedGuide] = useState<Guide | null>(null);
+
   return (
-    <div className="space-y-4">
-      <h1 className="text-3xl font-bold font-headline">Guides Page</h1>
-      <p className="text-muted-foreground">
-        This is a temporary placeholder page. The previous component was causing a critical error that resulted in a blank screen.
-      </p>
-      <div className="p-10 bg-secondary/50 rounded-lg text-center">
-        <p className="text-lg font-semibold">The Guides feature is being rebuilt.</p>
-        <p className="text-muted-foreground mt-2">
-          I am working to restore this functionality on a more stable foundation. Thank you for your patience.
+    <div className="space-y-8">
+      <div>
+        <h1 className="text-3xl font-bold font-headline">Marketing Guides</h1>
+        <p className="text-muted-foreground">
+          Your library of expert guides to help you grow your affiliate business.
         </p>
       </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {allGuides.map((guide) => {
+          const image = PlaceHolderImages.find((p) => p.id === guide.imageId);
+          return (
+            <Card key={guide.title} className="flex flex-col overflow-hidden">
+              {image && (
+                <div className="relative h-40 w-full">
+                  <Image
+                    src={image.imageUrl}
+                    alt={guide.title}
+                    data-ai-hint={image.imageHint}
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+              )}
+              <CardHeader>
+                <CardTitle>{guide.title}</CardTitle>
+              </CardHeader>
+              <CardContent className="flex-1">
+                 <p className="text-sm text-muted-foreground">
+                    Access Level: <span className="font-semibold text-primary">{guide.level.charAt(0).toUpperCase() + guide.level.slice(1)}</span>
+                </p>
+              </CardContent>
+              <CardFooter>
+                <Button className="w-full" onClick={() => setSelectedGuide(guide)}>
+                  Read Guide
+                </Button>
+              </CardFooter>
+            </Card>
+          );
+        })}
+      </div>
+
+      <Dialog
+        open={!!selectedGuide}
+        onOpenChange={(isOpen) => {
+          if (!isOpen) {
+            setSelectedGuide(null);
+          }
+        }}
+      >
+        <DialogContent className="sm:max-w-3xl h-[90vh] flex flex-col">
+          <DialogHeader>
+            <DialogTitle className="font-headline text-2xl pr-6">
+              {selectedGuide?.title}
+            </DialogTitle>
+            <DialogDescription>
+              Access Level: {selectedGuide?.level.charAt(0).toUpperCase() + (selectedGuide?.level.slice(1) || '')}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex-1 overflow-y-auto pr-6 space-y-4 text-foreground/90 [&_h3]:text-xl [&_h3]:font-semibold [&_h3]:mt-6 [&_p]:leading-relaxed [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:space-y-2 [&_li]:pl-2 [&_code]:bg-muted [&_code]:font-mono [&_code]:px-1.5 [&_code]:py-1 [&_code]:rounded-sm [&_a]:text-primary [&_a]:hover:underline [&_blockquote]:border-l-4 [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-muted-foreground">
+            <div
+              dangerouslySetInnerHTML={{ __html: selectedGuide?.content || '' }}
+            />
+          </div>
+          <DialogFooter className="mt-4 sm:justify-start">
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() => setSelectedGuide(null)}
+            >
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
