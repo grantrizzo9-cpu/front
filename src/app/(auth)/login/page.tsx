@@ -29,14 +29,11 @@ export default function LoginPage() {
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
   const [planId, setPlanId] = useState('starter');
-  const [referralCode, setReferralCode] = useState<string | null>(null);
 
   useEffect(() => {
       const params = new URLSearchParams(window.location.search);
       const plan = params.get('plan');
-      const ref = params.get('ref');
       if (plan) setPlanId(plan);
-      if (ref) setReferralCode(ref);
   }, []);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -97,6 +94,10 @@ export default function LoginPage() {
                 finalUsername = `${finalUsername}${Math.floor(100 + Math.random() * 900)}`;
             }
             batch.set(doc(firestore, "usernames", finalUsername), { uid: user.uid });
+            
+            // Direct-read referral code from URL at the moment of action
+            const params = new URLSearchParams(window.location.search);
+            const referralCode = params.get('ref');
 
             let referrerUid: string | null = null;
             if (referralCode) {

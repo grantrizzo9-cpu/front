@@ -63,13 +63,13 @@ function SignupFormComponent() {
     
     const isFormValid = username.length > 2 && /^\S+@\S+\.\S+$/.test(email) && password.length >= 6;
 
-    const postSignupFlow = async (user: User, finalUsername: string) => {
+    const postSignupFlow = async (user: User, finalUsername: string, refCode: string | null) => {
         const batch = writeBatch(firestore);
         const userDocRef = doc(firestore, "users", user.uid);
         
         let referrerUid: string | null = null;
-        if (referralCode) {
-            const referrerUsernameDoc = await getDoc(doc(firestore, "usernames", referralCode.toLowerCase()));
+        if (refCode) {
+            const referrerUsernameDoc = await getDoc(doc(firestore, "usernames", refCode.toLowerCase()));
             if (referrerUsernameDoc.exists()) {
                 referrerUid = referrerUsernameDoc.data()?.uid ?? null;
             }
@@ -120,6 +120,9 @@ function SignupFormComponent() {
         setIsProcessing(true);
         
         const finalUsername = username.toLowerCase();
+        // Direct-read referral code from URL at the moment of action
+        const params = new URLSearchParams(window.location.search);
+        const refCodeFromUrl = params.get('ref');
 
         try {
             const usernameDocRef = doc(firestore, "usernames", finalUsername);
@@ -132,7 +135,7 @@ function SignupFormComponent() {
 
             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
             await updateProfile(userCredential.user, { displayName: finalUsername });
-            await postSignupFlow(userCredential.user, finalUsername);
+            await postSignupFlow(userCredential.user, finalUsername, refCodeFromUrl);
 
         } catch (error: any) {
             let description;
@@ -160,7 +163,11 @@ function SignupFormComponent() {
                 const initialUsernameDoc = await getDoc(doc(firestore, "usernames", g_username));
                 if (initialUsernameDoc.exists()) g_username = `${g_username}${Math.floor(100 + Math.random() * 900)}`;
                 
-                await postSignupFlow(user, g_username);
+                // Direct-read referral code from URL at the moment of action
+                const params = new URLSearchParams(window.location.search);
+                const refCodeFromUrl = params.get('ref');
+
+                await postSignupFlow(user, g_username, refCodeFromUrl);
             } else {
                  toast({ title: "Login Successful", description: "Welcome back!" });
                  router.push("/dashboard");
