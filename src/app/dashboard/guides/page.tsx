@@ -40,7 +40,7 @@ const allGuides: Guide[] = [
         <p>This is the most strategic part of the process. A great domain name is your brand, and your niche is your battleground. Choose wisely.</p>
         <ul>
             <li><strong>Niche Selection:</strong> Your primary product is Affiliate AI Host, which appeals to entrepreneurs, marketers, developers, and anyone wanting to start an online business. Your niche could be a subset of this. For example: "AI tools for small business owners," "passive income strategies for students," or "the best hosting for new bloggers." A tighter niche is easier to dominate. Think about who you can best speak to.</li>
-            <li><strong>Domain Brainstorming:</strong> List at least 20 potential domain names. Combine keywords related to your niche with action words or branding. Examples: <code>AIEmpireBuilders.com</code>, <code>PassiveIncomePlaybook.net</code>, <code>YourNameAI.com</code>.</li>
+            <li><strong>Domain Brainstorming:</strong> List at least 20 potential domain names. Combine keywords related to your niche with action words or branding. Examples: \`<code>AIEmpireBuilders.com</code>\`, \`<code>PassiveIncomePlaybook.net</code>\`, \`<code>YourNameAI.com</code>\`.</li>
             <li><strong>Check Availability:</strong> Use the domain search tool on your <strong>Hosting page</strong> to find available domains through your integrated reseller store. This is a crucial step. Do not get attached to a name until you know it's available.</li>
             <li><strong>Domain Best Practices:</strong>
                 <ul>
@@ -88,7 +88,7 @@ const allGuides: Guide[] = [
         <h3>Step 5: Review, Track, & Optimize (Final 2 Hours)</h3>
         <p>Before you rest, check your work and set up your systems for tracking success.</p>
         <ul>
-            <li><strong>The Link Audit:</strong> Meticulously click every single link on your website. Your navigation links, your in-text links, and especially every affiliate link. Use an incognito browser to ensure your affiliate code (`?ref=...`) is correctly appended to the URL. A broken money link means zero income.</li>
+            <li><strong>The Link Audit:</strong> Meticulously click every single link on your website. Your navigation links, your in-text links, and especially every affiliate link. Use an incognito browser to ensure your affiliate code (\`?ref=...\`) is correctly appended to the URL. A broken money link means zero income.</li>
             <li><strong>Monitor Your Dashboard:</strong> Keep your Affiliate AI Host dashboard open. As clicks come in and referrals sign up, you'll see them appear in real-time. This is your command center.</li>
             <li><strong>Celebrate Your Launch:</strong> You have done what 99% of aspiring entrepreneurs only talk about. You've launched a real online business in 24 hours. This is a major accomplishment.</li>
         </ul>
@@ -103,7 +103,7 @@ const allGuides: Guide[] = [
         
         <h3>Part 1: Your Affiliate Link - The Golden Key</h3>
         <p>Your affiliate link is your personal tracking code. It's the mechanism that ensures you get credit for every single customer you send our way. It's absolutely vital that you understand how it works and how to use it correctly.</p>
-        <p>Your link will always follow this format: <a href="[YOUR_AFFILIATE_LINK_HERE]" target="_blank" rel="noopener noreferrer" class="text-primary font-semibold hover:underline"><code>[YOUR_AFFILIATE_LINK_HERE]</code></a></p>
+        <p>Your link will always follow this format: <a href="[YOUR_AFFILIATE_LINK_HERE]" target="_blank" rel="noopener noreferrer" class="text-primary font-semibold hover:underline">\`<code>[YOUR_AFFILIATE_LINK_HERE]</code>\`</a></p>
         
         <h4>How Tracking Works: The Cookie</h4>
         <p>When a person clicks on your unique link, a small text file called a "cookie" is placed in their web browser. This cookie contains your unique affiliate ID. It acts as a digital name tag.</p>
@@ -117,7 +117,7 @@ const allGuides: Guide[] = [
         <ol>
             <li><strong>Never Alter The Link:</strong> Do not use URL shorteners or attempt to modify the link in any way. Doing so can break the tracking mechanism, and you will lose commissions. Always use the full, complete link as provided.</li>
             <li><strong>Use it Contextually:</strong> Don't just drop your link randomly. Place it where it makes sense: within a product review, on a "recommended tools" page, or as a call-to-action in a relevant social media post. Context increases trust and click-through rates.</li>
-            <li><strong>Check Your Link:</strong> After placing your link on your website or in a post, click it yourself using an incognito browser window. Verify that it takes you to the correct page and that your ` + '`?ref=...`' + ` code is visible in the address bar.</li>
+            <li><strong>Check Your Link:</strong> After placing your link on your website or in a post, click it yourself using an incognito browser window. Verify that it takes you to the correct page and that your \`?ref=...\` code is visible in the address bar.</li>
         </ol>
 
         <hr class="my-6 border-border" />
@@ -158,7 +158,7 @@ const allGuides: Guide[] = [
       <p>Welcome to the most important guide for establishing a professional online presence. In the past, affiliates might have used a simple trick called "domain forwarding" to redirect a domain to their affiliate link. However, this method is outdated and heavily penalized by search engines like Google. It signals a low-quality site and will harm your ability to get organic traffic. This guide will show you the modern, professional, and SEO-friendly way to set up your affiliate website.</p>
       
       <h3>The Big Idea: Your Domain, Our Hosting, Your Brand</h3>
-      <p>The concept is simple but powerful. You will register your own unique domain name (e.g., <code>www.lizs-ai-reviews.com</code>). Then, instead of a cheap redirect, you will correctly point that domain to our high-performance Google Cloud hosting infrastructure. This tells the internet that your domain is the home of a real, legitimate website.</p>
+      <p>The concept is simple but powerful. You will register your own unique domain name (e.g., \`<code>www.lizs-ai-reviews.com</code>\`). Then, instead of a cheap redirect, you will correctly point that domain to our high-performance Google Cloud hosting infrastructure. This tells the internet that your domain is the home of a real, legitimate website.</p>
       <p><strong>The Result:</strong> When you share your domain, visitors arrive at a fast, professional, and secure website. You maintain all the branding and SEO benefits of owning your domain, while leveraging the power and reliability of our platform. This is how successful online businesses are built.</p>
       
       <hr class="my-6 border-border" />
@@ -167,7 +167,7 @@ const allGuides: Guide[] = [
       <p>While you won't be forwarding to this link, you still need it for all your other marketing efforts (social media, emails, etc.). It's the unique code that tracks your sales.</p>
       <ol>
         <li>Navigate to your <a href="/dashboard/settings" target="_blank" class="text-primary font-semibold hover:underline">Affiliate Settings Page</a>.</li>
-        <li>Carefully copy your complete, unique affiliate link. It will look exactly like this: <a href="[YOUR_AFFILIATE_LINK_HERE]" target="_blank" rel="noopener noreferrer" class="text-primary font-semibold hover:underline"><code>[YOUR_AFFILIATE_LINK_HERE]</code></a>.</li>
+        <li>Carefully copy your complete, unique affiliate link. It will look exactly like this: <a href="[YOUR_AFFILIATE_LINK_HERE]" target="_blank" rel="noopener noreferrer" class="text-primary font-semibold hover:underline">\`<code>[YOUR_AFFILIATE_LINK_HERE]</code>\`</a>.</li>
         <li>Save this link in a secure text file. You will use this link everywhere *except* for your main domain connection.</li>
       </ol>
       
@@ -176,7 +176,7 @@ const allGuides: Guide[] = [
       <ol>
         <li>Go to your <a href="https://rizzosai.shopco.com/" target="_blank" rel="noopener noreferrer" class="text-primary font-semibold hover:underline">integrated reseller store</a>. You can also use the convenient search tool on your <a href="/dashboard/hosting" target="_blank" class="text-primary font-semibold hover:underline">Hosting Page</a>.</li>
         <li>Brainstorm and search for a domain that is relevant to your niche. Try combining keywords like 'AI', 'hosting', 'reviews', 'insider', 'hub', 'stack', or your own name.</li>
-        <li>Select a <code>.com</code> extension if at all possible. It holds the most trust and authority online.</li>
+        <li>Select a \`<code>.com</code>\` extension if at all possible. It holds the most trust and authority online.</li>
         <li>Complete the purchase. For a small annual fee, you now own that domain. This is a critical business asset.</li>
       </ol>
       
@@ -197,7 +197,7 @@ const allGuides: Guide[] = [
       
       <h3>You're Done! What Happens Now?</h3>
       <p>The process of DNS "propagation" can take anywhere from a few minutes to a few hours. This is the time it takes for the new "address" of your website to be updated across the global internet.</p>
-      <p>Once it's complete, you can type your new domain (e.g., <code>www.lizs-ai-reviews.com</code>) into any browser. You will be taken directly to your professional website, hosted on our platform, with a secure SSL certificate automatically applied. You will see your domain in the address bar—no redirects, no forwarding. This tells Google and your visitors that you are a serious, authoritative presence online.</p>
+      <p>Once it's complete, you can type your new domain (e.g., \`<code>www.lizs-ai-reviews.com</code>\`) into any browser. You will be taken directly to your professional website, hosted on our platform, with a secure SSL certificate automatically applied. You will see your domain in the address bar—no redirects, no forwarding. This tells Google and your visitors that you are a serious, authoritative presence online.</p>
       <p>Congratulations! You now have a professionally configured affiliate website, ready to be promoted and optimized for search engines.</p>
     `
   },
@@ -394,7 +394,7 @@ const allGuides: Guide[] = [
         <p>A successful launch is not an accident; it is the result of meticulous preparation. This is your definitive, step-by-step checklist to follow before you drive any significant traffic to your new affiliate website. Completing these steps will ensure your site is technically sound, secure, and ready to convert visitors into commissions from the moment it goes live.</p>
         
         <h3>Phase 1: Finalize Your Production Environment</h3>
-        <p>Your <code>.env</code> file is the central configuration file that holds the secret keys to your external services. During development, it's common to use "sandbox" or "test" keys. Before launch, you MUST switch to live "production" keys. Failure to do so will result in failed payments and a broken user experience.</p>
+        <p>Your \`<code>.env</code>\` file is the central configuration file that holds the secret keys to your external services. During development, it's common to use "sandbox" or "test" keys. Before launch, you MUST switch to live "production" keys. Failure to do so will result in failed payments and a broken user experience.</p>
         <ul>
             <li><strong>PayPal Production Credentials:</strong>
                 <ol>
@@ -402,14 +402,14 @@ const allGuides: Guide[] = [
                     <li>Navigate to the "My Apps & Credentials" section.</li>
                     <li>Ensure you are on the **Live** tab.</li>
                     <li>Copy your **Live Client ID** and **Live Secret**.</li>
-                    <li>Open your <code>.env</code> file. Update the <code>PAYPAL_CLIENT_ID</code> and <code>PAYPAL_CLIENT_SECRET</code> with these live credentials. The <code>NEXT_PUBLIC_PAYPAL_CLIENT_ID</code> should also be updated to match your live client ID.</li>
+                    <li>Open your \`<code>.env</code>\` file. Update the \`<code>PAYPAL_CLIENT_ID</code>\` and \`<code>PAYPAL_CLIENT_SECRET</code>\` with these live credentials. The \`<code>NEXT_PUBLIC_PAYPAL_CLIENT_ID</code>\` should also be updated to match your live client ID.</li>
                 </ol>
             </li>
-            <li><strong>Gemini Production API Key:</strong> Ensure the <code>GEMINI_API_KEY</code> in your <code>.env</code> file is your final, production-ready key from Google AI Studio. Test your AI tools one last time to confirm they are working.</li>
+            <li><strong>Gemini Production API Key:</strong> Ensure the \`<code>GEMINI_API_KEY</code>\` in your \`<code>.env</code>\` file is your final, production-ready key from Google AI Studio. Test your AI tools one last time to confirm they are working.</li>
         </ul>
 
         <h3>Phase 2: Connect Your Custom Domain (DNS Configuration)</h3>
-        <p>This is the most critical technical step of your launch. You will be pointing your domain name (e.g., <code>your-affiliate-site.com</code>) to our Google Cloud hosting servers using DNS 'A' Records. This is the professional standard for hosting a website.</p>
+        <p>This is the most critical technical step of your launch. You will be pointing your domain name (e.g., \`<code>your-affiliate-site.com</code>\`) to our Google Cloud hosting servers using DNS 'A' Records. This is the professional standard for hosting a website.</p>
         <ol>
             <li><strong>Navigate to Your Hosting Console:</strong> This is where you will get the specific IP addresses for your host. <a href="https://console.firebase.google.com/project/affiliate-ai-host-new/hosting/custom-domains" target="_blank" rel="noopener noreferrer" class="text-primary font-semibold hover:underline">Click this link to open your project's hosting console</a>, then click the "Add custom domain" button to start the wizard.</li>
             <li><strong>Domain Verification (TXT Record):</strong> The first step in the wizard is to prove you own the domain. The console will provide a unique **TXT record** value. Copy this value.
@@ -435,7 +435,7 @@ const allGuides: Guide[] = [
         <p>Never assume everything works. Before you announce your site to the world, perform a final, end-to-end test as if you were a brand new customer.</p>
         <ul>
             <li>Open a new incognito or private browser window. This ensures you have no admin cookies or cached data.</li>
-            <li>Navigate directly to your live domain: <code>https://your-domain.com</code>.</li>
+            <li>Navigate directly to your live domain: \`<code>https://your-domain.com</code>\`.</li>
             <li>Go through the entire signup process. Choose the cheapest plan. Use a real, different email address and a real payment method (like a credit card or a different PayPal account).</li>
             <li>Ensure the payment goes through, your new test account is created, and you land on the dashboard.</li>
             <li>Check your main affiliate account's dashboard to see if the new referral appeared correctly.</li>
@@ -448,10 +448,10 @@ const allGuides: Guide[] = [
             <li>Go to <a href="https://search.google.com/search-console" target="_blank" rel="noopener noreferrer">Google Search Console</a> and log in with your Google account.</li>
             <li>Add your domain as a new property.</li>
             <li>Choose the "HTML tag" verification method. It's the simplest.</li>
-            <li>Google will provide a meta tag that looks like: <code>&lt;meta name="google-site-verification" content="Your_Unique_Code_Here" /&gt;</code>.</li>
+            <li>Google will provide a meta tag that looks like: \`<code>&lt;meta name="google-site-verification" content="Your_Unique_Code_Here" /&gt;</code>\`.</li>
             <li>Copy this entire tag.</li>
-            <li>In your project's code, open the file <code>src/app/layout.tsx</code>.</li>
-            <li>Paste the meta tag you copied into the <code>&lt;head&gt;</code> section of this file.</li>
+            <li>In your project's code, open the file \`<code>src/app/layout.tsx</code>\`.</li>
+            <li>Paste the meta tag you copied into the \`<code>&lt;head&gt;</code>\` section of this file.</li>
             <li>Once you save and the site redeploys, go back to Search Console and click "Verify."</li>
         </ul>
         <p>Once you have completed all four phases, your website is technically sound, ready for business, and discoverable by Google. You are now ready to launch.</p>
@@ -777,22 +777,19 @@ export default function GuidesPage() {
     if (!selectedGuide || !origin) return '';
     let content = selectedGuide.content;
 
-    const hasSavedDomain = userData?.customDomain?.name;
+    const customDomainName = userData?.customDomain?.name;
     const username = userData?.username;
     
-    // Determine the affiliate link based on custom domain or username
-    const affiliateLink = hasSavedDomain
-      ? `https://${userData.customDomain.name}`
+    const affiliateLink = customDomainName
+      ? `https://${customDomainName}`
       : username
         ? `${origin}/?ref=${username}`
         : null;
 
     if (affiliateLink) {
-      // Replace the generic placeholder
       content = content.replace(/\[YOUR_AFFILIATE_LINK_HERE\]/g, affiliateLink);
     }
     
-    // Also replace just the username placeholder if it exists on its own
     if (username) {
         content = content.replace(/\[YOUR_USERNAME_HERE\]/g, username);
     }
