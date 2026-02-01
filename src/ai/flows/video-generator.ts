@@ -110,9 +110,9 @@ const videoGeneratorFlow = ai.defineFlow(
             if (rawErrorMessage.includes("API key not valid")) {
                  userFriendlyError = `Authentication failed. The Gemini API Key you provided in the .env file appears to be invalid. Please double-check that you have copied the entire key correctly. If you just updated the key, you may need to restart the development server. Raw error: "${rawErrorMessage}"`;
             } else if (rawErrorMessage.includes("API is only accessible to billed users at this time")) {
-                userFriendlyError = 'Video Generation Blocked by Google Policy: This AI model requires a project with a billing history. This is not a bug in the app. To resolve this, you may need to wait for a billing cycle or contact Google Cloud support regarding your project\'s billing status.';
+                userFriendlyError = 'Video Generation Blocked: The Veo API requires a project with billing enabled. This is not a bug in the app. To resolve this, please enable billing on your Google Cloud project. If you have free trial credits, they will be used.';
             } else if (rawErrorMessage.includes("Quota exceeded") || rawErrorMessage.includes("Too Many Requests")) {
-                userFriendlyError = `API Rate Limit Reached: The AI service's free tier has a limited number of requests per minute and per day. You have exceeded this limit. This is not a bug. Please wait, or for unlimited access, add a billing account to your Google Cloud project. Raw error: "${rawErrorMessage}"`;
+                userFriendlyError = `API Rate Limit Reached: The Veo API's free tier has strict limits on requests per minute and per day. You have exceeded these limits. This is not a bug in the app. To remove these limits, please enable billing on your Google Cloud project. If you have free trial credits, they will be used automatically.`;
             }
 
             return { error: userFriendlyError };

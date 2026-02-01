@@ -189,7 +189,7 @@ const websiteGeneratorFlow = ai.defineFlow(
             if (rawErrorMessage.includes("API key not valid")) {
                 userFriendlyError = `Authentication failed. The Gemini API Key you provided in the .env file appears to be invalid. Please double-check that you have copied the entire key correctly. If you just updated the key, you may need to restart the development server. Raw error: "${rawErrorMessage}"`;
             } else if (rawErrorMessage.includes("Quota exceeded") || rawErrorMessage.includes("Too Many Requests")) {
-                userFriendlyError = `API Rate Limit Reached: The AI service's free tier has a limited number of requests per minute and per day. You have exceeded this limit. This is not a bug. Please wait, or for unlimited access, add a billing account to your Google Cloud project. Raw error: "${rawErrorMessage}"`;
+                userFriendlyError = `API Rate Limit Reached: The Gemini API's free tier has strict limits on requests per minute and per day. You have exceeded these limits. This is not a bug in the app. To remove these limits, please enable billing on your Google Cloud project. If you have free trial credits, they will be used automatically.`;
                 const match = rawErrorMessage.match(/Please retry in ([\d.]+)s/);
                 if (match && match[1]) {
                     retrySeconds = Math.ceil(parseFloat(match[1]));
