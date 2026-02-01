@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -14,6 +13,7 @@ import { Loader2, Globe, Info, CheckCircle, AlertTriangle, Search, BookOpen } fr
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
+import { RegistrarLogo } from '@/components/registrar-logo';
 
 export default function HostingPage() {
     const { user, isUserLoading } = useUser();
@@ -102,18 +102,21 @@ export default function HostingPage() {
     return (
         <div className="space-y-8 max-w-4xl">
              <div>
-                <h1 className="text-3xl font-bold font-headline">Custom Domain</h1>
-                <p className="text-muted-foreground">Connect your custom domain to build a professional affiliate website.</p>
+                <h1 className="text-3xl font-bold font-headline">Your Custom Domain</h1>
+                <p className="text-muted-foreground">This is your gateway to building a professional brand. A custom domain makes you look serious and helps you build a long-term asset.</p>
             </div>
 
             <Card>
                 <CardHeader>
-                    <div className="flex items-center gap-3">
-                         <div className="flex-shrink-0 w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-bold">1</div>
-                         <CardTitle>Find & Register a New Domain</CardTitle>
+                    <div className="flex items-start justify-between">
+                        <div className="flex items-center gap-3">
+                            <div className="flex-shrink-0 w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-bold">1</div>
+                            <CardTitle>Find Your Brand Name</CardTitle>
+                        </div>
+                        <RegistrarLogo />
                     </div>
                     <CardDescription>
-                        Use your integrated OpenSRS reseller store to find and register the perfect domain. You earn a commission on every sale.
+                        Use your integrated domain store, powered by OpenSRS, to find and register the perfect domain. A great name is your first step to making yourself memorable and professional. You also earn a commission on every sale.
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
