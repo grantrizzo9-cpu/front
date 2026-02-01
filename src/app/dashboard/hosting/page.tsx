@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -51,7 +52,7 @@ export default function HostingPage() {
             return;
         }
         // This will open the user's reseller storefront with the domain pre-filled for searching.
-        window.open(`https://rizzosai.shopco.com/site/availability?domain=${domainToSearch}`, '_blank');
+        window.open(`https://rizzosai.shopco.com/site/availability/${domainToSearch}`, '_blank');
     };
 
     const handleSaveDomain = () => {
