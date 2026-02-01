@@ -14,80 +14,217 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { websiteThemes, type WebsiteTheme } from '@/lib/data';
 import { cn } from '@/lib/utils';
 import { getHomepageHtml, getLegalPageHtml } from '@/lib/website-html-generator';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
-// Skeleton for loading state
-const WebsitePreviewSkeleton = () => (
-    <Card className="col-span-full">
-        <CardHeader>
-            <Skeleton className="h-8 w-1/2" />
-            <Skeleton className="h-4 w-3/4" />
-        </CardHeader>
-        <CardContent>
-            <div className="w-full h-[600px] flex items-center justify-center bg-secondary/30 rounded-lg">
-                <div className="text-center text-muted-foreground space-y-2">
-                    <Loader2 className="w-12 h-12 mx-auto animate-spin" />
-                    <p>Loading generator...</p>
-                </div>
-            </div>
-        </CardContent>
-    </Card>
-);
-
-// Preview Component (Simplified to remove iframe)
-const WebsitePreview = ({ 
-    site,
-    onCopyHomepage,
-    onCopyLegal,
-}: { 
-    site: GenerateWebsiteOutput,
-    onCopyHomepage: () => void,
-    onCopyLegal: (content: string, title: string) => void,
+// Component for editing the generated website content
+const WebsiteEditor = ({
+  site,
+  setSite,
+}: {
+  site: GenerateWebsiteOutput;
+  setSite: React.Dispatch<React.SetStateAction<GenerateWebsiteOutput | null>>;
 }) => {
-    return (
-        <Card className="col-span-full">
+  const { toast } = useToast();
+  const { user } = useUser();
+  const affiliateLink = user?.displayName ? `https://hostproai.com/?ref=${user.displayName.toLowerCase()}` : '#';
+
+  const handleInputChange = (section: keyof GenerateWebsiteOutput['homepage'], index: number | null, field: string, value: string) => {
+    setSite(prevSite => {
+      if (!prevSite) return null;
+  
+      // Deep copy to prevent state mutation issues
+      const newSite = JSON.parse(JSON.stringify(prevSite));
+      
+      if (index !== null) {
+        // @ts-ignore
+        newSite.homepage[section][index][field] = value;
+      } else {
+        // @ts-ignore
+        newSite.homepage[field] = value;
+      }
+      
+      return newSite;
+    });
+  };
+  
+   const handleSimpleInputChange = (field: keyof GenerateWebsiteOutput['homepage'], value: string) => {
+      setSite(prevSite => {
+        if (!prevSite) return null;
+        const newSite = JSON.parse(JSON.stringify(prevSite));
+        newSite.homepage[field] = value;
+        return newSite;
+      });
+  };
+  
+  const handleLegalChange = (page: 'terms' | 'privacy' | 'disclaimer', value: string) => {
+       setSite(prevSite => {
+        if (!prevSite) return null;
+        const newSite = JSON.parse(JSON.stringify(prevSite));
+        newSite[page] = value;
+        return newSite;
+      });
+  }
+
+  const copyHomepageHtml = useCallback(() => {
+    const html = getHomepageHtml(site, affiliateLink);
+    navigator.clipboard.writeText(html);
+    toast({ title: 'Copied to Clipboard!', description: 'Homepage HTML has been copied.' });
+  }, [site, affiliateLink, toast]);
+
+  const copyLegalPageHtml = useCallback((content: string, title: string) => {
+    const html = getLegalPageHtml(content, title, site);
+    navigator.clipboard.writeText(html);
+    toast({ title: 'Copied to Clipboard!', description: `${title} page HTML has been copied.` });
+  }, [site, toast]);
+
+  return (
+    <div className="space-y-6">
+        <Card>
             <CardHeader>
-                <div className="flex justify-between items-center">
-                    <div>
-                        <CardTitle>Your Generated Website Code</CardTitle>
-                        <CardDescription>The live preview has been temporarily disabled. Copy the full HTML code for each page below.</CardDescription>
-                    </div>
-                    <p className="text-sm text-muted-foreground">Theme: <span className="font-semibold text-foreground">{site.theme.name}</span></p>
-                </div>
+                <CardTitle>Global Settings</CardTitle>
+                <CardDescription>Edit the main title and theme of your website.</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
-                 <div className="space-y-2">
-                    <div className="flex justify-between items-center">
-                        <h3 className="font-semibold">Homepage (index.html)</h3>
-                        <Button variant="outline" size="sm" onClick={onCopyHomepage}><Copy className="mr-2 h-4 w-4"/> Copy HTML</Button>
-                    </div>
-                    <Textarea readOnly value={`<html>... (Full homepage code for '${site.homepage.title}') ...</html>`} className="font-mono text-xs bg-secondary" rows={3}/>
+            <CardContent className='space-y-4'>
+                <div>
+                  <Label htmlFor="siteTitle">Website Title</Label>
+                  <Input id="siteTitle" value={site.homepage.title} onChange={(e) => handleSimpleInputChange('title', e.target.value)} />
                 </div>
-                <div className="space-y-2">
-                    <div className="flex justify-between items-center">
-                        <h3 className="font-semibold">Terms of Service (terms.html)</h3>
-                        <Button variant="outline" size="sm" onClick={() => onCopyLegal(site.terms, 'Terms of Service')}><Copy className="mr-2 h-4 w-4"/> Copy HTML</Button>
+                 <div>
+                    <Label>Theme</Label>
+                    <div className="flex items-center gap-2 rounded-md border p-2 bg-secondary">
+                        <div className="flex gap-1 h-6 rounded-md overflow-hidden border w-24">
+                             {Object.values(site.theme.colors).map((color, index) => (
+                                <div key={index} style={{ backgroundColor: color }} className="w-full h-full" />
+                            ))}
+                        </div>
+                        <span className="font-semibold text-sm">{site.theme.name}</span>
                     </div>
-                    <Textarea readOnly value={site.terms} className="font-mono text-xs bg-secondary" rows={3}/>
-                </div>
-                <div className="space-y-2">
-                    <div className="flex justify-between items-center">
-                        <h3 className="font-semibold">Privacy Policy (privacy.html)</h3>
-                         <Button variant="outline" size="sm" onClick={() => onCopyLegal(site.privacy, 'Privacy Policy')}><Copy className="mr-2 h-4 w-4"/> Copy HTML</Button>
-                    </div>
-                    <Textarea readOnly value={site.privacy} className="font-mono text-xs bg-secondary" rows={3}/>
-                </div>
-                <div className="space-y-2">
-                    <div className="flex justify-between items-center">
-                        <h3 className="font-semibold">Earnings Disclaimer (disclaimer.html)</h3>
-                        <Button variant="outline" size="sm" onClick={() => onCopyLegal(site.disclaimer, 'Earnings Disclaimer')}><Copy className="mr-2 h-4 w-4"/> Copy HTML</Button>
-                    </div>
-                    <Textarea readOnly value={site.disclaimer} className="font-mono text-xs bg-secondary" rows={3}/>
                 </div>
             </CardContent>
         </Card>
-    );
-}
 
+        <Card>
+            <CardHeader>
+                <CardTitle>Homepage Content</CardTitle>
+                <CardDescription>Edit the content for each section of your homepage.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+                {/* Hero Section */}
+                <div className="space-y-4 rounded-lg border p-4">
+                    <h3 className="font-semibold">Hero Section</h3>
+                    <div className="space-y-2">
+                        <Label htmlFor="headline">Headline</Label>
+                        <Input id="headline" value={site.homepage.headline} onChange={(e) => handleSimpleInputChange('headline', e.target.value)} />
+                    </div>
+                     <div className="space-y-2">
+                        <Label htmlFor="subheadline">Subheadline</Label>
+                        <Textarea id="subheadline" value={site.homepage.subheadline} onChange={(e) => handleSimpleInputChange('subheadline', e.target.value)} rows={2}/>
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="ctaButtonText">CTA Button Text</Label>
+                        <Input id="ctaButtonText" value={site.homepage.ctaButtonText} onChange={(e) => handleSimpleInputChange('ctaButtonText', e.target.value)} />
+                    </div>
+                </div>
+                
+                {/* Features Section */}
+                <div className="space-y-4 rounded-lg border p-4">
+                     <h3 className="font-semibold">Features Section</h3>
+                     <div className="space-y-2">
+                        <Label>Section Headline</Label>
+                        <Input value={site.homepage.featuresHeadline} onChange={(e) => handleSimpleInputChange('featuresHeadline', e.target.value)} />
+                    </div>
+                    {site.homepage.features.map((feature, index) => (
+                        <div key={index} className="space-y-2 p-3 bg-secondary/50 rounded-md">
+                             <Label>Feature {index + 1}</Label>
+                             <Input placeholder="Icon (Emoji)" value={feature.icon} onChange={(e) => handleInputChange('features', index, 'icon', e.target.value)} />
+                             <Input placeholder="Title" value={feature.title} onChange={(e) => handleInputChange('features', index, 'title', e.target.value)} />
+                             <Textarea placeholder="Description" value={feature.description} onChange={(e) => handleInputChange('features', index, 'description', e.target.value)} rows={2}/>
+                        </div>
+                    ))}
+                </div>
+
+                 {/* Testimonials Section */}
+                <div className="space-y-4 rounded-lg border p-4">
+                     <h3 className="font-semibold">Testimonials Section</h3>
+                     <div className="space-y-2">
+                        <Label>Section Headline</Label>
+                        <Input value={site.homepage.testimonialsHeadline} onChange={(e) => handleSimpleInputChange('testimonialsHeadline', e.target.value)} />
+                    </div>
+                    {site.homepage.testimonials.map((testimonial, index) => (
+                        <div key={index} className="space-y-2 p-3 bg-secondary/50 rounded-md">
+                             <Label>Testimonial {index + 1}</Label>
+                             <Textarea placeholder="Text" value={testimonial.text} onChange={(e) => handleInputChange('testimonials', index, 'text', e.target.value)} rows={3}/>
+                             <Input placeholder="Name" value={testimonial.name} onChange={(e) => handleInputChange('testimonials', index, 'name', e.target.value)} />
+                             <Input placeholder="Role" value={testimonial.role} onChange={(e) => handleInputChange('testimonials', index, 'role', e.target.value)} />
+                        </div>
+                    ))}
+                </div>
+                
+                {/* FAQ Section */}
+                <div className="space-y-4 rounded-lg border p-4">
+                     <h3 className="font-semibold">FAQ Section</h3>
+                      <div className="space-y-2">
+                        <Label>Section Headline</Label>
+                        <Input value={site.homepage.faqHeadline} onChange={(e) => handleSimpleInputChange('faqHeadline', e.target.value)} />
+                    </div>
+                    {site.homepage.faqs.map((faq, index) => (
+                        <div key={index} className="space-y-2 p-3 bg-secondary/50 rounded-md">
+                            <Label>FAQ {index + 1}</Label>
+                            <Input placeholder="Question" value={faq.question} onChange={(e) => handleInputChange('faqs', index, 'question', e.target.value)} />
+                            <Textarea placeholder="Answer" value={faq.answer} onChange={(e) => handleInputChange('faqs', index, 'answer', e.target.value)} rows={3} />
+                        </div>
+                    ))}
+                </div>
+            </CardContent>
+        </Card>
+        
+        <Card>
+            <CardHeader><CardTitle>Legal Pages</CardTitle></CardHeader>
+            <CardContent className="space-y-4">
+                <div className="space-y-2">
+                    <Label>Terms of Service</Label>
+                    <Textarea value={site.terms} onChange={(e) => handleLegalChange('terms', e.target.value)} rows={5} />
+                </div>
+                <div className="space-y-2">
+                    <Label>Privacy Policy</Label>
+                    <Textarea value={site.privacy} onChange={(e) => handleLegalChange('privacy', e.target.value)} rows={5} />
+                </div>
+                <div className="space-y-2">
+                    <Label>Disclaimer</Label>
+                    <Textarea value={site.disclaimer} onChange={(e) => handleLegalChange('disclaimer', e.target.value)} rows={5} />
+                </div>
+            </CardContent>
+        </Card>
+
+        <Card>
+            <CardHeader><CardTitle>Export Your Website</CardTitle><CardDescription>Once you are happy with your content, copy the HTML for each page.</CardDescription></CardHeader>
+            <CardContent className="space-y-4">
+                 <div className="flex justify-between items-center p-3 border rounded-lg">
+                    <p className="font-semibold">Homepage (index.html)</p>
+                    <Button variant="outline" size="sm" onClick={copyHomepageHtml}><Copy className="mr-2 h-4 w-4"/> Copy HTML</Button>
+                </div>
+                <div className="flex justify-between items-center p-3 border rounded-lg">
+                    <p className="font-semibold">Terms of Service (terms.html)</p>
+                    <Button variant="outline" size="sm" onClick={() => copyLegalPageHtml(site.terms, 'Terms of Service')}><Copy className="mr-2 h-4 w-4"/> Copy HTML</Button>
+                </div>
+                <div className="flex justify-between items-center p-3 border rounded-lg">
+                    <p className="font-semibold">Privacy Policy (privacy.html)</p>
+                     <Button variant="outline" size="sm" onClick={() => copyLegalPageHtml(site.privacy, 'Privacy Policy')}><Copy className="mr-2 h-4 w-4"/> Copy HTML</Button>
+                </div>
+                <div className="flex justify-between items-center p-3 border rounded-lg">
+                    <p className="font-semibold">Earnings Disclaimer (disclaimer.html)</p>
+                    <Button variant="outline" size="sm" onClick={() => copyLegalPageHtml(site.disclaimer, 'Earnings Disclaimer')}><Copy className="mr-2 h-4 w-4"/> Copy HTML</Button>
+                </div>
+            </CardContent>
+        </Card>
+
+    </div>
+  );
+};
+
+
+// Main page component
 export default function AiWebsitePage() {
   const { toast } = useToast();
   const { user, isUserLoading } = useUser();
@@ -101,32 +238,19 @@ export default function AiWebsitePage() {
   useEffect(() => {
     setHasMounted(true);
   }, []);
-  
-  const affiliateLink = user?.displayName ? `https://hostproai.com/?ref=${user.displayName.toLowerCase()}` : '#';
 
   const handleGenerate = async () => {
     if (!user?.displayName) {
-      toast({
-        variant: 'destructive',
-        title: 'Username Not Found',
-        description: 'We couldn\'t find your username. Please make sure it\'s set in your profile.',
-      });
+      toast({ variant: 'destructive', title: 'Username Not Found', description: 'We couldn\'t find your username.' });
       return;
     }
-
     if (!selectedTheme) {
-        toast({
-            variant: 'destructive',
-            title: 'Please Select a Theme',
-            description: 'You must choose a theme for your website before generating.',
-        });
-        return;
+      toast({ variant: 'destructive', title: 'Please Select a Theme' });
+      return;
     }
-
     setIsLoading(true);
     setGeneratedSite(null);
     setError(null);
-
     try {
       const result = await generateWebsite({ username: user.displayName, themeName: selectedTheme.name });
       if (result.error) {
@@ -135,70 +259,56 @@ export default function AiWebsitePage() {
         setGeneratedSite(result);
       }
     } catch (e) {
-      console.error(e);
       const errorMessage = e instanceof Error ? e.message : 'An unexpected problem occurred.';
       setError(errorMessage);
     } finally {
       setIsLoading(false);
     }
   };
-
-  const copyHomepageHtml = useCallback(() => {
-    if (!generatedSite) return;
-    const html = getHomepageHtml(generatedSite, affiliateLink);
-    navigator.clipboard.writeText(html);
-    toast({ title: 'Copied to Clipboard!', description: `Homepage HTML has been copied.` });
-  }, [generatedSite, affiliateLink, toast]);
-
-  const copyLegalPageHtml = useCallback((content: string, title: string) => {
-    if (!generatedSite) return;
-    const html = getLegalPageHtml(content, title, generatedSite);
-    navigator.clipboard.writeText(html);
-    toast({ title: 'Copied to Clipboard!', description: `${title} page HTML has been copied.` });
-  }, [generatedSite, toast]);
   
   const renderContent = () => {
     if (!hasMounted || isUserLoading) {
-      return <WebsitePreviewSkeleton />;
+      return (
+        <Card><CardHeader><CardTitle>Loading Generator...</CardTitle></CardHeader><CardContent><Skeleton className="h-64 w-full" /></CardContent></Card>
+      );
+    }
+    
+    if (isLoading) {
+        return (
+            <Card>
+                <CardHeader>
+                    <CardTitle>Generating Your Website...</CardTitle>
+                    <CardDescription>The AI is crafting your content. This may take a moment.</CardDescription>
+                </CardHeader>
+                <CardContent className="flex justify-center items-center py-20">
+                    <Loader2 className="w-16 h-16 animate-spin text-primary" />
+                </CardContent>
+            </Card>
+        );
+    }
+
+    if (error) {
+         return (
+            <Card>
+            <CardHeader>
+                <CardTitle className="text-destructive flex items-center gap-2"><AlertTriangle /> Generation Failed</CardTitle>
+            </CardHeader>
+            <CardContent>
+                <Alert variant="destructive"><AlertTitle>An error occurred.</AlertTitle><AlertDescription>{error}</AlertDescription></Alert>
+                <Button variant="outline" onClick={() => { setGeneratedSite(null); setError(null); }} className="mt-4">Start Over</Button>
+            </CardContent>
+            </Card>
+        );
     }
 
     if (generatedSite) {
-        if (isLoading) {
-            return <WebsitePreviewSkeleton />;
-        }
-        if (error) {
-             return (
-                <Card className="col-span-full">
-                <CardHeader>
-                    <CardTitle className="text-destructive flex items-center gap-2">
-                    <AlertTriangle /> Generation Failed
-                    </CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <Alert variant="destructive">
-                    <AlertTitle>An error occurred while generating your website.</AlertTitle>
-                    <AlertDescription>{error}</AlertDescription>
-                    </Alert>
-                    <Button variant="outline" onClick={() => { setGeneratedSite(null); setError(null); }} className="mt-4">
-                        Start Over
-                    </Button>
-                </CardContent>
-                </Card>
-            );
-        }
         return (
             <div className="space-y-4">
                 <div className="flex justify-between items-center">
-                    <h2 className="text-2xl font-bold font-headline">Your Generated Website</h2>
-                    <Button variant="outline" onClick={() => { setGeneratedSite(null); setError(null); }}>
-                        Start Over
-                    </Button>
+                    <h2 className="text-2xl font-bold font-headline">Edit Your Website</h2>
+                    <Button variant="outline" onClick={() => { setGeneratedSite(null); setError(null); }}>Start Over</Button>
                 </div>
-                <WebsitePreview 
-                    site={generatedSite}
-                    onCopyHomepage={copyHomepageHtml}
-                    onCopyLegal={copyLegalPageHtml}
-                />
+                <WebsiteEditor site={generatedSite} setSite={setGeneratedSite} />
             </div>
         );
     }
@@ -207,49 +317,20 @@ export default function AiWebsitePage() {
     return (
       <>
         <Card>
-            <CardHeader>
-              <CardTitle>Step 1: Choose a Theme</CardTitle>
-              <CardDescription>Select a unique color palette for your new website. This will set the look and feel of your entire site.</CardDescription>
-            </CardHeader>
+            <CardHeader><CardTitle>Step 1: Choose a Theme</CardTitle><CardDescription>Select a color palette for your new website.</CardDescription></CardHeader>
             <CardContent className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {websiteThemes.map((theme) => (
-                <div 
-                  key={theme.name} 
-                  onClick={() => setSelectedTheme(theme)} 
-                  className={cn(
-                      "cursor-pointer rounded-lg border-2 p-4 transition-all hover:shadow-md", 
-                      selectedTheme?.name === theme.name ? "border-primary ring-2 ring-primary shadow-lg" : "border-border"
-                  )}
-                >
-                    <div className="flex justify-between items-center mb-3">
-                        <h3 className="font-semibold text-foreground">{theme.name}</h3>
-                        {selectedTheme?.name === theme.name && <CheckCircle className="h-5 w-5 text-primary" />}
-                    </div>
-                    <div className="flex gap-1 h-8 rounded-lg overflow-hidden border">
-                        {Object.values(theme.colors).map((color, index) => (
-                            <div key={index} style={{ backgroundColor: color }} className="w-full h-full" />
-                        ))}
-                    </div>
+                <div key={theme.name} onClick={() => setSelectedTheme(theme)} className={cn("cursor-pointer rounded-lg border-2 p-4 transition-all hover:shadow-md", selectedTheme?.name === theme.name ? "border-primary ring-2 ring-primary shadow-lg" : "border-border")}>
+                    <div className="flex justify-between items-center mb-3"><h3 className="font-semibold text-foreground">{theme.name}</h3>{selectedTheme?.name === theme.name && <CheckCircle className="h-5 w-5 text-primary" />}</div>
+                    <div className="flex gap-1 h-8 rounded-lg overflow-hidden border">{Object.values(theme.colors).map((color, index) => (<div key={index} style={{ backgroundColor: color }} className="w-full h-full" />))}</div>
                 </div>
               ))}
             </CardContent>
         </Card>
-
         <Card>
-            <CardHeader>
-                <CardTitle>Step 2: Generate Your Website</CardTitle>
-                <CardDescription>
-                    Once you have selected a theme, click the button below. The AI will generate a complete, unique website for you with compelling content and all necessary legal pages.
-                </CardDescription>
-            </CardHeader>
+            <CardHeader><CardTitle>Step 2: Generate Your Website</CardTitle><CardDescription>Once you select a theme, the AI will generate unique content for you.</CardDescription></CardHeader>
             <CardFooter>
-                <Button onClick={handleGenerate} disabled={isLoading || isUserLoading || !selectedTheme}>
-                    {isLoading ? (
-                    <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Generating...</>
-                    ) : (
-                    <><Wand2 className="mr-2 h-4 w-4" /> Generate Website</>
-                    )}
-                </Button>
+                <Button onClick={handleGenerate} disabled={isLoading || isUserLoading || !selectedTheme}><Wand2 className="mr-2 h-4 w-4" /> Generate Website</Button>
             </CardFooter>
         </Card>
       </>
@@ -258,12 +339,7 @@ export default function AiWebsitePage() {
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold font-headline">AI Website Generator</h1>
-        <p className="text-muted-foreground">
-          Instantly create a personalized, high-converting affiliate website.
-        </p>
-      </div>
+      <div><h1 className="text-3xl font-bold font-headline">AI Website Generator</h1><p className="text-muted-foreground">Create and customize your personalized affiliate website.</p></div>
       {renderContent()}
     </div>
   );
