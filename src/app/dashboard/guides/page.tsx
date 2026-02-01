@@ -18,12 +18,25 @@ import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
+// A default placeholder to prevent crashes if an image is missing
+const defaultImagePlaceholder = {
+    id: 'default-fallback',
+    description: 'A placeholder image for a guide',
+    imageUrl: 'https://picsum.photos/seed/default/600/400',
+    imageHint: 'placeholder'
+};
+
 // Helper function to find a guide image, with a fallback
 const getGuideImage = (guide: Guide) => {
     const specificImage = PlaceHolderImages.find(p => p.id === guide.imageId);
     if (specificImage) return specificImage;
-    // Fallback to a generic feature image if a specific guide image isn't found
-    return PlaceHolderImages.find(p => p.id === 'feature-2')!; 
+
+    const fallbackImage = PlaceHolderImages.find(p => p.id === 'feature-2');
+    if (fallbackImage) return fallbackImage;
+    
+    // If even the fallback is missing, return a failsafe default to prevent a crash
+    console.warn(`Image for guide "${guide.title}" and fallback 'feature-2' not found. Using default.`);
+    return defaultImagePlaceholder;
 };
 
 
