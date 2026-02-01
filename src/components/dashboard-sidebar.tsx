@@ -31,6 +31,7 @@ import {
   ImageIcon,
   Clapperboard,
   Send,
+  Wand2,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -64,6 +65,7 @@ export function DashboardSidebar() {
   const menuItems = [
     { path: "/dashboard", icon: <LayoutDashboard />, label: "Dashboard" },
     { path: "/dashboard/hosting", icon: <Globe />, label: "Hosting" },
+    { path: "/dashboard/ai-website", icon: <Wand2 />, label: "AI Website" },
     { path: "/dashboard/ai-tools", icon: <BrainCircuit />, label: "AI Content" },
     { path: "/dashboard/publisher", icon: <Send />, label: "Publisher" },
     { path: "/dashboard/guides", icon: <BookOpen />, label: "Marketing Guides" },
