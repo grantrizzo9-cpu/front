@@ -11,90 +11,12 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
-
-const themes = [
-  {
-    name: 'Vibrant Violet',
-    colors: {
-      '--primary-color': '#8B5CF6',
-      '--secondary-color': '#EC4899',
-      '--background-color': '#F5F3FF',
-      '--card-background': '#FFFFFF',
-      '--text-color': '#1F2937',
-      '--muted-color': '#6B7280',
-    },
-  },
-  {
-    name: 'Crimson Tide',
-    colors: {
-      '--primary-color': '#DC2626',
-      '--secondary-color': '#F472B6',
-      '--background-color': '#FEF2F2',
-      '--card-background': '#FFFFFF',
-      '--text-color': '#1F2937',
-      '--muted-color': '#6B7280',
-    },
-  },
-  {
-    name: 'Forest Green',
-    colors: {
-      '--primary-color': '#16A34A',
-      '--secondary-color': '#84CC16',
-      '--background-color': '#F0FDF4',
-      '--card-background': '#FFFFFF',
-      '--text-color': '#1F2937',
-      '--muted-color': '#6B7280',
-    },
-  },
-  {
-    name: 'Ocean Blue',
-    colors: {
-      '--primary-color': '#2563EB',
-      '--secondary-color': '#22D3EE',
-      '--background-color': '#EFF6FF',
-      '--card-background': '#FFFFFF',
-      '--text-color': '#1F2937',
-      '--muted-color': '#6B7280',
-    },
-  },
-  {
-    name: 'Sunset Orange',
-    colors: {
-      '--primary-color': '#F97316',
-      '--secondary-color': '#FACC15',
-      '--background-color': '#FFF7ED',
-      '--card-background': '#FFFFFF',
-      '--text-color': '#1F2937',
-      '--muted-color': '#6B7280',
-    },
-  },
-  {
-    name: 'Midnight Glow',
-    colors: {
-      '--primary-color': '#38BDF8', // Electric Blue
-      '--secondary-color': '#A78BFA', // Lighter Purple
-      '--background-color': '#111827', // Almost Black
-      '--card-background': '#1F2937', // Dark Gray
-      '--text-color': '#F9FAFB', // Light Gray
-      '--muted-color': '#9CA3AF', // Muted Gray
-    },
-  },
-    {
-    name: 'Chocolate Caramel',
-    colors: {
-      '--primary-color': '#78350F', // Brown
-      '--secondary-color': '#F59E0B', // Amber/Caramel
-      '--background-color': '#FEFCE8', // Light yellow/beige
-      '--card-background': '#FFFFFF',
-      '--text-color': '#1F2937',
-      '--muted-color': '#6B7280',
-    },
-  },
-];
+import { websiteThemes } from '@/lib/data';
 
 
 const GenerateWebsiteInputSchema = z.object({
   username: z.string().describe("The affiliate's username, used to construct their referral link."),
+  themeName: z.string().optional().describe("The name of the color theme for the website."),
 });
 export type GenerateWebsiteInput = z.infer<typeof GenerateWebsiteInputSchema>;
 
@@ -173,7 +95,7 @@ export async function generateWebsite(input: GenerateWebsiteInput): Promise<Gene
 
 const prompt = ai.definePrompt({
     name: 'websiteGeneratorPrompt',
-    input: { schema: GenerateWebsiteInputSchema },
+    input: { schema: z.object({ username: z.string() }) }, // Prompt only needs username
     output: { schema: WebsiteContentSchema }, // The LLM only generates the content
     prompt: `You are an expert copywriter and web designer specializing in high-converting affiliate marketing websites.
 
@@ -218,22 +140,23 @@ const websiteGeneratorFlow = ai.defineFlow(
         outputSchema: GenerateWebsiteOutputSchema,
     },
     async (input): Promise<GenerateWebsiteOutput> => {
-        const randomTheme = themes[Math.floor(Math.random() * themes.length)];
+        const theme = websiteThemes.find(t => t.name === input.themeName) || websiteThemes[Math.floor(Math.random() * websiteThemes.length)];
+        
         const emptyHomepage = { title: '', navLinks: [], headline: '', subheadline: '', ctaButtonText: '', featuresHeadline: '', features: [], howItWorksHeadline: '', howItWorksSteps: [], testimonialsHeadline: '', testimonials: [], faqHeadline: '', faqs: [], finalCtaHeadline: '', finalCtaSubheadline: '', finalCtaButtonText: '' };
         
         try {
-            const { output } = await prompt(input);
+            const { output } = await prompt({ username: input.username });
             if (!output) {
                 return {
                     homepage: emptyHomepage,
                     terms: '',
                     privacy: '',
                     disclaimer: '',
-                    theme: randomTheme,
+                    theme: theme,
                     error: 'The AI model did not return any content.'
                 };
             }
-            return { ...output, theme: randomTheme };
+            return { ...output, theme: theme };
         } catch (e: any) {
             console.error('Website Generation Error:', e);
             const rawErrorMessage = e.message || 'An unknown error occurred.';
@@ -244,7 +167,7 @@ const websiteGeneratorFlow = ai.defineFlow(
                     terms: '',
                     privacy: '',
                     disclaimer: '',
-                    theme: randomTheme,
+                    theme: theme,
                     error: `Authentication failed. The Gemini API Key you provided in the .env file appears to be invalid. Please double-check that you have copied the entire key correctly. If you just updated the key, you may need to restart the development server. Raw error: "${rawErrorMessage}"` };
             }
 
@@ -253,7 +176,7 @@ const websiteGeneratorFlow = ai.defineFlow(
                 terms: '',
                 privacy: '',
                 disclaimer: '',
-                theme: randomTheme,
+                theme: theme,
                 error: `The connection to the AI service failed. This could be a network issue or a problem with your Google Cloud project setup. Please check your environment and configuration. Raw error: "${rawErrorMessage}"` };
         }
     }

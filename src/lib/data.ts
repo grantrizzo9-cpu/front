@@ -154,3 +154,96 @@ export const mockAdminPayouts: AdminPayout[] = [
     { affiliateId: 'affiliate2', affiliateUsername: 'market_guru', unpaidCommissions: 8, totalUnpaid: 29.92, paypalEmail: 'marketguru@example.com' },
     { affiliateId: 'affiliate3', affiliateUsername: 'affiliate_pro', unpaidCommissions: 22, totalUnpaid: 82.28, paypalEmail: 'pro@example.com' },
 ];
+
+
+export type WebsiteTheme = {
+  name: string;
+  colors: {
+    '--primary-color': string;
+    '--secondary-color': string;
+    '--background-color': string;
+    '--card-background': string;
+    '--text-color': string;
+    '--muted-color': string;
+  };
+};
+
+export const websiteThemes: WebsiteTheme[] = [
+  {
+    name: 'Vibrant Violet',
+    colors: {
+      '--primary-color': '#8B5CF6',
+      '--secondary-color': '#EC4899',
+      '--background-color': '#F5F3FF',
+      '--card-background': '#FFFFFF',
+      '--text-color': '#1F2937',
+      '--muted-color': '#6B7280',
+    },
+  },
+  {
+    name: 'Crimson Tide',
+    colors: {
+      '--primary-color': '#DC2626',
+      '--secondary-color': '#F472B6',
+      '--background-color': '#FEF2F2',
+      '--card-background': '#FFFFFF',
+      '--text-color': '#1F2937',
+      '--muted-color': '#6B7280',
+    },
+  },
+  {
+    name: 'Forest Green',
+    colors: {
+      '--primary-color': '#16A34A',
+      '--secondary-color': '#84CC16',
+      '--background-color': '#F0FDF4',
+      '--card-background': '#FFFFFF',
+      '--text-color': '#1F2937',
+      '--muted-color': '#6B7280',
+    },
+  },
+  {
+    name: 'Ocean Blue',
+    colors: {
+      '--primary-color': '#2563EB',
+      '--secondary-color': '#22D3EE',
+      '--background-color': '#EFF6FF',
+      '--card-background': '#FFFFFF',
+      '--text-color': '#1F2937',
+      '--muted-color': '#6B7280',
+    },
+  },
+  {
+    name: 'Sunset Orange',
+    colors: {
+      '--primary-color': '#F97316',
+      '--secondary-color': '#FACC15',
+      '--background-color': '#FFF7ED',
+      '--card-background': '#FFFFFF',
+      '--text-color': '#1F2937',
+      '--muted-color': '#6B7280',
+    },
+  },
+  {
+    name: 'Midnight Glow',
+    colors: {
+      '--primary-color': '#38BDF8', // Electric Blue
+      '--secondary-color': '#A78BFA', // Lighter Purple
+      '--background-color': '#111827', // Almost Black
+      '--card-background': '#1F2937', // Dark Gray
+      '--text-color': '#F9FAFB', // Light Gray
+      '--muted-color': '#9CA3AF', // Muted Gray
+    },
+  },
+  {
+    name: 'Chocolate Caramel',
+    colors: {
+      '--primary-color': '#78350F', // Brown
+      '--secondary-color': '#F59E0B', // Amber/Caramel
+      '--background-color': '#FEFCE8', // Light yellow/beige
+      '--card-background': '#FFFFFF',
+      '--text-color': '#1F2937',
+      '--muted-color': '#6B7280',
+    },
+  },
+];
