@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -19,13 +20,45 @@ export type GenerateWebsiteInput = z.infer<typeof GenerateWebsiteInputSchema>;
 const GenerateWebsiteOutputSchema = z.object({
   homepage: z.object({
     title: z.string().describe('A creative and SEO-friendly title for the website.'),
+    
+    navLinks: z.array(z.object({
+        text: z.string().describe('Navigation link text.'),
+        href: z.string().describe('The anchor link for the section (e.g., #features).')
+    })).length(3).describe('A list of 3 navigation links for the header.'),
+
     headline: z.string().describe('The main, catchy headline for the hero section of the homepage.'),
     subheadline: z.string().describe('A short, persuasive subheadline that supports the main headline.'),
-    ctaButtonText: z.string().describe('Compelling text for the primary call-to-action button.'),
+    ctaButtonText: z.string().describe('Compelling text for the primary call-to-action button in the hero section.'),
+
+    featuresHeadline: z.string().describe('A headline for the features section.'),
     features: z.array(z.object({
       title: z.string().describe('The title of a key feature.'),
       description: z.string().describe('A brief description of the feature.'),
+      icon: z.string().describe('A simple, single emoji to represent the feature (e.g., \'🚀\').')
     })).length(3).describe('A list of exactly 3 key features of the Affiliate AI Host platform.'),
+
+    howItWorksHeadline: z.string().describe('A headline for the "How it Works" section.'),
+    howItWorksSteps: z.array(z.object({
+        title: z.string().describe('The title of a step in the process.'),
+        description: z.string().describe('A brief description of the step.'),
+    })).length(3).describe('A list of exactly 3 steps explaining how the affiliate process works.'),
+    
+    testimonialsHeadline: z.string().describe('A headline for the testimonials section.'),
+    testimonials: z.array(z.object({
+        text: z.string().describe('The text of the testimonial.'),
+        name: z.string().describe('The fictional name of the person giving the testimonial.'),
+        role: z.string().describe('The fictional role of the person (e.g., Blogger, Entrepreneur).')
+    })).length(3).describe('A list of exactly 3 fictional testimonials.'),
+
+    faqHeadline: z.string().describe('A headline for the FAQ section.'),
+    faqs: z.array(z.object({
+        question: z.string().describe('A frequently asked question.'),
+        answer: z.string().describe('The answer to the question.')
+    })).min(3).max(5).describe('A list of 3 to 5 frequently asked questions.'),
+    
+    finalCtaHeadline: z.string().describe('A headline for the final call-to-action section.'),
+    finalCtaSubheadline: z.string().describe('A subheadline for the final call-to-action section.'),
+    finalCtaButtonText: z.string().describe('Text for the final call-to-action button.'),
   }),
   terms: z.string().describe('The full text for a generic Terms of Service page suitable for an affiliate site.'),
   privacy: z.string().describe('The full text for a generic Privacy Policy page suitable for an affiliate site.'),
@@ -42,9 +75,9 @@ const prompt = ai.definePrompt({
     name: 'websiteGeneratorPrompt',
     input: { schema: GenerateWebsiteInputSchema },
     output: { schema: GenerateWebsiteOutputSchema },
-    prompt: `You are an expert copywriter and website strategist specializing in high-converting affiliate marketing websites.
+    prompt: `You are an expert copywriter and web designer specializing in high-converting affiliate marketing websites.
 
-Your task is to generate the complete text content for a simple, single-page affiliate website. The website's sole purpose is to promote "Affiliate AI Host", a platform that offers AI-powered web hosting and a lucrative affiliate program with daily payouts.
+Your task is to generate the complete text content for a professional, multi-section, single-page affiliate website. The website's sole purpose is to promote "Affiliate AI Host", a platform that offers AI-powered web hosting and a lucrative affiliate program with daily payouts.
 
 The affiliate's username is "{{username}}". All call-to-action links on the site will point to their unique referral link: https://hostproai.com/?ref={{username}}.
 
@@ -52,13 +85,24 @@ The tone should be enthusiastic, trustworthy, and benefit-oriented. Generate con
 
 Generate content for the following pages, formatted as a single JSON object:
 
-1.  **Homepage**: This is the main landing page.
+1.  **Homepage**: This is the main landing page. It should be comprehensive and compelling, similar to a full-featured professional landing page.
     *   **title**: A creative, SEO-friendly title for the website (e.g., "Your Daily Income Engine" or "The AI-Powered Affiliate Shortcut").
+    *   **navLinks**: A list of 3 navigation links for the header. The text should be short (e.g., 'Features', 'How it Works', 'FAQ') and the href should be an anchor link (e.g., '#features').
     *   **headline**: A powerful, attention-grabbing headline for the hero section.
     *   **subheadline**: A concise subheadline that explains the main benefit.
-    *   **ctaButtonText**: Action-oriented text for the main call-to-action button (e.g., "Start Earning Daily" or "Activate My AI Toolkit").
-    *   **features**: A list of exactly 3 key features of Affiliate AI Host. For each, provide a catchy title and a brief, benefit-focused description. Examples: "Daily PayPal Payouts", "Generous 70-75% Commissions", "Built-in AI Content Tools".
-
+    *   **ctaButtonText**: Action-oriented text for the main call-to-action button in the hero.
+    *   **featuresHeadline**: A headline for the features section (e.g., "Why Partner with Affiliate AI Host?").
+    *   **features**: A list of exactly 3 key features of Affiliate AI Host. For each, provide a catchy title, a brief benefit-focused description, and a single, relevant emoji. Examples: "Daily PayPal Payouts", "Generous 70-75% Commissions", "Built-in AI Content Tools".
+    *   **howItWorksHeadline**: A headline for the "How it Works" section (e.g., "Your Simple Path to Daily Income").
+    *   **howItWorksSteps**: A list of exactly 3 simple steps explaining the process: 1. Sign up, 2. Promote, 3. Get Paid Daily.
+    *   **testimonialsHeadline**: A headline for the testimonials section (e.g., "Trusted by Top Earners").
+    *   **testimonials**: A list of exactly 3 fictional but realistic and persuasive testimonials from different types of users (e.g., a blogger, a marketer, a side-hustler).
+    *   **faqHeadline**: A headline for the FAQ section (e.g., "Frequently Asked Questions").
+    *   **faqs**: A list of 3-5 common questions and answers about the affiliate program.
+    *   **finalCtaHeadline**: A headline for the final, bottom-of-page call-to-action section.
+    *   **finalCtaSubheadline**: A brief, urgent subheadline for the final CTA.
+    *   **finalCtaButtonText**: A strong, action-oriented button text for the final CTA.
+    
 2.  **Legal Pages**: Generate standard, generic boilerplate text for the following legal pages. The content should be suitable for a small, independent affiliate marketing website.
     *   **terms**: A simple Terms of Service.
     *   **privacy**: A simple Privacy Policy.
@@ -74,11 +118,13 @@ const websiteGeneratorFlow = ai.defineFlow(
         outputSchema: GenerateWebsiteOutputSchema,
     },
     async (input): Promise<GenerateWebsiteOutput> => {
+        const emptyHomepage = { title: '', navLinks: [], headline: '', subheadline: '', ctaButtonText: '', featuresHeadline: '', features: [], howItWorksHeadline: '', howItWorksSteps: [], testimonialsHeadline: '', testimonials: [], faqHeadline: '', faqs: [], finalCtaHeadline: '', finalCtaSubheadline: '', finalCtaButtonText: '' };
+        
         try {
             const { output } = await prompt(input);
             if (!output) {
                 return {
-                    homepage: { title: '', headline: '', subheadline: '', ctaButtonText: '', features: [] },
+                    homepage: emptyHomepage,
                     terms: '',
                     privacy: '',
                     disclaimer: '',
@@ -92,7 +138,7 @@ const websiteGeneratorFlow = ai.defineFlow(
             
              if (rawErrorMessage.includes("API key not valid")) {
                  return {
-                    homepage: { title: '', headline: '', subheadline: '', ctaButtonText: '', features: [] },
+                    homepage: emptyHomepage,
                     terms: '',
                     privacy: '',
                     disclaimer: '',
@@ -100,7 +146,7 @@ const websiteGeneratorFlow = ai.defineFlow(
             }
 
             return {
-                homepage: { title: '', headline: '', subheadline: '', ctaButtonText: '', features: [] },
+                homepage: emptyHomepage,
                 terms: '',
                 privacy: '',
                 disclaimer: '',
