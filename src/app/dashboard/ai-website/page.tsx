@@ -13,6 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import Link from 'next/link';
 
 export default function AiWebsitePage() {
   const { toast } = useToast();
@@ -142,11 +143,12 @@ export default function AiWebsitePage() {
     <title>${homepage.title}</title>
     <style>
         :root {
-            --primary-color: #1976D2; /* A professional blue */
-            --background-color: #F7F9FC;
+            --primary-color: #8B5CF6; /* Vibrant Violet */
+            --secondary-color: #EC4899; /* Vibrant Pink */
+            --background-color: #F5F3FF; /* Light Violet */
             --card-background: #FFFFFF;
-            --text-color: #212121;
-            --muted-color: #616161;
+            --text-color: #1F2937;
+            --muted-color: #6B7280;
             --font-body: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             --font-headline: 'Space Grotesk', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         }
@@ -163,8 +165,8 @@ export default function AiWebsitePage() {
         @media(min-width: 768px) { h1 { font-size: 3.5rem; } h2 { font-size: 2.75rem; } }
         p { margin-top: 0; }
         a { color: var(--primary-color); text-decoration: none; }
-        .btn { display: inline-block; background-color: var(--primary-color); color: white; padding: 14px 28px; font-size: 1rem; font-weight: 600; border-radius: 8px; text-decoration: none; transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-        .btn:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0,0,0,0.12); }
+        .btn { display: inline-block; background-color: var(--primary-color); color: white; padding: 14px 28px; font-size: 1rem; font-weight: 600; border-radius: 8px; text-decoration: none; transition: all 0.3s; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .btn:hover { background-color: var(--secondary-color); transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0,0,0,0.12); }
 
         /* Header */
         header.main-header {
@@ -177,8 +179,9 @@ export default function AiWebsitePage() {
         .main-nav a:hover { color: var(--text-color); }
 
         /* Hero */
-        .hero { text-align: center; padding: 80px 0; background: var(--card-background); }
-        .hero p { font-size: 1.1rem; color: var(--muted-color); max-width: 650px; margin: 1.5rem auto 2.5rem; }
+        .hero { text-align: center; padding: 80px 0; background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); color: white; }
+        .hero h1 { color: white; }
+        .hero p { font-size: 1.1rem; color: rgba(255, 255, 255, 0.9); max-width: 650px; margin: 1.5rem auto 2.5rem; }
         @media(min-width: 768px) { .hero p { font-size: 1.25rem; } }
 
         /* Sections */
@@ -187,7 +190,7 @@ export default function AiWebsitePage() {
         /* Features */
         .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem; }
         .feature { text-align: center; }
-        .feature-icon { font-size: 2rem; margin-bottom: 1rem; }
+        .feature-icon { font-size: 2rem; margin-bottom: 1rem; line-height: 1; color: var(--primary-color); }
         .feature h3 { font-size: 1.25rem; margin-bottom: 0.5rem; }
         .feature p { color: var(--muted-color); font-size: 0.95rem; }
 
@@ -383,10 +386,10 @@ const WebsitePreview = ({ site, onCopyHomepage, onCopyLegal, affiliateLink }: { 
                 </CardHeader>
                 <CardContent className="border-t divide-y">
                     {/* Hero */}
-                    <div className="bg-card text-card-foreground rounded-lg p-8 text-center mt-6">
-                        <h1 className="text-4xl font-bold font-headline">{homepage.headline}</h1>
-                        <p className="mt-4 text-xl text-muted-foreground">{homepage.subheadline}</p>
-                        <Button size="lg" className="mt-8" asChild>
+                    <div className="bg-gradient-to-r from-violet-500 to-pink-500 text-white rounded-lg p-8 text-center mt-6">
+                        <h1 className="text-4xl font-bold font-headline text-white">{homepage.headline}</h1>
+                        <p className="mt-4 text-xl text-violet-100">{homepage.subheadline}</p>
+                        <Button size="lg" className="mt-8 bg-white text-primary hover:bg-gray-100" asChild>
                             <a href={affiliateLink} target="_blank" rel="noopener noreferrer">
                                 {homepage.ctaButtonText} <ArrowRight className="ml-2" />
                             </a>
@@ -464,6 +467,19 @@ const WebsitePreview = ({ site, onCopyHomepage, onCopyLegal, affiliateLink }: { 
                         </Button>
                     </div>
                 </CardContent>
+                 {/* Footer Preview */}
+                <CardFooter className="flex-col items-start gap-4 bg-muted/20 p-8 border-t">
+                    <h3 className="text-lg font-bold font-headline">{homepage.title}</h3>
+                    <div className="flex gap-4 text-sm">
+                        <span className="text-muted-foreground hover:text-foreground">Terms</span>
+                        <span className="text-muted-foreground hover:text-foreground">Privacy</span>
+                        <span className="text-muted-foreground hover:text-foreground">Disclaimer</span>
+                    </div>
+                    <div className="text-xs text-muted-foreground space-y-1">
+                        <p>&copy; {new Date().getFullYear()}. All rights reserved.</p>
+                        <p>This is an independent affiliate website. We may earn a commission from purchases made through links on this site.</p>
+                    </div>
+                </CardFooter>
             </Card>
         </TabsContent>
         <TabsContent value="code">
