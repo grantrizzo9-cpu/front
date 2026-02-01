@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { Copy, Loader2, PartyPopper, Info } from "lucide-react";
 import { useUser, useFirestore, useDoc, updateDocumentNonBlocking, useMemoFirebase } from "@/firebase";
-import { doc, setDoc } from "firebase/firestore";
+import { doc, setDoc, writeBatch } from "firebase/firestore";
 import type { User as UserType } from "@/lib/types";
 import { useState, useEffect } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -35,14 +35,14 @@ export default function SettingsPage() {
 
   const { data: userData, isLoading: isUserDataLoading } = useDoc<UserType>(userDocRef);
 
-  // Check if the public username document exists
+  // Check if the public username document exists, ALWAYS using lowercase
   const usernameDocRef = useMemoFirebase(() => {
     if (!userData?.username || !firestore) return null;
-    return doc(firestore, "usernames", userData.username);
+    return doc(firestore, "usernames", userData.username.toLowerCase());
   }, [firestore, userData?.username]);
   const { data: usernameDoc, isLoading: isUsernameDocLoading } = useDoc(usernameDocRef);
 
-  const affiliateLink = userData?.username && origin ? `${origin}/?ref=${userData.username}` : '';
+  const affiliateLink = userData?.username && origin ? `${origin}/?ref=${userData.username.toLowerCase()}` : '';
   const isLinkPubliclyActive = !!usernameDoc;
   
   const handleCopyLink = () => {
@@ -57,8 +57,6 @@ export default function SettingsPage() {
   
   const handleBecomeAffiliate = () => {
       if (!userDocRef) return;
-      // This is now handled by the useAdmin hook idempotently, 
-      // but we leave a non-destructive path for non-admins to click.
       updateDocumentNonBlocking(userDocRef, { isAffiliate: true });
       toast({
           title: "Congratulations!",
@@ -67,14 +65,24 @@ export default function SettingsPage() {
   }
 
   const handleRepairLink = async () => {
-    if (!firestore || !user || !userData?.username) {
+    if (!firestore || !user || !userData?.username || !userDocRef) {
         toast({ variant: 'destructive', title: 'Error', description: 'Could not repair link. User data is missing.' });
         return;
     }
     setIsRepairing(true);
     try {
-        const publicUsernameRef = doc(firestore, 'usernames', userData.username);
-        await setDoc(publicUsernameRef, { uid: user.uid });
+        const batch = writeBatch(firestore);
+        const lowerCaseUsername = userData.username.toLowerCase();
+
+        // 1. Update the user's profile to store the lowercase username
+        batch.update(userDocRef, { username: lowerCaseUsername });
+
+        // 2. Create the public username document with the lowercase version
+        const publicUsernameRef = doc(firestore, 'usernames', lowerCaseUsername);
+        batch.set(publicUsernameRef, { uid: user.uid });
+
+        await batch.commit();
+
         toast({ title: 'Success!', description: 'Your affiliate link has been repaired and is now active.' });
     } catch (error: any) {
         toast({ variant: 'destructive', title: 'Repair Failed', description: error.message || 'An unknown error occurred.' });
@@ -147,7 +155,7 @@ export default function SettingsPage() {
                 <Info className="h-4 w-4" />
                 <AlertTitle>Your Affiliate Link is Inactive!</AlertTitle>
                 <AlertDescription>
-                    Your public affiliate username is not linked correctly. This will prevent you from receiving credit for referrals. Click the button below to fix it.
+                    Your public affiliate username is not linked correctly (likely due to a case-sensitivity issue). This will prevent you from receiving credit for referrals. Click the button below to fix it.
                     <Button 
                         onClick={handleRepairLink} 
                         className="mt-2 w-full"

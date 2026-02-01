@@ -68,31 +68,30 @@ export function useAdmin() {
           const userDoc = await getDoc(userDocRef);
           let username = userDoc.data()?.username;
 
+          // Generate a lowercase username if it doesn't exist
           if (!username) {
-            // Generate a username, force it to lowercase, and if it's taken, add a short UID hash.
             username = (user.displayName || user.email?.split('@')[0] || `admin`).replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
             const usernameCheckDoc = await getDoc(doc(firestore, "usernames", username));
             if (usernameCheckDoc.exists() && usernameCheckDoc.data()?.uid !== user.uid) {
                 username = `${username}${user.uid.substring(0, 4)}`;
             }
           }
+          
+          const lowerCaseUsername = username.toLowerCase();
 
           const batch = writeBatch(firestore);
-          // Ensure the username used for the document path is also lowercase.
-          const usernameDocRef = doc(firestore, 'usernames', username.toLowerCase());
+          const usernameDocRef = doc(firestore, 'usernames', lowerCaseUsername);
 
           // Use merge: true to idempotently create or update documents.
-          // This is now safe because the security rules will allow admins to update.
           batch.set(userDocRef, {
               id: user.uid,
               email: user.email,
-              username: username,
+              username: lowerCaseUsername, // Ensure username in user profile is also lowercase
               isAffiliate: true,
           }, { merge: true });
           
           batch.set(adminRoleRef, {}, { merge: true });
           
-          // This will now correctly write to /usernames/gonads (lowercase)
           batch.set(usernameDocRef, { uid: user.uid }, { merge: true });
 
           await batch.commit();
