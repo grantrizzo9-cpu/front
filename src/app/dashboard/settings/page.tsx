@@ -34,11 +34,15 @@ export default function SettingsPage() {
     if (!userData?.username || !firestore) return null;
     return doc(firestore, "usernames", userData.username.toLowerCase());
   }, [firestore, userData?.username]);
-  const { data: usernameDoc, isLoading: isUsernameDocLoading } = useDoc(usernameDocRef);
+  const { data: usernameDoc, isLoading: isUsernameDocLoading } = useDoc<{uid: string}>(usernameDocRef);
 
   const affiliateLink = userData?.username ? `https://hostproai.com/?ref=${userData.username.toLowerCase()}` : '';
-  const isLinkPubliclyActive = !!usernameDoc;
   
+  // A link is active AND correct if the public username doc exists AND its UID matches the current user's UID.
+  const isLinkPubliclyRegistered = !!usernameDoc;
+  const isLinkOwnedByCurrentUser = usernameDoc?.uid === user?.uid;
+  const isLinkActiveAndCorrect = isLinkPubliclyRegistered && isLinkOwnedByCurrentUser;
+
   const handleCopyLink = () => {
     if (affiliateLink) {
       navigator.clipboard.writeText(affiliateLink);
@@ -71,7 +75,7 @@ export default function SettingsPage() {
         // 1. Update the user's profile to store the lowercase username
         batch.update(userDocRef, { username: lowerCaseUsername });
 
-        // 2. Create the public username document with the lowercase version
+        // 2. Create/overwrite the public username document with the lowercase version, pointing to the correct UID
         const publicUsernameRef = doc(firestore, 'usernames', lowerCaseUsername);
         batch.set(publicUsernameRef, { uid: user.uid });
 
@@ -86,6 +90,10 @@ export default function SettingsPage() {
   };
 
   const isLoading = isUserLoading || isUserDataLoading || isUsernameDocLoading || isAdminLoading;
+  
+  // The repair UI should be shown if the user is an affiliate, but their link is not active and correct.
+  const showRepairUI = userData?.isAffiliate && !isLinkActiveAndCorrect && !isLoading;
+
 
   if (isLoading) {
     return (
@@ -144,12 +152,12 @@ export default function SettingsPage() {
               <Copy className="h-4 w-4" />
             </Button>
           </div>
-          {userData?.isAffiliate && !isLinkPubliclyActive && !isLoading && (
+          {showRepairUI && (
             <Alert variant="destructive" className="mt-4">
                 <Info className="h-4 w-4" />
                 <AlertTitle>Your Affiliate Link is Inactive!</AlertTitle>
                 <AlertDescription>
-                    Your public affiliate username is not linked correctly (likely due to a case-sensitivity issue). This will prevent you from receiving credit for referrals. Click the button below to fix it.
+                    Your public affiliate username is not correctly linked to your account. This will prevent you from receiving credit for referrals. Click the button below to reclaim your link.
                     <Button 
                         onClick={handleRepairLink} 
                         className="mt-2 w-full"
