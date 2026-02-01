@@ -69,8 +69,11 @@ export default function DashboardPage() {
       const pending = allReferrals.filter(r => r.activationStatus === 'pending').length;
       const activatedReferrals = allReferrals.filter(r => r.activationStatus === 'activated');
       
-      // Gross sales and revenue should only be calculated from activated referrals
-      const grossSales = activatedReferrals.reduce((sum, r) => sum + (r.grossSale || 0), 0);
+      const grossSales = activatedReferrals.reduce((sum, r) => {
+        const tier = subscriptionTiers.find(t => t.name === r.planPurchased);
+        return sum + (tier?.price || 0);
+      }, 0);
+
       const payouts = activatedReferrals.reduce((sum, r) => sum + (r.commission || 0), 0);
       const companyRevenue = grossSales - payouts;
 
@@ -296,7 +299,7 @@ export default function DashboardPage() {
                 <AlertCircle className="h-4 w-4" />
                 <AlertTitle>Your Account is Inactive!</AlertTitle>
                 <AlertDescription>
-                    You must pay the one-time activation fee to start your trial and get access to your tools.
+                    You must pay the one-time activation fee to start your trial and get access to all tools.
                     <Button asChild size="sm" className="ml-4">
                         <Link href={`/dashboard/upgrade?plan=${userData?.subscription?.tierId || 'starter'}`}>Activate Your Plan</Link>
                     </Button>
