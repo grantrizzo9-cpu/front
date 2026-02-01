@@ -76,3 +76,15 @@ export type RefundRequest = {
   status: 'pending' | 'processed' | 'denied';
   requestedAt: Timestamp;
 };
+
+export type Content = {
+  id: string;
+  userId: string;
+  title: string;
+  topic: string;
+  contentType: string;
+  content: string;
+  status: 'draft' | 'published';
+  createdAt: Timestamp;
+  updatedAt: Timestamp;
+};

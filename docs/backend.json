@@ -340,6 +340,52 @@
       "required": [
         "uid"
       ]
+    },
+    "Content": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Content",
+      "type": "object",
+      "description": "Represents a piece of generated content, like an article or blog post.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the content."
+        },
+        "userId": {
+          "type": "string",
+          "description": "The UID of the user who owns this content."
+        },
+        "title": {
+          "type": "string",
+          "description": "The title of the article or post."
+        },
+        "topic": {
+          "type": "string",
+          "description": "The original topic used to generate the content."
+        },
+        "contentType": {
+          "type": "string",
+          "description": "The original content type (e.g., blog post)."
+        },
+        "content": {
+          "type": "string",
+          "description": "The body of the article."
+        },
+        "status": {
+          "type": "string",
+          "description": "The current status of the content.",
+          "enum": ["draft", "published"]
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": ["id", "userId", "title", "content", "status", "createdAt", "updatedAt"]
     }
   },
   "auth": {
@@ -460,6 +506,20 @@
               "name": "requestId",
               "description": "The unique identifier for the refund request."
             }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/content/{contentId}",
+        "definition": {
+          "entityName": "Content",
+          "schema": {
+            "$ref": "#/backend/entities/Content"
+          },
+          "description": "Stores generated content for a user. Path-based ownership: Only the user with the matching {userId} can manage their content.",
+          "params": [
+            { "name": "userId", "description": "The user's UID." },
+            { "name": "contentId", "description": "The unique ID for the content." }
           ]
         }
       },

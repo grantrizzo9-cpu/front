@@ -39,6 +39,11 @@ service cloud.firestore {
       allow update, delete: if (request.auth != null && exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid))) || request.auth.token.email == 'rentapog@gmail.com';
     }
 
+    // A user can manage their own generated content.
+    match /users/{userId}/content/{contentId} {
+      allow read, write: if request.auth.uid == userId;
+    }
+
 
     // --- Public Data & Roles ---
 
