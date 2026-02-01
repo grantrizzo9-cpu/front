@@ -168,12 +168,8 @@ export default function WebsiteBuilderPage() {
     try {
       const result = await generateWebsite({ username: user.displayName, themeName: selectedTheme.name });
       if (result.error) {
-        if (result.error.includes("Quota exceeded") || result.error.includes("Too Many Requests")) {
-            const match = result.error.match(/Please retry in ([\d.]+)s/);
-            if (match && match[1]) {
-                const delay = Math.ceil(parseFloat(match[1]));
-                setRetryDelay(delay);
-            }
+        if (result.retryAfter) {
+            setRetryDelay(result.retryAfter);
         }
         setError(result.error);
       } else {
@@ -272,9 +268,9 @@ export default function WebsiteBuilderPage() {
   }
     
   if (error) {
-     const isRateLimitError = error.includes("Quota exceeded") || error.includes("Too Many Requests");
+     const isRateLimitError = error.includes("Quota exceeded") || error.includes("API Rate Limit");
      const friendlyMessage = isRateLimitError
-         ? "You've made too many requests to the AI service on the free tier. Please wait for the cooldown timer to finish before trying again."
+         ? "You've exceeded the daily/minute request limit for the AI service's free tier. This is not a bug, but a hard limit from the provider. Please wait for the timer to finish, or try again later (e.g., tomorrow). For unlimited access, you can add a billing account to your Google Cloud project."
          : error;
  
      return (
@@ -287,10 +283,18 @@ export default function WebsiteBuilderPage() {
                         <AlertTitle>{isRateLimitError ? "API Rate Limit Reached" : "An Error Occurred"}</AlertTitle>
                         <AlertDescription>
                             {friendlyMessage}
-                            {isRateLimitError && (
-                                <p className="mt-2 text-xs text-muted-foreground">
-                                    This is a restriction of the free AI service, not a bug in the app. To avoid this in the future, you can add a billing account to your Google Cloud project.
-                                </p>
+                             {!isRateLimitError && error.includes("API Key") && (
+                                <>
+                                    <p className="mt-2">
+                                        Click the link below to get your key, then paste it into the 
+                                        <code className="bg-muted p-1 rounded-sm mx-1">.env</code> file in the file explorer.
+                                    </p>
+                                     <Button asChild variant="link" className="px-0">
+                                        <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer">
+                                            Get Gemini API Key
+                                        </a>
+                                    </Button>
+                                </>
                             )}
                         </AlertDescription>
                     </Alert>

@@ -86,6 +86,7 @@ const GenerateWebsiteOutputSchema = WebsiteContentSchema.extend({
     colors: ColorThemeSchema,
   }),
   error: z.string().optional(),
+  retryAfter: z.number().optional(),
 });
 export type GenerateWebsiteOutput = z.infer<typeof GenerateWebsiteOutputSchema>;
 
@@ -183,11 +184,16 @@ const websiteGeneratorFlow = ai.defineFlow(
             const rawErrorMessage = e.message || 'An unknown error occurred.';
             
             let userFriendlyError = `The connection to the AI service failed. This could be a network issue or a problem with your Google Cloud project setup. Please check your environment and configuration. Raw error: "${rawErrorMessage}"`;
+            let retrySeconds: number | null = null;
 
             if (rawErrorMessage.includes("API key not valid")) {
                 userFriendlyError = `Authentication failed. The Gemini API Key you provided in the .env file appears to be invalid. Please double-check that you have copied the entire key correctly. If you just updated the key, you may need to restart the development server. Raw error: "${rawErrorMessage}"`;
-            } else if (rawErrorMessage.includes("Quota exceeded")) {
-                userFriendlyError = `API Rate Limit Exceeded: You've made too many requests on the free tier. Please wait a minute before trying again or check your Google Cloud billing status. Raw error: "${rawErrorMessage}"`;
+            } else if (rawErrorMessage.includes("Quota exceeded") || rawErrorMessage.includes("Too Many Requests")) {
+                userFriendlyError = `API Rate Limit Reached: The AI service's free tier has a limited number of requests per minute and per day. You have exceeded this limit. This is not a bug. Please wait, or for unlimited access, add a billing account to your Google Cloud project. Raw error: "${rawErrorMessage}"`;
+                const match = rawErrorMessage.match(/Please retry in ([\d.]+)s/);
+                if (match && match[1]) {
+                    retrySeconds = Math.ceil(parseFloat(match[1]));
+                }
             }
 
             return {
@@ -198,6 +204,7 @@ const websiteGeneratorFlow = ai.defineFlow(
                 theme: theme,
                 username: input.username,
                 error: userFriendlyError,
+                retryAfter: retrySeconds,
             };
         }
     }
