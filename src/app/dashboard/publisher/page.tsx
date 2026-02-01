@@ -179,7 +179,7 @@ export default function PublisherPage() {
                         <TableCell>
                           <Badge variant={article.status === 'published' ? 'default' : 'secondary'}>{article.status}</Badge>
                         </TableCell>
-                        <TableCell>{format(article.updatedAt.toDate(), 'PP')}</TableCell>
+                        <TableCell>{article.updatedAt ? format(article.updatedAt.toDate(), 'PP') : 'Pending...'}</TableCell>
                         <TableCell className="text-right">
                           <Button variant="outline" size="sm" onClick={() => { setSelectedArticle(article); setIsEditDialogOpen(true); }}>
                             <Edit className="mr-2 h-4 w-4" /> Edit
