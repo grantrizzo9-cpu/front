@@ -16,7 +16,7 @@ export function RegistrarLogo({ className }: { className?: string }) {
       className={cn("flex items-center gap-2 text-foreground", className)}
     >
       <Globe className="h-6 w-6 text-muted-foreground" />
-      <span className="text-lg font-bold font-headline">Domain Reseller</span>
+      <span className="text-lg font-bold font-headline">Host Pro AI</span>
     </Link>
   );
 }
