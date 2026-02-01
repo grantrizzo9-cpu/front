@@ -88,3 +88,13 @@ export type Content = {
   createdAt: Timestamp;
   updatedAt: Timestamp;
 };
+
+export type Website = {
+  id: string;
+  userId: string;
+  themeName: string;
+  content: any; // This holds the output of the website generator flow
+  status: 'draft' | 'published';
+  createdAt: Timestamp;
+  updatedAt: Timestamp;
+};
