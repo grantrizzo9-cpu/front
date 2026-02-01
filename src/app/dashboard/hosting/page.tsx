@@ -20,6 +20,7 @@ export default function HostingPage() {
     const firestore = useFirestore();
     const { toast } = useToast();
     const [domainInput, setDomainInput] = useState('');
+    const [domainToSearch, setDomainToSearch] = useState('');
     const [isSaving, setIsSaving] = useState(false);
     
     const [localDomainStatus, setLocalDomainStatus] = useState<'unconfigured' | 'pending' | 'connected' | 'error' | null>(null);
@@ -43,6 +44,21 @@ export default function HostingPage() {
     }, [userData?.customDomain]);
 
     const isLoading = isUserLoading || isUserDataLoading;
+
+    const handleDomainSearch = () => {
+        if (!domainToSearch) {
+            toast({ variant: 'destructive', title: 'Please enter a domain to search.'});
+            return;
+        }
+        const storeUrl = process.env.NEXT_PUBLIC_DOMAIN_STORE_URL;
+        if (!storeUrl || storeUrl.includes('REPLACE_WITH')) {
+            toast({ variant: 'destructive', title: 'Store URL Not Configured', description: 'Please set your domain reseller URL in the .env file.'});
+            return;
+        }
+        // This will open the user's reseller storefront with the domain pre-filled for searching.
+        // The exact URL structure may vary based on the storefront provider.
+        window.open(`https://${storeUrl}/?domain=${domainToSearch}`, '_blank');
+    };
 
     const handleSaveDomain = () => {
         if (!userDocRef || !domainInput) return;
@@ -94,10 +110,45 @@ export default function HostingPage() {
                 <CardHeader>
                     <div className="flex items-center gap-3">
                          <div className="flex-shrink-0 w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-bold">1</div>
-                         <CardTitle>Register or Enter Your Domain</CardTitle>
+                         <CardTitle>Find & Register a New Domain</CardTitle>
                     </div>
                     <CardDescription>
-                        Your custom domain is your identity on the web. It's how you build a memorable brand and establish credibility with your audience. We recommend using our trusted partner, <a href="https://name.com" target="_blank" rel="noopener noreferrer" className="text-primary font-semibold underline">Name.com</a>, to find and register the perfect domain for your new affiliate business. Make a name for yourself!
+                        Use your integrated OpenSRS reseller store to find and register the perfect domain. You earn a commission on every sale.
+                    </CardDescription>
+                </CardHeader>
+                <CardContent>
+                    {!process.env.NEXT_PUBLIC_DOMAIN_STORE_URL || process.env.NEXT_PUBLIC_DOMAIN_STORE_URL.includes('REPLACE_WITH') ? (
+                        <Alert variant="destructive">
+                            <AlertTriangle className="h-4 w-4" />
+                            <AlertTitle>Action Required</AlertTitle>
+                            <AlertDescription>
+                                To enable domain search, set your `NEXT_PUBLIC_DOMAIN_STORE_URL` in the `.env` file.
+                            </AlertDescription>
+                        </Alert>
+                    ) : (
+                        <div className="flex gap-2">
+                            <Input
+                                id="domain-search"
+                                placeholder="your-awesome-site.com"
+                                value={domainToSearch}
+                                onChange={(e) => setDomainToSearch(e.target.value)}
+                            />
+                            <Button onClick={handleDomainSearch}>
+                                <Search className="mr-2 h-4 w-4" /> Search
+                            </Button>
+                        </div>
+                    )}
+                </CardContent>
+            </Card>
+
+            <Card>
+                <CardHeader>
+                    <div className="flex items-center gap-3">
+                         <div className="flex-shrink-0 w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-bold">2</div>
+                         <CardTitle>Connect Your Registered Domain</CardTitle>
+                    </div>
+                    <CardDescription>
+                       After registering your domain through your store, enter it here to connect it to our hosting platform.
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -119,11 +170,11 @@ export default function HostingPage() {
             <Card className={!domainInput ? "opacity-50 pointer-events-none" : ""}>
                 <CardHeader>
                     <div className="flex items-center gap-3">
-                         <div className="flex-shrink-0 w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-bold">2</div>
-                         <CardTitle>Connect Your Domain</CardTitle>
+                         <div className="flex-shrink-0 w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-bold">3</div>
+                         <CardTitle>Connect Your Domain to Firebase</CardTitle>
                     </div>
                     <CardDescription>
-                       To connect your domain, you'll need to update its DNS records at your registrar.
+                       To take your site live, you'll need to update its DNS records at your registrar.
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -145,7 +196,7 @@ export default function HostingPage() {
             <Card>
                  <CardHeader>
                     <div className="flex items-center gap-3">
-                         <div className="flex-shrink-0 w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-bold">3</div>
+                         <div className="flex-shrink-0 w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-bold">4</div>
                          <CardTitle>Final Status</CardTitle>
                     </div>
                     <CardDescription>
@@ -194,7 +245,7 @@ export default function HostingPage() {
                                     <>
                                         <Badge variant="secondary">Unconfigured</Badge>
                                         <p className="text-sm text-muted-foreground max-w-sm">
-                                            Complete Step 1 to begin the domain setup process.
+                                            Complete Step 1 and 2 to begin the domain setup process.
                                         </p>
                                     </>
                                 );
