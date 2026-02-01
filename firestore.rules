@@ -48,11 +48,12 @@ service cloud.firestore {
     // --- Public Data & Roles ---
 
     // Usernames are public for single GET requests.
-    // A user can CREATE their own username mapping. Updating is disallowed except for admins.
+    // A user can CREATE their own username mapping.
+    // A user can UPDATE a mapping to claim it for their own account. Admins can also update.
     match /usernames/{username} {
       allow get: if true;
       allow create: if request.auth != null && request.resource.data.uid == request.auth.uid;
-      allow update: if (request.auth != null && exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid))) || request.auth.token.email == 'rentapog@gmail.com';
+      allow update: if (request.auth != null && request.resource.data.uid == request.auth.uid) || (request.auth != null && exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid))) || request.auth.token.email == 'rentapog@gmail.com';
       allow list, delete: if false;
     }
 
