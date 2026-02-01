@@ -51,7 +51,7 @@ export const subscriptionTiers: SubscriptionTier[] = [
     price: 49.95,
     // Replace with your actual Sandbox Plan ID for the Pro tier.
     paypalPlanId: 'P-5W037679NJ177610XNF7SEFQ',
-    description: 'Everything in Plus, with professional tools for serious affiliates.',
+    description: 'Everything in Pro, with professional tools for serious affiliates.',
     guideAccessLevel: 'pro',
     features: [
       '25 Websites',
@@ -116,7 +116,7 @@ export const subscriptionTiers: SubscriptionTier[] = [
     name: 'Enterprise',
     price: 499.95,
     // Replace with your actual Sandbox Plan ID for the Enterprise tier.
-    paypalPlanId: 'REPLACE_WITH_ENTERPRISE_PLAN_ID',
+    paypalPlanId: 'P-5Y2152619Y596201DNF7SHLI',
     description: 'Everything in Scale, plus enterprise-grade tools for power-users.',
     guideAccessLevel: 'enterprise',
     features: [
