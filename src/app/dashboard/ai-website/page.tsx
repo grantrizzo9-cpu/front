@@ -9,7 +9,6 @@ import { generateWebsite, type GenerateWebsiteOutput } from '@/ai/flows/website-
 import { Loader2, AlertTriangle, Wand2, Copy, Eye, Code, CheckCircle, ArrowRight } from 'lucide-react';
 import { useUser } from '@/firebase';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { Skeleton } from '@/components/ui/skeleton';
 import { websiteThemes, type WebsiteTheme } from '@/lib/data';
@@ -35,15 +34,10 @@ const WebsitePreviewSkeleton = () => (
 );
 
 
-// Preview Component
+// Preview Component (Simplified to remove iframe)
 const WebsitePreview = ({ site, onCopyLegal, getHomepageHtml, affiliateLink }: { site: GenerateWebsiteOutput, onCopyLegal: (content: string, title: string) => void, getHomepageHtml: (site: GenerateWebsiteOutput, link: string) => string, affiliateLink: string }) => {
     
     const { toast } = useToast();
-
-    const iframeSrcDoc = useMemo(() => {
-        if (!site) return '';
-        return getHomepageHtml(site, affiliateLink);
-    }, [site, affiliateLink, getHomepageHtml]);
 
     const copyHomepageHtml = useCallback(() => {
         if (!site) return;
@@ -52,64 +46,49 @@ const WebsitePreview = ({ site, onCopyLegal, getHomepageHtml, affiliateLink }: {
         toast({ title: 'Copied to Clipboard!', description: `Homepage HTML has been copied.` });
     }, [site, affiliateLink, getHomepageHtml, toast]);
     
-
     return (
-    <Tabs defaultValue="preview" className="col-span-full">
-        <div className="flex justify-between items-center pr-1">
-            <TabsList>
-                <TabsTrigger value="preview"><Eye className="mr-2 h-4 w-4" /> Preview</TabsTrigger>
-                <TabsTrigger value="code"><Code className="mr-2 h-4 w-4" /> Get HTML</TabsTrigger>
-            </TabsList>
-             <p className="text-sm text-muted-foreground">Theme: <span className="font-semibold text-foreground">{site.theme.name}</span></p>
-        </div>
-
-        <TabsContent value="preview">
-            <Card className="overflow-hidden">
-                <div className="w-full h-[600px] bg-background">
-                    <iframe srcDoc={iframeSrcDoc} className="w-full h-full border-0" title="Website Preview" />
+        <Card className="col-span-full">
+            <CardHeader>
+                <div className="flex justify-between items-center">
+                    <div>
+                        <CardTitle>Your Generated Website Code</CardTitle>
+                        <CardDescription>The live preview has been temporarily disabled to resolve a rendering issue. You can still copy the full HTML code for each page below.</CardDescription>
+                    </div>
+                    <p className="text-sm text-muted-foreground">Theme: <span className="font-semibold text-foreground">{site.theme.name}</span></p>
                 </div>
-            </Card>
-        </TabsContent>
-        <TabsContent value="code">
-            <Card>
-                <CardHeader>
-                    <CardTitle>Your Website Code</CardTitle>
-                    <CardDescription>Copy the HTML for each page and upload them to your web host.</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                     <div className="space-y-2">
-                        <div className="flex justify-between items-center">
-                            <h3 className="font-semibold">Homepage (index.html)</h3>
-                            <Button variant="outline" size="sm" onClick={copyHomepageHtml}><Copy className="mr-2 h-4 w-4"/> Copy HTML</Button>
-                        </div>
-                        <Textarea readOnly value={`<html>... (Full homepage code for '${site.homepage.title}') ...</html>`} className="font-mono text-xs bg-secondary" rows={3}/>
+            </CardHeader>
+            <CardContent className="space-y-4">
+                 <div className="space-y-2">
+                    <div className="flex justify-between items-center">
+                        <h3 className="font-semibold">Homepage (index.html)</h3>
+                        <Button variant="outline" size="sm" onClick={copyHomepageHtml}><Copy className="mr-2 h-4 w-4"/> Copy HTML</Button>
                     </div>
-                    <div className="space-y-2">
-                        <div className="flex justify-between items-center">
-                            <h3 className="font-semibold">Terms of Service (terms.html)</h3>
-                            <Button variant="outline" size="sm" onClick={() => onCopyLegal(site.terms, 'Terms of Service')}><Copy className="mr-2 h-4 w-4"/> Copy HTML</Button>
-                        </div>
-                        <Textarea readOnly value={site.terms} className="font-mono text-xs bg-secondary" rows={3}/>
+                    <Textarea readOnly value={`<html>... (Full homepage code for '${site.homepage.title}') ...</html>`} className="font-mono text-xs bg-secondary" rows={3}/>
+                </div>
+                <div className="space-y-2">
+                    <div className="flex justify-between items-center">
+                        <h3 className="font-semibold">Terms of Service (terms.html)</h3>
+                        <Button variant="outline" size="sm" onClick={() => onCopyLegal(site.terms, 'Terms of Service')}><Copy className="mr-2 h-4 w-4"/> Copy HTML</Button>
                     </div>
-                    <div className="space-y-2">
-                        <div className="flex justify-between items-center">
-                            <h3 className="font-semibold">Privacy Policy (privacy.html)</h3>
-                             <Button variant="outline" size="sm" onClick={() => onCopyLegal(site.privacy, 'Privacy Policy')}><Copy className="mr-2 h-4 w-4"/> Copy HTML</Button>
-                        </div>
-                        <Textarea readOnly value={site.privacy} className="font-mono text-xs bg-secondary" rows={3}/>
+                    <Textarea readOnly value={site.terms} className="font-mono text-xs bg-secondary" rows={3}/>
+                </div>
+                <div className="space-y-2">
+                    <div className="flex justify-between items-center">
+                        <h3 className="font-semibold">Privacy Policy (privacy.html)</h3>
+                         <Button variant="outline" size="sm" onClick={() => onCopyLegal(site.privacy, 'Privacy Policy')}><Copy className="mr-2 h-4 w-4"/> Copy HTML</Button>
                     </div>
-                    <div className="space-y-2">
-                        <div className="flex justify-between items-center">
-                            <h3 className="font-semibold">Earnings Disclaimer (disclaimer.html)</h3>
-                            <Button variant="outline" size="sm" onClick={() => onCopyLegal(site.disclaimer, 'Earnings Disclaimer')}><Copy className="mr-2 h-4 w-4"/> Copy HTML</Button>
-                        </div>
-                        <Textarea readOnly value={site.disclaimer} className="font-mono text-xs bg-secondary" rows={3}/>
+                    <Textarea readOnly value={site.privacy} className="font-mono text-xs bg-secondary" rows={3}/>
+                </div>
+                <div className="space-y-2">
+                    <div className="flex justify-between items-center">
+                        <h3 className="font-semibold">Earnings Disclaimer (disclaimer.html)</h3>
+                        <Button variant="outline" size="sm" onClick={() => onCopyLegal(site.disclaimer, 'Earnings Disclaimer')}><Copy className="mr-2 h-4 w-4"/> Copy HTML</Button>
                     </div>
-                </CardContent>
-            </Card>
-        </TabsContent>
-    </Tabs>
-);
+                    <Textarea readOnly value={site.disclaimer} className="font-mono text-xs bg-secondary" rows={3}/>
+                </div>
+            </CardContent>
+        </Card>
+    );
 }
 
 
@@ -544,5 +523,3 @@ ${themeColorsCss}
     </div>
   );
 }
-
-    
