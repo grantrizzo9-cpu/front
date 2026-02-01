@@ -28,9 +28,9 @@ const PublishedSite = ({ site, user, onRegenerate }: { site: Website, user: User
             <CardContent className="space-y-4">
                  <Alert>
                     <UploadCloud className="h-4 w-4" />
-                    <AlertTitle>Next Steps: Automatic Deployment</AlertTitle>
+                    <AlertTitle>How to Go Live</AlertTitle>
                     <AlertDescription>
-                        This dashboard provides the user interface for one-click deployment. To make this fully functional, a backend process needs to be implemented to take the saved content and upload it to your hosting provider (like Firebase Hosting). This step is not yet automated.
+                        This dashboard provides one-click generation of your website code. To make your site live on your custom domain, the generated files need to be uploaded to your web host. Currently, this requires a manual step, but full one-click deployment from this dashboard is coming soon.
                     </AlertDescription>
                 </Alert>
                 {user?.customDomain?.name ? (
@@ -72,9 +72,14 @@ const Deployer = ({ site, affiliateLink, onDeploy, onCancel }: { site: GenerateW
     return (
         <div className="space-y-8">
             <Card>
-                <CardHeader>
-                    <CardTitle>Step 2: Preview & Deploy</CardTitle>
-                    <CardDescription>This is a fully interactive preview of your generated homepage. When you are ready, deploy it.</CardDescription>
+                <CardHeader className="flex flex-row items-start justify-between">
+                    <div>
+                        <CardTitle>Step 2: Preview & Deploy</CardTitle>
+                        <CardDescription>This is a fully interactive preview of your generated homepage. When you are ready, deploy it.</CardDescription>
+                    </div>
+                    <Button onClick={onCancel} variant="outline">
+                        Start Over
+                    </Button>
                 </CardHeader>
                 <CardContent>
                     <div className="w-full aspect-[16/9] border rounded-lg overflow-hidden bg-white">
@@ -97,7 +102,7 @@ const Deployer = ({ site, affiliateLink, onDeploy, onCancel }: { site: GenerateW
                         <UploadCloud className="mr-2 h-4 w-4"/> Deploy Website
                     </Button>
                     <Button onClick={onCancel} size="lg" variant="outline">
-                        Cancel
+                        Start Over
                     </Button>
                 </CardFooter>
             </Card>
@@ -133,7 +138,10 @@ export default function WebsiteBuilderPage() {
   const { data: userWebsites, isLoading: isLoadingWebsite } = useCollection<Website>(websitesQuery);
   const publishedSite = userWebsites?.[0] || null;
 
-  const affiliateLink = user?.displayName ? `https://hostproai.com/?ref=${user.displayName.toLowerCase()}` : '#';
+  const affiliateLink = userData?.customDomain?.name
+    ? `https://${userData.customDomain.name}`
+    : user?.displayName ? `https://hostproai.com/?ref=${user.displayName.toLowerCase()}` : '#';
+
 
   const handleGenerate = async () => {
     if (!user?.displayName) {
