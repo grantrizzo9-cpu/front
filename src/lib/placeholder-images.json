@@ -74,8 +74,8 @@
     },
     {
       "id": "guide-email-marketing",
-      "description": "A person holding a phone with an envelope icon.",
-      "imageUrl": "https://images.unsplash.com/photo-1557200134-90327ee9f695?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxlbWFpbCUyMG1hcmtldGluZyUyMGNvbmNlcHR8ZW58MHx8fHwxNzE5OTI0MzYyfDA&ixlib=rb-4.0.3&q=80&w=1080",
+      "description": "An envelope icon on a screen with other marketing-related icons.",
+      "imageUrl": "https://images.unsplash.com/photo-1586769852836-bc069f19e1b6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxlbWFpbCUyMG1hcmtldGluZ3xlbnwwfHx8fDE3MjE4NzU4NTV8MA&ixlib=rb-4.0.3&q=80&w=1080",
       "imageHint": "email marketing"
     },
     {
@@ -92,9 +92,9 @@
     },
     {
       "id": "guide-cro-fundamentals",
-      "description": "A chart showing an upward trend, symbolizing conversion rate optimization.",
-      "imageUrl": "https://images.unsplash.com/photo-1634942537034-142828558437?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxvIHRpbWl6YXRpb24lMjBjaGFydHxlbnwwfHx8fDE3MTk4NTQ3ODR8MA&ixlib=rb-4.0.3&q=80&w=1080",
-      "imageHint": "optimization chart"
+      "description": "A financial graph with an uptrend, symbolizing growth and optimization.",
+      "imageUrl": "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxzdG9jayUyMGNoYXJ0JTIwdXB8ZW58MHx8fHwxNzIxODc1OTAxfDA&ixlib=rb-4.0.3&q=80&w=1080",
+      "imageHint": "growth chart"
     },
     {
       "id": "guide-email-sequence",
