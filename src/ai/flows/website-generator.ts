@@ -113,7 +113,7 @@ Generate content for the following pages, formatted as a single JSON object:
     *   **navLinks**: A list of 3 navigation links for the header. The text should be short (e.g., 'Features', 'How it Works', 'FAQ') and the href should be an anchor link (e.g., '#features').
     *   **headline**: A powerful, attention-grabbing headline for the hero section.
     *   **subheadline**: A concise subheadline that explains the main benefit.
-    *   **ctaButtonText**: Action-oriented text for the main call-to-action button in the hero.
+    *   **ctaButtonText**: Action-oriented text for the main call-to-action button in the hero section.
     *   **featuresHeadline**: A headline for the features section (e.g., "Why Partner with Affiliate AI Host?").
     *   **features**: A list of exactly 3 key features of Affiliate AI Host. For each, provide a catchy title, a brief benefit-focused description, and a single, relevant emoji. Examples: "Daily PayPal Payouts", "Generous 70-75% Commissions", "Built-in AI Content Tools".
     *   **howItWorksHeadline**: A headline for the "How it Works" section (e.g., "Your Simple Path to Daily Income").
@@ -134,6 +134,27 @@ Generate content for the following pages, formatted as a single JSON object:
 Do not include any markdown formatting like \`\`\`json in your output. The output must be a pure JSON object that strictly adheres to the provided schema.`,
 });
 
+// This is a dummy object that satisfies the schema constraints, used for returning on error.
+const dummyHomepage = {
+    title: 'Error',
+    navLinks: [{text:'',href:''},{text:'',href:''},{text:'',href:''}],
+    headline: 'Error',
+    subheadline: 'An error occurred during generation.',
+    ctaButtonText: 'Try Again',
+    featuresHeadline: 'Error',
+    features: [{title:'',description:'',icon:''},{title:'',description:'',icon:''},{title:'',description:'',icon:''}],
+    howItWorksHeadline: 'Error',
+    howItWorksSteps: [{title:'',description:''},{title:'',description:''},{title:'',description:''}],
+    testimonialsHeadline: 'Error',
+    testimonials: [{text:'',name:'',role:''},{text:'',name:'',role:''},{text:'',name:'',role:''}],
+    faqHeadline: 'Error',
+    faqs: [{question:'',answer:''},{question:'',answer:''},{question:'',answer:''}],
+    finalCtaHeadline: 'Error',
+    finalCtaSubheadline: 'Please try again later.',
+    finalCtaButtonText: 'Error',
+};
+
+
 const websiteGeneratorFlow = ai.defineFlow(
     {
         name: 'websiteGeneratorFlow',
@@ -143,16 +164,14 @@ const websiteGeneratorFlow = ai.defineFlow(
     async (input): Promise<GenerateWebsiteOutput> => {
         const theme = websiteThemes.find(t => t.name === input.themeName) || websiteThemes[Math.floor(Math.random() * websiteThemes.length)];
         
-        const emptyHomepage = { title: '', navLinks: [], headline: '', subheadline: '', ctaButtonText: '', featuresHeadline: '', features: [], howItWorksHeadline: '', howItWorksSteps: [], testimonialsHeadline: '', testimonials: [], faqHeadline: '', faqs: [], finalCtaHeadline: '', finalCtaSubheadline: '', finalCtaButtonText: '' };
-        
         try {
             const { output } = await prompt({ username: input.username });
             if (!output) {
                 return {
-                    homepage: emptyHomepage,
-                    terms: '',
-                    privacy: '',
-                    disclaimer: '',
+                    homepage: dummyHomepage,
+                    terms: 'Error generating content.',
+                    privacy: 'Error generating content.',
+                    disclaimer: 'Error generating content.',
                     theme: theme,
                     username: input.username,
                     error: 'The AI model did not return any content.'
@@ -163,25 +182,25 @@ const websiteGeneratorFlow = ai.defineFlow(
             console.error('Website Generation Error:', e);
             const rawErrorMessage = e.message || 'An unknown error occurred.';
             
-             if (rawErrorMessage.includes("API key not valid")) {
-                 return {
-                    homepage: emptyHomepage,
-                    terms: '',
-                    privacy: '',
-                    disclaimer: '',
-                    theme: theme,
-                    username: input.username,
-                    error: `Authentication failed. The Gemini API Key you provided in the .env file appears to be invalid. Please double-check that you have copied the entire key correctly. If you just updated the key, you may need to restart the development server. Raw error: "${rawErrorMessage}"` };
+            let userFriendlyError = `The connection to the AI service failed. This could be a network issue or a problem with your Google Cloud project setup. Please check your environment and configuration. Raw error: "${rawErrorMessage}"`;
+
+            if (rawErrorMessage.includes("API key not valid")) {
+                userFriendlyError = `Authentication failed. The Gemini API Key you provided in the .env file appears to be invalid. Please double-check that you have copied the entire key correctly. If you just updated the key, you may need to restart the development server. Raw error: "${rawErrorMessage}"`;
+            } else if (rawErrorMessage.includes("Quota exceeded")) {
+                userFriendlyError = `API Rate Limit Exceeded: You've made too many requests on the free tier. Please wait a minute before trying again or check your Google Cloud billing status. Raw error: "${rawErrorMessage}"`;
             }
 
             return {
-                homepage: emptyHomepage,
-                terms: '',
-                privacy: '',
-                disclaimer: '',
+                homepage: dummyHomepage,
+                terms: 'Error generating content.',
+                privacy: 'Error generating content.',
+                disclaimer: 'Error generating content.',
                 theme: theme,
                 username: input.username,
-                error: `The connection to the AI service failed. This could be a network issue or a problem with your Google Cloud project setup. Please check your environment and configuration. Raw error: "${rawErrorMessage}"` };
+                error: userFriendlyError,
+            };
         }
     }
 );
+
+    
