@@ -234,7 +234,12 @@ export default function UpgradePage() {
                 </Alert>
             )}
             
-            <PayPalScriptProvider options={{ clientId: paypalClientId!, vault: true, intent: "subscription" }}>
+            <PayPalScriptProvider options={{
+                clientId: paypalClientId!,
+                vault: true,
+                intent: "subscription",
+                "disable-funding": "sepa,bancontact,giropay,ideal,mybank,p24,sofort",
+            }}>
                 {selectedTierId ? (
                     (() => {
                         const tier = subscriptionTiers.find(t => t.id === selectedTierId);
