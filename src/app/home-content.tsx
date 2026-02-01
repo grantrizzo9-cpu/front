@@ -128,7 +128,7 @@ export function HomeContent() {
                 <li className="flex gap-4">
                   <div className="flex-shrink-0 w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-bold">1</div>
                   <div>
-                    <h3 className="font-semibold text-lg">Create Your Account & Choose a Plan</h3>
+                    <h3 className="font-semibold text-lg">Create Your Account &amp; Choose a Plan</h3>
                     <p className="text-muted-foreground">Sign up to get your unique referral link. Your referred users will immediately appear on your dashboard.</p>
                   </div>
                 </li>
@@ -142,7 +142,7 @@ export function HomeContent() {
                 <li className="flex gap-4">
                   <div className="flex-shrink-0 w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-bold">3</div>
                   <div>
-                    <h3 className="font-semibold text-lg">Promote, Refer & Get Paid Daily</h3>
+                    <h3 className="font-semibold text-lg">Promote, Refer &amp; Get Paid Daily</h3>
                     <p className="text-muted-foreground">Earn 70-75% commission on recurring daily sales from your referrals after their trial ends. Payouts are sent automatically to your PayPal every day.</p>
                   </div>
                 </li>
