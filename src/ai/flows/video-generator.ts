@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -104,15 +105,18 @@ const videoGeneratorFlow = ai.defineFlow(
             console.error('Video Generation Flow Error:', e);
             const rawErrorMessage = e.message || 'An unknown error occurred.';
 
+            let userFriendlyError = `The connection to the AI service failed. This could be a network issue or a problem with your Google Cloud project setup. Please check your environment and configuration. Raw error: "${rawErrorMessage}"`;
+
             if (rawErrorMessage.includes("API key not valid")) {
-                 return { error: `Authentication failed. The Gemini API Key you provided in the .env file appears to be invalid. Please double-check that you have copied the entire key correctly. If you just updated the key, you may need to restart the development server. Raw error: "${rawErrorMessage}"` };
+                 userFriendlyError = `Authentication failed. The Gemini API Key you provided in the .env file appears to be invalid. Please double-check that you have copied the entire key correctly. If you just updated the key, you may need to restart the development server. Raw error: "${rawErrorMessage}"`;
+            } else if (rawErrorMessage.includes("API is only accessible to billed users at this time")) {
+                userFriendlyError = 'Video Generation Blocked by Google Policy: This AI model requires a project with a billing history. This is not a bug in the app. To resolve this, you may need to wait for a billing cycle or contact Google Cloud support regarding your project\'s billing status.';
+            } else if (rawErrorMessage.includes("Quota exceeded")) {
+                userFriendlyError = `API Rate Limit Exceeded: You've made too many requests on the free tier. Please wait a minute before trying again or check your Google Cloud billing status. Raw error: "${rawErrorMessage}"`;
             }
 
-            if (rawErrorMessage.includes("API is only accessible to billed users at this time")) {
-                return { error: 'Video Generation Blocked by Google Policy: This AI model requires a project with a billing history. This is not a bug in the app. To resolve this, you may need to wait for a billing cycle or contact Google Cloud support regarding your project\'s billing status.' };
-            }
-
-            return { error: `The connection to the AI service failed. This could be a network issue or a problem with your Google Cloud project setup. Please check your environment and configuration. Raw error: "${rawErrorMessage}"` };
+            return { error: userFriendlyError };
         }
     }
 );
+    
