@@ -71,31 +71,34 @@ export function useAdmin() {
           // Generate a lowercase username if it doesn't exist
           if (!username) {
             username = (user.displayName || user.email?.split('@')[0] || `admin`).replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
-            const usernameCheckDoc = await getDoc(doc(firestore, "usernames", username));
-            if (usernameCheckDoc.exists() && usernameCheckDoc.data()?.uid !== user.uid) {
-                username = `${username}${user.uid.substring(0, 4)}`;
-            }
           }
           
           const lowerCaseUsername = username.toLowerCase();
+          const usernameDocRef = doc(firestore, 'usernames', lowerCaseUsername);
+          const usernameDocSnap = await getDoc(usernameDocRef);
 
           const batch = writeBatch(firestore);
-          const usernameDocRef = doc(firestore, 'usernames', lowerCaseUsername);
 
-          // Use merge: true to idempotently create or update documents.
+          // Update the admin's user document.
           batch.set(userDocRef, {
               id: user.uid,
               email: user.email,
-              username: lowerCaseUsername, // Ensure username in user profile is also lowercase
+              username: lowerCaseUsername,
               isAffiliate: true,
           }, { merge: true });
           
+          // Ensure the admin role document exists.
           batch.set(adminRoleRef, {}, { merge: true });
-          
-          batch.set(usernameDocRef, { uid: user.uid }, { merge: true });
+
+          // CRITICAL FIX: Only set the public username if it's not already taken by someone else.
+          if (!usernameDocSnap.exists() || usernameDocSnap.data()?.uid === user.uid) {
+              batch.set(usernameDocRef, { uid: user.uid });
+          } else {
+              console.warn(`Admin's desired username '${lowerCaseUsername}' is already taken by user ${usernameDocSnap.data()?.uid}. The public username mapping for the admin was NOT created to avoid an overwrite. The admin should choose a different username.`);
+          }
 
           await batch.commit();
-          console.log("Admin database state verified and consistent.");
+          console.log("Admin database state verification process completed.");
 
         } catch (e) {
           // This will log errors to the console but will NOT break the UI.
