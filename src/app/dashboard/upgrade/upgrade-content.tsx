@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -25,7 +26,9 @@ export function UpgradeContent() {
     const [paymentError, setPaymentError] = useState<string | null>(null);
     const [selectedTierId, setSelectedTierId] = useState<string | null>(null);
 
-    const paypalClientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID;
+    const useSandbox = process.env.PAYPAL_SANDBOX !== 'false';
+    const paypalClientId = useSandbox ? process.env.NEXT_PUBLIC_PAYPAL_SANDBOX_CLIENT_ID : process.env.NEXT_PUBLIC_PAYPAL_LIVE_CLIENT_ID;
+
     const searchParams = useSearchParams();
 
     const userDocRef = useMemoFirebase(() => {
@@ -192,6 +195,8 @@ export function UpgradeContent() {
     }
     
     if (!paypalClientId || paypalClientId.includes('REPLACE_WITH')) {
+        const envString = useSandbox ? "Sandbox" : "Live";
+        const missingVar = useSandbox ? "NEXT_PUBLIC_PAYPAL_SANDBOX_CLIENT_ID" : "NEXT_PUBLIC_PAYPAL_LIVE_CLIENT_ID";
       return (
           <div className="space-y-8">
               <div>
@@ -200,9 +205,9 @@ export function UpgradeContent() {
               </div>
               <Alert variant="destructive">
                   <AlertTriangle className="h-4 w-4" />
-                  <AlertTitle>Payment Gateway Not Configured</AlertTitle>
+                  <AlertTitle>Payment Gateway Not Configured for {envString}</AlertTitle>
                   <AlertDescription>
-                      The application's payment processing is not yet set up. The `NEXT_PUBLIC_PAYPAL_CLIENT_ID` is missing from the `.env` file. Please add your PayPal Sandbox or Production Client ID to proceed.
+                      The application's payment processing is not yet set up. The `{missingVar}` is missing from the `.env` file. Please add your PayPal Client ID to proceed.
                   </AlertDescription>
               </Alert>
           </div>

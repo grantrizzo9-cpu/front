@@ -2,20 +2,25 @@
 import { NextResponse } from 'next/server';
 import { subscriptionTiers } from '@/lib/data';
 
-// Determine the PayPal API base URL based on the environment
-const useSandbox = process.env.PAYPAL_SANDBOX === 'true';
+// --- SAFER DEFAULTS ---
+// The application now defaults to using the SANDBOX environment.
+// To use your live PayPal account, you must set PAYPAL_SANDBOX="false" in your deployment environment variables (e.g., in Netlify).
+const useSandbox = process.env.PAYPAL_SANDBOX !== 'false';
+
 const PAYPAL_API_BASE = useSandbox 
     ? "https://api-m.sandbox.paypal.com"
     : "https://api-m.paypal.com";
 
 // This function gets an access token from PayPal
 async function getPayPalAccessToken() {
-    const clientId = process.env.PAYPAL_CLIENT_ID;
-    const clientSecret = process.env.PAYPAL_CLIENT_SECRET;
-    const env = useSandbox ? 'SANDBOX' : 'PRODUCTION';
+    const env = useSandbox ? 'SANDBOX' : 'LIVE';
+    
+    // Select credentials based on the environment
+    const clientId = useSandbox ? process.env.PAYPAL_SANDBOX_CLIENT_ID : process.env.PAYPAL_LIVE_CLIENT_ID;
+    const clientSecret = useSandbox ? process.env.PAYPAL_SANDBOX_CLIENT_SECRET : process.env.PAYPAL_LIVE_CLIENT_SECRET;
 
     if (!clientId || !clientSecret || clientId.includes('REPLACE_WITH') || clientSecret.includes('REPLACE_WITH')) {
-        const errorMsg = `Your server-side PayPal API credentials are not configured. The 'PAYPAL_CLIENT_ID' and 'PAYPAL_CLIENT_SECRET' are missing from the .env file. Please get your ${env} API credentials from the PayPal Developer Dashboard and add them to your .env file to proceed.`;
+        const errorMsg = `Your ${env} PayPal API credentials are not configured. The 'PAYPAL_${env}_CLIENT_ID' and 'PAYPAL_${env}_CLIENT_SECRET' variables are missing from your environment. Please add them from your PayPal Developer Dashboard to proceed.`;
         console.error(errorMsg);
         throw new Error(errorMsg);
     }
@@ -35,7 +40,7 @@ async function getPayPalAccessToken() {
     if (!response.ok || !data.access_token) {
         console.error("PAYPAL_TOKEN_ERROR:", JSON.stringify(data, null, 2));
          if (data.error === 'invalid_client') {
-            throw new Error(`PayPal client authentication failed. This means your PAYPAL_CLIENT_ID or PAYPAL_CLIENT_SECRET in the .env file is incorrect for the ${env} environment. Please double-check your credentials from the PayPal Developer Dashboard. Raw error: ${data.error_description}`);
+            throw new Error(`PayPal client authentication failed. Your PAYPAL_${env}_CLIENT_ID or PAYPAL_${env}_CLIENT_SECRET is incorrect for the ${env} environment. Please double-check your credentials.`);
         }
         throw new Error(`Failed to authenticate with PayPal. Response: ${JSON.stringify(data)}`);
     }
@@ -44,7 +49,7 @@ async function getPayPalAccessToken() {
 
 
 export async function POST(request: Request) {
-  const environment = useSandbox ? 'SANDBOX' : 'PRODUCTION';
+  const environment = useSandbox ? 'SANDBOX' : 'LIVE';
   console.log(`PayPal API route called. Using ${environment} environment.`);
 
   try {
@@ -59,14 +64,17 @@ export async function POST(request: Request) {
         return NextResponse.json({ success: false, error: `Subscription tier with id '${planId}' not found.` }, { status: 404 });
       }
 
-      if (!tier.paypalPlanId || tier.paypalPlanId.includes('REPLACE_WITH')) {
-        const errorMsg = `The PayPal Plan ID for the '${tier.name}' plan is not configured in src/lib/data.ts. Please create a plan in your PayPal ${environment} account and add the ID.`;
+      // Select the correct PayPal Plan ID based on the environment
+      const paypalPlanId = useSandbox ? tier.paypalPlanId_Sandbox : tier.paypalPlanId_Live;
+
+      if (!paypalPlanId || paypalPlanId.includes('REPLACE_WITH')) {
+        const errorMsg = `The PayPal Plan ID for the '${tier.name}' plan is not configured for the ${environment} environment in src/lib/data.ts. Please create a plan in your PayPal account and add the ID.`;
         console.error(errorMsg);
         return NextResponse.json({ success: false, error: errorMsg }, { status: 500 });
       }
 
       const payload = {
-        plan_id: tier.paypalPlanId,
+        plan_id: paypalPlanId,
         custom_id: customId, // Pass the Firebase UID
       };
 
@@ -89,7 +97,7 @@ export async function POST(request: Request) {
         });
         const issue = subData.details?.[0]?.issue || subData.name || "SUBSCRIPTION_CREATION_FAILED";
         const description = subData.details?.[0]?.description || subData.message || "An error occurred.";
-        return NextResponse.json({ success: false, error: `PayPal Error for plan '${tier.name}': ${issue}`, debug: `${description} (Hint: This often happens if the Plan ID for the '${tier.name}' tier does not exist or is misconfigured in your PayPal ${environment} account.)` }, { status: subResponse.status });
+        return NextResponse.json({ success: false, error: `PayPal Error: ${issue}`, debug: `${description} (Hint: This often happens if the Plan ID for the '${tier.name}' tier does not exist or is misconfigured in your PayPal ${environment} account.)` }, { status: subResponse.status });
       }
 
       return NextResponse.json({ success: true, subscriptionId: subData.id });
