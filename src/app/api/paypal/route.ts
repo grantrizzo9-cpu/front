@@ -3,15 +3,16 @@ import { NextResponse } from 'next/server';
 import { subscriptionTiers } from '@/lib/data';
 
 // Determine the PayPal API base URL based on the environment
-const PAYPAL_API_BASE = process.env.NODE_ENV === 'production' 
-    ? "https://api-m.paypal.com" 
-    : "https://api-m.sandbox.paypal.com";
+const useSandbox = process.env.PAYPAL_SANDBOX === 'true';
+const PAYPAL_API_BASE = useSandbox 
+    ? "https://api-m.sandbox.paypal.com"
+    : "https://api-m.paypal.com";
 
 // This function gets an access token from PayPal
 async function getPayPalAccessToken() {
     const clientId = process.env.PAYPAL_CLIENT_ID;
     const clientSecret = process.env.PAYPAL_CLIENT_SECRET;
-    const env = process.env.NODE_ENV === 'production' ? 'PRODUCTION' : 'SANDBOX';
+    const env = useSandbox ? 'SANDBOX' : 'PRODUCTION';
 
     if (!clientId || !clientSecret || clientId.includes('REPLACE_WITH') || clientSecret.includes('REPLACE_WITH')) {
         const errorMsg = `Your server-side PayPal API credentials are not configured. The 'PAYPAL_CLIENT_ID' and 'PAYPAL_CLIENT_SECRET' are missing from the .env file. Please get your ${env} API credentials from the PayPal Developer Dashboard and add them to your .env file to proceed.`;
@@ -43,7 +44,7 @@ async function getPayPalAccessToken() {
 
 
 export async function POST(request: Request) {
-  const environment = process.env.NODE_ENV === 'production' ? 'PRODUCTION' : 'SANDBOX';
+  const environment = useSandbox ? 'SANDBOX' : 'PRODUCTION';
   console.log(`PayPal API route called. Using ${environment} environment.`);
 
   try {

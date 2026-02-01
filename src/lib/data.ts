@@ -1,16 +1,28 @@
 
 import type { SubscriptionTier, Referral, Payout, AdminPayout } from './types';
 
-// IMPORTANT: For PayPal integration to work, you must create a separate "Plan" in your 
-// PayPal Developer Dashboard (Sandbox) for EACH subscription tier listed below. 
-// Each plan must have the correct daily price. Once created, copy the unique Plan ID 
-// (it starts with "P-...") and paste it into the corresponding `paypalPlanId` field.
+// --- IMPORTANT PAYPAL SETUP ---
+//
+// To process payments, you must create a subscription "Plan" in your PayPal Developer Dashboard
+// for EACH of the subscription tiers listed below. This must be done for BOTH your Sandbox and 
+// Production environments.
+//
+// 1. Sandbox Environment (for testing):
+//    - Go to your PayPal Developer Dashboard -> Sandbox -> Subscriptions -> Subscription plans.
+//    - Create a plan for each tier with the exact daily price.
+//    - Copy the Plan ID (starts with "P-...") and paste it into the `paypalPlanId` field below.
+//
+// 2. Production Environment (for going live):
+//    - When you are ready to accept real payments, you must repeat the process in your LIVE account.
+//    - You will then need to update the `paypalPlanId` values below with your LIVE Plan IDs.
+//    - You will also need to update the `PAYPAL_SANDBOX` variable in your .env file to "false".
+//
+// The current values are placeholder SANDBOX IDs.
 export const subscriptionTiers: SubscriptionTier[] = [
   {
     id: 'starter',
     name: 'Starter',
     price: 4.95,
-    // Example: 'P-1234567890ABCDEFG' - Replace with your actual Sandbox Plan ID for the Starter tier.
     paypalPlanId: 'P-11976043Y1636863PNF67FXA', 
     description: 'Launch your affiliate journey with these essential tools.',
     guideAccessLevel: 'starter',
@@ -29,7 +41,6 @@ export const subscriptionTiers: SubscriptionTier[] = [
     id: 'plus',
     name: 'Plus',
     price: 19.95,
-    // Replace with your actual Sandbox Plan ID for the Plus tier.
     paypalPlanId: 'P-1EG68235K3435163JNF7SDFA',
     description: 'Everything in Starter, plus more power and speed.',
     guideAccessLevel: 'plus',
@@ -49,7 +60,6 @@ export const subscriptionTiers: SubscriptionTier[] = [
     id: 'pro',
     name: 'Pro',
     price: 49.95,
-    // Replace with your actual Sandbox Plan ID for the Pro tier.
     paypalPlanId: 'P-5W037679NJ177610XNF7SEFQ',
     description: 'Everything in Pro, with professional tools for serious affiliates.',
     guideAccessLevel: 'pro',
@@ -71,7 +81,6 @@ export const subscriptionTiers: SubscriptionTier[] = [
     id: 'business',
     name: 'Business',
     price: 99.95,
-    // Replace with your actual Sandbox Plan ID for the Business tier.
     paypalPlanId: 'P-6JG346243U749934ENF7SFSA',
     description: 'Everything in Pro, with business tools for established agencies.',
     guideAccessLevel: 'business',
@@ -93,7 +102,6 @@ export const subscriptionTiers: SubscriptionTier[] = [
     id: 'scale',
     name: 'Scale',
     price: 299.95,
-    // Replace with your actual Sandbox Plan ID for the Scale tier.
     paypalPlanId: 'P-9SY225236J3759335NF7SGRQ',
     description: 'Everything in Scale, plus tools for scaling your operations.',
     guideAccessLevel: 'scale',
@@ -115,7 +123,6 @@ export const subscriptionTiers: SubscriptionTier[] = [
     id: 'enterprise',
     name: 'Enterprise',
     price: 499.95,
-    // Replace with your actual Sandbox Plan ID for the Enterprise tier.
     paypalPlanId: 'P-5Y2152619Y596201DNF7SHLI',
     description: 'Everything in Scale, plus enterprise-grade tools for power-users.',
     guideAccessLevel: 'enterprise',
