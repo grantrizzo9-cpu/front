@@ -22,6 +22,11 @@ export default function AiWebsitePage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedTheme, setSelectedTheme] = useState<WebsiteTheme | null>(null);
+  const [hasMounted, setHasMounted] = useState(false);
+
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
   
   const affiliateLink = user?.displayName ? `https://hostproai.com/?ref=${user.displayName.toLowerCase()}` : '#';
 
@@ -273,7 +278,8 @@ ${themeColorsCss}
         </div>
     </footer>
     <script>
-      document.getElementById('copyright-year').textContent = new Date().getFullYear();
+      const el = document.getElementById('copyright-year');
+      if (el) el.textContent = new Date().getFullYear();
     </script>
 </body>
 </html>
@@ -349,6 +355,20 @@ ${themeColorsCss}
     }
     return null; // Should not happen in the new flow
   };
+
+  if (!hasMounted) {
+    return (
+      <div className="space-y-8">
+        <div>
+          <h1 className="text-3xl font-bold font-headline">AI Website Generator</h1>
+          <p className="text-muted-foreground">
+            Instantly create a personalized, high-converting affiliate website.
+          </p>
+        </div>
+        <WebsitePreviewSkeleton />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8">
@@ -439,6 +459,8 @@ const WebsitePreview = ({ site, onCopyHomepage, onCopyLegal, getHomepageHtml, af
         toast({ title: 'Copied to Clipboard!', description: `Homepage HTML has been copied.` });
     }, [site, affiliateLink, getHomepageHtml]);
     
+    const { toast } = useToast();
+
     return (
     <Tabs defaultValue="preview" className="col-span-full">
         <div className="flex justify-between items-center pr-1">
@@ -504,16 +526,15 @@ const WebsitePreviewSkeleton = () => (
     <Card className="col-span-full">
         <CardHeader>
             <Skeleton className="h-8 w-1/2" />
+            <Skeleton className="h-4 w-3/4" />
         </CardHeader>
         <CardContent>
             <div className="w-full h-[600px] flex items-center justify-center bg-secondary/30 rounded-lg">
                 <div className="text-center text-muted-foreground space-y-2">
                     <Loader2 className="w-12 h-12 mx-auto animate-spin" />
-                    <p>Building your preview...</p>
+                    <p>Loading generator...</p>
                 </div>
             </div>
         </CardContent>
     </Card>
 );
-
-    
