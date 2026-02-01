@@ -72,7 +72,7 @@ export const subscriptionTiers: SubscriptionTier[] = [
     name: 'Business',
     price: 99.95,
     // Replace with your actual Sandbox Plan ID for the Business tier.
-    paypalPlanId: 'REPLACE_WITH_BUSINESS_PLAN_ID',
+    paypalPlanId: 'P-6JG346243U749934ENF7SFSA',
     description: 'Everything in Pro, with business tools for established agencies.',
     guideAccessLevel: 'business',
     features: [
