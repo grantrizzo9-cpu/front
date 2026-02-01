@@ -53,7 +53,7 @@ export async function POST(request: Request) {
       }
 
       if (!tier.paypalPlanId || tier.paypalPlanId.includes('REPLACE_WITH')) {
-        const errorMsg = `The PayPal Plan ID for the '${planId}' plan is not configured in src/lib/data.ts. Please add your Sandbox Plan ID for testing or your Live Plan ID for production.`;
+        const errorMsg = `The PayPal Plan ID for the '${planId}' plan is not configured in src/lib/data.ts. Please create a plan in your PayPal ${environment} account and add the ID.`;
         console.error(errorMsg);
         return NextResponse.json({ success: false, error: errorMsg }, { status: 500 });
       }
@@ -82,7 +82,7 @@ export async function POST(request: Request) {
         });
         const issue = subData.details?.[0]?.issue || subData.name || "SUBSCRIPTION_CREATION_FAILED";
         const description = subData.details?.[0]?.description || subData.message || "An error occurred.";
-        return NextResponse.json({ success: false, error: `PayPal Error: ${issue}`, debug: `${description} (Hint: This often happens if the Plan ID, which should start with 'P-...', does not exist in your PayPal ${environment} account.)` }, { status: subResponse.status });
+        return NextResponse.json({ success: false, error: `PayPal Error for plan '${tier.name}': ${issue}`, debug: `${description} (Hint: This often happens if the Plan ID for the '${tier.name}' tier does not exist or is misconfigured in your PayPal ${environment} account.)` }, { status: subResponse.status });
       }
 
       return NextResponse.json({ success: true, subscriptionId: subData.id });
