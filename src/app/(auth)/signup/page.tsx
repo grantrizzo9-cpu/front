@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { subscriptionTiers } from "@/lib/data";
 import { Loader2, Users } from "lucide-react";
@@ -27,16 +27,24 @@ function SignupFormComponent() {
     const { toast } = useToast();
     const auth = useAuth();
     const firestore = useFirestore();
-    const searchParams = useSearchParams();
 
     const [username, setUsername] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [isProcessing, setIsProcessing] = useState(false);
     const [errors, setErrors] = useState({ username: '', email: '', password: '' });
+
+    const [planId, setPlanId] = useState('starter');
+    const [referralCode, setReferralCode] = useState<string | null>(null);
+
+    useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        const plan = params.get('plan');
+        const ref = params.get('ref');
+        if (plan) setPlanId(plan);
+        if (ref) setReferralCode(ref);
+    }, []);
     
-    const planId = searchParams.get("plan") || 'starter';
-    const referralCode = searchParams.get("ref");
     const plan = subscriptionTiers.find(p => p.id === planId) || subscriptionTiers[0];
 
     useEffect(() => {
@@ -63,7 +71,6 @@ function SignupFormComponent() {
         if (referralCode) {
             const referrerUsernameDoc = await getDoc(doc(firestore, "usernames", referralCode.toLowerCase()));
             if (referrerUsernameDoc.exists()) {
-                // Use optional chaining for safety, although uid should always exist.
                 referrerUid = referrerUsernameDoc.data()?.uid ?? null;
             }
         }
@@ -83,7 +90,6 @@ function SignupFormComponent() {
         const usernameDocForWriteRef = doc(firestore, "usernames", finalUsername);
         batch.set(usernameDocForWriteRef, { uid: user.uid });
 
-        // If there was a referrer, create the referral document in their subcollection
         if (referrerUid) {
             const referralDocRef = doc(collection(firestore, 'users', referrerUid, 'referrals'), user.uid);
             const referralData = {
@@ -95,10 +101,10 @@ function SignupFormComponent() {
                 planPurchased: plan.name,
                 grossSale: 0,
                 commission: 0,
-                status: 'paid' as const, // 'paid' because commission is 0
+                status: 'paid' as const,
                 activationStatus: 'pending' as const,
                 date: serverTimestamp(),
-                subscriptionId: user.uid, // Using user's UID as a unique ID for this
+                subscriptionId: user.uid,
             };
             batch.set(referralDocRef, referralData);
         }

@@ -6,12 +6,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth, useFirestore } from "@/firebase";
 import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { doc, getDoc, writeBatch, serverTimestamp, collection } from "firebase/firestore";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Loader2 } from "lucide-react";
 import { subscriptionTiers } from "@/lib/data";
 
@@ -25,9 +25,19 @@ export default function LoginPage() {
   const { toast } = useToast();
   const auth = useAuth();
   const firestore = useFirestore();
-  const searchParams = useSearchParams();
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+
+  const [planId, setPlanId] = useState('starter');
+  const [referralCode, setReferralCode] = useState<string | null>(null);
+
+  useEffect(() => {
+      const params = new URLSearchParams(window.location.search);
+      const plan = params.get('plan');
+      const ref = params.get('ref');
+      if (plan) setPlanId(plan);
+      if (ref) setReferralCode(ref);
+  }, []);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -75,15 +85,11 @@ export default function LoginPage() {
         const userDocRef = doc(firestore, "users", user.uid);
         const userDoc = await getDoc(userDocRef);
         
-        const planId = searchParams.get("plan") || 'starter';
         const plan = subscriptionTiers.find(p => p.id === planId) || subscriptionTiers[0];
-        const referralCode = searchParams.get("ref");
-
 
         if (!userDoc.exists()) {
             const batch = writeBatch(firestore);
             
-            // Create a unique, lowercase username
             let finalUsername = (user.displayName || user.email?.split('@')[0] || `user${user.uid.substring(0,5)}`).replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
             const usernameDocRef = doc(firestore, "usernames", finalUsername);
             const usernameDoc = await getDoc(usernameDocRef);
@@ -104,7 +110,7 @@ export default function LoginPage() {
                 id: user.uid,
                 email: user.email,
                 username: finalUsername,
-                referredBy: referrerUid, // Correctly set the referrer's UID
+                referredBy: referrerUid,
                 isAffiliate: true,
                 createdAt: serverTimestamp(),
                 subscription: {
@@ -118,7 +124,6 @@ export default function LoginPage() {
             };
             batch.set(userDocRef, newUserDocData);
 
-             // If there was a referrer, create the referral document in their subcollection
             if (referrerUid) {
                 const referralDocRef = doc(collection(firestore, 'users', referrerUid, 'referrals'), user.uid);
                 const referralData = {
@@ -130,10 +135,10 @@ export default function LoginPage() {
                     planPurchased: plan.name,
                     grossSale: 0,
                     commission: 0,
-                    status: 'paid' as const, // 'paid' because commission is 0
+                    status: 'paid' as const,
                     activationStatus: 'pending' as const,
                     date: serverTimestamp(),
-                    subscriptionId: user.uid, // Using user's UID as a unique ID for this
+                    subscriptionId: user.uid,
                 };
                 batch.set(referralDocRef, referralData);
             }
