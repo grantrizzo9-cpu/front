@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useMemo, useState } from 'react';
@@ -12,16 +13,8 @@ import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { useAdmin } from '@/hooks/use-admin';
 import { Badge } from '@/components/ui/badge';
-import Image from 'next/image';
-import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
-
-// Helper function to find a guide image.
-const getGuideImage = (guide: Guide) => {
-    return PlaceHolderImages.find(p => p.id === guide.imageId);
-};
-
 
 export default function GuidesPage() {
   const { user, isUserLoading } = useUser();
@@ -37,7 +30,6 @@ export default function GuidesPage() {
   const { data: userData, isLoading: isUserDataLoading } = useDoc<UserType>(userDocRef);
 
   const { currentTier, accessibleGuides } = useMemo(() => {
-    // Admin gets all guides
     if (isAdmin) {
       const adminTier = subscriptionTiers.find(t => t.id === 'enterprise');
       return { currentTier: adminTier, accessibleGuides: allGuides };
@@ -76,10 +68,10 @@ export default function GuidesPage() {
     const affiliateLink = `https://hostproai.com/?ref=${userData.username}`;
     const placeholder = 'https://hostproai.com/?ref=[YOUR_USERNAME_HERE]';
     
-    // A safe way to do a global replace for a URL-like string
-    return selectedGuide.content.split(placeholder).join(
-        `<a href="${affiliateLink}" target="_blank" rel="noopener noreferrer" class="font-semibold text-primary hover:underline break-all">${affiliateLink}</a>`
-    );
+    const linkifiedPlaceholder = `<a href="${affiliateLink}" target="_blank" rel="noopener noreferrer" class="font-semibold text-primary hover:underline break-all">${affiliateLink}</a>`;
+    
+    return selectedGuide.content.split(placeholder).join(linkifiedPlaceholder);
+
   }, [selectedGuide, userData?.username]);
 
   const handleDownload = (guide: Guide) => {
@@ -112,7 +104,6 @@ export default function GuidesPage() {
     );
   }
 
-  // NO SUBSCRIPTION VIEW: If not admin and no subscription exists.
   if (!isAdmin && !userData?.subscription) {
       return (
           <div className="space-y-8">
@@ -146,28 +137,15 @@ export default function GuidesPage() {
 
         {/* Unlocked Guides */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {accessibleGuides.map((guide) => {
-            const guideImage = getGuideImage(guide);
-            return (
+          {accessibleGuides.map((guide) => (
               <Card key={guide.title} className="flex flex-col">
-                <div className="relative h-40 w-full bg-muted">
-                    {guideImage && (
-                        <Image
-                            src={guideImage.imageUrl}
-                            alt={guide.title}
-                            data-ai-hint={guideImage.imageHint}
-                            fill
-                            className="object-cover rounded-t-lg"
-                        />
-                    )}
-                </div>
                 <CardHeader>
                     <CardTitle className="flex items-start justify-between gap-2">
                         <span className="font-headline text-lg">{guide.title}</span>
                         <Badge variant="outline" className="capitalize flex-shrink-0">{guide.level}</Badge>
                     </CardTitle>
-                    <CardDescription className="line-clamp-2 pt-2">
-                        {guide.content.replace(/<[^>]+>/g, '').substring(0, 100)}...
+                    <CardDescription className="line-clamp-3 pt-2">
+                        {guide.content.replace(/<[^>]+>/g, '').substring(0, 120)}...
                     </CardDescription>
                 </CardHeader>
                 <CardFooter className="mt-auto">
@@ -178,32 +156,18 @@ export default function GuidesPage() {
                     </DialogTrigger>
                 </CardFooter>
               </Card>
-            );
-          })}
-           {lockedGuides.map((guide) => {
-            const guideImage = getGuideImage(guide);
-            return (
-              <Card key={guide.title} className="flex flex-col relative overflow-hidden">
-                <div className="relative h-40 w-full">
-                    {guideImage && (
-                        <Image
-                            src={guideImage.imageUrl}
-                            alt={guide.title}
-                            data-ai-hint={guideImage.imageHint}
-                            fill
-                            className="object-cover rounded-t-lg filter grayscale"
-                        />
-                    )}
-                     <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                        <Lock className="h-8 w-8 text-white" />
-                    </div>
+            ))}
+           {lockedGuides.map((guide) => (
+              <Card key={guide.title} className="flex flex-col relative overflow-hidden bg-muted/50">
+                 <div className="absolute inset-0 bg-background/30 flex items-center justify-center z-10">
+                    <Lock className="h-8 w-8 text-foreground/50" />
                 </div>
                 <CardHeader>
                     <CardTitle className="flex items-start justify-between gap-2">
                         <span className="font-headline text-lg text-muted-foreground">{guide.title}</span>
                          <Badge variant="secondary" className="capitalize flex-shrink-0">{guide.level}</Badge>
                     </CardTitle>
-                    <CardDescription className="line-clamp-2 pt-2 text-muted-foreground">
+                    <CardDescription className="line-clamp-3 pt-2 text-muted-foreground">
                         Upgrade to the {guide.level} plan or higher to unlock this guide.
                     </CardDescription>
                 </CardHeader>
@@ -215,8 +179,7 @@ export default function GuidesPage() {
                     </Button>
                 </CardFooter>
               </Card>
-            );
-          })}
+            ))}
         </div>
       </div>
       

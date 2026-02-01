@@ -28,7 +28,7 @@ export const allGuides: Guide[] = [
         <h3>Step 2: Launch Your Website (Next 2 Hours)</h3>
         <p>This is the easy part. Our platform is built for speed.</p>
         <ul>
-            <li><strong>Sign Up:</strong> If you haven't already, sign up for an Affiliate AI Host plan using this link: <strong>https://hostproai.com/?ref=rentahost</strong></li>
+            <li><strong>Sign Up:</strong> If you haven't already, sign up for an Affiliate AI Host plan using this link: <strong>https://hostproai.com/?ref=[YOUR_USERNAME_HERE]</strong></li>
             <li><strong>Connect Domain:</strong> Follow our "Pre-Launch Checklist" guide to connect your domain to our hosting. While you wait for it to go live, you can start on the next step.</li>
         </ul>
 
@@ -97,7 +97,7 @@ export const allGuides: Guide[] = [
       <p>This is the most important piece of the puzzle. Your affiliate link is what tells us you sent a customer.</p>
       <ol>
         <li>Go to your <a href="/dashboard/settings" target="_blank" class="text-primary font-semibold hover:underline">Affiliate Settings Page</a>.</li>
-        <li>Copy your unique affiliate link. It will look like this: <code>https://hostproai.com/?ref=[your-username]</code></li>
+        <li>Copy your unique affiliate link. It will look like this: <code>https://hostproai.com/?ref=[YOUR_USERNAME_HERE]</code></li>
         <li>Paste this link into a notepad or text file. You'll need it in a moment.</li>
       </ol>
       
@@ -318,7 +318,7 @@ export const allGuides: Guide[] = [
             <p>I’ve recommended Affiliate AI Host, but I wanted to show you *why* it's the engine behind my own affiliate business.</p>
             <p>It’s not just about the incredible 70-75% daily commissions. It’s about the tools that make earning them easier. My favorite feature is the <strong>AI Content Generator</strong>.</p>
             <p>If you want to see the platform and tools I use every day, you can check it out here:</p>
-            <p><a href="https://hostproai.com/?ref=rentahost" target="_blank" rel="noopener noreferrer"><strong>https://hostproai.com/?ref=rentahost</strong></a></p>
+            <p><a href="https://hostproai.com/?ref=[YOUR_USERNAME_HERE]" target="_blank" rel="noopener noreferrer"><strong>https://hostproai.com/?ref=[YOUR_USERNAME_HERE]</strong></a></p>
             <p>It’s worth a look just to see how the platform is structured for affiliate success.</p>
             <p>Best,</p>
             <p>Grant Rizzoli</p>
@@ -340,7 +340,7 @@ export const allGuides: Guide[] = [
             </ul>
             </p>
             <p>To post a review, you need a website. If you're ready to build your first real online asset, this is the platform I recommend to get it done fast:</p>
-            <p><a href="https://hostproai.com/?ref=rentahost" target="_blank" rel="noopener noreferrer"><strong>https://hostproai.com/?ref=rentahost</strong></a></p>
+            <p><a href="https://hostproai.com/?ref=[YOUR_USERNAME_HERE]" target="_blank" rel="noopener noreferrer"><strong>https://hostproai.com/?ref=[YOUR_USERNAME_HERE]</strong></a></p>
             <p>Cheers,</p>
             <p>Grant Rizzoli</p>
         </blockquote>
@@ -354,7 +354,7 @@ export const allGuides: Guide[] = [
             <p>Let's break down the real power of this affiliate program. The "Pro" plan costs $49.95/day. Your commission is 70%. That's <strong>$34.96 per day... from a single referral.</strong></p>
             <p>Now, imagine you refer just <strong>5 people</strong> who choose that plan. That's over $5,200 a month, paid out to your PayPal account automatically, every single day.</p>
             <p>This isn't a get-rich-quick scheme. It's simple, powerful math.</p>
-            <p>Want to start your own daily income stream? <a href="https://hostproai.com/?ref=rentahost" target="_blank" rel="noopener noreferrer" class="text-primary font-semibold hover:underline"><strong>Click here to see the plans and get started.</strong></a></p>
+            <p>Want to start your own daily income stream? <a href="https://hostproai.com/?ref=[YOUR_USERNAME_HERE]" target="_blank" rel="noopener noreferrer" class="text-primary font-semibold hover:underline"><strong>Click here to see the plans and get started.</strong></a></p>
             <p>Best,</p>
             <p>Grant Rizzoli</p>
         </blockquote>
@@ -367,7 +367,7 @@ export const allGuides: Guide[] = [
             <p>Hi there,</p>
             <p>I want to share a quick story about Sarah. She was new to affiliate marketing and frustrated with slow, monthly payouts. She signed up for Affiliate AI Host, paid her one-time activation fee, and got to work.</p>
             <p>She used the AI tools to write a few posts and promote them. Within a week, she got her first two referrals. After their trial, she saw her first commission in her PayPal. Then another the next day. And the next.</p>
-            <p>That daily motivation is powerful. You can follow the exact same path. It all starts with the right platform. <a href="https://hostproai.com/?ref=rentahost" target="_blank" rel="noopener noreferrer" class="text-primary font-semibold hover:underline"><strong>Get the same tools Sarah used right here.</strong></a></p>
+            <p>That daily motivation is powerful. You can follow the exact same path. It all starts with the right platform. <a href="https://hostproai.com/?ref=[YOUR_USERNAME_HERE]" target="_blank" rel="noopener noreferrer" class="text-primary font-semibold hover:underline"><strong>Get the same tools Sarah used right here.</strong></a></p>
             <p>Talk soon,</p>
             <p>Grant Rizzoli</p>
         </blockquote>
@@ -381,7 +381,7 @@ export const allGuides: Guide[] = [
             <p>It’s been about a week since you downloaded the launch checklist. If you haven't started yet, what's holding you back?</p>
             <p>Maybe you're worried it's not for you. That's why there's a <strong>24-hour, no-questions-asked refund policy</strong> on the one-time activation fee. You can try it with zero risk.</p>
             <p>The opportunity to build a daily income stream is right in front of you. The best time to start was yesterday. The second-best time is now.</p>
-            <p><a href="https://hostproai.com/?ref=rentahost" target="_blank" rel="noopener noreferrer" class="text-primary font-semibold hover:underline"><strong>Click Here to Create Your Account & Launch Your Affiliate Business Today.</strong></a></p>
+            <p><a href="https://hostproai.com/?ref=[YOUR_USERNAME_HERE]" target="_blank" rel="noopener noreferrer" class="text-primary font-semibold hover:underline"><strong>Click Here to Create Your Account & Launch Your Affiliate Business Today.</strong></a></p>
             <p>This is your moment. Don't let it pass you by.</p>
             <p>To your success,</p>
             <p>Grant Rizzoli</p>
@@ -411,3 +411,4 @@ export const allGuides: Guide[] = [
     `
   }
 ];
+
