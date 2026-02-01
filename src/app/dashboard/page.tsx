@@ -5,7 +5,7 @@ import { StatCard } from "@/components/stat-card";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { format } from "date-fns";
-import { DollarSign, Users, BarChart, BrainCircuit, ArrowRight, Loader2, TrendingUp, Info, UserCheck, UserPlus, AlertCircle } from "lucide-react";
+import { DollarSign, Users, BrainCircuit, ArrowRight, Loader2, TrendingUp, Info, UserCheck, UserPlus, AlertCircle, HardDrive } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import Link from 'next/link';
 import { Button } from "@/components/ui/button";
@@ -15,6 +15,8 @@ import { collection, collectionGroup, doc } from "firebase/firestore";
 import { useAdmin } from "@/hooks/use-admin";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useMemo } from "react";
+import { subscriptionTiers } from "@/lib/data";
+import { Progress } from "@/components/ui/progress";
 
 export default function DashboardPage() {
   const { user, isUserLoading } = useUser();
@@ -93,20 +95,18 @@ export default function DashboardPage() {
   );
 
   // --- Personal Stats (for the logged-in user, admin or not) ---
-   const { personalTotalCommission, personalTotalReferrals, personalUnpaidCommissions, personalGrossSalesValue } = useMemo(() => {
+   const { personalTotalCommission, personalTotalReferrals, personalUnpaidCommissions } = useMemo(() => {
       if (!personalReferrals || personalReferrals.length === 0) {
-          return { personalTotalCommission: 0, personalTotalReferrals: 0, personalUnpaidCommissions: 0, personalGrossSalesValue: 0 };
+          return { personalTotalCommission: 0, personalTotalReferrals: 0, personalUnpaidCommissions: 0 };
       }
 
       const totalCommission = personalReferrals.reduce((sum, r) => sum + (r.commission || 0), 0);
       const unpaidCommissions = personalReferrals.filter(r => r.status === 'unpaid').reduce((sum, r) => sum + (r.commission || 0), 0);
-      const grossSales = personalReferrals.reduce((sum, r) => sum + (r.grossSale || 0), 0);
-
+      
       return {
           personalTotalCommission: totalCommission,
           personalTotalReferrals: personalReferrals.length,
           personalUnpaidCommissions: unpaidCommissions,
-          personalGrossSalesValue: grossSales,
       };
   }, [personalReferrals]);
 
@@ -115,6 +115,31 @@ export default function DashboardPage() {
   const isSubscriptionInactive = userData?.subscription?.status === 'inactive';
   const trialEndDate = userData?.subscription?.trialEndDate?.toDate();
   const isTrialActive = userData?.subscription?.status === 'active' && trialEndDate && trialEndDate > new Date();
+
+  const userTier = useMemo(() => subscriptionTiers.find(t => t.id === userData?.subscription?.tierId), [userData]);
+
+  const { totalStorage, usedStorage, usagePercentage } = useMemo(() => {
+    if (!userTier) return { totalStorage: 0, usedStorage: 0, usagePercentage: 0 };
+    
+    const parseStorage = (storageString: string | undefined): number => {
+      if (!storageString) return 0;
+      const match = storageString.match(/(\d+\.?\d*)\s*(GB|TB)/i);
+      if (!match) return 0;
+      let value = parseFloat(match[1]);
+      const unit = match[2].toUpperCase();
+      if (unit === 'TB') {
+          value *= 1000; // Convert TB to GB
+      }
+      return value;
+    };
+    
+    const storageFeature = userTier.features.find(f => f.includes('GB') || f.includes('TB'));
+    const total = storageFeature ? parseStorage(storageFeature) : 0;
+    const used = 4.72; // Mocked value
+    const percentage = total > 0 ? (used / total) * 100 : 0;
+
+    return { totalStorage: total, usedStorage: used, usagePercentage: percentage };
+  }, [userTier]);
 
   if (initialLoading) {
       return (
@@ -179,7 +204,7 @@ export default function DashboardPage() {
                              <StatCard
                                 title="Total Gross Sales"
                                 value={`$${totalGrossSales.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
-                                icon={<BarChart />}
+                                icon={<TrendingUp />}
                                 description="Gross value of all completed sales on the platform."
                             />
                              <StatCard
@@ -302,12 +327,22 @@ export default function DashboardPage() {
                 icon={<Users />}
                 description="Users who signed up using your link."
             />
-            <StatCard
-                title="Your Gross Sales Value"
-                value={`$${personalGrossSalesValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
-                icon={<BarChart />}
-                description="Gross value of recurring sales from your referrals."
-            />
+             <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Storage Usage</CardTitle>
+                    <HardDrive className="h-5 w-5 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                    <div className="text-2xl font-bold">{totalStorage > 0 ? `${totalStorage} GB` : 'N/A'}</div>
+                    <p className="text-xs text-muted-foreground">
+                        {userTier?.name} Plan
+                    </p>
+                </CardContent>
+                <CardFooter className="flex-col items-start gap-2 pt-0">
+                    <Progress value={usagePercentage} aria-label={`${usagePercentage.toFixed(0)}% used`} />
+                    <p className="text-xs text-muted-foreground">{usedStorage} GB of {totalStorage} GB used</p>
+                </CardFooter>
+            </Card>
             <StatCard
                 title="Your Unpaid Commissions"
                 value={`$${personalUnpaidCommissions.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}

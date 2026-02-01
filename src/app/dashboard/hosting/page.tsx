@@ -159,7 +159,7 @@ export default function HostingPage() {
                 <CardHeader>
                     <div className="flex items-center gap-3">
                          <div className="flex-shrink-0 w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-bold">3</div>
-                         <CardTitle>Connect Your Domain to Firebase</CardTitle>
+                         <CardTitle>Connect Your Domain to Your Host</CardTitle>
                     </div>
                     <CardDescription>
                        To take your site live, you'll need to update its DNS records at your registrar.
@@ -188,7 +188,7 @@ export default function HostingPage() {
                          <CardTitle>Final Status</CardTitle>
                     </div>
                     <CardDescription>
-                        This status reflects the information saved in our app. For live status, always check the Firebase Console.
+                        This status reflects the information saved in our app. For live status, always check the Hosting Console.
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="flex flex-col items-center justify-center text-center gap-4 py-8">
@@ -200,7 +200,7 @@ export default function HostingPage() {
                                     <>
                                         <Badge className="bg-amber-500 text-white hover:bg-amber-500">Pending Verification</Badge>
                                         <p className="text-sm text-muted-foreground max-w-sm">
-                                            The system is waiting for your DNS records to be verified by Firebase. Check the Firebase Console and our Pre-Launch guide for details.
+                                            The system is waiting for your DNS records to be verified. Check the Hosting Console and our Pre-Launch guide for details.
                                         </p>
                                     </>
                                 );
