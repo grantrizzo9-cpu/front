@@ -1,9 +1,9 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/card';
 import { useToast } from '@/hooks/use-toast';
 import { generateWebsite, type GenerateWebsiteOutput } from '@/ai/flows/website-generator';
 import { Loader2, AlertTriangle, Wand2, ArrowRight, Copy, Eye, Code } from 'lucide-react';
@@ -12,8 +12,6 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import Link from 'next/link';
 
 export default function AiWebsitePage() {
   const { toast } = useToast();
@@ -54,42 +52,13 @@ export default function AiWebsitePage() {
       setIsLoading(false);
     }
   };
-
-  const toHtml = (content: string) => {
-      return content.split('\n').filter(p => p.trim() !== '').map(p => `<p>${p.trim()}</p>`).join('\n');
-  }
-
-  const copyLegalPageHtml = (content: string, title: string) => {
-    const fullHtml = `
-      <!DOCTYPE html>
-      <html lang="en">
-      <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>${title}</title>
-        <style>
-          body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; color: #333; max-width: 800px; margin: 0 auto; padding: 20px; background-color: #f8f9fa; }
-          .container { background-color: #fff; padding: 2rem; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-          h1, h2 { color: #1a1a1a; }
-          h1 { font-size: 2.5rem; margin-bottom: 2rem; }
-          h2 { font-size: 1.75rem; margin-top: 2.5rem; margin-bottom: 1rem; border-bottom: 1px solid #eee; padding-bottom: 0.5rem;}
-        </style>
-      </head>
-      <body>
-        <div class="container">
-            <h1>${title}</h1>
-            ${toHtml(content)}
-        </div>
-      </body>
-      </html>
-    `;
-    navigator.clipboard.writeText(fullHtml);
-    toast({ title: 'Copied to Clipboard!', description: `${title} page HTML has been copied.` });
-  };
   
-  const copyHomepageHtml = () => {
-      if (!generatedSite) return;
-      const { homepage } = generatedSite;
+  const getHomepageHtml = useCallback((site: GenerateWebsiteOutput, link: string) => {
+      const { homepage, theme } = site;
+      
+      const themeColorsCss = Object.entries(theme.colors)
+          .map(([key, value]) => `    ${key}: ${value};`)
+          .join('\n');
       
       const navLinksHtml = homepage.navLinks.map(link => `<li><a href="${link.href}">${link.text}</a></li>`).join('');
 
@@ -134,7 +103,7 @@ export default function AiWebsitePage() {
           <a href="disclaimer.html">Disclaimer</a>
       `;
 
-      const fullHtml = `
+      return `
 <!DOCTYPE html>
 <html lang="en" style="scroll-behavior: smooth;">
 <head>
@@ -143,14 +112,7 @@ export default function AiWebsitePage() {
     <title>${homepage.title}</title>
     <style>
         :root {
-            --primary-color: #8B5CF6; /* Vibrant Violet */
-            --secondary-color: #EC4899; /* Vibrant Pink */
-            --background-color: #F5F3FF; /* Light Violet */
-            --card-background: #FFFFFF;
-            --text-color: #1F2937;
-            --muted-color: #6B7280;
-            --font-body: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            --font-headline: 'Space Grotesk', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+${themeColorsCss}
         }
         body { 
             font-family: var(--font-body); margin: 0; padding: 0; background-color: var(--background-color); color: var(--text-color); 
@@ -167,16 +129,21 @@ export default function AiWebsitePage() {
         a { color: var(--primary-color); text-decoration: none; }
         .btn { display: inline-block; background-color: var(--primary-color); color: white; padding: 14px 28px; font-size: 1rem; font-weight: 600; border-radius: 8px; text-decoration: none; transition: all 0.3s; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
         .btn:hover { background-color: var(--secondary-color); transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0,0,0,0.12); }
+        .hero .btn, .final-cta .btn { color: var(--background-color); background-color: var(--card-background); }
+        .hero .btn:hover, .final-cta .btn:hover { opacity: 0.9; }
 
         /* Header */
         header.main-header {
             position: sticky; top: 0; background: rgba(255,255,255,0.8); backdrop-filter: blur(10px); z-index: 100; border-bottom: 1px solid #E5E7EB;
         }
         header .container { display: flex; align-items: center; justify-content: space-between; height: 72px; }
-        .logo { font-size: 1.25rem; font-weight: 700; font-family: var(--font-headline); }
+        .logo { font-size: 1.25rem; font-weight: 700; font-family: var(--font-headline); color: var(--text-color); }
         .main-nav ul { list-style: none; margin: 0; padding: 0; display: flex; gap: 1.5rem; }
         .main-nav a { font-weight: 500; color: var(--muted-color); transition: color 0.2s; }
         .main-nav a:hover { color: var(--text-color); }
+        header.main-header {
+            background: color-mix(in srgb, var(--card-background) 80%, transparent);
+        }
 
         /* Hero */
         .hero { text-align: center; padding: 80px 0; background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); color: white; }
@@ -186,6 +153,7 @@ export default function AiWebsitePage() {
 
         /* Sections */
         .section-alt { background-color: var(--card-background); }
+        body[data-theme="dark"] .section-alt { background-color: color-mix(in srgb, var(--background-color) 70%, white); }
 
         /* Features */
         .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem; }
@@ -206,6 +174,7 @@ export default function AiWebsitePage() {
         .testimonials-grid { display: grid; grid-template-columns: 1fr; gap: 1.5rem; }
         @media(min-width: 768px) { .testimonials-grid { grid-template-columns: repeat(3, 1fr); } }
         .testimonial-card { background: var(--card-background); padding: 2rem; border-radius: 12px; border: 1px solid #E5E7EB; }
+        body[data-theme="dark"] .testimonial-card { border-color: color-mix(in srgb, var(--background-color) 50%, white); }
         .testimonial-text { font-style: italic; color: var(--muted-color); }
         .testimonial-author { margin-top: 1.5rem; }
         .author-name { font-weight: 600; }
@@ -214,6 +183,7 @@ export default function AiWebsitePage() {
         /* FAQ */
         .faq-container { max-width: 768px; margin: 0 auto; }
         .faq-item { border-bottom: 1px solid #E5E7EB; padding: 1rem 0; }
+        body[data-theme="dark"] .faq-item { border-color: color-mix(in srgb, var(--background-color) 50%, white); }
         .faq-item summary { font-size: 1.1rem; font-weight: 600; cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center; }
         .faq-item summary::-webkit-details-marker { display: none; }
         .faq-item summary::after { content: '+'; font-size: 1.5rem; font-weight: 400; transition: transform 0.2s; color: var(--primary-color); }
@@ -227,7 +197,8 @@ export default function AiWebsitePage() {
 
         /* Footer */
         footer { padding: 40px 20px; text-align: center; border-top: 1px solid #E5E7EB; margin-top: 60px; background: var(--card-background); }
-        .footer-logo { font-size: 1.25rem; font-weight: 700; font-family: var(--font-headline); margin-bottom: 1rem; }
+        body[data-theme="dark"] footer { border-color: color-mix(in srgb, var(--background-color) 50%, white); }
+        .footer-logo { font-size: 1.25rem; font-weight: 700; font-family: var(--font-headline); margin-bottom: 1rem; color: var(--text-color); }
         .footer-links { margin-bottom: 1rem; }
         .footer-links a { margin: 0 0.75rem; font-weight: 500; color: var(--muted-color); transition: color 0.2s; }
         .footer-links a:hover { color: var(--text-color); }
@@ -237,13 +208,13 @@ export default function AiWebsitePage() {
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
 </head>
-<body>
+<body data-theme="${theme.name === 'Midnight Glow' ? 'dark': 'light'}">
 
     <header class="main-header">
         <div class="container">
             <div class="logo">${homepage.title}</div>
             <nav class="main-nav"><ul>${navLinksHtml}</ul></nav>
-            <a href="${affiliateLink}" class="btn">Sign Up</a>
+            <a href="${link}" class="btn">Sign Up</a>
         </div>
     </header>
 
@@ -252,7 +223,7 @@ export default function AiWebsitePage() {
             <div class="container">
                 <h1>${homepage.headline}</h1>
                 <p>${homepage.subheadline}</p>
-                <a href="${affiliateLink}" class="btn">${homepage.ctaButtonText}</a>
+                <a href="${link}" class="btn">${homepage.ctaButtonText}</a>
             </div>
         </section>
 
@@ -283,7 +254,7 @@ export default function AiWebsitePage() {
         <section id="final-cta" class="final-cta container">
             <h2>${homepage.finalCtaHeadline}</h2>
             <p>${homepage.finalCtaSubheadline}</p>
-            <a href="${affiliateLink}" class="btn">${homepage.finalCtaButtonText}</a>
+            <a href="${link}" class="btn">${homepage.finalCtaButtonText}</a>
         </section>
     </main>
     
@@ -298,9 +269,57 @@ export default function AiWebsitePage() {
 </body>
 </html>
     `;
-    navigator.clipboard.writeText(fullHtml);
-    toast({ title: 'Copied to Clipboard!', description: `Homepage HTML has been copied.` });
+  }, []);
+
+  const toHtml = (content: string) => {
+      return content.split('\n').filter(p => p.trim() !== '').map(p => `<p>${p.trim()}</p>`).join('\n');
   }
+
+  const copyHomepageHtml = useCallback(() => {
+    if (!generatedSite) return;
+    const html = getHomepageHtml(generatedSite, affiliateLink);
+    navigator.clipboard.writeText(html);
+    toast({ title: 'Copied to Clipboard!', description: `Homepage HTML has been copied.` });
+  }, [generatedSite, affiliateLink, getHomepageHtml, toast]);
+
+  const copyLegalPageHtml = useCallback((content: string, title: string) => {
+    if (!generatedSite) return;
+    const { theme } = generatedSite;
+      
+    const themeColorsCss = Object.entries(theme.colors)
+        .map(([key, value]) => `    ${key}: ${value};`)
+        .join('\n');
+
+    const fullHtml = `
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>${title}</title>
+        <style>
+          :root { 
+            ${themeColorsCss}
+          }
+          body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; color: var(--text-color); max-width: 800px; margin: 0 auto; padding: 20px; background-color: var(--background-color); }
+          .container { background-color: var(--card-background); padding: 2rem; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+          h1, h2 { color: var(--text-color); }
+          h1 { font-size: 2.5rem; margin-bottom: 2rem; }
+          h2 { font-size: 1.75rem; margin-top: 2.5rem; margin-bottom: 1rem; border-bottom: 1px solid #eee; padding-bottom: 0.5rem;}
+        </style>
+      </head>
+      <body>
+        <div class="container">
+            <h1>${title}</h1>
+            ${toHtml(content)}
+        </div>
+      </body>
+      </html>
+    `;
+    navigator.clipboard.writeText(fullHtml);
+    toast({ title: 'Copied to Clipboard!', description: `${title} page HTML has been copied.` });
+  }, [generatedSite, toast]);
+
 
   const renderContent = () => {
     if (isLoading) {
@@ -324,7 +343,7 @@ export default function AiWebsitePage() {
       );
     }
     if (generatedSite) {
-      return <WebsitePreview site={generatedSite} onCopyHomepage={copyHomepageHtml} onCopyLegal={copyLegalPageHtml} affiliateLink={affiliateLink} />;
+      return <WebsitePreview site={generatedSite} onCopyHomepage={copyHomepageHtml} onCopyLegal={copyLegalPageHtml} getHomepageHtml={getHomepageHtml} affiliateLink={affiliateLink} />;
     }
     return (
       <div className="col-span-full flex flex-col items-center justify-center text-center text-muted-foreground bg-secondary/30 rounded-lg p-12 min-h-[400px]">
@@ -348,7 +367,7 @@ export default function AiWebsitePage() {
         <CardHeader>
           <CardTitle>Launch Your Site</CardTitle>
           <CardDescription>
-            The AI will generate a unique homepage and all necessary legal pages for you, embedded with your affiliate link.
+            The AI will generate a unique homepage and all necessary legal pages for you, embedded with your affiliate link. A new random color theme will be applied with each generation.
           </CardDescription>
         </CardHeader>
         <CardFooter>
@@ -368,8 +387,13 @@ export default function AiWebsitePage() {
 }
 
 // Preview Component
-const WebsitePreview = ({ site, onCopyHomepage, onCopyLegal, affiliateLink }: { site: GenerateWebsiteOutput, onCopyHomepage: () => void, onCopyLegal: (content: string, title: string) => void, affiliateLink: string }) => {
-    const { homepage } = site;
+const WebsitePreview = ({ site, onCopyHomepage, onCopyLegal, getHomepageHtml, affiliateLink }: { site: GenerateWebsiteOutput, onCopyHomepage: () => void, onCopyLegal: (content: string, title: string) => void, getHomepageHtml: (site: GenerateWebsiteOutput, link: string) => string, affiliateLink: string }) => {
+    
+    const iframeSrcDoc = useMemo(() => {
+        if (!site) return '';
+        return getHomepageHtml(site, affiliateLink);
+    }, [site, affiliateLink, getHomepageHtml]);
+    
     return (
     <Tabs defaultValue="preview" className="col-span-full">
         <div className="flex justify-between items-center pr-1">
@@ -377,109 +401,14 @@ const WebsitePreview = ({ site, onCopyHomepage, onCopyLegal, affiliateLink }: { 
                 <TabsTrigger value="preview"><Eye className="mr-2" /> Preview</TabsTrigger>
                 <TabsTrigger value="code"><Code className="mr-2" /> Get HTML</TabsTrigger>
             </TabsList>
+             <p className="text-sm text-muted-foreground">Theme: <span className="font-semibold text-foreground">{site.theme.name}</span></p>
         </div>
 
         <TabsContent value="preview">
-            <Card>
-                <CardHeader>
-                    <CardTitle>{homepage.title}</CardTitle>
-                </CardHeader>
-                <CardContent className="border-t divide-y">
-                    {/* Hero */}
-                    <div className="bg-gradient-to-r from-violet-500 to-pink-500 text-white rounded-lg p-8 text-center mt-6">
-                        <h1 className="text-4xl font-bold font-headline text-white">{homepage.headline}</h1>
-                        <p className="mt-4 text-xl text-violet-100">{homepage.subheadline}</p>
-                        <Button size="lg" className="mt-8 bg-white text-primary hover:bg-gray-100" asChild>
-                            <a href={affiliateLink} target="_blank" rel="noopener noreferrer">
-                                {homepage.ctaButtonText} <ArrowRight className="ml-2" />
-                            </a>
-                        </Button>
-                    </div>
-                    {/* Features */}
-                    <div className="py-12">
-                        <h2 className="text-3xl font-bold font-headline text-center mb-8">{homepage.featuresHeadline}</h2>
-                        <div className="grid md:grid-cols-3 gap-8 text-center">
-                            {homepage.features.map(feature => (
-                                <div key={feature.title}>
-                                    <span className="text-4xl">{feature.icon}</span>
-                                    <h3 className="text-lg font-semibold mt-2">{feature.title}</h3>
-                                    <p className="text-muted-foreground mt-2">{feature.description}</p>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                    {/* How it works */}
-                    <div className="py-12 bg-secondary/50 -mx-6 px-6">
-                        <h2 className="text-3xl font-bold font-headline text-center mb-10">{homepage.howItWorksHeadline}</h2>
-                        <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
-                            {homepage.howItWorksSteps.map((step, i) => (
-                                <div key={step.title} className="flex gap-4">
-                                     <div className="flex-shrink-0 w-10 h-10 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-bold text-lg">{i + 1}</div>
-                                     <div>
-                                        <h3 className="font-semibold text-lg">{step.title}</h3>
-                                        <p className="text-muted-foreground mt-1 text-sm">{step.description}</p>
-                                     </div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                    {/* Testimonials */}
-                    <div className="py-12">
-                        <h2 className="text-3xl font-bold font-headline text-center mb-8">{homepage.testimonialsHeadline}</h2>
-                        <div className="grid lg:grid-cols-3 gap-8">
-                            {homepage.testimonials.map(testimonial => (
-                                <Card key={testimonial.name}>
-                                    <CardContent className="pt-6">
-                                        <p className="italic">"{testimonial.text}"</p>
-                                    </CardContent>
-                                    <CardFooter>
-                                        <div>
-                                            <p className="font-semibold">{testimonial.name}</p>
-                                            <p className="text-sm text-muted-foreground">{testimonial.role}</p>
-                                        </div>
-                                    </CardFooter>
-                                </Card>
-                            ))}
-                        </div>
-                    </div>
-                    {/* FAQ */}
-                    <div className="py-12 bg-secondary/50 -mx-6 px-6">
-                         <h2 className="text-3xl font-bold font-headline text-center mb-8">{homepage.faqHeadline}</h2>
-                         <div className="max-w-3xl mx-auto">
-                            <Accordion type="single" collapsible>
-                                {homepage.faqs.map((faq, i) => (
-                                    <AccordionItem value={`item-${i}`} key={i}>
-                                        <AccordionTrigger className="text-lg text-left">{faq.question}</AccordionTrigger>
-                                        <AccordionContent className="text-base">{faq.answer}</AccordionContent>
-                                    </AccordionItem>
-                                ))}
-                            </Accordion>
-                         </div>
-                    </div>
-                     {/* Final CTA */}
-                    <div className="py-12 text-center">
-                        <h2 className="text-3xl font-bold font-headline">{homepage.finalCtaHeadline}</h2>
-                        <p className="mt-4 text-lg text-muted-foreground mx-auto max-w-2xl">{homepage.finalCtaSubheadline}</p>
-                        <Button size="lg" className="mt-8" asChild>
-                            <a href={affiliateLink} target="_blank" rel="noopener noreferrer">
-                                {homepage.finalCtaButtonText} <ArrowRight className="ml-2" />
-                            </a>
-                        </Button>
-                    </div>
-                </CardContent>
-                 {/* Footer Preview */}
-                <CardFooter className="flex-col items-start gap-4 bg-muted/20 p-8 border-t">
-                    <h3 className="text-lg font-bold font-headline">{homepage.title}</h3>
-                    <div className="flex gap-4 text-sm">
-                        <span className="text-muted-foreground hover:text-foreground">Terms</span>
-                        <span className="text-muted-foreground hover:text-foreground">Privacy</span>
-                        <span className="text-muted-foreground hover:text-foreground">Disclaimer</span>
-                    </div>
-                    <div className="text-xs text-muted-foreground space-y-1">
-                        <p>&copy; {new Date().getFullYear()}. All rights reserved.</p>
-                        <p>This is an independent affiliate website. We may earn a commission from purchases made through links on this site.</p>
-                    </div>
-                </CardFooter>
+            <Card className="overflow-hidden">
+                <div className="w-full h-[600px] bg-background">
+                    <iframe srcDoc={iframeSrcDoc} className="w-full h-full border-0" title="Website Preview" />
+                </div>
             </Card>
         </TabsContent>
         <TabsContent value="code">
@@ -494,7 +423,7 @@ const WebsitePreview = ({ site, onCopyHomepage, onCopyLegal, affiliateLink }: { 
                             <h3 className="font-semibold">Homepage (index.html)</h3>
                             <Button variant="outline" size="sm" onClick={onCopyHomepage}><Copy className="mr-2 h-4 w-4"/> Copy HTML</Button>
                         </div>
-                        <Textarea readOnly value={`<html>... (Full homepage code) ...</html>`} className="font-mono text-xs" rows={3}/>
+                        <Textarea readOnly value={`<html>... (Full homepage code for '${site.homepage.title}') ...</html>`} className="font-mono text-xs" rows={3}/>
                     </div>
                     <div className="space-y-2">
                         <div className="flex justify-between items-center">
@@ -531,36 +460,11 @@ const WebsitePreviewSkeleton = () => (
         <CardHeader>
             <Skeleton className="h-8 w-1/2" />
         </CardHeader>
-        <CardContent className="border-t divide-y">
-            <div className="p-8 text-center mt-6 space-y-4">
-                <Skeleton className="h-12 w-3/4 mx-auto" />
-                <Skeleton className="h-6 w-full max-w-md mx-auto" />
-                <Skeleton className="h-12 w-48 mx-auto" />
-            </div>
-            <div className="py-12">
-                 <Skeleton className="h-8 w-1/3 mx-auto mb-8" />
-                <div className="grid md:grid-cols-3 gap-8 text-center">
-                    {[...Array(3)].map((_, i) => (
-                        <div key={i} className="space-y-2">
-                            <Skeleton className="h-10 w-10 mx-auto rounded-full" />
-                            <Skeleton className="h-6 w-3/4 mx-auto" />
-                            <Skeleton className="h-4 w-full mx-auto" />
-                            <Skeleton className="h-4 w-5/6 mx-auto" />
-                        </div>
-                    ))}
-                </div>
-            </div>
-             <div className="py-12">
-                 <Skeleton className="h-8 w-1/3 mx-auto mb-8" />
-                <div className="grid lg:grid-cols-3 gap-8">
-                     {[...Array(3)].map((_, i) => (
-                        <div key={i} className="space-y-4 p-4 border rounded-lg">
-                            <Skeleton className="h-4 w-full" />
-                            <Skeleton className="h-4 w-5/6" />
-                            <Skeleton className="h-4 w-full" />
-                             <Skeleton className="h-8 w-1/2 mt-4" />
-                        </div>
-                    ))}
+        <CardContent>
+            <div className="w-full h-[600px] flex items-center justify-center bg-secondary/30 rounded-lg">
+                <div className="text-center text-muted-foreground space-y-2">
+                    <Loader2 className="w-12 h-12 mx-auto animate-spin" />
+                    <p>Building your preview...</p>
                 </div>
             </div>
         </CardContent>
