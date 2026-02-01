@@ -94,10 +94,10 @@ export default function HostingPage() {
                 <CardHeader>
                     <div className="flex items-center gap-3">
                          <div className="flex-shrink-0 w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-bold">1</div>
-                         <CardTitle>Enter Your Domain</CardTitle>
+                         <CardTitle>Register or Enter Your Domain</CardTitle>
                     </div>
                     <CardDescription>
-                       Enter the domain name you own. You can buy one from any registrar, like <a href="https://name.com" target="_blank" rel="noopener noreferrer" className="text-primary underline">Name.com</a> or Google Domains.
+                        Your custom domain is your identity on the web. It's how you build a memorable brand and establish credibility with your audience. We recommend using our trusted partner, <a href="https://name.com" target="_blank" rel="noopener noreferrer" className="text-primary font-semibold underline">Name.com</a>, to find and register the perfect domain for your new affiliate business. Make a name for yourself!
                     </CardDescription>
                 </CardHeader>
                 <CardContent>

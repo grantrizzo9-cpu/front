@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useMemo } from 'react';
@@ -39,7 +40,7 @@ const allGuides: Guide[] = [
         <p>A great domain name is memorable and relevant. Your niche is the specific audience you're targeting.</p>
         <ul>
             <li><strong>Brainstorm:</strong> List 10 domain names related to 'AI', 'hosting', 'affiliate', or 'passive income'.</li>
-            <li><strong>Check Availability:</strong> Use a registrar like Name.com to see if your top choices are available.</li>
+            <li><strong>Check Availability:</strong> Use our partner <a href="https://name.com" target="_blank" rel="noopener noreferrer" class="text-primary font-semibold hover:underline">Name.com</a> to see if your top choices are available.</li>
             <li><strong>Keep it Simple:</strong> Aim for a .com that's easy to say and spell.</li>
             <li><strong>Decision:</strong> Purchase your domain. This is your digital real estate!</li>
         </ul>
@@ -122,7 +123,7 @@ const allGuides: Guide[] = [
       <h3>Step 2: Buy Your Piece of the Internet (Your Domain Name)</h3>
       <p>A domain name makes you look professional. Telling someone to visit <code>www.bills-business.com</code> is much better than a long, complicated link.</p>
       <ol>
-        <li>Go to a domain registrar website. We recommend <a href="https://name.com" target="_blank" rel="noopener noreferrer" class="text-primary font-semibold hover:underline">Name.com</a> or <a href="https://domains.google" target="_blank" rel="noopener noreferrer" class="text-primary font-semibold hover:underline">Google Domains</a> because they are simple to use.</li>
+        <li>Go to our recommended domain registrar, <a href="https://name.com" target="_blank" rel="noopener noreferrer" class="text-primary font-semibold hover:underline">Name.com</a>, to find your perfect domain. Their process is simple and we'll guide you through connecting it.</li>
         <li>Search for a domain name. Try to include words like 'AI', 'hosting', 'reviews', 'affiliate', or your own name.</li>
         <li>Choose a <code>.com</code> if you can. It's the most recognized.</li>
         <li>Buy the domain! It usually costs about $10-15 for a whole year. You now own that piece of the internet.</li>
@@ -131,7 +132,7 @@ const allGuides: Guide[] = [
       <h3>Step 3: The Secret Weapon (Domain Forwarding)</h3>
       <p>This is where the magic happens. You're going to tell your new domain name to "forward" any visitors to your affiliate link.</p>
       <ol>
-        <li>In your domain registrar's account (like Name.com), find your new domain and look for a setting called <strong>"Forwarding"</strong>, "Domain Forwarding", or "Redirect". It's often in the DNS settings section.</li>
+        <li>In your domain registrar's account (at Name.com), find your new domain and look for a setting called <strong>"Forwarding"</strong>, "Domain Forwarding", or "Redirect". It's often in the DNS settings section.</li>
         <li>You will see a box that asks where you want to forward your domain to.</li>
         <li>Paste your "Golden Key" (your full affiliate link from Step 1) into this box.</li>
         <li>Make sure the forwarding type is set to **"Permanent (301)"** if you have the option.</li>
@@ -225,7 +226,7 @@ const allGuides: Guide[] = [
         <p>This is the most critical step. You need to point your domain (e.g., <code>hostproai.com</code>) to our cloud hosting servers.</p>
         <ol>
             <li><strong>Navigate to Firebase Hosting:</strong> Go to this specific URL for your project: <a href="https://console.firebase.google.com/project/affiliate-ai-host-new/hosting/custom-domains" target="_blank" rel="noopener noreferrer">Firebase Hosting Console</a>. Click "Add custom domain".</li>
-            <li><strong>Verify Ownership (TXT Record):</strong> The Firebase wizard will ask you to verify you own the domain. It will provide a <strong>TXT record</strong> value. Copy this value. Go to your domain registrar (the website where you purchased your domain), find its DNS settings, and add a new TXT record for your main domain (the host is usually '@'). Paste the value from Firebase and save. Wait for Firebase to verify it, which can take up to an hour.</li>
+            <li><strong>Verify Ownership (TXT Record):</strong> The Firebase wizard will ask you to verify you own the domain. It will provide a <strong>TXT record</strong> value. Copy this value. Go to your domain registrar (like <a href="https://name.com" target="_blank" rel="noopener noreferrer" class="text-primary hover:underline">Name.com</a>), find its DNS settings, and add a new TXT record for your main domain (the host is usually '@'). Paste the value from Firebase and save. Wait for Firebase to verify it, which can take up to an hour.</li>
             <li><strong>Go Live (A Records):</strong> After verification, Firebase will give you two <strong>A Records</strong> (IP addresses). Go back to your domain registrar's DNS settings. <strong>Delete any old A records</strong> for your root domain ('@') to prevent conflicts. Then, create two new A records, one for each IP address Firebase provided.</li>
         </ol>
         <p>Once these DNS changes propagate across the internet, your site will be live at your custom domain with a secure SSL certificate.</p>
@@ -456,8 +457,6 @@ export default function GuidesPage() {
     if (affiliateLink) {
       // Replace the full placeholder affiliate link (most common case)
       content = content.replace(/https:\/\/hostproai\.com\/\?ref=\[YOUR_USERNAME_HERE\]/g, affiliateLink);
-      // Replace the hardcoded 'rentahost' link from previous request
-      content = content.replace(/https:\/\/hostproai\.com\/\?ref=rentahost/g, affiliateLink);
     }
     
     // Also replace just the username placeholder if it exists on its own
