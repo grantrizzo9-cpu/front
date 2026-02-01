@@ -2,6 +2,7 @@
 
 "use client";
 
+import { useState, useEffect } from "react";
 import {
   Sidebar,
   SidebarHeader,
@@ -53,6 +54,12 @@ export function DashboardSidebar() {
   const { user, isUserLoading } = useUser();
   const auth = useAuth();
   const { isAdmin, isLoading: isAdminLoading } = useAdmin();
+  const [hasMounted, setHasMounted] = useState(false);
+
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
+
 
   const isActive = (path: string) => pathname === path;
 
@@ -126,7 +133,7 @@ export function DashboardSidebar() {
       <SidebarFooter>
         <div className="flex items-center gap-3">
            <Avatar>
-            {isUserLoading ? (
+            {isUserLoading || !hasMounted ? (
               <Skeleton className="h-10 w-10 rounded-full" />
             ) : (
               <>
@@ -138,7 +145,7 @@ export function DashboardSidebar() {
             )}
           </Avatar>
           <div className="flex-1 overflow-hidden">
-            {isUserLoading ? (
+            {isUserLoading || !hasMounted ? (
               <div className="space-y-1">
                 <Skeleton className="h-4 w-24" />
                 <Skeleton className="h-3 w-32" />
