@@ -6,7 +6,8 @@ function toHtmlParagraphs(content: string): string {
 }
 
 export function getHomepageHtml(site: GenerateWebsiteOutput, link: string): string {
-    const { homepage, theme } = site;
+    const { homepage, theme, username } = site;
+    const platformBaseUrl = 'https://hostproai.com';
       
     const themeColorsCss = Object.entries(theme.colors)
         .map(([key, value]) => `    ${key}: ${value};`)
@@ -49,10 +50,44 @@ export function getHomepageHtml(site: GenerateWebsiteOutput, link: string): stri
       </details>
     `).join('');
     
-    const footerLinksHtml = `
-        <a href="#" onclick="openModal('terms-modal', event)">Terms</a> |
-        <a href="#" onclick="openModal('privacy-modal', event)">Privacy</a> |
-        <a href="#" onclick="openModal('disclaimer-modal', event)">Disclaimer</a>
+    const footerHtml = `
+      <footer>
+        <div class="container">
+          <div class="footer-grid">
+            <div class="footer-col">
+              <div class="footer-logo">Affiliate AI Host</div>
+              <p class="footer-description">The future of affiliate marketing and web hosting, powered by AI.</p>
+            </div>
+            <div class="footer-col">
+              <h4>Platform</h4>
+              <ul>
+                <li><a href="${platformBaseUrl}/pricing?ref=${username}" target="_blank">Pricing</a></li>
+                <li><a href="${platformBaseUrl}/#features?ref=${username}" target="_blank">Features</a></li>
+                <li><a href="${platformBaseUrl}/#faq?ref=${username}" target="_blank">FAQ</a></li>
+                <li><a href="${platformBaseUrl}/login?ref=${username}" target="_blank">Login</a></li>
+              </ul>
+            </div>
+            <div class="footer-col">
+              <h4>Legal</h4>
+              <ul>
+                <li><a href="#" onclick="openModal('terms-modal', event)">Terms of Service</a></li>
+                <li><a href="#" onclick="openModal('privacy-modal', event)">Privacy Policy</a></li>
+                <li><a href="#" onclick="openModal('disclaimer-modal', event)">Disclaimer</a></li>
+              </ul>
+            </div>
+            <div class="footer-col">
+              <h4>Company</h4>
+              <ul>
+                <li><a href="${platformBaseUrl}/about?ref=${username}" target="_blank">About Us</a></li>
+                <li><a href="${platformBaseUrl}/contact?ref=${username}" target="_blank">Contact</a></li>
+              </ul>
+            </div>
+          </div>
+          <div class="footer-bottom">
+            <p>&copy; <span id="copyright-year"></span> Affiliate AI Host. All rights reserved.</p>
+          </div>
+        </div>
+      </footer>
     `;
 
     const modalsHtml = `
@@ -98,9 +133,10 @@ ${themeColorsCss}
         .container { max-width: 1100px; margin: 0 auto; padding: 0 20px; }
         section { padding: 60px 0; }
         @media(min-width: 768px) { section { padding: 80px 0; } }
-        h1, h2, h3 { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"; font-weight: 700; margin-top: 0; letter-spacing: -0.02em; color: var(--text-color)}
+        h1, h2, h3, h4 { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"; font-weight: 700; margin-top: 0; letter-spacing: -0.02em; color: var(--text-color)}
         h1 { font-size: 2.5rem; }
         h2 { font-size: 2.25rem; text-align: center; margin-bottom: 3rem; }
+        h4 { font-size: 1rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted-color); }
         @media(min-width: 768px) { h1 { font-size: 3.5rem; } h2 { font-size: 2.75rem; } }
         p { margin-top: 0; color: var(--muted-color); }
         a { color: var(--primary-color); text-decoration: none; }
@@ -171,12 +207,19 @@ ${themeColorsCss}
         @media(min-width: 768px) { .final-cta p { font-size: 1.25rem; } }
 
         /* Footer */
-        footer { padding: 40px 20px; text-align: center; border-top: 1px solid color-mix(in srgb, var(--border-color, var(--card-background)) 50%, transparent); margin-top: 60px; background: var(--card-background); }
-        .footer-logo { font-size: 1.25rem; font-weight: 700; margin-bottom: 1rem; color: var(--text-color); }
-        .footer-links { margin-bottom: 1rem; }
-        .footer-links a { margin: 0 0.75rem; font-weight: 500; color: var(--muted-color); transition: color 0.2s; cursor: pointer; }
-        .footer-links a:hover { color: var(--text-color); }
-        .footer-legal { font-size: 0.8rem; color: #9CA3AF; max-width: 500px; margin: 0.5rem auto 0; }
+        footer { padding: 60px 20px; border-top: 1px solid color-mix(in srgb, var(--border-color, var(--card-background)) 50%, transparent); margin-top: 60px; background: var(--card-background); }
+        .footer-grid { display: grid; grid-template-columns: 1fr; gap: 2.5rem; text-align: center;}
+        @media(min-width: 768px) { .footer-grid { grid-template-columns: 2fr 1fr 1fr 1fr; gap: 2rem; text-align: left; } }
+        .footer-col .footer-logo { font-size: 1.25rem; font-weight: 700; margin-bottom: 1rem; color: var(--text-color); }
+        .footer-col .footer-description { font-size: 0.9rem; max-width: 300px; margin: 0 auto; }
+        @media(min-width: 768px) { .footer-col .footer-description { margin: 0; } }
+        .footer-col h4 { margin-bottom: 1rem; }
+        .footer-col ul { list-style: none; padding: 0; margin: 0; }
+        .footer-col ul li { margin-bottom: 0.75rem; }
+        .footer-col ul a { color: var(--muted-color); font-weight: 500; font-size: 0.95rem; transition: color 0.2s; }
+        .footer-col ul a:hover { color: var(--text-color); }
+        .footer-bottom { border-top: 1px solid color-mix(in srgb, var(--border-color, var(--card-background)) 50%, transparent); margin-top: 3rem; padding-top: 2rem; text-align: center; font-size: 0.9rem; color: var(--muted-color); }
+
 
         /* Modal styles */
         .modal { display: none; position: fixed; z-index: 1001; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.6); animation: fadeIn 0.3s; }
@@ -238,14 +281,7 @@ ${themeColorsCss}
         </section>
     </main>
     
-    <footer>
-        <div class="container">
-            <div class="footer-logo">${homepage.title}</div>
-            <div class="footer-links">${footerLinksHtml}</div>
-            <p class="footer-legal">&copy; <span id="copyright-year"></span>. All rights reserved.</p>
-            <p class="footer-legal">This is an independent affiliate website. We may earn a commission from purchases made through links on this site.</p>
-        </div>
-    </footer>
+    ${footerHtml}
     
     ${modalsHtml}
 

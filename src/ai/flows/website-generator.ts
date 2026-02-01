@@ -80,6 +80,7 @@ const ColorThemeSchema = z.object({
 });
 
 const GenerateWebsiteOutputSchema = WebsiteContentSchema.extend({
+  username: z.string(),
   theme: z.object({
     name: z.string(),
     colors: ColorThemeSchema,
@@ -153,10 +154,11 @@ const websiteGeneratorFlow = ai.defineFlow(
                     privacy: '',
                     disclaimer: '',
                     theme: theme,
+                    username: input.username,
                     error: 'The AI model did not return any content.'
                 };
             }
-            return { ...output, theme: theme };
+            return { ...output, username: input.username, theme: theme };
         } catch (e: any) {
             console.error('Website Generation Error:', e);
             const rawErrorMessage = e.message || 'An unknown error occurred.';
@@ -168,6 +170,7 @@ const websiteGeneratorFlow = ai.defineFlow(
                     privacy: '',
                     disclaimer: '',
                     theme: theme,
+                    username: input.username,
                     error: `Authentication failed. The Gemini API Key you provided in the .env file appears to be invalid. Please double-check that you have copied the entire key correctly. If you just updated the key, you may need to restart the development server. Raw error: "${rawErrorMessage}"` };
             }
 
@@ -177,6 +180,7 @@ const websiteGeneratorFlow = ai.defineFlow(
                 privacy: '',
                 disclaimer: '',
                 theme: theme,
+                username: input.username,
                 error: `The connection to the AI service failed. This could be a network issue or a problem with your Google Cloud project setup. Please check your environment and configuration. Raw error: "${rawErrorMessage}"` };
         }
     }
