@@ -50,9 +50,33 @@ export function getHomepageHtml(site: GenerateWebsiteOutput, link: string): stri
     `).join('');
     
     const footerLinksHtml = `
-        <a href="terms.html">Terms</a> |
-        <a href="privacy.html">Privacy</a> |
-        <a href="disclaimer.html">Disclaimer</a>
+        <a href="#" onclick="openModal('terms-modal', event)">Terms</a> |
+        <a href="#" onclick="openModal('privacy-modal', event)">Privacy</a> |
+        <a href="#" onclick="openModal('disclaimer-modal', event)">Disclaimer</a>
+    `;
+
+    const modalsHtml = `
+        <div id="terms-modal" class="modal">
+          <div class="modal-content">
+            <span class="modal-close" onclick="closeModal('terms-modal')">&times;</span>
+            <h2>Terms of Service</h2>
+            ${toHtmlParagraphs(site.terms)}
+          </div>
+        </div>
+        <div id="privacy-modal" class="modal">
+          <div class="modal-content">
+            <span class="modal-close" onclick="closeModal('privacy-modal')">&times;</span>
+            <h2>Privacy Policy</h2>
+            ${toHtmlParagraphs(site.privacy)}
+          </div>
+        </div>
+        <div id="disclaimer-modal" class="modal">
+          <div class="modal-content">
+            <span class="modal-close" onclick="closeModal('disclaimer-modal')">&times;</span>
+            <h2>Earnings Disclaimer</h2>
+            ${toHtmlParagraphs(site.disclaimer)}
+          </div>
+        </div>
     `;
 
     return `
@@ -150,9 +174,18 @@ ${themeColorsCss}
         footer { padding: 40px 20px; text-align: center; border-top: 1px solid color-mix(in srgb, var(--border-color, var(--card-background)) 50%, transparent); margin-top: 60px; background: var(--card-background); }
         .footer-logo { font-size: 1.25rem; font-weight: 700; margin-bottom: 1rem; color: var(--text-color); }
         .footer-links { margin-bottom: 1rem; }
-        .footer-links a { margin: 0 0.75rem; font-weight: 500; color: var(--muted-color); transition: color 0.2s; }
+        .footer-links a { margin: 0 0.75rem; font-weight: 500; color: var(--muted-color); transition: color 0.2s; cursor: pointer; }
         .footer-links a:hover { color: var(--text-color); }
         .footer-legal { font-size: 0.8rem; color: #9CA3AF; max-width: 500px; margin: 0.5rem auto 0; }
+
+        /* Modal styles */
+        .modal { display: none; position: fixed; z-index: 1001; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.6); animation: fadeIn 0.3s; }
+        .modal-content { background-color: var(--card-background); color: var(--text-color); margin: 5% auto; padding: 30px; border: 1px solid var(--border-color, #eee); border-radius: 12px; width: 80%; max-width: 700px; position: relative; animation: slideIn 0.3s; }
+        .modal-content h2 { text-align: left; }
+        .modal-close { color: #aaa; position: absolute; top: 15px; right: 25px; font-size: 28px; font-weight: bold; cursor: pointer; }
+        .modal-close:hover, .modal-close:focus { color: var(--text-color); }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideIn { from { transform: translateY(-50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
     </style>
 </head>
 <body class="${theme.name === 'Midnight Glow' ? 'dark-theme' : 'light-theme'}">
@@ -213,51 +246,34 @@ ${themeColorsCss}
             <p class="footer-legal">This is an independent affiliate website. We may earn a commission from purchases made through links on this site.</p>
         </div>
     </footer>
+    
+    ${modalsHtml}
+
     <script>
       document.addEventListener('DOMContentLoaded', function() {
         const el = document.getElementById('copyright-year');
         if (el) el.textContent = new Date().getFullYear();
       });
+      function openModal(id, event) {
+        if(event) event.preventDefault();
+        document.getElementById(id).style.display = 'block';
+        document.body.style.overflow = 'hidden';
+      }
+      function closeModal(id) {
+        document.getElementById(id).style.display = 'none';
+        document.body.style.overflow = 'auto';
+      }
+      window.onclick = function(event) {
+        const modals = document.getElementsByClassName('modal');
+        for (let i = 0; i < modals.length; i++) {
+            if (event.target == modals[i]) {
+                modals[i].style.display = "none";
+                document.body.style.overflow = 'auto';
+            }
+        }
+      }
     </script>
 </body>
 </html>
     `;
 }
-
-export function getLegalPageHtml(content: string, title: string, site: GenerateWebsiteOutput): string {
-    const { theme } = site;
-      
-    const themeColorsCss = Object.entries(theme.colors)
-        .map(([key, value]) => `    ${key}: ${value};`)
-        .join('\n');
-
-    const fullHtml = `
-      <!DOCTYPE html>
-      <html lang="en">
-      <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>${title}</title>
-        <style>
-          :root { 
-            ${themeColorsCss}
-          }
-          body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; color: var(--text-color); max-width: 800px; margin: 0 auto; padding: 20px; background-color: var(--background-color); }
-          .container { background-color: var(--card-background); padding: 2rem; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-          h1, h2 { color: var(--text-color); }
-          h1 { font-size: 2.5rem; margin-bottom: 2rem; }
-          h2 { font-size: 1.75rem; margin-top: 2.5rem; margin-bottom: 1rem; border-bottom: 1px solid color-mix(in srgb, var(--border-color, var(--card-background)) 50%, transparent); padding-bottom: 0.5rem;}
-        </style>
-      </head>
-      <body>
-        <div class="container">
-            <h1>${title}</h1>
-            ${toHtmlParagraphs(content)}
-        </div>
-      </body>
-      </html>
-    `;
-    return fullHtml;
-}
-
-    

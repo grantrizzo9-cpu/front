@@ -11,7 +11,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
 import { websiteThemes, type WebsiteTheme } from '@/lib/data';
 import { cn } from '@/lib/utils';
-import { getHomepageHtml, getLegalPageHtml } from '@/lib/website-html-generator';
+import { getHomepageHtml } from '@/lib/website-html-generator';
 
 // Preview Component
 const WebsitePreview = ({ site, affiliateLink }: { site: GenerateWebsiteOutput, affiliateLink: string }) => {
@@ -35,7 +35,7 @@ const WebsitePreview = ({ site, affiliateLink }: { site: GenerateWebsiteOutput, 
                         srcDoc={previewHtml}
                         title="Website Preview"
                         className="w-full h-full"
-                        sandbox="allow-scripts allow-same-origin"
+                        sandbox="allow-scripts allow-same-origin allow-modals"
                     />
                 </div>
             </CardContent>
@@ -48,53 +48,22 @@ const WebsitePreview = ({ site, affiliateLink }: { site: GenerateWebsiteOutput, 
 const ExportWebsite = ({ site, affiliateLink }: { site: GenerateWebsiteOutput, affiliateLink: string }) => {
     const { toast } = useToast();
 
-    const copyHtml = useCallback((page: 'home' | 'terms' | 'privacy' | 'disclaimer') => {
-        let html = '';
-        let title = '';
-        switch (page) {
-            case 'home':
-                html = getHomepageHtml(site, affiliateLink);
-                title = 'Homepage';
-                break;
-            case 'terms':
-                html = getLegalPageHtml(site.terms, 'Terms of Service', site);
-                title = 'Terms of Service';
-                break;
-            case 'privacy':
-                html = getLegalPageHtml(site.privacy, 'Privacy Policy', site);
-                title = 'Privacy Policy';
-                break;
-            case 'disclaimer':
-                html = getLegalPageHtml(site.disclaimer, 'Earnings Disclaimer', site);
-                title = 'Earnings Disclaimer';
-                break;
-        }
+    const copyHtml = useCallback(() => {
+        const html = getHomepageHtml(site, affiliateLink);
         navigator.clipboard.writeText(html);
-        toast({ title: 'Copied to Clipboard!', description: `${title} HTML has been copied.` });
+        toast({ title: 'Copied to Clipboard!', description: `Your website's HTML has been copied.` });
     }, [site, affiliateLink, toast]);
     
     return (
         <Card>
             <CardHeader>
                 <CardTitle>Export Your Website</CardTitle>
-                <CardDescription>Copy the HTML for each page and upload them to your web host.</CardDescription>
+                <CardDescription>Copy the complete HTML for your single-page website.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
                  <div className="flex justify-between items-center p-3 border rounded-lg">
-                    <p className="font-semibold">Homepage</p>
-                    <Button variant="outline" size="sm" onClick={() => copyHtml('home')}><Copy className="mr-2 h-4 w-4"/> Copy index.html</Button>
-                </div>
-                <div className="flex justify-between items-center p-3 border rounded-lg">
-                    <p className="font-semibold">Terms of Service</p>
-                    <Button variant="outline" size="sm" onClick={() => copyHtml('terms')}><Copy className="mr-2 h-4 w-4"/> Copy terms.html</Button>
-                </div>
-                <div className="flex justify-between items-center p-3 border rounded-lg">
-                    <p className="font-semibold">Privacy Policy</p>
-                     <Button variant="outline" size="sm" onClick={() => copyHtml('privacy')}><Copy className="mr-2 h-4 w-4"/> Copy privacy.html</Button>
-                </div>
-                <div className="flex justify-between items-center p-3 border rounded-lg">
-                    <p className="font-semibold">Earnings Disclaimer</p>
-                    <Button variant="outline" size="sm" onClick={() => copyHtml('disclaimer')}><Copy className="mr-2 h-4 w-4"/> Copy disclaimer.html</Button>
+                    <p className="font-semibold">Your Website</p>
+                    <Button variant="outline" size="sm" onClick={copyHtml}><Copy className="mr-2 h-4 w-4"/> Copy index.html</Button>
                 </div>
             </CardContent>
             <CardFooter>
@@ -102,7 +71,7 @@ const ExportWebsite = ({ site, affiliateLink }: { site: GenerateWebsiteOutput, a
                     <UploadCloud className="h-4 w-4" />
                     <AlertTitle>How to Go Live</AlertTitle>
                     <AlertDescription>
-                        After copying the code for each page, create the corresponding `.html` files on your computer (e.g., `index.html`, `terms.html`). Paste the copied code into each file. Finally, upload these files to your web hosting provider to make your website visible to the world.
+                        After copying the code, create a file named `index.html` on your computer. Paste the copied code into this file and save it. Finally, upload this single `index.html` file to your web hosting provider to make your website visible to the world.
                     </AlertDescription>
                 </Alert>
             </CardFooter>
