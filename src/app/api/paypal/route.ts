@@ -41,7 +41,7 @@ export async function POST(request: Request) {
   console.log(`PayPal API route called. Using ${environment} environment.`);
 
   try {
-    const { action, planId, customId } = await request.json();
+    const { action, planId, customId, subscriptionId, reason } = await request.json();
     const accessToken = await getPayPalAccessToken();
 
     if (action === 'create_subscription') {
@@ -53,7 +53,7 @@ export async function POST(request: Request) {
       }
 
       if (!tier.paypalPlanId || tier.paypalPlanId.includes('REPLACE_WITH')) {
-        const errorMsg = `The PayPal Plan ID for the '${planId}' plan is not configured in src/lib/data.ts. Please create a plan in your PayPal ${environment} account and add the ID.`;
+        const errorMsg = `The PayPal Plan ID for the '${tier.name}' plan is not configured in src/lib/data.ts. Please create a plan in your PayPal ${environment} account and add the ID.`;
         console.error(errorMsg);
         return NextResponse.json({ success: false, error: errorMsg }, { status: 500 });
       }
@@ -86,6 +86,34 @@ export async function POST(request: Request) {
       }
 
       return NextResponse.json({ success: true, subscriptionId: subData.id });
+    }
+
+    if (action === 'cancel_subscription') {
+      if (!subscriptionId) {
+        return NextResponse.json({ success: false, error: "Subscription ID is required for cancellation." }, { status: 400 });
+      }
+
+      const cancelResponse = await fetch(`${PAYPAL_API_BASE}/v1/billing/subscriptions/${subscriptionId}/cancel`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({ reason: reason || 'User upgraded to a different plan.' }),
+      });
+
+      // PayPal returns 204 No Content on success
+      if (cancelResponse.status === 204) {
+        return NextResponse.json({ success: true, message: 'Subscription cancelled successfully.' });
+      } else {
+        const errorData = await cancelResponse.json();
+        console.error("PAYPAL_CANCEL_ERROR:", {
+            status: cancelResponse.status,
+            paypalResponse: errorData,
+            subscriptionId: subscriptionId,
+        });
+        return NextResponse.json({ success: false, error: `PayPal cancellation failed: ${errorData.message || 'Unknown error'}` }, { status: cancelResponse.status });
+      }
     }
 
     return NextResponse.json({ success: false, error: 'Invalid action specified.' }, { status: 400 });

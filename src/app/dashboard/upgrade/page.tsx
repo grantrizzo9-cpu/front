@@ -74,10 +74,12 @@ export default function UpgradePage() {
                 return responseData.subscriptionId;
             } else {
                 const errorMsg = responseData.debug || responseData.error || "Failed to create subscription on the server.";
+                setPaymentError(errorMsg);
                 throw new Error(errorMsg);
             }
         } catch (e: any) {
-            setPaymentError(`Network error or server is unreachable: ${e.message}`);
+            const errorMsg = `Network error or server is unreachable: ${e.message}`;
+            setPaymentError(errorMsg);
             return Promise.reject(e);
         }
     };
@@ -94,12 +96,40 @@ export default function UpgradePage() {
             const tier = subscriptionTiers.find(t => t.id === selectedTierId);
             if (!tier) throw new Error("Selected plan details not found after payment.");
             
+            const isUpgrade = userData.subscription?.status === 'active';
+            const oldSubscriptionId = userData.subscription?.paypalSubscriptionId;
+
+            // If this is an upgrade, cancel the old subscription first.
+            if (isUpgrade && oldSubscriptionId) {
+                console.log(`Cancelling old subscription: ${oldSubscriptionId}`);
+                const cancelResponse = await fetch('/api/paypal', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'cancel_subscription',
+                        subscriptionId: oldSubscriptionId,
+                        reason: `Upgrading to ${selectedTierId} plan.`
+                    }),
+                });
+
+                if (!cancelResponse.ok) {
+                    const errorData = await cancelResponse.json();
+                    console.warn("Failed to cancel old subscription, but proceeding with upgrade:", errorData.error || 'Unknown cancellation error');
+                    toast({
+                        variant: "default",
+                        title: "Upgrade Notice",
+                        description: "Your new plan is active, but we couldn't automatically cancel your old one. Please manage it in your PayPal account to avoid double billing.",
+                        duration: 10000,
+                    });
+                } else {
+                    console.log("Old subscription cancelled successfully.");
+                }
+            }
+            
             const batch = writeBatch(firestore);
             
             const trialEnd = new Date();
             trialEnd.setDate(trialEnd.getDate() + 3);
-
-            const isUpgrade = userData.subscription?.status === 'active';
 
             const newSubscriptionData = {
                 tierId: selectedTierId,
@@ -117,12 +147,10 @@ export default function UpgradePage() {
                 // Find the referral document in the referrer's subcollection.
                 const referralDocRef = doc(firestore, 'users', userData.referredBy, 'referrals', user.uid);
                 
-                // Update the referral doc to mark it 'activated' and record the sale.
-                // The commission is 0 because the platform owner keeps the activation fee.
                 batch.update(referralDocRef, { 
                     activationStatus: 'activated',
-                    grossSale: tier.price, // Record the activation fee as a gross sale.
-                    commission: 0,       // No commission is paid on the activation fee.
+                    grossSale: tier.price,
+                    commission: 0,
                 });
             }
             
@@ -140,9 +168,12 @@ export default function UpgradePage() {
     };
     
     const onError = (err: any) => {
-        const errorMsg = `A client-side error occurred with PayPal. This could be due to an invalid Client ID, network issue, or a problem with your PayPal account. Raw error: ${err.toString()}`;
-        console.error("PayPal onError callback triggered.", err);
-        setPaymentError(errorMsg);
+        // This error is now primarily set by createSubscription, but this is a good fallback.
+        if (!paymentError) {
+            const errorMsg = `A client-side error occurred with PayPal. Raw error: ${err.toString()}`;
+            console.error("PayPal onError callback triggered.", err);
+            setPaymentError(errorMsg);
+        }
         setIsProcessing(false);
     };
     
