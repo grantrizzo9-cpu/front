@@ -3,7 +3,7 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { generateWebsite, type GenerateWebsiteOutput } from '@/ai/flows/website-generator';
 import { Loader2, AlertTriangle, Wand2, Copy, CheckCircle } from 'lucide-react';
