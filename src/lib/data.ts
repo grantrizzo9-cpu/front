@@ -11,7 +11,7 @@ export const subscriptionTiers: SubscriptionTier[] = [
     name: 'Starter',
     price: 4.95,
     // Example: 'P-1234567890ABCDEFG' - Replace with your actual Sandbox Plan ID for the Starter tier.
-    paypalPlanId: 'REPLACE_WITH_STARTER_PLAN_ID', 
+    paypalPlanId: 'P-11976043Y1636863PNF67FXA', 
     description: 'Launch your affiliate journey with these essential tools.',
     guideAccessLevel: 'starter',
     features: [
