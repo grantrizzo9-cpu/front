@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, Suspense } from 'react';
+import { useState, Suspense, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -33,12 +33,27 @@ function SignupFormComponent() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [isProcessing, setIsProcessing] = useState(false);
+    const [errors, setErrors] = useState({ username: '', email: '', password: '' });
     
     const planId = searchParams.get("plan") || 'starter';
     const referralCode = searchParams.get("ref");
     const plan = subscriptionTiers.find(p => p.id === planId) || subscriptionTiers[0];
 
-    const isFormValid = username.length > 2 && email.includes('@') && password.length >= 6;
+    useEffect(() => {
+        const newErrors = { username: '', email: '', password: '' };
+        if (username.length > 0 && username.length <= 2) {
+            newErrors.username = "Username must be longer than 2 characters.";
+        }
+        if (password.length > 0 && password.length < 6) {
+            newErrors.password = "Password must be at least 6 characters.";
+        }
+        if (email.length > 0 && !/^\S+@\S+\.\S+$/.test(email)) {
+            newErrors.email = "Please enter a valid email address.";
+        }
+        setErrors(newErrors);
+    }, [username, email, password]);
+    
+    const isFormValid = username.length > 2 && /^\S+@\S+\.\S+$/.test(email) && password.length >= 6;
 
     const postSignupFlow = async (user: User, finalUsername: string) => {
         const batch = writeBatch(firestore);
@@ -48,7 +63,8 @@ function SignupFormComponent() {
         if (referralCode) {
             const referrerUsernameDoc = await getDoc(doc(firestore, "usernames", referralCode.toLowerCase()));
             if (referrerUsernameDoc.exists()) {
-                referrerUid = referrerUsernameDoc.data().uid;
+                // Use optional chaining for safety, although uid should always exist.
+                referrerUid = referrerUsernameDoc.data()?.uid ?? null;
             }
         }
 
@@ -162,14 +178,17 @@ function SignupFormComponent() {
                     <div className="space-y-2">
                         <Label htmlFor="username">Username</Label>
                         <Input id="username" value={username} onChange={(e) => setUsername(e.target.value)} required disabled={isProcessing} />
+                        {errors.username && <p className="text-sm text-destructive mt-1">{errors.username}</p>}
                     </div>
                     <div className="space-y-2">
                         <Label htmlFor="email">Email</Label>
                         <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required disabled={isProcessing} />
+                        {errors.email && <p className="text-sm text-destructive mt-1">{errors.email}</p>}
                     </div>
                     <div className="space-y-2">
                         <Label htmlFor="password">Password (min. 6 characters)</Label>
                         <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required disabled={isProcessing} />
+                        {errors.password && <p className="text-sm text-destructive mt-1">{errors.password}</p>}
                     </div>
                     {referralCode && (
                         <div className="flex items-center gap-3 text-sm text-primary border border-primary/20 bg-primary/5 p-3 rounded-lg">
