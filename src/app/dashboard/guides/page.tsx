@@ -439,24 +439,35 @@ export default function GuidesPage() {
   }, [firestore, user]);
 
   const { data: userData } = useDoc<UserType>(userDocRef);
-  const username = userData?.username;
 
   const processedContent = useMemo(() => {
     if (!selectedGuide) return '';
     let content = selectedGuide.content;
 
-    if (username) {
-      const affiliateLink = `https://hostproai.com/?ref=${username}`;
-      // Replace the generic placeholder for the full link
+    const hasConnectedDomain = userData?.customDomain?.status === 'connected' && userData.customDomain.name;
+    const username = userData?.username;
+    
+    // Determine the affiliate link based on custom domain or username
+    const affiliateLink = hasConnectedDomain
+      ? `https://${userData.customDomain.name}`
+      : username
+        ? `https://hostproai.com/?ref=${username}`
+        : null;
+
+    if (affiliateLink) {
+      // Replace the full placeholder affiliate link (most common case)
       content = content.replace(/https:\/\/hostproai\.com\/\?ref=\[YOUR_USERNAME_HERE\]/g, affiliateLink);
-      // Replace just the username placeholder
-      content = content.replace(/\[YOUR_USERNAME_HERE\]/g, username);
-      // Also replace the hardcoded 'rentahost' placeholder as requested by the user
+      // Replace the hardcoded 'rentahost' link from previous request
       content = content.replace(/https:\/\/hostproai\.com\/\?ref=rentahost/g, affiliateLink);
     }
     
+    // Also replace just the username placeholder if it exists on its own
+    if (username) {
+        content = content.replace(/\[YOUR_USERNAME_HERE\]/g, username);
+    }
+    
     return content;
-  }, [selectedGuide, username]);
+  }, [selectedGuide, userData]);
 
 
   const handleDownload = () => {
@@ -591,4 +602,3 @@ export default function GuidesPage() {
     </div>
   );
 }
-
