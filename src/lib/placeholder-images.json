@@ -110,9 +110,9 @@
     },
     {
       "id": "guide-website-forwarding",
-      "description": "A simplified diagram showing a domain name pointing to a website.",
-      "imageUrl": "https://images.unsplash.com/photo-1585776245991-a69054178a3f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxkbnMlMjBmb3J3YXJkaW5nfGVufDB8fHx8MTcyMjA0MjU4Nnww&ixlib=rb-4.0.3&q=80&w=1080",
-      "imageHint": "dns forwarding"
+      "description": "A person working on a laptop, symbolizing starting an online website.",
+      "imageUrl": "https://images.unsplash.com/photo-1487017159836-4e23ece2e4cf?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxsYXB0b3AlMjBkZXNrfGVufDB8fHx8MTc2OTg3NzM5OHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "laptop desk"
     }
   ]
 }
