@@ -94,7 +94,7 @@ export const subscriptionTiers: SubscriptionTier[] = [
     name: 'Scale',
     price: 299.95,
     // Replace with your actual Sandbox Plan ID for the Scale tier.
-    paypalPlanId: 'REPLACE_WITH_SCALE_PLAN_ID',
+    paypalPlanId: 'P-9SY225236J3759335NF7SGRQ',
     description: 'Everything in Scale, plus tools for scaling your operations.',
     guideAccessLevel: 'scale',
     features: [
