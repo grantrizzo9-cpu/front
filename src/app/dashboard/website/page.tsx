@@ -61,7 +61,7 @@ const PublishedSite = ({ site, user, onRegenerate }: { site: Website, user: User
 
 
 // Component to preview and deploy a generated site
-const Deployer = ({ site, affiliateLink, onDeploy, onCancel }: { site: GenerateWebsiteOutput, affiliateLink: string, onDeploy: () => void, onCancel: () => void }) => {
+const Deployer = ({ site, affiliateLink, onDeploy, onStartOver }: { site: GenerateWebsiteOutput, affiliateLink: string, onDeploy: () => void, onStartOver: () => void }) => {
     const [previewHtml, setPreviewHtml] = useState('');
 
     useEffect(() => {
@@ -77,7 +77,7 @@ const Deployer = ({ site, affiliateLink, onDeploy, onCancel }: { site: GenerateW
                         <CardTitle>Step 2: Preview & Deploy</CardTitle>
                         <CardDescription>This is a fully interactive preview of your generated homepage. When you are ready, deploy it.</CardDescription>
                     </div>
-                    <Button onClick={onCancel} variant="outline">
+                    <Button onClick={onStartOver} variant="outline">
                         Start Over
                     </Button>
                 </CardHeader>
@@ -101,7 +101,7 @@ const Deployer = ({ site, affiliateLink, onDeploy, onCancel }: { site: GenerateW
                      <Button onClick={onDeploy} size="lg">
                         <UploadCloud className="mr-2 h-4 w-4"/> Deploy Website
                     </Button>
-                    <Button onClick={onCancel} size="lg" variant="outline">
+                    <Button onClick={onStartOver} size="lg" variant="outline">
                         Start Over
                     </Button>
                 </CardFooter>
@@ -122,6 +122,16 @@ export default function WebsiteBuilderPage() {
   const [isProcessing, setIsProcessing] = useState(false); // Used for both generating and deploying
   const [error, setError] = useState<string | null>(null);
   const [selectedTheme, setSelectedTheme] = useState<WebsiteTheme | null>(null);
+  const [retryDelay, setRetryDelay] = useState(0);
+
+  useEffect(() => {
+    if (retryDelay > 0) {
+        const timerId = setInterval(() => {
+            setRetryDelay(prev => prev - 1);
+        }, 1000);
+        return () => clearInterval(timerId);
+    }
+  }, [retryDelay]);
 
   const userDocRef = useMemoFirebase(() => {
     if (!user) return null;
@@ -158,6 +168,13 @@ export default function WebsiteBuilderPage() {
     try {
       const result = await generateWebsite({ username: user.displayName, themeName: selectedTheme.name });
       if (result.error) {
+        if (result.error.includes("Quota exceeded")) {
+            const match = result.error.match(/Please retry in ([\d.]+)s/);
+            if (match && match[1]) {
+                const delay = Math.ceil(parseFloat(match[1]));
+                setRetryDelay(delay);
+            }
+        }
         setError(result.error);
       } else {
         setGeneratedSite(result);
@@ -201,6 +218,7 @@ export default function WebsiteBuilderPage() {
   const handleStartOver = () => {
       setGeneratedSite(null);
       setError(null);
+      setRetryDelay(0);
       if(publishedSite && firestore && user) {
           const docRef = doc(firestore, 'users', user.uid, 'websites', publishedSite.id);
           updateDocumentNonBlocking(docRef, { status: 'draft' });
@@ -236,7 +254,7 @@ export default function WebsiteBuilderPage() {
      return (
         <div className="space-y-8">
             <div><h1 className="text-3xl font-bold font-headline">My Website</h1><p className="text-muted-foreground">Manage your one-click affiliate website.</p></div>
-             <Deployer site={generatedSite} affiliateLink={affiliateLink} onDeploy={handleDeploy} onCancel={handleStartOver} />
+             <Deployer site={generatedSite} affiliateLink={affiliateLink} onDeploy={handleDeploy} onStartOver={handleStartOver} />
         </div>
     );
   }
@@ -260,7 +278,15 @@ export default function WebsiteBuilderPage() {
             <Card>
                 <CardHeader><CardTitle className="text-destructive flex items-center gap-2"><AlertTriangle /> Generation Failed</CardTitle></CardHeader>
                 <CardContent><Alert variant="destructive"><AlertTitle>An error occurred.</AlertTitle><AlertDescription>{error}</AlertDescription></Alert></CardContent>
-                <CardFooter><Button variant="outline" onClick={() => setError(null)}>Start Over</Button></CardFooter>
+                <CardFooter>
+                    <Button 
+                       variant="outline" 
+                       onClick={handleStartOver}
+                       disabled={retryDelay > 0}
+                    >
+                       {retryDelay > 0 ? `Please wait ${retryDelay}s` : "Start Over"}
+                   </Button>
+               </CardFooter>
             </Card>
         </div>
     );
