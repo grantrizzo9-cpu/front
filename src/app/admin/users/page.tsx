@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useMemo, useState, useEffect } from 'react';
@@ -18,32 +19,31 @@ export default function AdminUsersPage() {
   const router = useRouter();
   const { toast } = useToast();
   const firestore = useFirestore();
-  const { isAdmin, isLoading: isAdminLoading } = useAdmin();
+  const { isPlatformOwner, isLoading: isAdminLoading } = useAdmin();
   const [processingId, setProcessingId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!isAdminLoading && !isPlatformOwner) {
+      router.push('/dashboard');
+    }
+  }, [isPlatformOwner, isAdminLoading, router]);
 
   // 1. Fetch all users
   const usersQuery = useMemoFirebase(() => {
-    if (!firestore || !isAdmin) return null;
+    if (!firestore || !isPlatformOwner) return null;
     return collection(firestore, 'users');
-  }, [firestore, isAdmin]);
+  }, [firestore, isPlatformOwner]);
   const { data: users, isLoading: usersLoading } = useCollection<UserType>(usersQuery);
   
   // 2. Fetch all admin role documents
   const adminRolesQuery = useMemoFirebase(() => {
-    if (!firestore || !isAdmin) return null;
+    if (!firestore || !isPlatformOwner) return null;
     return collection(firestore, 'roles_admin');
-  }, [firestore, isAdmin]);
+  }, [firestore, isPlatformOwner]);
   const { data: adminRoles, isLoading: rolesLoading } = useCollection<{uid: string}>(adminRolesQuery);
 
   // Create a fast lookup set of admin UIDs
   const adminUids = useMemo(() => new Set(adminRoles?.map(role => role.id) ?? []), [adminRoles]);
-
-  // Redirect if not an admin
-  useEffect(() => {
-    if (!isAdminLoading && !isAdmin) {
-      router.push('/dashboard');
-    }
-  }, [isAdmin, isAdminLoading, router]);
 
   const isLoading = isAdminLoading || usersLoading || rolesLoading;
 
@@ -79,6 +79,14 @@ export default function AdminUsersPage() {
   };
 
 
+  if (isLoading || !isPlatformOwner) {
+    return (
+      <div className="flex justify-center items-center h-full p-8">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-8">
       <div>
@@ -90,13 +98,13 @@ export default function AdminUsersPage() {
         <CardHeader>
             <CardTitle>All Users</CardTitle>
             <CardDescription>
-                {isLoading ? "Loading users..." : (
+                {usersLoading ? "Loading users..." : (
                     <>There are currently <span className="font-bold text-primary">{users?.length ?? 0}</span> users on the platform.</>
                 )}
             </CardDescription>
         </CardHeader>
         <CardContent>
-             {isLoading ? (
+             {usersLoading ? (
                 <div className="flex justify-center items-center h-40">
                     <Loader2 className="h-8 w-8 animate-spin text-primary" />
                 </div>

@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -14,18 +14,26 @@ import { collectionGroup, query, doc } from "firebase/firestore";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { StatCard } from "@/components/stat-card";
+import { useRouter } from "next/navigation";
 
 export default function AdminRefundsPage() {
   const { toast } = useToast();
   const firestore = useFirestore();
-  const { isAdmin, isLoading: isAdminLoading } = useAdmin();
+  const { isPlatformOwner, isLoading: isAdminLoading } = useAdmin();
   const [processingId, setProcessingId] = useState<string | null>(null);
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!isAdminLoading && !isPlatformOwner) {
+      router.push('/dashboard');
+    }
+  }, [isPlatformOwner, isAdminLoading, router]);
 
   // 1. Fetch all refund requests using a collection group query
   const refundRequestsQuery = useMemoFirebase(() => {
-    if (!firestore || !isAdmin) return null;
+    if (!firestore || !isPlatformOwner) return null;
     return query(collectionGroup(firestore, 'refundRequests'));
-  }, [firestore, isAdmin]);
+  }, [firestore, isPlatformOwner]);
   const { data: refundRequests, isLoading: requestsLoading } = useCollection<RefundRequest>(refundRequestsQuery);
 
   const isLoading = isAdminLoading || requestsLoading;
@@ -62,6 +70,14 @@ export default function AdminRefundsPage() {
     );
   }, [refundRequests]);
 
+  if (isLoading || !isPlatformOwner) {
+    return (
+      <div className="flex justify-center items-center h-full p-8">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-8">
       <div>
@@ -82,13 +98,13 @@ export default function AdminRefundsPage() {
         <CardHeader>
             <CardTitle>Pending Refund Requests</CardTitle>
             <CardDescription>
-                {isLoading ? "Loading requests..." : (
+                {requestsLoading ? "Loading requests..." : (
                     <>There are currently <span className="font-bold text-primary">{pendingRequests.length}</span> pending refund requests.</>
                 )}
             </CardDescription>
         </CardHeader>
         <CardContent>
-            {isLoading ? (
+            {requestsLoading ? (
                 <div className="flex justify-center items-center h-40">
                     <Loader2 className="h-8 w-8 animate-spin text-primary" />
                 </div>

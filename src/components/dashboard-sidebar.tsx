@@ -52,7 +52,7 @@ export function DashboardSidebar() {
   const router = useRouter();
   const { user, isUserLoading } = useUser();
   const auth = useAuth();
-  const { isAdmin, isLoading: isAdminLoading } = useAdmin();
+  const { isPlatformOwner, isLoading: isAdminLoading } = useAdmin();
   const [hasMounted, setHasMounted] = useState(false);
 
   useEffect(() => {
@@ -107,7 +107,7 @@ export function DashboardSidebar() {
               </SidebarMenuButton>
             </SidebarMenuItem>
           ))}
-          {!isAdminLoading && isAdmin && (
+          {!isAdminLoading && isPlatformOwner && (
             <>
               <SidebarMenuItem className="mt-4">
                 <span className="px-2 text-xs font-semibold text-muted-foreground">Admin</span>

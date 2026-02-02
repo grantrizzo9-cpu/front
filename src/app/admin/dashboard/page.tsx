@@ -1,9 +1,31 @@
 
+'use client';
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { subscriptionTiers } from "@/lib/data";
-import { CheckCircle } from "lucide-react";
+import { CheckCircle, Loader2 } from "lucide-react";
+import { useAdmin } from "@/hooks/use-admin";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 export default function AdminDashboardPage() {
+  const router = useRouter();
+  const { isPlatformOwner, isLoading: isAdminLoading } = useAdmin();
+
+  useEffect(() => {
+    if (!isAdminLoading && !isPlatformOwner) {
+      router.push('/dashboard');
+    }
+  }, [isPlatformOwner, isAdminLoading, router]);
+
+  if (isAdminLoading || !isPlatformOwner) {
+    return (
+      <div className="flex justify-center items-center h-full p-8">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-8">
       <div>
