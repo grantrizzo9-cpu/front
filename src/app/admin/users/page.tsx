@@ -52,7 +52,7 @@ export default function AdminUsersPage() {
 
     const isCurrentlyAdmin = adminUids.has(targetUser.id);
     // Prevent the main admin from having their role revoked via the UI
-    if (targetUser.email === 'grantrizzo2@gmail.com') {
+    if (targetUser.email === 'rentapog@gmail.com') {
       toast({ variant: 'destructive', title: 'Action Not Allowed', description: 'The platform owner\'s admin status cannot be changed.' });
       return;
     }
@@ -150,7 +150,7 @@ export default function AdminUsersPage() {
                             variant="outline" 
                             size="sm"
                             onClick={() => handleToggleAdmin(u)}
-                            disabled={processingId === u.id || u.email === 'grantrizzo2@gmail.com'}
+                            disabled={processingId === u.id || u.email === 'rentapog@gmail.com'}
                         >
                           {processingId === u.id ? (
                             <Loader2 className="mr-2 h-4 w-4 animate-spin" />

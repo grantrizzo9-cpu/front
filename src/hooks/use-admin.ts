@@ -29,7 +29,7 @@ export function useAdmin() {
     }
 
     // PRIMARY check: Hardcoded platform owner email.
-    if (user.email?.toLowerCase() === 'grantrizzo2@gmail.com') {
+    if (user.email?.toLowerCase() === 'rentapog@gmail.com') {
       setIsAdmin(true);
       setIsPlatformOwner(true);
       setIsLoading(false);
