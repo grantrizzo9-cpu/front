@@ -90,11 +90,20 @@ export function useAdmin() {
           // Ensure the admin role document exists.
           batch.set(adminRoleRef, {}, { merge: true });
 
-          // CRITICAL FIX: Only set the public username if it's not already taken by someone else.
-          if (!usernameDocSnap.exists() || usernameDocSnap.data()?.uid === user.uid) {
-              batch.set(usernameDocRef, { uid: user.uid });
+          // Safely check and set the public username document
+          if (usernameDocSnap.exists()) {
+              // The username document already exists.
+              // Check if it belongs to someone else.
+              if (usernameDocSnap.data().uid !== user.uid) {
+                  // It belongs to someone else. Warn and do not overwrite.
+                  console.warn(`Admin's desired username '${lowerCaseUsername}' is already taken by user ${usernameDocSnap.data().uid}. The public username mapping for the admin was NOT created to avoid an overwrite.`);
+              } else {
+                  // It already exists and belongs to the admin. Re-set it to be safe.
+                  batch.set(usernameDocRef, { uid: user.uid });
+              }
           } else {
-              console.warn(`Admin's desired username '${lowerCaseUsername}' is already taken by user ${usernameDocSnap.data()?.uid}. The public username mapping for the admin was NOT created to avoid an overwrite. The admin should choose a different username.`);
+              // The username document does not exist, so we are free to create it.
+              batch.set(usernameDocRef, { uid: user.uid });
           }
 
           await batch.commit();
