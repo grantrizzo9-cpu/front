@@ -15,6 +15,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
 import { RegistrarLogo } from '@/components/registrar-logo';
+import { firebaseConfig } from '@/firebase/config';
 
 export default function HostingPage() {
     const { user, isUserLoading } = useUser();
@@ -85,6 +86,8 @@ export default function HostingPage() {
             setIsSaving(false);
         }, 1000);
     };
+    
+    const hostingConsoleUrl = `https://console.firebase.google.com/project/${firebaseConfig.projectId}/hosting/custom-domains`;
 
     if (isLoading && localDomainStatus === null) {
         return (
@@ -175,7 +178,7 @@ export default function HostingPage() {
                         <AlertDescription>
                             This is your project's Google Hosting console. Click "Add custom domain" and follow the wizard. It will give you the DNS records (a TXT record first, then two A records) you need for the next step.
                             <Button asChild variant="default" className="mt-2 w-full">
-                                <Link href="https://console.firebase.google.com/project/affiliate-ai-host-new/hosting/custom-domains" target="_blank" rel="noopener noreferrer">
+                                <Link href={hostingConsoleUrl} target="_blank" rel="noopener noreferrer">
                                     Open Hosting Console
                                 </Link>
                             </Button>
@@ -259,7 +262,3 @@ export default function HostingPage() {
         </div>
     );
 }
-
-    
-
-    
