@@ -305,7 +305,7 @@ export default function DashboardPage() {
             <p className="text-muted-foreground">Welcome back! Here's a summary of your personal affiliate activity.</p>
         </div>
 
-        {isSubscriptionInactive && (
+        {isSubscriptionInactive && !isAdmin && (
              <Alert variant="destructive">
                 <AlertCircle className="h-4 w-4" />
                 <AlertTitle>Your Account is Inactive!</AlertTitle>
@@ -318,7 +318,7 @@ export default function DashboardPage() {
             </Alert>
         )}
 
-        {isTrialActive && (
+        {isTrialActive && !isAdmin && (
             <Alert className="border-accent/50 bg-accent/5">
                 <Info className="h-4 w-4 text-accent" />
                 <AlertTitle className="text-accent">You're on a Trial!</AlertTitle>

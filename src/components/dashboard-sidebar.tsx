@@ -83,6 +83,7 @@ export function DashboardSidebar() {
 
   const adminMenuItems = [
     { path: "/admin/dashboard", icon: <LayoutGrid />, label: "Packages" },
+    { path: "/admin/users", icon: <Users />, label: "Users" },
     { path: "/admin/refunds", icon: <ShieldCheck />, label: "Manage Refunds" },
   ];
 
