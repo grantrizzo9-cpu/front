@@ -87,7 +87,7 @@ const Deployer = ({ site, affiliateLink, onDeploy, onStartOver }: { site: Genera
                             srcDoc={previewHtml}
                             title="Website Preview"
                             className="w-full h-full"
-                            sandbox="allow-scripts allow-modals allow-popups allow-same-origin"
+                            sandbox="allow-scripts allow-popups allow-modals"
                         />
                     </div>
                 </CardContent>
