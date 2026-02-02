@@ -87,9 +87,7 @@ export default function HostingPage() {
         }, 1000);
     };
     
-    const hostingConsoleUrl = user?.email
-      ? `https://console.firebase.google.com/project/${firebaseConfig.projectId}/hosting/custom-domains?authuser=${user.email}`
-      : `https://console.firebase.google.com/project/${firebaseConfig.projectId}/hosting/custom-domains`;
+    const hostingConsoleUrl = `https://console.firebase.google.com/project/${firebaseConfig.projectId}/hosting/custom-domains`;
 
 
     if (isLoading && localDomainStatus === null) {
@@ -179,7 +177,7 @@ export default function HostingPage() {
                         <Globe className="h-4 w-4" />
                         <AlertTitle>Start Here: Go to Hosting Console</AlertTitle>
                         <AlertDescription>
-                            This is your project's Google Hosting console. Click "Add custom domain" and follow the wizard. It will give you the DNS records (a TXT record first, then two A records) you need for the next step.
+                            This link opens your project's Google Hosting console. When prompted, you must **log in with the Google Account that owns the Firebase project**. After logging in, click "Add custom domain" and follow the wizard to get your DNS records.
                             <Button asChild variant="default" className="mt-2 w-full">
                                 <Link href={hostingConsoleUrl} target="_blank" rel="noopener noreferrer">
                                     Open Hosting Console
