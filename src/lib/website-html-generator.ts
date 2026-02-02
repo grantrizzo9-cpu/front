@@ -121,6 +121,7 @@ export function getHomepageHtml(site: GenerateWebsiteOutput, link: string): stri
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>${homepage.title}</title>
+    <base target="_self">
     <style>
         :root {
 ${themeColorsCss}
