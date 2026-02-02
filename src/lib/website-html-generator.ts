@@ -237,7 +237,7 @@ ${themeColorsCss}
         <div class="container">
             <div class="logo">${homepage.title}</div>
             <nav class="main-nav"><ul>${navLinksHtml}</ul></nav>
-            <a href="${link}" class="btn">Sign Up</a>
+            <a href="${link}" target="_blank" rel="noopener noreferrer" class="btn">Sign Up</a>
         </div>
     </header>
 
@@ -246,7 +246,7 @@ ${themeColorsCss}
             <div class="container">
                 <h1>${homepage.headline}</h1>
                 <p>${homepage.subheadline}</p>
-                <a href="${link}" class="btn">${homepage.ctaButtonText}</a>
+                <a href="${link}" target="_blank" rel="noopener noreferrer" class="btn">${homepage.ctaButtonText}</a>
             </div>
         </section>
 
@@ -277,7 +277,7 @@ ${themeColorsCss}
         <section id="final-cta" class="final-cta container">
             <h2>${homepage.finalCtaHeadline}</h2>
             <p>${homepage.finalCtaSubheadline}</p>
-            <a href="${link}" class="btn">${homepage.finalCtaButtonText}</a>
+            <a href="${link}" target="_blank" rel="noopener noreferrer" class="btn">${homepage.finalCtaButtonText}</a>
         </section>
     </main>
     
