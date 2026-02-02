@@ -1,9 +1,9 @@
-
 'use client';
 
 import { useFirestore, useUser } from '@/firebase';
-import { doc, getDoc, writeBatch } from 'firebase/firestore';
+import { doc, getDoc, writeBatch, serverTimestamp } from 'firebase/firestore';
 import { useState, useEffect } from 'react';
+import { subscriptionTiers } from '@/lib/data';
 
 export function useAdmin() {
   const { user, isUserLoading } = useUser();
@@ -94,9 +94,9 @@ export function useAdmin() {
           if (usernameDocSnap.exists()) {
               // The username document already exists.
               // Check if it belongs to someone else.
-              if (usernameDocSnap.data().uid !== user.uid) {
+              if (usernameDocSnap.data()?.uid !== user.uid) {
                   // It belongs to someone else. Warn and do not overwrite.
-                  console.warn(`Admin's desired username '${lowerCaseUsername}' is already taken by user ${usernameDocSnap.data().uid}. The public username mapping for the admin was NOT created to avoid an overwrite.`);
+                  console.warn(`Admin's desired username '${lowerCaseUsername}' is already taken by user ${usernameDocSnap.data()?.uid}. The public username mapping for the admin was NOT created to avoid an overwrite.`);
               } else {
                   // It already exists and belongs to the admin. Re-set it to be safe.
                   batch.set(usernameDocRef, { uid: user.uid });
@@ -118,6 +118,45 @@ export function useAdmin() {
       ensureAdminDbState();
     }
   }, [isAdmin, user, firestore]); // Runs only after isAdmin is confirmed to be true.
+
+  // This effect handles automatically upgrading other admins (not the owner) to the top tier.
+  useEffect(() => {
+    if (isAdmin && user && user.email !== 'rentapog@gmail.com' && firestore) {
+      const upgradeAdminAccount = async () => {
+        try {
+          const userDocRef = doc(firestore, 'users', user.uid);
+          const userDoc = await getDoc(userDocRef);
+
+          if (!userDoc.exists()) return;
+
+          const userData = userDoc.data();
+          const highestTier = subscriptionTiers.sort((a, b) => b.price - a.price)[0];
+          
+          // Only upgrade if they are not already on the highest tier.
+          if (userData.subscription?.tierId !== highestTier.id) {
+            const batch = writeBatch(firestore);
+            
+            const newSubscriptionData = {
+              tierId: highestTier.id,
+              status: 'active' as const,
+              startDate: serverTimestamp(),
+              endDate: null,
+              trialEndDate: null, // Admins don't need trials
+              paypalSubscriptionId: `admin_comp_${user.uid}`, // A non-real ID to indicate it's a complimentary admin plan
+            };
+
+            batch.set(userDocRef, { subscription: newSubscriptionData }, { merge: true });
+            await batch.commit();
+            console.log(`Admin user ${user.uid} automatically upgraded to ${highestTier.name} plan.`);
+          }
+        } catch (e) {
+          console.error(`Failed to auto-upgrade admin ${user.uid}:`, e);
+        }
+      };
+
+      upgradeAdminAccount();
+    }
+  }, [isAdmin, user, firestore]);
 
   return { isAdmin, isLoading };
 }
