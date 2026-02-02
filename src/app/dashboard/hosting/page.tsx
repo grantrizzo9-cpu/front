@@ -87,7 +87,10 @@ export default function HostingPage() {
         }, 1000);
     };
     
-    const hostingConsoleUrl = `https://console.firebase.google.com/project/${firebaseConfig.projectId}/hosting/custom-domains`;
+    const hostingConsoleUrl = user?.email
+      ? `https://console.firebase.google.com/project/${firebaseConfig.projectId}/hosting/custom-domains?authuser=${user.email}`
+      : `https://console.firebase.google.com/project/${firebaseConfig.projectId}/hosting/custom-domains`;
+
 
     if (isLoading && localDomainStatus === null) {
         return (
