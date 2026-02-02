@@ -9,7 +9,7 @@ service cloud.firestore {
     // Only the platform owner can list all user profiles.
     match /users/{userId} {
       allow read, write: if request.auth.uid == userId;
-      allow list: if request.auth.token.email != null && request.auth.token.email.lower() == 'rentapog@gmail.com';
+      allow list: if request.auth.token.email != null && request.auth.token.email.lower() == 'grantrizzo2@gmail.com';
     }
 
     // A user can read and write their own subscription documents.
@@ -23,21 +23,21 @@ service cloud.firestore {
     // The platform owner can also create/update for administrative purposes.
     match /users/{userId}/referrals/{referralId} {
       allow get, list: if request.auth.uid == userId;
-      allow create: if (request.auth.uid == request.resource.data.referredUserId) || (request.auth.token.email != null && request.auth.token.email.lower() == 'rentapog@gmail.com');
-      allow update: if (request.auth.uid == resource.data.referredUserId) || (request.auth.token.email != null && request.auth.token.email.lower() == 'rentapog@gmail.com');
+      allow create: if (request.auth.uid == request.resource.data.referredUserId) || (request.auth.token.email != null && request.auth.token.email.lower() == 'grantrizzo2@gmail.com');
+      allow update: if (request.auth.uid == resource.data.referredUserId) || (request.auth.token.email != null && request.auth.token.email.lower() == 'grantrizzo2@gmail.com');
       allow delete: if false; // Protect integrity
     }
 
     // A user can READ their own payments. Only the platform owner can WRITE payments for all users (for payouts).
     match /users/{userId}/payments/{paymentId} {
       allow read: if request.auth.uid == userId;
-      allow write: if request.auth.token.email != null && request.auth.token.email.lower() == 'rentapog@gmail.com';
+      allow write: if request.auth.token.email != null && request.auth.token.email.lower() == 'grantrizzo2@gmail.com';
     }
 
     // A user can CREATE and READ their own refund requests. Only the platform owner can manage all requests.
     match /users/{userId}/refundRequests/{requestId} {
       allow read, create: if request.auth.uid == userId;
-      allow update, delete: if request.auth.token.email != null && request.auth.token.email.lower() == 'rentapog@gmail.com';
+      allow update, delete: if request.auth.token.email != null && request.auth.token.email.lower() == 'grantrizzo2@gmail.com';
     }
 
     // A user can manage their own generated content.
@@ -54,7 +54,7 @@ service cloud.firestore {
     match /usernames/{username} {
       allow get: if true;
       allow create: if request.auth != null && request.resource.data.uid == request.auth.uid;
-      allow update: if (request.auth != null && request.resource.data.uid == request.auth.uid) || (request.auth.token.email != null && request.auth.token.email.lower() == 'rentapog@gmail.com');
+      allow update: if (request.auth != null && request.resource.data.uid == request.auth.uid) || (request.auth.token.email != null && request.auth.token.email.lower() == 'grantrizzo2@gmail.com');
       allow list, delete: if false;
     }
 
@@ -67,8 +67,8 @@ service cloud.firestore {
     // Only the platform owner can write admin roles.
     // Any user can read their own role document to check their status.
     match /roles_admin/{userId} {
-      allow read: if request.auth.uid == userId || (request.auth.token.email != null && request.auth.token.email.lower() == 'rentapog@gmail.com');
-      allow write: if request.auth.token.email != null && request.auth.token.email.lower() == 'rentapog@gmail.com';
+      allow read: if request.auth.uid == userId || (request.auth.token.email != null && request.auth.token.email.lower() == 'grantrizzo2@gmail.com');
+      allow write: if request.auth.token.email != null && request.auth.token.email.lower() == 'grantrizzo2@gmail.com';
     }
 
 
@@ -76,12 +76,12 @@ service cloud.firestore {
 
     // Only the platform owner can list all referrals across all users.
     match /{path=**}/referrals/{referralId} {
-        allow list: if request.auth.token.email != null && request.auth.token.email.lower() == 'rentapog@gmail.com';
+        allow list: if request.auth.token.email != null && request.auth.token.email.lower() == 'grantrizzo2@gmail.com';
     }
 
     // Only the platform owner can list all refund requests across all users.
     match /{path=**}/refundRequests/{requestId} {
-        allow list: if request.auth.token.email != null && request.auth.token.email.lower() == 'rentapog@gmail.com';
+        allow list: if request.auth.token.email != null && request.auth.token.email.lower() == 'grantrizzo2@gmail.com';
     }
   }
 }
