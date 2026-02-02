@@ -111,7 +111,7 @@ export default function HostingPage() {
                         <RegistrarLogo />
                     </div>
                     <CardDescription>
-                        Use your integrated domain store to find and register the perfect domain. A great name is your first step to making yourself memorable and professional. You also earn a commission on every sale.
+                        Use your integrated domain store to find and register the perfect domain. This is a professional GoDaddy reseller store, and you earn a commission on every sale.
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -136,7 +136,7 @@ export default function HostingPage() {
                          <CardTitle>Connect Your Registered Domain</CardTitle>
                     </div>
                     <CardDescription>
-                       After registering your domain through your store, enter it here to connect it to our hosting platform.
+                       After purchasing your domain through your store, enter it here to begin the connection process.
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -159,18 +159,33 @@ export default function HostingPage() {
                 <CardHeader>
                     <div className="flex items-center gap-3">
                          <div className="flex-shrink-0 w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-bold">3</div>
-                         <CardTitle>Connect Your Domain to Your Host</CardTitle>
+                         <CardTitle>Point Your Domain to the Host</CardTitle>
                     </div>
                     <CardDescription>
-                       To take your site live, you'll need to update its DNS records at your registrar.
+                       To take your site live, you'll need to update its DNS records at your registrar (your ShopCo store).
                     </CardDescription>
                 </CardHeader>
-                <CardContent>
-                     <Alert>
-                        <BookOpen className="h-4 w-4" />
-                        <AlertTitle>View The Full Guide</AlertTitle>
+                <CardContent className="space-y-4">
+                     <p className="text-sm text-muted-foreground">
+                        This is a technical but crucial step that connects your domain name (e.g., your-site.com) to our high-performance hosting servers. You only have to do this once.
+                    </p>
+                    <Alert className="border-primary/50">
+                        <Globe className="h-4 w-4" />
+                        <AlertTitle>Start Here: Go to Hosting Console</AlertTitle>
                         <AlertDescription>
-                            We've created a detailed, step-by-step guide to walk you through the entire process of connecting your domain and going live.
+                            This is your project's Google Hosting console. Click "Add custom domain" and follow the wizard. It will give you the DNS records (a TXT record first, then two A records) you need for the next step.
+                            <Button asChild variant="default" className="mt-2 w-full">
+                                <Link href="https://console.firebase.google.com/project/affiliate-ai-host-new/hosting/custom-domains" target="_blank" rel="noopener noreferrer">
+                                    Open Hosting Console
+                                </Link>
+                            </Button>
+                        </AlertDescription>
+                    </Alert>
+                    <Alert>
+                        <BookOpen className="h-4 w-4" />
+                        <AlertTitle>Need Help? Read the Full Guide</AlertTitle>
+                        <AlertDescription>
+                            We have a detailed, step-by-step guide with screenshots that walks you through this entire process. We recommend opening this in a new tab for reference.
                              <Button asChild variant="link" className="p-0 h-auto font-semibold">
                                 <Link href="/dashboard/guides">
                                     Click here to read the "Pre-Launch Checklist" guide.
@@ -200,7 +215,7 @@ export default function HostingPage() {
                                     <>
                                         <Badge className="bg-amber-500 text-white hover:bg-amber-500">Pending Verification</Badge>
                                         <p className="text-sm text-muted-foreground max-w-sm">
-                                            The system is waiting for your DNS records to be verified. Check the Hosting Console and our Pre-Launch guide for details.
+                                            The system is waiting for your DNS records to be updated and verified. This can take a few hours. Check the Hosting Console for live status.
                                         </p>
                                     </>
                                 );
@@ -244,5 +259,7 @@ export default function HostingPage() {
         </div>
     );
 }
+
+    
 
     
