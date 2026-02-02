@@ -6,10 +6,10 @@ service cloud.firestore {
     // --- User Data ---
 
     // A user can read and write their own profile document.
-    // An admin can list all user profiles.
+    // Only the platform owner can list all user profiles.
     match /users/{userId} {
       allow read, write: if request.auth.uid == userId;
-      allow list: if (request.auth != null && exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid))) || (request.auth.token.email != null && request.auth.token.email.lower() == 'rentapog@gmail.com');
+      allow list: if request.auth.token.email != null && request.auth.token.email.lower() == 'rentapog@gmail.com';
     }
 
     // A user can read and write their own subscription documents.
@@ -20,23 +20,24 @@ service cloud.firestore {
     // A user can READ (get, list) their own referrals.
     // A new user can CREATE a referral doc for their referrer during signup.
     // The referred user can UPDATE the record (e.g., to change activation status).
+    // The platform owner can also create/update for administrative purposes.
     match /users/{userId}/referrals/{referralId} {
       allow get, list: if request.auth.uid == userId;
-      allow create: if (request.auth != null && exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid))) || (request.auth.uid == request.resource.data.referredUserId);
-      allow update: if (request.auth != null && exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid))) || (request.auth.uid == resource.data.referredUserId);
+      allow create: if (request.auth.uid == request.resource.data.referredUserId) || (request.auth.token.email != null && request.auth.token.email.lower() == 'rentapog@gmail.com');
+      allow update: if (request.auth.uid == resource.data.referredUserId) || (request.auth.token.email != null && request.auth.token.email.lower() == 'rentapog@gmail.com');
       allow delete: if false; // Protect integrity
     }
 
-    // A user can READ their own payments. Admins can WRITE payments for all users (for payouts).
+    // A user can READ their own payments. Only the platform owner can WRITE payments for all users (for payouts).
     match /users/{userId}/payments/{paymentId} {
       allow read: if request.auth.uid == userId;
-      allow write: if (request.auth != null && exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid))) || (request.auth.token.email != null && request.auth.token.email.lower() == 'rentapog@gmail.com');
+      allow write: if request.auth.token.email != null && request.auth.token.email.lower() == 'rentapog@gmail.com';
     }
 
-    // A user can CREATE and READ their own refund requests. Admins can manage all requests.
+    // A user can CREATE and READ their own refund requests. Only the platform owner can manage all requests.
     match /users/{userId}/refundRequests/{requestId} {
       allow read, create: if request.auth.uid == userId;
-      allow update, delete: if (request.auth != null && exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid))) || (request.auth.token.email != null && request.auth.token.email.lower() == 'rentapog@gmail.com');
+      allow update, delete: if request.auth.token.email != null && request.auth.token.email.lower() == 'rentapog@gmail.com';
     }
 
     // A user can manage their own generated content.
@@ -49,11 +50,11 @@ service cloud.firestore {
 
     // Usernames are public for single GET requests.
     // A user can CREATE their own username mapping.
-    // A user can UPDATE a mapping to claim it for their own account. Admins can also update.
+    // The platform owner can also update usernames.
     match /usernames/{username} {
       allow get: if true;
       allow create: if request.auth != null && request.resource.data.uid == request.auth.uid;
-      allow update: if (request.auth != null && request.resource.data.uid == request.auth.uid) || (request.auth != null && exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid))) || (request.auth.token.email != null && request.auth.token.email.lower() == 'rentapog@gmail.com');
+      allow update: if (request.auth != null && request.resource.data.uid == request.auth.uid) || (request.auth.token.email != null && request.auth.token.email.lower() == 'rentapog@gmail.com');
       allow list, delete: if false;
     }
 
@@ -63,24 +64,24 @@ service cloud.firestore {
       allow write: if false;
     }
 
-    // Admins can read/write any admin role document to manage privileges.
-    // A user can also read their own role to check their status.
+    // Only the platform owner can write admin roles.
+    // Any user can read their own role document to check their status.
     match /roles_admin/{userId} {
-      allow read: if request.auth.uid == userId || (request.auth != null && exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid))) || (request.auth.token.email != null && request.auth.token.email.lower() == 'rentapog@gmail.com');
-      allow write: if (request.auth != null && exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid))) || (request.auth.token.email != null && request.auth.token.email.lower() == 'rentapog@gmail.com');
+      allow read: if request.auth.uid == userId || (request.auth.token.email != null && request.auth.token.email.lower() == 'rentapog@gmail.com');
+      allow write: if request.auth.token.email != null && request.auth.token.email.lower() == 'rentapog@gmail.com';
     }
 
 
     // --- Collection Group Queries for Admin Panel ---
 
-    // Admins can list all referrals across all users for the admin dashboard.
+    // Only the platform owner can list all referrals across all users.
     match /{path=**}/referrals/{referralId} {
-        allow list: if (request.auth != null && exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid))) || (request.auth.token.email != null && request.auth.token.email.lower() == 'rentapog@gmail.com');
+        allow list: if request.auth.token.email != null && request.auth.token.email.lower() == 'rentapog@gmail.com';
     }
 
-    // Admins can list all refund requests across all users for the admin dashboard.
+    // Only the platform owner can list all refund requests across all users.
     match /{path=**}/refundRequests/{requestId} {
-        allow list: if (request.auth != null && exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid))) || (request.auth.token.email != null && request.auth.token.email.lower() == 'rentapog@gmail.com');
+        allow list: if request.auth.token.email != null && request.auth.token.email.lower() == 'rentapog@gmail.com';
     }
   }
 }
