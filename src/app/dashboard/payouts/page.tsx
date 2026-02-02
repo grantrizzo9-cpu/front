@@ -3,7 +3,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { format } from "date-fns";
-import { ArrowRight, Loader2, PartyPopper, TrendingUp } from "lucide-react";
+import { ArrowRight, Loader2, PartyPopper, ShieldCheck, TrendingUp } from "lucide-react";
 import Link from "next/link";
 import type { Payout, User as UserType, Referral } from "@/lib/types";
 import { useUser, useFirestore, useCollection, useMemoFirebase, useDoc, updateDocumentNonBlocking } from "@/firebase";
@@ -12,11 +12,13 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
+import { useAdmin } from "@/hooks/use-admin";
 
 export default function PayoutsPage() {
   const { user, isUserLoading } = useUser();
   const firestore = useFirestore();
   const { toast } = useToast();
+  const { isAdmin, isLoading: isAdminLoading } = useAdmin();
 
   const payoutsRef = useMemoFirebase(() => {
     if (!user || !firestore) return null;
@@ -36,7 +38,7 @@ export default function PayoutsPage() {
   }, [firestore, user?.uid]);
   const { data: referrals, isLoading: referralsLoading } = useCollection<Referral>(referralsRef);
 
-  const isLoading = isUserLoading || payoutsLoading || isUserDataLoading || referralsLoading;
+  const isLoading = isUserLoading || payoutsLoading || isUserDataLoading || referralsLoading || isAdminLoading;
   const referralCount = referrals?.length ?? 0;
 
   const handleSaveChanges = (e: React.FormEvent<HTMLFormElement>) => {
@@ -69,7 +71,17 @@ export default function PayoutsPage() {
         <p className="text-muted-foreground">Manage your payout settings and view your payout history.</p>
       </div>
 
-       {referralCount >= 2 ? (
+       {isAdmin ? (
+            <Card className="bg-blue-50 border-blue-200 dark:bg-blue-950 dark:border-blue-800">
+                <CardHeader className="flex-row items-center gap-4">
+                    <ShieldCheck className="h-8 w-8 text-blue-600 dark:text-blue-400 flex-shrink-0" />
+                    <div>
+                        <CardTitle className="text-blue-800 dark:text-blue-200">Admin Payouts Unlocked</CardTitle>
+                        <CardDescription className="text-blue-700 dark:text-blue-300">As an admin, your payouts are automatically enabled. The 2-referral minimum does not apply to you.</CardDescription>
+                    </div>
+                </CardHeader>
+            </Card>
+        ) : referralCount >= 2 ? (
             <Card className="bg-green-50 border-green-200 dark:bg-green-950 dark:border-green-800">
                 <CardHeader className="flex-row items-center gap-4">
                     <PartyPopper className="h-8 w-8 text-green-600 dark:text-green-400 flex-shrink-0" />
