@@ -8,8 +8,8 @@ import { useToast } from '@/hooks/use-toast';
 import { Crown, Loader2, ShieldOff, User } from 'lucide-react';
 import type { User as UserType } from '@/lib/types';
 import { useAdmin } from '@/hooks/use-admin';
-import { useCollection, useFirestore, useMemoFirebase, setDocumentNonBlocking, deleteDocumentNonBlocking } from '@/firebase';
-import { collection, doc } from 'firebase/firestore';
+import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
+import { collection, doc, setDoc, deleteDoc } from 'firebase/firestore';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useRouter } from 'next/navigation';
@@ -47,7 +47,7 @@ export default function AdminUsersPage() {
 
   const isLoading = isAdminLoading || usersLoading || rolesLoading;
 
-  const handleToggleAdmin = (targetUser: UserType) => {
+  const handleToggleAdmin = async (targetUser: UserType) => {
     if (!firestore) return;
 
     const isCurrentlyAdmin = adminUids.has(targetUser.id);
@@ -58,23 +58,24 @@ export default function AdminUsersPage() {
     }
 
     setProcessingId(targetUser.id);
-    
     const adminRoleRef = doc(firestore, 'roles_admin', targetUser.id);
     
-    if (isCurrentlyAdmin) {
-      // Revoke admin
-      deleteDocumentNonBlocking(adminRoleRef);
-      toast({ title: 'Admin Revoked', description: `${targetUser.username} is no longer an admin.` });
-    } else {
-      // Grant admin
-      setDocumentNonBlocking(adminRoleRef, {}, { merge: false });
-      toast({ title: 'Admin Granted', description: `${targetUser.username} is now an admin.` });
-    }
-    
-    // Simulate API call delay and allow local state to update
-    setTimeout(() => {
+    try {
+        if (isCurrentlyAdmin) {
+            // Revoke admin
+            await deleteDoc(adminRoleRef);
+            toast({ title: 'Admin Revoked', description: `${targetUser.username} is no longer an admin.` });
+        } else {
+            // Grant admin - create an empty document
+            await setDoc(adminRoleRef, {}); 
+            toast({ title: 'Admin Granted', description: `${targetUser.username} is now an admin.` });
+        }
+    } catch (error: any) {
+        console.error("Failed to toggle admin status:", error);
+        toast({ variant: 'destructive', title: 'Operation Failed', description: error.message || 'Could not update admin status. Check security rules.' });
+    } finally {
         setProcessingId(null);
-    }, 1500)
+    }
   };
 
 
