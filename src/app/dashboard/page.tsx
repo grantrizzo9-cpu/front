@@ -23,6 +23,8 @@ export default function DashboardPage() {
   const firestore = useFirestore();
   const { isAdmin, isLoading: isAdminLoading } = useAdmin();
 
+  const isPlatformOwner = isAdmin && user?.email === 'rentapog@gmail.com';
+
   // --- Personal Data Fetching (for all users, including admin) ---
   const personalReferralsQuery = useMemoFirebase(() => {
     if (!user || !firestore) return null;
@@ -38,23 +40,23 @@ export default function DashboardPage() {
 
   // --- Admin-Only Data Fetching ---
   const allUsersQuery = useMemoFirebase(() => {
-    if (!isAdmin || !firestore) return null; // Only fetch if admin
+    if (!isPlatformOwner || !firestore) return null; // Only fetch if platform owner
     return collection(firestore, 'users');
-  }, [isAdmin, firestore]);
+  }, [isPlatformOwner, firestore]);
   const { data: allUsers, isLoading: allUsersLoading } = useCollection<UserType>(allUsersQuery);
   
   const allReferralsQuery = useMemoFirebase(() => {
-    if (!isAdmin || !firestore) return null; // Only fetch if admin
+    if (!isPlatformOwner || !firestore) return null; // Only fetch if platform owner
     return collectionGroup(firestore, 'referrals');
-  }, [isAdmin, firestore]);
+  }, [isPlatformOwner, firestore]);
   const { data: allReferrals, isLoading: allReferralsLoading } = useCollection<Referral>(allReferralsQuery);
   
   const initialLoading = isUserLoading || isAdminLoading || isUserDataLoading;
-  const isPlatformDataEmpty = isAdmin && !allReferralsLoading && allReferrals?.length === 0;
+  const isPlatformDataEmpty = isPlatformOwner && !allReferralsLoading && allReferrals?.length === 0;
 
   // --- Platform-Wide Stats (for Admins) ---
   const { platformRevenue, totalAffiliatePayouts, totalPlatformReferrals, totalGrossSales, totalUsers, totalAffiliates, pendingActivations } = useMemo(() => {
-    if (!isAdmin) {
+    if (!isPlatformOwner) {
       return { platformRevenue: 0, totalAffiliatePayouts: 0, totalPlatformReferrals: 0, totalGrossSales: 0, totalUsers: 0, totalAffiliates: 0, pendingActivations: 0 };
     }
 
@@ -89,7 +91,7 @@ export default function DashboardPage() {
       console.error("Error calculating platform stats:", e);
       return { platformRevenue: 0, totalAffiliatePayouts: 0, totalPlatformReferrals: 0, totalGrossSales: 0, totalUsers: usersCount, totalAffiliates: affiliatesCount, pendingActivations: 0 };
     }
-  }, [allReferrals, allUsers, isAdmin]);
+  }, [allReferrals, allUsers, isPlatformOwner]);
 
   const recentAllReferrals = useMemo(() => 
       allReferrals?.sort((a, b) => (b.date?.toMillis() ?? 0) - (a.date?.toMillis() ?? 0)).slice(0, 5) ?? [],
@@ -165,8 +167,8 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-8">
-        {/* ======== ADMIN-ONLY SECTION ======== */}
-        {isAdmin && (
+        {/* ======== ADMIN-ONLY SECTION (Now for Platform Owner) ======== */}
+        {isPlatformOwner && (
             <div className="space-y-8">
                 {isPlatformDataEmpty ? (
                      <Card>
