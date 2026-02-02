@@ -121,7 +121,6 @@ export function getHomepageHtml(site: GenerateWebsiteOutput, link: string): stri
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>${homepage.title}</title>
-    <base target="_self">
     <style>
         :root {
 ${themeColorsCss}
@@ -290,6 +289,22 @@ ${themeColorsCss}
       document.addEventListener('DOMContentLoaded', function() {
         const el = document.getElementById('copyright-year');
         if (el) el.textContent = new Date().getFullYear();
+
+        // Intercept anchor link clicks within the header
+        document.querySelectorAll('header.main-header a[href^="#"]').forEach(anchor => {
+          anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            const targetId = this.getAttribute('href');
+            try {
+              const targetElement = document.querySelector(targetId);
+              if (targetElement) {
+                  targetElement.scrollIntoView({ behavior: 'smooth' });
+              }
+            } catch (error) {
+              console.error('Failed to scroll to element:', error);
+            }
+          });
+        });
       });
       function openModal(id, event) {
         if(event) event.preventDefault();

@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { generateWebsite, type GenerateWebsiteOutput } from '@/ai/flows/website-generator';
-import { Loader2, AlertTriangle, Wand2, CheckCircle, UploadCloud } from 'lucide-react';
+import { Loader2, AlertTriangle, Wand2, CheckCircle, UploadCloud, ArrowLeft } from 'lucide-react';
 import { useUser, useFirestore, useCollection, useDoc, useMemoFirebase, addDocumentNonBlocking, updateDocumentNonBlocking } from '@/firebase';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -78,7 +78,7 @@ const Deployer = ({ site, affiliateLink, onDeploy, onStartOver }: { site: Genera
                         <CardDescription>This is a fully interactive preview of your generated homepage. When you are ready, deploy it.</CardDescription>
                     </div>
                     <Button onClick={onStartOver} variant="outline">
-                        Start Over
+                        <ArrowLeft className="mr-2 h-4 w-4" /> Back to Themes
                     </Button>
                 </CardHeader>
                 <CardContent>
@@ -98,10 +98,10 @@ const Deployer = ({ site, affiliateLink, onDeploy, onStartOver }: { site: Genera
                 </CardHeader>
                 <CardFooter className="gap-2">
                      <Button onClick={onDeploy} size="lg">
-                        <UploadCloud className="mr-2 h-4 w-4"/> Deploy Website
+                        <UploadCloud className="mr-2 h-4 w-4"/> Deploy This Website
                     </Button>
                     <Button onClick={onStartOver} size="lg" variant="outline">
-                        Start Over
+                        <ArrowLeft className="mr-2 h-4 w-4" /> Back to Themes
                     </Button>
                 </CardFooter>
             </Card>
