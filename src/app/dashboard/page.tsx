@@ -21,9 +21,7 @@ import { Progress } from "@/components/ui/progress";
 export default function DashboardPage() {
   const { user, isUserLoading } = useUser();
   const firestore = useFirestore();
-  const { isAdmin, isLoading: isAdminLoading } = useAdmin();
-
-  const isPlatformOwner = isAdmin && user?.email === 'rentapog@gmail.com';
+  const { isPlatformOwner, isLoading: isAdminLoading } = useAdmin();
 
   // --- Personal Data Fetching (for all users, including admin) ---
   const personalReferralsQuery = useMemoFirebase(() => {
@@ -307,7 +305,7 @@ export default function DashboardPage() {
             <p className="text-muted-foreground">Welcome back! Here's a summary of your personal affiliate activity.</p>
         </div>
 
-        {isSubscriptionInactive && !isAdmin && (
+        {isSubscriptionInactive && !isPlatformOwner && (
              <Alert variant="destructive">
                 <AlertCircle className="h-4 w-4" />
                 <AlertTitle>Your Account is Inactive!</AlertTitle>
@@ -320,7 +318,7 @@ export default function DashboardPage() {
             </Alert>
         )}
 
-        {isTrialActive && !isAdmin && (
+        {isTrialActive && !isPlatformOwner && (
             <Alert className="border-accent/50 bg-accent/5">
                 <Info className="h-4 w-4 text-accent" />
                 <AlertTitle className="text-accent">You're on a Trial!</AlertTitle>

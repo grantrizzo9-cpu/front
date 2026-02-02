@@ -9,25 +9,28 @@ export function useAdmin() {
   const { user, isUserLoading } = useUser();
   const firestore = useFirestore();
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isPlatformOwner, setIsPlatformOwner] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  // This effect is ONLY for determining the `isAdmin` state for the UI.
+  // This effect is ONLY for determining the `isAdmin` and `isPlatformOwner` state for the UI.
   useEffect(() => {
     setIsLoading(true);
+    setIsAdmin(false);
+    setIsPlatformOwner(false);
 
     if (isUserLoading) {
       return;
     }
 
     if (!user) {
-      setIsAdmin(false);
       setIsLoading(false);
       return;
     }
 
     // PRIMARY check: Hardcoded platform owner email.
-    if (user.email === 'rentapog@gmail.com') {
+    if (user.email?.toLowerCase() === 'rentapog@gmail.com') {
       setIsAdmin(true);
+      setIsPlatformOwner(true);
       setIsLoading(false);
       // The separate effect below will handle ensuring the DB is consistent.
       return;
@@ -37,16 +40,17 @@ export function useAdmin() {
     const checkRoleDoc = async () => {
       try {
         if (!firestore) {
-          setIsAdmin(false);
           setIsLoading(false);
           return;
         }
         const adminRoleRef = doc(firestore, 'roles_admin', user.uid);
         const adminDocSnap = await getDoc(adminRoleRef);
-        setIsAdmin(adminDocSnap.exists());
+        if (adminDocSnap.exists()) {
+          setIsAdmin(true); // They are an admin
+          setIsPlatformOwner(false); // But not the owner
+        }
       } catch (error) {
         console.error("Error checking admin status:", error);
-        setIsAdmin(false); // Default to not admin on error
       } finally {
         setIsLoading(false);
       }
@@ -59,7 +63,7 @@ export function useAdmin() {
   // is consistent for the hardcoded admin user. It does NOT affect the UI's
   // `isAdmin` or `isLoading` state, making the UI more resilient.
   useEffect(() => {
-    if (isAdmin && user && user.email === 'rentapog@gmail.com' && firestore) {
+    if (isPlatformOwner && user && firestore) {
       const ensureAdminDbState = async () => {
         try {
           const userDocRef = doc(firestore, 'users', user.uid);
@@ -117,11 +121,11 @@ export function useAdmin() {
 
       ensureAdminDbState();
     }
-  }, [isAdmin, user, firestore]); // Runs only after isAdmin is confirmed to be true.
+  }, [isPlatformOwner, user, firestore]);
 
   // This effect handles automatically upgrading other admins (not the owner) to the top tier.
   useEffect(() => {
-    if (isAdmin && user && user.email !== 'rentapog@gmail.com' && firestore) {
+    if (isAdmin && !isPlatformOwner && user && firestore) {
       const upgradeAdminAccount = async () => {
         try {
           const userDocRef = doc(firestore, 'users', user.uid);
@@ -156,7 +160,7 @@ export function useAdmin() {
 
       upgradeAdminAccount();
     }
-  }, [isAdmin, user, firestore]);
+  }, [isAdmin, isPlatformOwner, user, firestore]);
 
-  return { isAdmin, isLoading };
+  return { isAdmin, isPlatformOwner, isLoading };
 }
