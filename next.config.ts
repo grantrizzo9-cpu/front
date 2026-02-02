@@ -3,6 +3,7 @@ import type {NextConfig} from 'next';
 
 const nextConfig: NextConfig = {
   /* config options here */
+  output: 'export',
   typescript: {
     ignoreBuildErrors: true,
   },
@@ -31,13 +32,6 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  allowedDevOrigins: ["https://*.cloudworkstations.dev"],
 };
-
-// Conditionally add the `output: 'standalone'` option for production builds.
-// This is required for reliable deployments in containerized environments like App Hosting.
-if (process.env.NODE_ENV === 'production') {
-  nextConfig.output = 'standalone';
-}
 
 export default nextConfig;
