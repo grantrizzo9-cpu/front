@@ -180,19 +180,34 @@ export default function SettingsPage() {
                                   <p className="font-semibold text-foreground">Important: Multiple Accounts policy</p>
                                   <p>Google may restrict new accounts if they are linked to older accounts with outstanding billing issues. If this happens, your best path forward is to start fresh with a completely new email and project configuration.</p>
                                   <p className="font-semibold text-foreground">Your code is safe!</p>
-                                  <p>The code we've built here is separate from your Firebase account. You can create a new project in a new Firebase account, and we can simply swap the configuration to point to the new one. Your app will be back online in minutes.</p>
+                                  <p>The code we&apos;ve built here is separate from your Firebase account. You can create a new project in a new Firebase account, and we can simply swap the configuration to point to the new one. Your app will be back online in minutes.</p>
+                              </div>
+                          </AccordionContent>
+                      </AccordionItem>
+                      <AccordionItem value="workspace">
+                          <AccordionTrigger className="text-sm font-semibold text-left">Using Google Workspace? (Avoid $70 fees)</AccordionTrigger>
+                          <AccordionContent className="text-sm space-y-3 text-muted-foreground">
+                              <p>Google Workspace is excellent for professional isolation, but you should <strong>not</strong> pay $70 just to use Firebase.</p>
+                              <div className="space-y-2 border-l-2 border-primary/20 pl-4 py-2">
+                                  <p className="font-semibold text-foreground">What to avoid:</p>
+                                  <ul className="list-disc list-inside space-y-1">
+                                      <li><strong>Avoid &quot;Google Cloud Premium Support&quot;:</strong> This costs money and is not needed for a standard Firebase project.</li>
+                                      <li><strong>Standard Workspace Cost:</strong> A basic Workspace account is usually $6-$12/month per user. If they are asking for $70, you might be looking at a &quot;Plus&quot; or &quot;Enterprise&quot; plan you don&apos;t need.</li>
+                                  </ul>
+                                  <p className="font-semibold text-foreground">The &quot;Free&quot; Way:</p>
+                                  <p>You can create a standard <strong>personal Gmail</strong> for free. Firebase projects on personal accounts still have the same Blaze Pay-as-you-go features as Workspace accounts once a billing card is added.</p>
                               </div>
                           </AccordionContent>
                       </AccordionItem>
                       <AccordionItem value="clean-break">
-                          <AccordionTrigger className="text-sm font-semibold text-left">The "Clean Break" Checklist</AccordionTrigger>
+                          <AccordionTrigger className="text-sm font-semibold text-left">The &quot;Clean Break&quot; Checklist</AccordionTrigger>
                           <AccordionContent className="text-sm space-y-3 text-muted-foreground">
-                              <p>To prevent Google's systems from linking a new project to old restricted accounts, follow these steps exactly:</p>
+                              <p>To prevent Google&apos;s systems from linking a new project to old restricted accounts, follow these steps exactly:</p>
                               <div className="space-y-4">
                                   <div className="p-3 bg-secondary/50 rounded-lg border">
                                       <p className="font-semibold text-foreground mb-2">Phase 1: Creation (The Most Critical)</p>
                                       <ul className="list-decimal list-inside space-y-1">
-                                          <li><strong>New Device & Network:</strong> Have a friend create the Gmail and Firebase project on their computer and home network (not your hotspot).</li>
+                                          <li><strong>New Device &amp; Network:</strong> Have a friend create the Gmail and Firebase project on their computer and home network (not your hotspot).</li>
                                           <li><strong>New Phone Number:</strong> Use a phone number that has never been linked to your restricted accounts for the mandatory verification.</li>
                                           <li><strong>New Payment Method:</strong> <strong>CRITICAL.</strong> Use a credit card that has never been used with Google before.</li>
                                       </ul>
@@ -201,7 +216,7 @@ export default function SettingsPage() {
                                       <p className="font-semibold text-foreground mb-2">Phase 2: Usage (On Your Laptop)</p>
                                       <p>Even if you are on the same hotspot, you can avoid linking by isolating your browser:</p>
                                       <ul className="list-decimal list-inside space-y-1">
-                                          <li><strong>New Browser Profile:</strong> In Chrome, create a brand new "Profile" (the icon next to the address bar). This ensures NO cookies or history from your old accounts are sent to Google.</li>
+                                          <li><strong>New Browser Profile:</strong> In Chrome, create a brand new &quot;Profile&quot; (the icon next to the address bar). This ensures NO cookies or history from your old accounts are sent to Google.</li>
                                           <li><strong>Switch Browsers:</strong> If you used Chrome, switch to Firefox or Edge specifically for this new account.</li>
                                           <li><strong>Avoid Old Logins:</strong> Never log into your old restricted Gmail accounts in the same browser window where you use the new one.</li>
                                       </ul>
@@ -210,79 +225,35 @@ export default function SettingsPage() {
                           </AccordionContent>
                       </AccordionItem>
                       <AccordionItem value="billing-permissions">
-                          <AccordionTrigger className="text-sm font-semibold text-destructive text-left">Error: "No available billing accounts"?</AccordionTrigger>
+                          <AccordionTrigger className="text-sm font-semibold text-destructive text-left">Error: &quot;No available billing accounts&quot;?</AccordionTrigger>
                           <AccordionContent className="text-sm space-y-3 text-muted-foreground">
-                              <p>This happens when you are an owner of the <strong>Project</strong>, but you don't have permission to manage the <strong>Billing Account</strong> itself.</p>
+                              <p>This happens when you are an owner of the <strong>Project</strong>, but you don&apos;t have permission to manage the <strong>Billing Account</strong> itself.</p>
                               <div className="space-y-2 border-l-2 border-primary/20 pl-4 py-2">
                                   <p className="font-semibold text-foreground">How to fix it (Do NOT go to Project IAM):</p>
                                   <ol className="list-decimal list-inside space-y-1">
                                       <li>Click the <strong>Hamburger Menu</strong> (top left) and select <strong>Billing</strong>.</li>
                                       <li><strong>CRITICAL:</strong> Click the specific <strong>name</strong> of your billing account from the list.</li>
-                                      <li>Now that you are <em>inside</em> the account view, click on <strong>"Account Management"</strong> in the left sidebar.</li>
-                                      <li>Look at the <strong>"Permissions"</strong> panel on the right side of the screen.</li>
-                                      <li>Click <strong>"ADD PRINCIPAL"</strong>, enter your email address.</li>
-                                      <li>In the <strong>"Role"</strong> box, select <strong>Billing &gt; Billing Account Administrator</strong>.</li>
-                                      <li>Save, then you can go back to the "Projects" tab and link your project.</li>
+                                      <li>Now that you are <em>inside</em> the account view, click on <strong>&quot;Account Management&quot;</strong> in the left sidebar.</li>
+                                      <li>Look at the <strong>&quot;Permissions&quot;</strong> panel on the right side of the screen.</li>
+                                      <li>Click <strong>&quot;ADD PRINCIPAL&quot;</strong>, enter your email address.</li>
+                                      <li>In the <strong>&quot;Role&quot;</strong> box, select <strong>Billing &gt; Billing Account Administrator</strong>.</li>
+                                      <li>Save, then you can go back to the &quot;Projects&quot; tab and link your project.</li>
                                   </ol>
                               </div>
-                          </AccordionContent>
-                      </AccordionItem>
-                      <AccordionItem value="billing-hang">
-                          <AccordionTrigger className="text-sm font-semibold">Stuck on "Waiting for Billing Account"?</AccordionTrigger>
-                          <AccordionContent className="text-sm space-y-3 text-muted-foreground">
-                              <p>If the publisher is stuck even after you've paid, it's usually because the <strong>project</strong> isn't manually linked to your <strong>Billing Account</strong> yet.</p>
-                              <div className="space-y-2">
-                                  <p className="font-semibold text-foreground">How to fix it:</p>
-                                  <ol className="list-decimal list-inside space-y-1">
-                                      <li>Go to the <a href="https://console.cloud.google.com/billing/projects" target="_blank" className="text-primary underline">Cloud Billing Projects page</a>.</li>
-                                      <li>Find your project (<code>affiliate-ai-host-new</code>).</li>
-                                      <li>Click the three dots (Actions) next to it and select <strong>"Change billing"</strong>.</li>
-                                      <li>Select your active billing account and click <strong>"Set Account"</strong>.</li>
-                                  </ol>
-                                  <p>Wait 60 seconds after linking, then refresh your deployment tool.</p>
-                              </div>
-                          </AccordionContent>
-                      </AccordionItem>
-                      <AccordionItem value="dns-work">
-                          <AccordionTrigger className="text-sm font-semibold">Does my project need to be published for DNS to work?</AccordionTrigger>
-                          <AccordionContent className="text-sm space-y-3 text-muted-foreground">
-                              <p><strong>Yes.</strong> While you can point your DNS records to Firebase at any time, your website will not actually "go live" until the Publisher process is complete.</p>
-                              <ul className="list-disc list-inside space-y-1">
-                                  <li><strong>DNS</strong> is just the map to your site.</li>
-                                  <li><strong>Publishing</strong> is what puts your app code on the server.</li>
-                                  <li><strong>SSL Security:</strong> Firebase cannot issue your security certificate until your project is successfully linked to billing.</li>
-                              </ul>
                           </AccordionContent>
                       </AccordionItem>
                       <AccordionItem value="billing-support">
-                          <AccordionTrigger className="text-sm font-semibold">How to contact Billing Support?</AccordionTrigger>
+                          <AccordionTrigger className="text-sm font-semibold text-left">How to contact Billing Support?</AccordionTrigger>
                           <AccordionContent className="text-sm space-y-3 text-muted-foreground">
                               <div className="space-y-2">
                                   <ol className="list-decimal list-inside space-y-1">
                                       <li>Go to the <a href="https://console.cloud.google.com/billing" target="_blank" className="text-primary underline">Google Cloud Billing Console</a>.</li>
                                       <li>Click on the <strong>name</strong> of your billing account.</li>
-                                      <li>Click on <strong>"Support"</strong> in the left-hand sidebar menu.</li>
-                                      <li>Click the <strong>"Contact Support"</strong> button at the top of the page.</li>
+                                      <li>Click on <strong>&quot;Support&quot;</strong> in the left-hand sidebar menu.</li>
+                                      <li>Click the <strong>&quot;Contact Support&quot;</strong> button at the top of the page.</li>
                                   </ol>
                                   <p>Billing support is free for all accounts, even on the free tier.</p>
                               </div>
-                          </AccordionContent>
-                      </AccordionItem>
-                      <AccordionItem value="emails">
-                          <AccordionTrigger className="text-sm font-semibold">Fixing "Sender Name" &amp; Verification</AccordionTrigger>
-                          <AccordionContent className="text-sm space-y-3 text-muted-foreground">
-                              <p>If Cloud won't let you change your "Public Name" due to verification, use this shortcut to fix your emails immediately:</p>
-                              <ol className="list-decimal list-inside space-y-1">
-                                  <li>Go to <strong>Auth &gt; Templates</strong> in Firebase.</li>
-                                  <li>Edit any template (e.g., Email address change).</li>
-                                  <li>In the <strong>Sender</strong> section, click the pencil.</li>
-                                  <li>Update <strong>Display Name</strong> to "Affiliate AI Host".</li>
-                              </ol>
-                              <Button asChild variant="outline" size="sm" className="w-full mt-2">
-                                  <Link href="https://console.firebase.google.com/project/_/authentication/emails" target="_blank">
-                                      Open Auth Templates <ExternalLink className="ml-2 h-3 w-3" />
-                                  </Link>
-                              </Button>
                           </AccordionContent>
                       </AccordionItem>
                   </Accordion>
@@ -315,7 +286,7 @@ export default function SettingsPage() {
                     <CheckCircle2 className="h-4 w-4 text-green-600" />
                     <AlertTitle className="text-green-800 dark:text-green-200 font-bold">Verification Link Sent!</AlertTitle>
                     <AlertDescription className="text-green-700 dark:text-green-300">
-                        <p>We've sent a confirmation link to <strong>{verificationSentTo}</strong>. Your account email will not change until you click that link.</p>
+                        <p>We&apos;ve sent a confirmation link to <strong>{verificationSentTo}</strong>. Your account email will not change until you click that link.</p>
                     </AlertDescription>
                 </Alert>
 
@@ -323,7 +294,7 @@ export default function SettingsPage() {
                     <CardHeader className="py-3">
                         <CardTitle className="text-sm flex items-center gap-2">
                             <HelpCircle className="h-4 w-4 text-amber-600" />
-                            Didn't get the email?
+                            Didn&apos;t get the email?
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="text-xs text-muted-foreground space-y-2 pb-3">
