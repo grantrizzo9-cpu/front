@@ -210,6 +210,21 @@ export default function SettingsPage() {
                               </div>
                           </AccordionContent>
                       </AccordionItem>
+                      <AccordionItem value="billing-support">
+                          <AccordionTrigger className="text-sm font-semibold">How to contact Billing Support?</AccordionTrigger>
+                          <AccordionContent className="text-sm space-y-3 text-muted-foreground">
+                              <p>If you've followed the steps and still can't link your account, you can contact the dedicated Billing Support team for free.</p>
+                              <div className="space-y-2">
+                                  <ol className="list-decimal list-inside space-y-1">
+                                      <li>Go to the <a href="https://console.cloud.google.com/billing" target="_blank" className="text-primary underline">Google Cloud Billing Console</a>.</li>
+                                      <li>Click on the <strong>name</strong> of your billing account.</li>
+                                      <li>Click on <strong>"Support"</strong> in the left-hand sidebar menu.</li>
+                                      <li>Click the <strong>"Contact Support"</strong> button at the top of the page.</li>
+                                  </ol>
+                                  <p>Billing support is free for all accounts, even on the free tier.</p>
+                              </div>
+                          </AccordionContent>
+                      </AccordionItem>
                       <AccordionItem value="linking">
                           <AccordionTrigger className="text-sm font-semibold">Cloud vs Firebase: Linking Your Account</AccordionTrigger>
                           <AccordionContent className="text-sm space-y-3 text-muted-foreground">
