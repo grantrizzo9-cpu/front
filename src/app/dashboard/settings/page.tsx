@@ -172,7 +172,7 @@ export default function SettingsPage() {
                       <ShieldCheck className="h-5 w-5 text-primary" />
                       Administrator Technical Guide
                   </CardTitle>
-                  <CardDescription>Common setup tasks and project "linking" instructions.</CardDescription>
+                  <CardDescription>Follow this checklist if you are stuck on Step 2 of the Publisher.</CardDescription>
               </CardHeader>
               <CardContent className="pt-6">
                   <Accordion type="single" collapsible className="w-full">
@@ -298,6 +298,12 @@ export default function SettingsPage() {
                         <p>• Check your <strong>Spam or Junk</strong> folder.</p>
                         <p>• Wait up to 5 minutes for the internet to deliver the message.</p>
                         <p>• Ensure you typed the email correctly: <strong>{verificationSentTo}</strong>.</p>
+                        <div className="mt-4 p-3 bg-primary/10 rounded border border-primary/20 text-foreground">
+                            <p className="font-semibold flex items-center gap-1 mb-1">
+                                <ShieldCheck className="h-3 w-3" /> Admin Tip: Prevent Spam
+                            </p>
+                            <p>Go to your Firebase Console &gt; Auth &gt; Templates and <strong>customize your domain</strong>. This adds DKIM/SPF records which tells email providers your site is trusted.</p>
+                        </div>
                     </CardContent>
                 </Card>
               </div>
