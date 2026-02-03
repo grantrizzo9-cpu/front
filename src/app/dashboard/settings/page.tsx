@@ -5,25 +5,29 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { Copy, Loader2, PartyPopper, Info, Mail } from "lucide-react";
-import { useUser, useFirestore, useDoc, updateDocumentNonBlocking, useMemoFirebase } from "@/firebase";
+import { Copy, Loader2, PartyPopper, Info, Mail, AlertCircle, LogOut } from "lucide-react";
+import { useUser, useFirestore, useDoc, updateDocumentNonBlocking, useMemoFirebase, useAuth } from "@/firebase";
 import { doc, writeBatch } from "firebase/firestore";
-import { verifyBeforeUpdateEmail } from "firebase/auth";
+import { verifyBeforeUpdateEmail, signOut } from "firebase/auth";
 import type { User as UserType } from "@/lib/types";
 import { useState, useMemo } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useAdmin } from "@/hooks/use-admin";
 import { Label } from "@/components/ui/label";
+import { useRouter } from "next/navigation";
 
 export default function SettingsPage() {
   const { user, isUserLoading } = useUser();
+  const auth = useAuth();
   const firestore = useFirestore();
   const { toast } = useToast();
   const { isAdmin, isLoading: isAdminLoading } = useAdmin();
+  const router = useRouter();
 
   const [isRepairing, setIsRepairing] = useState(false);
   const [newEmail, setNewEmail] = useState('');
   const [isUpdatingEmail, setIsUpdatingEmail] = useState(false);
+  const [showRecentLoginError, setShowRecentLoginError] = useState(false);
 
   const userDocRef = useMemoFirebase(() => {
     if (!user || !firestore) return null;
@@ -101,6 +105,7 @@ export default function SettingsPage() {
     if (!user || !newEmail) return;
     
     setIsUpdatingEmail(true);
+    setShowRecentLoginError(false);
     try {
         // Modern Firebase security requirements: verify the new email before it's updated.
         await verifyBeforeUpdateEmail(user, newEmail);
@@ -121,6 +126,7 @@ export default function SettingsPage() {
         let message = "An error occurred while updating your email.";
         
         if (error.code === 'auth/requires-recent-login') {
+            setShowRecentLoginError(true);
             message = "This operation is sensitive and requires recent authentication. Please log out and log back in, then try again.";
         } else if (error.code === 'auth/operation-not-allowed') {
             message = "Email updates are currently restricted. Please ensure you are following the verification link sent to your inbox.";
@@ -136,6 +142,12 @@ export default function SettingsPage() {
     } finally {
         setIsUpdatingEmail(false);
     }
+  };
+
+  const handleLogout = () => {
+    signOut(auth).then(() => {
+      router.push("/login");
+    });
   };
 
   const isLoading = isUserLoading || isUserDataLoading || isUsernameDocLoading || isAdminLoading;
@@ -164,7 +176,20 @@ export default function SettingsPage() {
           <CardTitle>Account Settings</CardTitle>
           <CardDescription>Update your login email address.</CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-4">
+          {showRecentLoginError && (
+              <Alert variant="destructive">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertTitle>Security Verification Required</AlertTitle>
+                  <AlertDescription className="space-y-3">
+                      <p>Changing your email is a sensitive action. To protect your account, you must have logged in recently.</p>
+                      <Button variant="outline" size="sm" onClick={handleLogout} className="bg-destructive/10 hover:bg-destructive/20 border-destructive/20 text-destructive">
+                          <LogOut className="mr-2 h-4 w-4" /> Log out and sign back in
+                      </Button>
+                  </AlertDescription>
+              </Alert>
+          )}
+
           {isGoogleUser ? (
               <Alert className="bg-muted">
                   <Info className="h-4 w-4" />
