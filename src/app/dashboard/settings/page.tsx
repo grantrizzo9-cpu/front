@@ -193,7 +193,7 @@ export default function SettingsPage() {
                                       <p className="font-semibold text-foreground mb-2">Phase 1: Creation (The Most Critical)</p>
                                       <ul className="list-decimal list-inside space-y-1">
                                           <li><strong>New Device & Network:</strong> Have a friend create the Gmail and Firebase project on their computer and home network (not your hotspot).</li>
-                                          <li><strong>New Phone Number:</strong> Use a phone number that has never been linked to your restricted accounts.</li>
+                                          <li><strong>New Phone Number:</strong> Use a phone number that has never been linked to your restricted accounts for the mandatory verification.</li>
                                           <li><strong>New Payment Method:</strong> <strong>CRITICAL.</strong> Use a credit card that has never been used with Google before.</li>
                                       </ul>
                                   </div>
