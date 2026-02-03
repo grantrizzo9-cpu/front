@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useState, useMemo, useEffect } from 'react';
@@ -167,7 +166,7 @@ const allGuides: Guide[] = [
       <h3>Step 1: Find Your "Golden Key" (Your Affiliate Link)</h3>
       <p>While you won't be forwarding to this link, you still need it for all your other marketing efforts (social media, emails, etc.). It's the unique code that tracks your sales.</p>
       <ol>
-        <li>Navigate to your <a href="/dashboard/settings" target="_blank" class="text-primary font-semibold hover:underline">Affiliate Settings Page</a>.</li>
+        <li>Navigate to your <a href="/dashboard/settings" class="text-primary font-semibold hover:underline">Affiliate Settings Page</a>.</li>
         <li>Carefully copy your complete, unique affiliate link. It will look exactly like this: <a href="[YOUR_AFFILIATE_LINK_HERE]" target="_blank" rel="noopener noreferrer" class="text-primary font-semibold hover:underline">\`<code>[YOUR_AFFILIATE_LINK_HERE]</code>\`</a>.</li>
         <li>Save this link in a secure text file. You will use this link everywhere *except* for your main domain connection.</li>
       </ol>
@@ -175,7 +174,7 @@ const allGuides: Guide[] = [
       <h3>Step 2: Purchase Your Digital Real Estate (Your Domain Name)</h3>
       <p>Your domain name is your brand. It's how people will remember and find you. A professional domain is a non-negotiable part of building a long-term, sustainable business.</p>
       <ol>
-        <li>Go to your <a href="https://rizzosai.shopco.com/" target="_blank" rel="noopener noreferrer" class="text-primary font-semibold hover:underline">integrated reseller store</a>. You can also use the convenient search tool on your <a href="/dashboard/hosting" target="_blank" class="text-primary font-semibold hover:underline">Hosting Page</a>.</li>
+        <li>Go to your <a href="https://rizzosai.shopco.com/" target="_blank" rel="noopener noreferrer" class="text-primary font-semibold hover:underline">integrated reseller store</a>. You can also use the convenient search tool on your <a href="/dashboard/hosting" class="text-primary font-semibold hover:underline">Hosting Page</a>.</li>
         <li>Brainstorm and search for a domain that is relevant to your niche. Try combining keywords like 'AI', 'hosting', 'reviews', 'insider', 'hub', 'stack', or your own name.</li>
         <li>Select a \`<code>.com</code>\` extension if at all possible. It holds the most trust and authority online.</li>
         <li>Complete the purchase. For a small annual fee, you now own that domain. This is a critical business asset.</li>
