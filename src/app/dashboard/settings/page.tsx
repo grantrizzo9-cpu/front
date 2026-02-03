@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { Copy, Loader2, PartyPopper, Info, Mail, AlertCircle, LogOut, CheckCircle2 } from "lucide-react";
+import { Copy, Loader2, PartyPopper, Info, Mail, AlertCircle, LogOut, CheckCircle2, HelpCircle, ShieldCheck } from "lucide-react";
 import { useUser, useFirestore, useDoc, updateDocumentNonBlocking, useMemoFirebase, useAuth } from "@/firebase";
 import { doc, writeBatch } from "firebase/firestore";
 import { verifyBeforeUpdateEmail, signOut } from "firebase/auth";
@@ -15,13 +15,19 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useAdmin } from "@/hooks/use-admin";
 import { Label } from "@/components/ui/label";
 import { useRouter } from "next/navigation";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 
 export default function SettingsPage() {
   const { user, isUserLoading } = useUser();
   const auth = useAuth();
   const firestore = useFirestore();
   const { toast } = useToast();
-  const { isAdmin, isLoading: isAdminLoading } = useAdmin();
+  const { isAdmin, isPlatformOwner, isLoading: isAdminLoading } = useAdmin();
   const router = useRouter();
 
   const [isRepairing, setIsRepairing] = useState(false);
@@ -182,14 +188,37 @@ export default function SettingsPage() {
           )}
 
           {verificationSentTo && (
-              <Alert className="bg-green-50 border-green-200 dark:bg-green-950 dark:border-green-800">
-                  <CheckCircle2 className="h-4 w-4 text-green-600" />
-                  <AlertTitle className="text-green-800 dark:text-green-200">Verification Link Sent!</AlertTitle>
-                  <AlertDescription className="text-green-700 dark:text-green-300">
-                      <p>We've sent a link to <strong>{verificationSentTo}</strong>. Your account email will not change until you click that link.</p>
-                      <p className="mt-2 text-xs">Didn't get it? Check your spam folder or try again in a few minutes.</p>
-                  </AlertDescription>
-              </Alert>
+              <div className="space-y-4">
+                <Alert className="bg-green-50 border-green-200 dark:bg-green-950 dark:border-green-800">
+                    <CheckCircle2 className="h-4 w-4 text-green-600" />
+                    <AlertTitle className="text-green-800 dark:text-green-200 font-bold">Verification Link Sent!</AlertTitle>
+                    <AlertDescription className="text-green-700 dark:text-green-300">
+                        <p>We've sent a confirmation link to <strong>{verificationSentTo}</strong>. Your account email will not change until you click that link.</p>
+                    </AlertDescription>
+                </Alert>
+
+                <Card className="border-amber-200 bg-amber-50 dark:bg-amber-950/20">
+                    <CardHeader className="py-3">
+                        <CardTitle className="text-sm flex items-center gap-2">
+                            <HelpCircle className="h-4 w-4 text-amber-600" />
+                            Didn't get the email?
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent className="text-xs text-muted-foreground space-y-2 pb-3">
+                        <p>• Check your <strong>Spam or Junk</strong> folder.</p>
+                        <p>• Wait up to 5 minutes for the internet to deliver the message.</p>
+                        <p>• Ensure you typed the email correctly: <strong>{verificationSentTo}</strong>.</p>
+                        {isPlatformOwner && (
+                            <div className="pt-2 mt-2 border-t border-amber-200">
+                                <p className="font-bold text-amber-800 dark:text-amber-200 mb-1 flex items-center gap-1">
+                                    <ShieldCheck className="h-3 w-3" /> Admin Tip: Prevent Spam
+                                </p>
+                                <p>Go to your Firebase Console > Auth > Templates and <strong>customize your domain</strong>. This adds DKIM/SPF records which tells email providers your site is trusted.</p>
+                            </div>
+                        )}
+                    </CardContent>
+                </Card>
+              </div>
           )}
 
           {isGoogleUser ? (
