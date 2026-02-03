@@ -19,7 +19,7 @@ import {
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from "@/components/ui/accordion";
+} from "@/components/accordion";
 import Link from "next/link";
 
 export default function SettingsPage() {
@@ -191,10 +191,12 @@ export default function SettingsPage() {
                       <AccordionItem value="clean-break">
                           <AccordionTrigger className="text-sm font-semibold text-left">The "Clean Break" Checklist</AccordionTrigger>
                           <AccordionContent className="text-sm space-y-3 text-muted-foreground">
-                              <p>To prevent Google's systems from linking a new project to old restricted accounts, follow these steps:</p>
+                              <p>To prevent Google's systems from linking a new project to old restricted accounts, follow these steps exactly:</p>
                               <ul className="list-decimal list-inside space-y-2">
                                   <li><strong>New Email:</strong> Use a brand new Gmail address that hasn't been used for Google Cloud before.</li>
+                                  <li><strong>Phone Verification:</strong> Use a different phone number if possible. Google uses this as a primary link between accounts.</li>
                                   <li><strong>New Card:</strong> Use a different credit card. Systems often link accounts by the payment method.</li>
+                                  <li><strong>Fresh Network:</strong> Use a different internet connection (like mobile data instead of home Wi-Fi) to create the account.</li>
                                   <li><strong>Incognito Mode:</strong> Perform the setup in an Incognito/Private window to avoid tracking cookies.</li>
                                   <li><strong>New Config:</strong> Once the new project is ready, send the <code>firebaseConfig</code> to your developer to update the app.</li>
                               </ul>
