@@ -181,8 +181,8 @@ export default function AdminHostingPage() {
                   <li>Copy the domain name from the table above.</li>
                   <li>Click <strong>"Open Firebase Console"</strong> to go to the Hosting settings.</li>
                   <li>Click <strong>"Add custom domain"</strong> and paste the domain name.</li>
-                  <li>Follow the instructions in the Firebase wizard to get the <strong>A Records</strong>.</li>
-                  <li>Go to your domain registrar (e.g. GoDaddy) and add those A Records to the domain.</li>
+                  <li>Follow the instructions in the Firebase wizard to get the <strong>A Records</strong> (IP addresses).</li>
+                  <li>Go to your domain registrar (e.g. GoDaddy or your reseller store) and add those A Records to the domain's DNS settings.</li>
                   <li>Once done, click <strong>"Mark as Connected"</strong> here so the user sees the "Live" badge on their dashboard.</li>
               </ol>
           </CardContent>
