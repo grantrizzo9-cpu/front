@@ -1,18 +1,19 @@
 
-
 "use client";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { Copy, Loader2, PartyPopper, Info } from "lucide-react";
+import { Copy, Loader2, PartyPopper, Info, Mail } from "lucide-react";
 import { useUser, useFirestore, useDoc, updateDocumentNonBlocking, useMemoFirebase } from "@/firebase";
 import { doc, setDoc, writeBatch } from "firebase/firestore";
+import { updateEmail } from "firebase/auth";
 import type { User as UserType } from "@/lib/types";
 import { useState, useEffect } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useAdmin } from "@/hooks/use-admin";
+import { Label } from "@/components/ui/label";
 
 export default function SettingsPage() {
   const { user, isUserLoading } = useUser();
@@ -21,6 +22,8 @@ export default function SettingsPage() {
   const { isAdmin, isLoading: isAdminLoading } = useAdmin();
 
   const [isRepairing, setIsRepairing] = useState(false);
+  const [newEmail, setNewEmail] = useState('');
+  const [isUpdatingEmail, setIsUpdatingEmail] = useState(false);
 
   const userDocRef = useMemoFirebase(() => {
     if (!user || !firestore) return null;
@@ -89,6 +92,43 @@ export default function SettingsPage() {
     }
   };
 
+  const handleUpdateEmail = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user || !newEmail) return;
+    
+    setIsUpdatingEmail(true);
+    try {
+        // 1. Update Firebase Auth Email
+        await updateEmail(user, newEmail);
+        
+        // 2. Update Firestore User Doc
+        if (userDocRef) {
+            updateDocumentNonBlocking(userDocRef, { email: newEmail });
+        }
+        
+        toast({
+            title: "Email Updated",
+            description: `Your account email has been changed to ${newEmail}.`,
+        });
+        setNewEmail('');
+    } catch (error: any) {
+        console.error("Email update error:", error);
+        let message = "An error occurred while updating your email.";
+        if (error.code === 'auth/requires-recent-login') {
+            message = "This operation is sensitive and requires recent authentication. Please log out and log back in, then try again.";
+        } else if (error.message) {
+            message = error.message;
+        }
+        toast({
+            variant: "destructive",
+            title: "Update Failed",
+            description: message,
+        });
+    } finally {
+        setIsUpdatingEmail(false);
+    }
+  };
+
   const isLoading = isUserLoading || isUserDataLoading || isUsernameDocLoading || isAdminLoading;
   
   // The repair UI should be shown if the user is an affiliate, but their link is not active and correct.
@@ -109,6 +149,39 @@ export default function SettingsPage() {
         <h1 className="text-3xl font-bold font-headline">Settings</h1>
         <p className="text-muted-foreground">Manage your account and affiliate settings.</p>
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Account Settings</CardTitle>
+          <CardDescription>Update your login email address.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleUpdateEmail} className="space-y-4">
+            <div className="space-y-2">
+                <Label htmlFor="current-email">Current Email</Label>
+                <Input id="current-email" type="email" value={user?.email || ''} disabled className="bg-muted" />
+            </div>
+            <div className="space-y-2">
+                <Label htmlFor="new-email">New Email Address</Label>
+                <div className="flex gap-2">
+                    <Input 
+                        id="new-email" 
+                        type="email" 
+                        placeholder="new-email@example.com" 
+                        value={newEmail}
+                        onChange={(e) => setNewEmail(e.target.value)}
+                        required
+                        disabled={isUpdatingEmail}
+                    />
+                    <Button type="submit" disabled={isUpdatingEmail || !newEmail}>
+                        {isUpdatingEmail ? <Loader2 className="animate-spin h-4 w-4" /> : <Mail className="h-4 w-4 mr-2" />}
+                        Update
+                    </Button>
+                </div>
+            </div>
+          </form>
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>
