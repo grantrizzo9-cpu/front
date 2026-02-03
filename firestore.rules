@@ -45,6 +45,11 @@ service cloud.firestore {
       allow read, write: if request.auth.uid == userId;
     }
 
+    // A user can manage their own generated websites.
+    match /users/{userId}/websites/{websiteId} {
+      allow read, write: if request.auth.uid == userId;
+    }
+
 
     // --- Public Data & Roles ---
 
