@@ -210,6 +210,18 @@ export default function SettingsPage() {
                               </div>
                           </AccordionContent>
                       </AccordionItem>
+                      <AccordionItem value="dns-work">
+                          <AccordionTrigger className="text-sm font-semibold">Does my project need to be published for DNS to work?</AccordionTrigger>
+                          <AccordionContent className="text-sm space-y-3 text-muted-foreground">
+                              <p><strong>Yes.</strong> While you can point your DNS records to Firebase at any time, your website will not actually "go live" until the Publisher process is complete.</p>
+                              <ul className="list-disc list-inside space-y-1">
+                                  <li><strong>DNS</strong> is just the map to your site.</li>
+                                  <li><strong>Publishing</strong> is what puts your app code on the server.</li>
+                                  <li><strong>SSL Security:</strong> Firebase cannot issue your security certificate until your project is successfully linked to billing.</li>
+                              </ul>
+                              <p>If you don't finish publishing, users will see a "Site Not Found" error even if your DNS is correct.</p>
+                          </AccordionContent>
+                      </AccordionItem>
                       <AccordionItem value="billing-support">
                           <AccordionTrigger className="text-sm font-semibold">How to contact Billing Support?</AccordionTrigger>
                           <AccordionContent className="text-sm space-y-3 text-muted-foreground">
