@@ -9,7 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useUser, useFirestore, useDoc, useMemoFirebase, updateDocumentNonBlocking } from '@/firebase';
 import { doc } from 'firebase/firestore';
 import type { User as UserType } from '@/lib/types';
-import { Loader2, Globe, CheckCircle, Search, BookOpen, Send, ShieldCheck, ArrowRight } from 'lucide-react';
+import { Loader2, Globe, CheckCircle, Search, BookOpen, Send, ShieldCheck, ArrowRight, Copy, Info } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
@@ -80,10 +80,18 @@ export default function HostingPage() {
         setTimeout(() => {
             toast({
                 title: 'Domain Saved',
-                description: `Request for ${domainInput} sent.`,
+                description: `Setup instructions for ${domainInput} are now available.`,
             });
             setIsSaving(false);
         }, 1000);
+    };
+
+    const copyToClipboard = (text: string) => {
+        navigator.clipboard.writeText(text);
+        toast({
+            title: "Copied!",
+            description: `${text} copied to clipboard.`,
+        });
     };
     
     const hostingConsoleUrl = `https://console.firebase.google.com/project/${firebaseConfig.projectId}/hosting/custom-domains`;
@@ -140,7 +148,7 @@ export default function HostingPage() {
                          <CardTitle>Submit Domain for Setup</CardTitle>
                     </div>
                     <CardDescription>
-                       Enter the domain you purchased below to notify our team.
+                       Enter the domain you purchased below to start the connection process.
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -154,18 +162,79 @@ export default function HostingPage() {
                         />
                         <Button onClick={handleSaveDomain} disabled={isSaving || !domainInput || localDomainStatus === 'connected'}>
                             {isSaving ? <Loader2 className="animate-spin mr-2" /> : <Send className="mr-2" />}
-                            {localDomainStatus === 'connected' ? 'Domain Connected' : 'Save & Request Setup'}
+                            {localDomainStatus === 'connected' ? 'Domain Connected' : 'Save & Start Setup'}
                         </Button>
                     </div>
                 </CardContent>
             </Card>
 
-            {/* Step 3: Status */}
+            {/* Step 3: DNS Instructions (Visible only when pending or connected) */}
+            {(localDomainStatus === 'pending' || localDomainStatus === 'connected') && (
+                <Card className="border-primary/20 bg-primary/5 animate-in fade-in slide-in-from-bottom-2">
+                    <CardHeader>
+                        <div className="flex items-center gap-3">
+                            <div className="flex-shrink-0 w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-bold">3</div>
+                            <CardTitle>Configure Your Domain (DNS)</CardTitle>
+                        </div>
+                        <CardDescription>
+                            Follow these steps at your domain registrar (e.g. Host Pro AI, GoDaddy, etc.) to point your domain to our servers.
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                        <div className="grid gap-4">
+                            <div className="p-4 bg-background border rounded-lg">
+                                <p className="text-sm font-semibold mb-3">Add these two "A Records" to your DNS settings:</p>
+                                <div className="space-y-3">
+                                    <div className="flex items-center justify-between p-2 bg-secondary/50 rounded border border-dashed">
+                                        <div className="flex gap-4 text-xs font-mono">
+                                            <span className="text-muted-foreground uppercase">Type:</span> A
+                                            <span className="text-muted-foreground uppercase ml-2">Host:</span> @
+                                            <span className="text-muted-foreground uppercase ml-2">Value:</span> 199.36.158.100
+                                        </div>
+                                        <Button variant="ghost" size="sm" onClick={() => copyToClipboard('199.36.158.100')}>
+                                            <Copy className="h-3 w-3" />
+                                        </Button>
+                                    </div>
+                                    <div className="flex items-center justify-between p-2 bg-secondary/50 rounded border border-dashed">
+                                        <div className="flex gap-4 text-xs font-mono">
+                                            <span className="text-muted-foreground uppercase">Type:</span> A
+                                            <span className="text-muted-foreground uppercase ml-2">Host:</span> @
+                                            <span className="text-muted-foreground uppercase ml-2">Value:</span> 151.101.1.195
+                                        </div>
+                                        <Button variant="ghost" size="sm" onClick={() => copyToClipboard('151.101.1.195')}>
+                                            <Copy className="h-3 w-3" />
+                                        </Button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <Alert>
+                                <Info className="h-4 w-4" />
+                                <AlertTitle>Important: Clear existing records</AlertTitle>
+                                <AlertDescription className="text-xs">
+                                    Be sure to <strong>delete any existing A records</strong> for your root domain (@) before adding the new ones. This ensures your domain points correctly to our host.
+                                </AlertDescription>
+                            </Alert>
+
+                            <div className="space-y-2 text-sm text-muted-foreground">
+                                <p>1. Log in to your domain registrar's account.</p>
+                                <p>2. Find the DNS Management or "Advanced DNS" section for <strong>{domainInput}</strong>.</p>
+                                <p>3. Create the two records shown above.</p>
+                                <p>4. Once you've saved your DNS changes, it can take anywhere from 30 minutes to 24 hours for the internet to update (propagate).</p>
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+            )}
+
+            {/* Step 4: Status */}
             <Card>
                  <CardHeader>
                     <div className="flex items-center gap-3">
-                         <div className="flex-shrink-0 w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-bold">3</div>
-                         <CardTitle>Connection Status</CardTitle>
+                         <div className="flex-shrink-0 w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-bold">
+                            {localDomainStatus === 'connected' ? <CheckCircle className="h-5 w-5" /> : '4'}
+                         </div>
+                         <CardTitle>Final Verification Status</CardTitle>
                     </div>
                 </CardHeader>
                 <CardContent className="flex flex-col items-center justify-center text-center gap-4 py-8">
@@ -173,10 +242,10 @@ export default function HostingPage() {
                         switch (localDomainStatus) {
                             case 'pending':
                                 return (
-                                    <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2">
-                                        <Badge className="bg-amber-500 text-white animate-pulse">Request Received: Setup in Progress</Badge>
+                                    <div className="space-y-4">
+                                        <Badge className="bg-amber-500 text-white animate-pulse">Request Received: Activation Pending</Badge>
                                         <p className="text-sm text-muted-foreground max-w-sm mx-auto">
-                                            We've received your request for <strong>{domainInput}</strong>. Our team is now configuring the server. This usually takes 2-24 hours.
+                                            We've received your request for <strong>{domainInput}</strong>. Once you've updated your DNS records (Step 3), our team will activate your SSL certificate.
                                         </p>
                                     </div>
                                 );
@@ -187,7 +256,7 @@ export default function HostingPage() {
                                             <CheckCircle className="h-4 w-4 text-green-600" />
                                             <AlertTitle className="text-green-800">Your Site is Live!</AlertTitle>
                                             <AlertDescription className="text-green-700">
-                                                Your domain is successfully connected. View your site at: <br/>
+                                                Your domain is successfully connected and secure. View your site at: <br/>
                                                 <a href={`https://${domainInput}`} target="_blank" rel="noopener noreferrer" className="font-bold underline text-lg">{domainInput}</a>
                                             </AlertDescription>
                                         </Alert>
@@ -197,7 +266,7 @@ export default function HostingPage() {
                                 return (
                                     <div className="text-muted-foreground">
                                         <Globe className="w-12 h-12 mx-auto mb-2 opacity-20" />
-                                        <p>Waiting for domain submission...</p>
+                                        <p>Complete steps 1 & 2 to see status.</p>
                                     </div>
                                 );
                         }
