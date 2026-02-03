@@ -176,6 +176,18 @@ export default function SettingsPage() {
               </CardHeader>
               <CardContent className="pt-6">
                   <Accordion type="single" collapsible className="w-full">
+                      <AccordionItem value="suspension">
+                          <AccordionTrigger className="text-sm font-semibold text-destructive text-left">Account Suspended or Restricted?</AccordionTrigger>
+                          <AccordionContent className="text-sm space-y-3 text-muted-foreground">
+                              <p>If Google has restricted your account, it is almost always due to automated <strong>Identity Verification</strong> or <strong>Payment Verification</strong> flags.</p>
+                              <div className="space-y-2 border-l-2 border-destructive/20 pl-4 py-2">
+                                  <p className="font-semibold text-foreground">Important: Multiple Accounts policy</p>
+                                  <p>Google may restrict new accounts if they are linked to older accounts with outstanding billing issues. If this happens, your best path forward is to start fresh with a completely new email and project configuration.</p>
+                                  <p className="font-semibold text-foreground">Your code is safe!</p>
+                                  <p>The code we've built here is separate from your Firebase account. You can create a new project in a new Firebase account, and we can simply swap the configuration to point to the new one. Your app will be back online in minutes.</p>
+                              </div>
+                          </AccordionContent>
+                      </AccordionItem>
                       <AccordionItem value="billing-permissions">
                           <AccordionTrigger className="text-sm font-semibold text-destructive text-left">Error: "No available billing accounts"?</AccordionTrigger>
                           <AccordionContent className="text-sm space-y-3 text-muted-foreground">
@@ -207,19 +219,6 @@ export default function SettingsPage() {
                                       <li>Select your active billing account and click <strong>"Set Account"</strong>.</li>
                                   </ol>
                                   <p>Wait 60 seconds after linking, then refresh your deployment tool.</p>
-                              </div>
-                          </AccordionContent>
-                      </AccordionItem>
-                      <AccordionItem value="suspension">
-                          <AccordionTrigger className="text-sm font-semibold text-destructive text-left">Account Suspended or Restricted?</AccordionTrigger>
-                          <AccordionContent className="text-sm space-y-3 text-muted-foreground">
-                              <p>If Google has restricted your account, it is almost always due to automated <strong>Identity Verification</strong> or <strong>Payment Verification</strong> flags.</p>
-                              <div className="space-y-2 border-l-2 border-destructive/20 pl-4 py-2">
-                                  <p className="font-semibold text-foreground">Steps to recover:</p>
-                                  <ol className="list-decimal list-inside space-y-1">
-                                      <li>Check your email for messages from <strong>"Google Payments"</strong> or <strong>"Google Cloud"</strong> regarding verification. They usually require a photo of an ID to prove you are a real person.</li>
-                                      <li>If you cannot recover the account, <strong>don't panic</strong>. Your app code is safe here. You can create a new project in a new Firebase account, and we can simply swap the <code>firebaseConfig</code> file to point to the new one. Your app will be back online in minutes.</li>
-                                  </ol>
                               </div>
                           </AccordionContent>
                       </AccordionItem>
