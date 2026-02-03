@@ -172,7 +172,7 @@ export default function SettingsPage() {
                       <ShieldCheck className="h-5 w-5 text-primary" />
                       Administrator Technical Guide
                   </CardTitle>
-                  <CardDescription>Follow this checklist if you are stuck on Step 2 of the Publisher.</CardDescription>
+                  <CardDescription>Troubleshooting and support for platform owners.</CardDescription>
               </CardHeader>
               <CardContent className="pt-6">
                   <Accordion type="single" collapsible className="w-full">
@@ -207,6 +207,19 @@ export default function SettingsPage() {
                                       <li>Select your active billing account and click <strong>"Set Account"</strong>.</li>
                                   </ol>
                                   <p>Wait 60 seconds after linking, then refresh your deployment tool.</p>
+                              </div>
+                          </AccordionContent>
+                      </AccordionItem>
+                      <AccordionItem value="suspension">
+                          <AccordionTrigger className="text-sm font-semibold text-destructive text-left">Account Suspended or Restricted?</AccordionTrigger>
+                          <AccordionContent className="text-sm space-y-3 text-muted-foreground">
+                              <p>If Google has restricted your account, it is almost always due to automated <strong>Identity Verification</strong> or <strong>Payment Verification</strong> flags.</p>
+                              <div className="space-y-2 border-l-2 border-destructive/20 pl-4 py-2">
+                                  <p className="font-semibold text-foreground">Steps to recover:</p>
+                                  <ol className="list-decimal list-inside space-y-1">
+                                      <li>Check your email for messages from <strong>"Google Payments"</strong> or <strong>"Google Cloud"</strong> regarding verification. They usually require a photo of an ID to prove you are a real person.</li>
+                                      <li>If you cannot recover the account, <strong>don't panic</strong>. Your app code is safe here. You can create a new project in a new Firebase account, and we can simply swap the <code>firebaseConfig</code> file to point to the new one. Your app will be back online in minutes.</li>
+                                  </ol>
                               </div>
                           </AccordionContent>
                       </AccordionItem>
