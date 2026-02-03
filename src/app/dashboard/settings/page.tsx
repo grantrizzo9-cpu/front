@@ -187,7 +187,7 @@ export default function SettingsPage() {
                                       <li>Click on <strong>"Account Management"</strong> in the left sidebar.</li>
                                       <li>Look at the <strong>"Permissions"</strong> panel on the right.</li>
                                       <li>Click <strong>"ADD PRINCIPAL"</strong> and enter your email address.</li>
-                                      <li>In the <strong>"Role"</strong> box, select <strong>Billing > Billing Account Administrator</strong>.</li>
+                                      <li>In the <strong>"Role"</strong> box, select <strong>Billing &gt; Billing Account Administrator</strong>.</li>
                                       <li>Save, then go back to the "Projects" tab and you will now be able to link your project.</li>
                                   </ol>
                               </div>
