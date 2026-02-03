@@ -122,10 +122,6 @@ export default function SettingsPage() {
         if (error.code === 'auth/requires-recent-login') {
             setShowRecentLoginError(true);
             message = "Security check: Please log out and log back in to verify your identity before changing your email.";
-        } else if (error.code === 'auth/requires-recent-login') {
-            message = "Security check: Please log out and log back in to verify your identity before changing your email.";
-        } else if (error.code === 'auth/invalid-email') {
-            message = "The email address you entered is not valid.";
         } else if (error.message) {
             message = error.message;
         }
@@ -192,25 +188,36 @@ export default function SettingsPage() {
                           <AccordionTrigger className="text-sm font-semibold text-left">The "Clean Break" Checklist</AccordionTrigger>
                           <AccordionContent className="text-sm space-y-3 text-muted-foreground">
                               <p>To prevent Google's systems from linking a new project to old restricted accounts, follow these steps exactly:</p>
-                              <ul className="list-decimal list-inside space-y-2">
-                                  <li><strong>New Email:</strong> Use a brand new Gmail address that hasn't been used for Google Cloud before.</li>
-                                  <li><strong>Phone Verification:</strong> Use a different phone number if possible. Google uses this as a primary link between accounts.</li>
-                                  <li><strong>New Card:</strong> Use a different credit card. Systems often link accounts by the payment method.</li>
-                                  <li><strong>Fresh Network:</strong> Use a different internet connection (like mobile data instead of home Wi-Fi) to create the account.</li>
-                                  <li><strong>Incognito Mode:</strong> Perform the setup in an Incognito/Private window to avoid tracking cookies.</li>
-                                  <li><strong>New Config:</strong> Once the new project is ready, send the <code>firebaseConfig</code> to your developer to update the app.</li>
-                              </ul>
+                              <div className="space-y-4">
+                                  <div className="p-3 bg-secondary/50 rounded-lg border">
+                                      <p className="font-semibold text-foreground mb-2">Phase 1: Creation (The Most Critical)</p>
+                                      <ul className="list-decimal list-inside space-y-1">
+                                          <li><strong>New Device & Network:</strong> Have a friend create the Gmail and Firebase project on their computer and home network (not your hotspot).</li>
+                                          <li><strong>New Phone Number:</strong> Use a phone number that has never been linked to your restricted accounts.</li>
+                                          <li><strong>New Payment Method:</strong> <strong>CRITICAL.</strong> Use a credit card that has never been used with Google before.</li>
+                                      </ul>
+                                  </div>
+                                  <div className="p-3 bg-secondary/50 rounded-lg border">
+                                      <p className="font-semibold text-foreground mb-2">Phase 2: Usage (On Your Laptop)</p>
+                                      <p>Even if you are on the same hotspot, you can avoid linking by isolating your browser:</p>
+                                      <ul className="list-decimal list-inside space-y-1">
+                                          <li><strong>New Browser Profile:</strong> In Chrome, create a brand new "Profile" (the icon next to the address bar). This ensures NO cookies or history from your old accounts are sent to Google.</li>
+                                          <li><strong>Switch Browsers:</strong> If you used Chrome, switch to Firefox or Edge specifically for this new account.</li>
+                                          <li><strong>Avoid Old Logins:</strong> Never log into your old restricted Gmail accounts in the same browser window where you use the new one.</li>
+                                      </ul>
+                                  </div>
+                              </div>
                           </AccordionContent>
                       </AccordionItem>
                       <AccordionItem value="billing-permissions">
                           <AccordionTrigger className="text-sm font-semibold text-destructive text-left">Error: "No available billing accounts"?</AccordionTrigger>
                           <AccordionContent className="text-sm space-y-3 text-muted-foreground">
-                              <p>This happens when you are an owner of the <strong>Project</strong>, but you don't have permission to manage the <strong>Billing Account</strong> itself. They are managed in two different places.</p>
+                              <p>This happens when you are an owner of the <strong>Project</strong>, but you don't have permission to manage the <strong>Billing Account</strong> itself.</p>
                               <div className="space-y-2 border-l-2 border-primary/20 pl-4 py-2">
                                   <p className="font-semibold text-foreground">How to fix it (Do NOT go to Project IAM):</p>
                                   <ol className="list-decimal list-inside space-y-1">
                                       <li>Click the <strong>Hamburger Menu</strong> (top left) and select <strong>Billing</strong>.</li>
-                                      <li><strong>CRITICAL:</strong> Click the specific <strong>name</strong> of your billing account from the list (e.g. "My Billing Account").</li>
+                                      <li><strong>CRITICAL:</strong> Click the specific <strong>name</strong> of your billing account from the list.</li>
                                       <li>Now that you are <em>inside</em> the account view, click on <strong>"Account Management"</strong> in the left sidebar.</li>
                                       <li>Look at the <strong>"Permissions"</strong> panel on the right side of the screen.</li>
                                       <li>Click <strong>"ADD PRINCIPAL"</strong>, enter your email address.</li>
@@ -245,13 +252,11 @@ export default function SettingsPage() {
                                   <li><strong>Publishing</strong> is what puts your app code on the server.</li>
                                   <li><strong>SSL Security:</strong> Firebase cannot issue your security certificate until your project is successfully linked to billing.</li>
                               </ul>
-                              <p>If you don't finish publishing, users will see a "Site Not Found" error even if your DNS is correct.</p>
                           </AccordionContent>
                       </AccordionItem>
                       <AccordionItem value="billing-support">
                           <AccordionTrigger className="text-sm font-semibold">How to contact Billing Support?</AccordionTrigger>
                           <AccordionContent className="text-sm space-y-3 text-muted-foreground">
-                              <p>If you've followed the steps and still can't link your account, you can contact the dedicated Billing Support team for free.</p>
                               <div className="space-y-2">
                                   <ol className="list-decimal list-inside space-y-1">
                                       <li>Go to the <a href="https://console.cloud.google.com/billing" target="_blank" className="text-primary underline">Google Cloud Billing Console</a>.</li>
@@ -260,21 +265,6 @@ export default function SettingsPage() {
                                       <li>Click the <strong>"Contact Support"</strong> button at the top of the page.</li>
                                   </ol>
                                   <p>Billing support is free for all accounts, even on the free tier.</p>
-                              </div>
-                          </AccordionContent>
-                      </AccordionItem>
-                      <AccordionItem value="linking">
-                          <AccordionTrigger className="text-sm font-semibold">Cloud vs Firebase: Linking Your Account</AccordionTrigger>
-                          <AccordionContent className="text-sm space-y-3 text-muted-foreground">
-                              <p><strong>They are already linked!</strong> Every Firebase project is a Google Cloud project. If you don't see your project in Cloud, ensure you are logged into the same Google Account in both tabs.</p>
-                              <div className="space-y-2">
-                                  <p className="font-semibold text-foreground">Why link Billing?</p>
-                                  <p>To use paid features (AI generators, high-volume hosting), you must link a <strong>Billing Account</strong> in the Google Cloud Console.</p>
-                                  <Button asChild variant="outline" size="sm" className="w-full">
-                                      <Link href="https://console.cloud.google.com/billing" target="_blank">
-                                          Open Cloud Billing <ExternalLink className="ml-2 h-3 w-3" />
-                                      </Link>
-                                  </Button>
                               </div>
                           </AccordionContent>
                       </AccordionItem>
@@ -288,26 +278,15 @@ export default function SettingsPage() {
                                   <li>In the <strong>Sender</strong> section, click the pencil.</li>
                                   <li>Update <strong>Display Name</strong> to "Affiliate AI Host".</li>
                               </ol>
-                              <Button asChild variant="outline" size="sm" className="w-full">
+                              <Button asChild variant="outline" size="sm" className="w-full mt-2">
                                   <Link href="https://console.firebase.google.com/project/_/authentication/emails" target="_blank">
                                       Open Auth Templates <ExternalLink className="ml-2 h-3 w-3" />
                                   </Link>
                               </Button>
                           </AccordionContent>
                       </AccordionItem>
-                      <AccordionItem value="spam">
-                          <AccordionTrigger className="text-sm font-semibold">Prevent Emails from Going to Spam</AccordionTrigger>
-                          <AccordionContent className="text-sm space-y-2 text-muted-foreground">
-                              <p>To ensure your users receive emails, you must authorize your domain (DKIM/SPF):</p>
-                              <ol className="list-decimal list-inside">
-                                  <li>Go to <strong>Auth &gt; Templates</strong>.</li>
-                                  <li>Click <strong>"customize domain"</strong> next to the sender.</li>
-                                  <li>Enter <code>hostproai.com</code> and add the provided DNS records to your registrar.</li>
-                              </ol>
-                          </AccordionContent>
-                      </AccordionItem>
                   </Accordion>
-              </CardContent>
+              </CardHeader>
           </Card>
       )}
 
