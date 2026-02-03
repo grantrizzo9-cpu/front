@@ -176,8 +176,25 @@ export default function SettingsPage() {
               </CardHeader>
               <CardContent className="pt-6">
                   <Accordion type="single" collapsible className="w-full">
+                      <AccordionItem value="billing-permissions">
+                          <AccordionTrigger className="text-sm font-semibold text-destructive text-left">Error: "No available billing accounts"?</AccordionTrigger>
+                          <AccordionContent className="text-sm space-y-3 text-muted-foreground">
+                              <p>If you see "No available billing accounts" in Google Cloud, it means your account is an owner of the project but doesn't have permission to use the <strong>Billing Account</strong> itself.</p>
+                              <div className="space-y-2">
+                                  <p className="font-semibold text-foreground">How to fix it:</p>
+                                  <ol className="list-decimal list-inside space-y-1">
+                                      <li>Go to the <a href="https://console.cloud.google.com/billing" target="_blank" className="text-primary underline">Billing Management page</a>.</li>
+                                      <li>Click on <strong>"Account Management"</strong> in the left sidebar.</li>
+                                      <li>Look at the <strong>"Permissions"</strong> panel on the right.</li>
+                                      <li>Click <strong>"ADD PRINCIPAL"</strong> and enter your email address.</li>
+                                      <li>In the <strong>"Role"</strong> box, select <strong>Billing > Billing Account Administrator</strong>.</li>
+                                      <li>Save, then go back to the "Projects" tab and you will now be able to link your project.</li>
+                                  </ol>
+                              </div>
+                          </AccordionContent>
+                      </AccordionItem>
                       <AccordionItem value="billing-hang">
-                          <AccordionTrigger className="text-sm font-semibold text-destructive">Stuck on "Waiting for Billing Account"?</AccordionTrigger>
+                          <AccordionTrigger className="text-sm font-semibold">Stuck on "Waiting for Billing Account"?</AccordionTrigger>
                           <AccordionContent className="text-sm space-y-3 text-muted-foreground">
                               <p>If the publisher is stuck on Step 2 even after you've paid, it's usually because the <strong>project</strong> isn't manually linked to your <strong>Billing Account</strong> yet.</p>
                               <div className="space-y-2">
