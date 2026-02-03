@@ -212,7 +212,10 @@ export default function SettingsPage() {
                                 <p className="font-bold text-amber-800 dark:text-amber-200 mb-1 flex items-center gap-1">
                                     <ShieldCheck className="h-3 w-3" /> Admin Tip: Prevent Spam
                                 </p>
-                                <p>Go to your Firebase Console &gt; Auth &gt; Templates and <strong>customize your domain</strong>. This adds DKIM/SPF records which tells email providers your site is trusted.</p>
+                                <div className="space-y-2">
+                                    <p>1. <strong>Set Public Name:</strong> Go to Gear icon &gt; Project settings &gt; General &gt; Public-facing name.</p>
+                                    <p>2. <strong>Authorize Domain:</strong> Go to Auth &gt; Templates &gt; select any template &gt; click <strong>"customize domain"</strong>. This adds DKIM/SPF records which tells email providers your site is trusted.</p>
+                                </div>
                             </div>
                         )}
                     </CardContent>
