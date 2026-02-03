@@ -286,7 +286,7 @@ export default function SettingsPage() {
                           </AccordionContent>
                       </AccordionItem>
                   </Accordion>
-              </CardHeader>
+              </CardContent>
           </Card>
       )}
 
@@ -301,7 +301,7 @@ export default function SettingsPage() {
                   <AlertCircle className="h-4 w-4" />
                   <AlertTitle>Action Required: Recent Login Needed</AlertTitle>
                   <AlertDescription className="space-y-3">
-                      <p>To protect your account, Firebase requires you to have logged in recently to perform this change. Please log out and sign back in to continue.</p>
+                      <p>To protect your account, Firebase requires you to have logged in recently to perform this change. Please log out and log back in to continue.</p>
                       <Button variant="outline" size="sm" onClick={handleLogout} className="bg-destructive/10 hover:bg-destructive/20 border-destructive/20 text-destructive">
                           <LogOut className="mr-2 h-4 w-4" /> Log out and sign back in
                       </Button>
