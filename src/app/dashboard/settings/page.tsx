@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { Copy, Loader2, PartyPopper, Info, Mail, AlertCircle, LogOut } from "lucide-react";
+import { Copy, Loader2, PartyPopper, Info, Mail, AlertCircle, LogOut, CheckCircle2 } from "lucide-react";
 import { useUser, useFirestore, useDoc, updateDocumentNonBlocking, useMemoFirebase, useAuth } from "@/firebase";
 import { doc, writeBatch } from "firebase/firestore";
 import { verifyBeforeUpdateEmail, signOut } from "firebase/auth";
@@ -28,6 +28,7 @@ export default function SettingsPage() {
   const [newEmail, setNewEmail] = useState('');
   const [isUpdatingEmail, setIsUpdatingEmail] = useState(false);
   const [showRecentLoginError, setShowRecentLoginError] = useState(false);
+  const [verificationSentTo, setVerificationSentTo] = useState<string | null>(null);
 
   const userDocRef = useMemoFirebase(() => {
     if (!user || !firestore) return null;
@@ -36,7 +37,6 @@ export default function SettingsPage() {
 
   const { data: userData, isLoading: isUserDataLoading } = useDoc<UserType>(userDocRef);
 
-  // Check if the public username document exists, ALWAYS using lowercase
   const usernameDocRef = useMemoFirebase(() => {
     if (!userData?.username || !firestore) return null;
     return doc(firestore, "usernames", userData.username.toLowerCase());
@@ -45,7 +45,6 @@ export default function SettingsPage() {
 
   const affiliateLink = userData?.username ? `https://hostproai.com/?ref=${userData.username.toLowerCase()}` : '';
   
-  // A link is active AND correct if the public username doc exists AND its UID matches the current user's UID.
   const isLinkPubliclyRegistered = !!usernameDoc;
   const isLinkOwnedByCurrentUser = usernameDoc?.uid === user?.uid;
   const isLinkActiveAndCorrect = isLinkPubliclyRegistered && isLinkOwnedByCurrentUser;
@@ -82,16 +81,10 @@ export default function SettingsPage() {
     try {
         const batch = writeBatch(firestore);
         const lowerCaseUsername = userData.username.toLowerCase();
-
-        // 1. Update the user's profile to store the lowercase username
         batch.update(userDocRef, { username: lowerCaseUsername });
-
-        // 2. Create/overwrite the public username document with the lowercase version, pointing to the correct UID
         const publicUsernameRef = doc(firestore, 'usernames', lowerCaseUsername);
         batch.set(publicUsernameRef, { uid: user.uid });
-
         await batch.commit();
-
         toast({ title: 'Success!', description: 'Your affiliate link has been repaired and is now active.' });
     } catch (error: any) {
         toast({ variant: 'destructive', title: 'Repair Failed', description: error.message || 'An unknown error occurred.' });
@@ -106,19 +99,18 @@ export default function SettingsPage() {
     
     setIsUpdatingEmail(true);
     setShowRecentLoginError(false);
+    setVerificationSentTo(null);
+
     try {
-        // Modern Firebase security requirements: verify the new email before it's updated.
+        // Modern Firebase requires verification link before updating sensitive fields.
         await verifyBeforeUpdateEmail(user, newEmail);
         
-        // We update the Firestore document email now so the UI reflects the change requested.
-        // The actual Auth login email will update once the user clicks the verification link.
-        if (userDocRef) {
-            updateDocumentNonBlocking(userDocRef, { email: newEmail });
-        }
+        // We set local state to show the user they need to check their email.
+        setVerificationSentTo(newEmail);
         
         toast({
-            title: "Verification Sent",
-            description: `A verification link has been sent to ${newEmail}. Please click the link in your inbox to complete the update.`,
+            title: "Check Your Inbox",
+            description: `A verification link has been sent to ${newEmail}.`,
         });
         setNewEmail('');
     } catch (error: any) {
@@ -127,9 +119,11 @@ export default function SettingsPage() {
         
         if (error.code === 'auth/requires-recent-login') {
             setShowRecentLoginError(true);
-            message = "This operation is sensitive and requires recent authentication. Please log out and log back in, then try again.";
+            message = "Security check: Please log out and log back in to verify your identity before changing your email.";
         } else if (error.code === 'auth/operation-not-allowed') {
-            message = "Email updates are currently restricted. Please ensure you are following the verification link sent to your inbox.";
+            message = "Email updates are restricted in the Firebase Console settings.";
+        } else if (error.code === 'auth/invalid-email') {
+            message = "The email address you entered is not valid.";
         } else if (error.message) {
             message = error.message;
         }
@@ -151,10 +145,7 @@ export default function SettingsPage() {
   };
 
   const isLoading = isUserLoading || isUserDataLoading || isUsernameDocLoading || isAdminLoading;
-  
-  // The repair UI should be shown if the user is an affiliate, but their link is not active and correct.
   const showRepairUI = userData?.isAffiliate && !isLinkActiveAndCorrect && !isLoading;
-
 
   if (isLoading) {
     return (
@@ -180,12 +171,23 @@ export default function SettingsPage() {
           {showRecentLoginError && (
               <Alert variant="destructive">
                   <AlertCircle className="h-4 w-4" />
-                  <AlertTitle>Security Verification Required</AlertTitle>
+                  <AlertTitle>Action Required: Recent Login Needed</AlertTitle>
                   <AlertDescription className="space-y-3">
-                      <p>Changing your email is a sensitive action. To protect your account, you must have logged in recently.</p>
+                      <p>To protect your account, Firebase requires you to have logged in recently to perform this change. Please log out and sign back in to continue.</p>
                       <Button variant="outline" size="sm" onClick={handleLogout} className="bg-destructive/10 hover:bg-destructive/20 border-destructive/20 text-destructive">
                           <LogOut className="mr-2 h-4 w-4" /> Log out and sign back in
                       </Button>
+                  </AlertDescription>
+              </Alert>
+          )}
+
+          {verificationSentTo && (
+              <Alert className="bg-green-50 border-green-200 dark:bg-green-950 dark:border-green-800">
+                  <CheckCircle2 className="h-4 w-4 text-green-600" />
+                  <AlertTitle className="text-green-800 dark:text-green-200">Verification Link Sent!</AlertTitle>
+                  <AlertDescription className="text-green-700 dark:text-green-300">
+                      <p>We've sent a link to <strong>{verificationSentTo}</strong>. Your account email will not change until you click that link.</p>
+                      <p className="mt-2 text-xs">Didn't get it? Check your spam folder or try again in a few minutes.</p>
                   </AlertDescription>
               </Alert>
           )}
@@ -204,24 +206,31 @@ export default function SettingsPage() {
                     <Label htmlFor="current-email">Current Email</Label>
                     <Input id="current-email" type="email" value={user?.email || ''} disabled className="bg-muted" />
                 </div>
-                <div className="space-y-2">
-                    <Label htmlFor="new-email">New Email Address</Label>
-                    <div className="flex gap-2">
-                        <Input 
-                            id="new-email" 
-                            type="email" 
-                            placeholder="new-email@example.com" 
-                            value={newEmail}
-                            onChange={(e) => setNewEmail(e.target.value)}
-                            required
-                            disabled={isUpdatingEmail}
-                        />
-                        <Button type="submit" disabled={isUpdatingEmail || !newEmail}>
-                            {isUpdatingEmail ? <Loader2 className="animate-spin h-4 w-4" /> : <Mail className="h-4 w-4 mr-2" />}
-                            Update
-                        </Button>
+                {!verificationSentTo && (
+                    <div className="space-y-2">
+                        <Label htmlFor="new-email">New Email Address</Label>
+                        <div className="flex gap-2">
+                            <Input 
+                                id="new-email" 
+                                type="email" 
+                                placeholder="new-email@example.com" 
+                                value={newEmail}
+                                onChange={(e) => setNewEmail(e.target.value)}
+                                required
+                                disabled={isUpdatingEmail}
+                            />
+                            <Button type="submit" disabled={isUpdatingEmail || !newEmail}>
+                                {isUpdatingEmail ? <Loader2 className="animate-spin h-4 w-4" /> : <Mail className="h-4 w-4 mr-2" />}
+                                Update
+                            </Button>
+                        </div>
                     </div>
-                </div>
+                )}
+                {verificationSentTo && (
+                    <Button variant="ghost" size="sm" onClick={() => setVerificationSentTo(null)} className="text-xs">
+                        Change email address or resend
+                    </Button>
+                )}
               </form>
           )}
         </CardContent>
