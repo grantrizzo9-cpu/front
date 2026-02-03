@@ -19,7 +19,7 @@ import {
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from "@/components/accordion";
+} from "@/components/ui/accordion";
 import Link from "next/link";
 
 export default function SettingsPage() {
@@ -122,8 +122,8 @@ export default function SettingsPage() {
         if (error.code === 'auth/requires-recent-login') {
             setShowRecentLoginError(true);
             message = "Security check: Please log out and log back in to verify your identity before changing your email.";
-        } else if (error.code === 'auth/operation-not-allowed') {
-            message = "Email updates are restricted in the Firebase Console settings.";
+        } else if (error.code === 'auth/requires-recent-login') {
+            message = "Security check: Please log out and log back in to verify your identity before changing your email.";
         } else if (error.code === 'auth/invalid-email') {
             message = "The email address you entered is not valid.";
         } else if (error.message) {
