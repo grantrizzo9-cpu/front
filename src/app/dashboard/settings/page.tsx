@@ -196,6 +196,8 @@ export default function SettingsPage() {
                                   </ul>
                                   <p className="font-semibold text-foreground">The &quot;Free&quot; Way:</p>
                                   <p>You can create a standard <strong>personal Gmail</strong> for free. Firebase projects on personal accounts still have the same Blaze Pay-as-you-go features as Workspace accounts once a billing card is added.</p>
+                                  <p className="font-semibold text-destructive mt-2">Warning: Workspace does not hide your Credit Card.</p>
+                                  <p>If you use the <strong>same credit card</strong> on a new Workspace account, Google will likely link it to your restricted accounts and freeze the new one too.</p>
                               </div>
                           </AccordionContent>
                       </AccordionItem>
@@ -204,12 +206,12 @@ export default function SettingsPage() {
                           <AccordionContent className="text-sm space-y-3 text-muted-foreground">
                               <p>To prevent Google&apos;s systems from linking a new project to old restricted accounts, follow these steps exactly:</p>
                               <div className="space-y-4">
-                                  <div className="p-3 bg-secondary/50 rounded-lg border">
-                                      <p className="font-semibold text-foreground mb-2">Phase 1: Creation (The Most Critical)</p>
+                                  <div className="p-3 bg-secondary/50 rounded-lg border border-destructive/20">
+                                      <p className="font-semibold text-destructive mb-2">Phase 1: Creation (The Most Critical)</p>
                                       <ul className="list-decimal list-inside space-y-1">
                                           <li><strong>New Device &amp; Network:</strong> Have a friend create the Gmail and Firebase project on their computer and home network (not your hotspot).</li>
-                                          <li><strong>New Phone Number:</strong> Use a phone number that has never been linked to your restricted accounts for the mandatory verification.</li>
-                                          <li><strong>New Payment Method:</strong> <strong>CRITICAL.</strong> Use a credit card that has never been used with Google before.</li>
+                                          <li><strong>New Phone Number:</strong> Use a phone number that has never been linked to your restricted accounts for verification.</li>
+                                          <li><strong>New Payment Method:</strong> <strong>CRITICAL.</strong> Use a credit card that has NEVER been used with Google before. If you use your old card, the account will be linked and likely restricted.</li>
                                       </ul>
                                   </div>
                                   <div className="p-3 bg-secondary/50 rounded-lg border">
