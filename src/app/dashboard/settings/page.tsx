@@ -213,8 +213,8 @@ export default function SettingsPage() {
                                     <ShieldCheck className="h-3 w-3" /> Admin Tip: Prevent Spam
                                 </p>
                                 <div className="space-y-2">
-                                    <p>1. <strong>Set Public Name:</strong> Go to Gear icon &gt; Project settings &gt; General &gt; Public-facing name.</p>
-                                    <p>2. <strong>Authorize Domain:</strong> Go to Auth &gt; Templates &gt; select any template &gt; click <strong>"customize domain"</strong>. This adds DKIM/SPF records which tells email providers your site is trusted.</p>
+                                    <p>1. <strong>Set Sender Name:</strong> Go to Auth &gt; Templates &gt; edit any template. Change the &quot;Display name&quot; in the Sender row. This bypasses the Brand Verification check.</p>
+                                    <p>2. <strong>Authorize Domain:</strong> In the same Templates section, click <strong>&quot;customize domain&quot;</strong>. This adds DKIM/SPF records which tells email providers your site is trusted.</p>
                                 </div>
                             </div>
                         )}
