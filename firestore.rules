@@ -5,7 +5,7 @@ service cloud.firestore {
 
     // Helper function to check if the user is a platform owner
     function isPlatformOwner() {
-      return request.auth.token.email != null && 
+      return request.auth != null && 
              (request.auth.token.email.lower() == 'rentapog@gmail.com' || 
               request.auth.token.email.lower() == 'grantrizzo2@gmail.com');
     }
@@ -13,20 +13,21 @@ service cloud.firestore {
     // --- User Data ---
 
     // A user can read and write their own profile document.
-    // Only the platform owner can list all user profiles.
+    // Only the platform owner can list all user profiles and update them (for domain setup).
     match /users/{userId} {
-      allow read, write: if request.auth.uid == userId;
+      allow read: if request.auth.uid == userId || isPlatformOwner();
+      allow write: if request.auth.uid == userId || isPlatformOwner();
       allow list: if isPlatformOwner();
     }
 
     // A user can read and write their own subscription documents.
     match /users/{userId}/subscriptions/{subscriptionId} {
-      allow read, write: if request.auth.uid == userId;
+      allow read, write: if request.auth.uid == userId || isPlatformOwner();
     }
 
     // A user can READ (get, list) their own referrals.
     match /users/{userId}/referrals/{referralId} {
-      allow get, list: if request.auth.uid == userId;
+      allow get, list: if request.auth.uid == userId || isPlatformOwner();
       allow create: if (request.auth.uid == request.resource.data.referredUserId) || isPlatformOwner();
       allow update: if (request.auth.uid == resource.data.referredUserId) || isPlatformOwner();
       allow delete: if false; // Protect integrity
@@ -34,24 +35,24 @@ service cloud.firestore {
 
     // A user can READ their own payments. Only the platform owner can WRITE payments for all users (for payouts).
     match /users/{userId}/payments/{paymentId} {
-      allow read: if request.auth.uid == userId;
+      allow read: if request.auth.uid == userId || isPlatformOwner();
       allow write: if isPlatformOwner();
     }
 
     // A user can CREATE and READ their own refund requests. Only the platform owner can manage all requests.
     match /users/{userId}/refundRequests/{requestId} {
-      allow read, create: if request.auth.uid == userId;
+      allow read, create: if request.auth.uid == userId || isPlatformOwner();
       allow update, delete: if isPlatformOwner();
     }
 
     // A user can manage their own generated content.
     match /users/{userId}/content/{contentId} {
-      allow read, write: if request.auth.uid == userId;
+      allow read, write: if request.auth.uid == userId || isPlatformOwner();
     }
 
     // A user can manage their own generated websites.
     match /users/{userId}/websites/{websiteId} {
-      allow read, write: if request.auth.uid == userId;
+      allow read, write: if request.auth.uid == userId || isPlatformOwner();
     }
 
 
