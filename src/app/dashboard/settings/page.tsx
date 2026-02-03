@@ -176,6 +176,22 @@ export default function SettingsPage() {
               </CardHeader>
               <CardContent className="pt-6">
                   <Accordion type="single" collapsible className="w-full">
+                      <AccordionItem value="billing-hang">
+                          <AccordionTrigger className="text-sm font-semibold text-destructive">Stuck on "Waiting for Billing Account"?</AccordionTrigger>
+                          <AccordionContent className="text-sm space-y-3 text-muted-foreground">
+                              <p>If the publisher is stuck on Step 2 even after you've paid, it's usually because the <strong>project</strong> isn't manually linked to your <strong>Billing Account</strong> yet.</p>
+                              <div className="space-y-2">
+                                  <p className="font-semibold text-foreground">How to fix it:</p>
+                                  <ol className="list-decimal list-inside space-y-1">
+                                      <li>Go to the <a href="https://console.cloud.google.com/billing/projects" target="_blank" className="text-primary underline">Cloud Billing Projects page</a>.</li>
+                                      <li>Find your project (<code>affiliate-ai-host-new</code>).</li>
+                                      <li>Click the three dots (Actions) next to it and select <strong>"Change billing"</strong>.</li>
+                                      <li>Select your active billing account and click <strong>"Set Account"</strong>.</li>
+                                  </ol>
+                                  <p>Wait 60 seconds after linking, then refresh your deployment tool.</p>
+                              </div>
+                          </AccordionContent>
+                      </AccordionItem>
                       <AccordionItem value="linking">
                           <AccordionTrigger className="text-sm font-semibold">Cloud vs Firebase: Linking Your Account</AccordionTrigger>
                           <AccordionContent className="text-sm space-y-3 text-muted-foreground">
