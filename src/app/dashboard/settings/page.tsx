@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { Copy, Loader2, PartyPopper, Info, Mail, AlertCircle, LogOut, CheckCircle2, HelpCircle, ShieldCheck, ExternalLink, CreditCard } from "lucide-react";
+import { Copy, Loader2, PartyPopper, Info, Mail, AlertCircle, LogOut, CheckCircle2, HelpCircle, ShieldCheck, ExternalLink, CreditCard, RefreshCcw } from "lucide-react";
 import { useUser, useFirestore, useDoc, updateDocumentNonBlocking, useMemoFirebase, useAuth } from "@/firebase";
 import { doc, writeBatch } from "firebase/firestore";
 import { verifyBeforeUpdateEmail, signOut } from "firebase/auth";
@@ -186,6 +186,18 @@ export default function SettingsPage() {
                                   <p className="font-semibold text-foreground">Your code is safe!</p>
                                   <p>The code we've built here is separate from your Firebase account. You can create a new project in a new Firebase account, and we can simply swap the configuration to point to the new one. Your app will be back online in minutes.</p>
                               </div>
+                          </AccordionContent>
+                      </AccordionItem>
+                      <AccordionItem value="clean-break">
+                          <AccordionTrigger className="text-sm font-semibold text-left">The "Clean Break" Checklist</AccordionTrigger>
+                          <AccordionContent className="text-sm space-y-3 text-muted-foreground">
+                              <p>To prevent Google's systems from linking a new project to old restricted accounts, follow these steps:</p>
+                              <ul className="list-decimal list-inside space-y-2">
+                                  <li><strong>New Email:</strong> Use a brand new Gmail address that hasn't been used for Google Cloud before.</li>
+                                  <li><strong>New Card:</strong> Use a different credit card. Systems often link accounts by the payment method.</li>
+                                  <li><strong>Incognito Mode:</strong> Perform the setup in an Incognito/Private window to avoid tracking cookies.</li>
+                                  <li><strong>New Config:</strong> Once the new project is ready, send the <code>firebaseConfig</code> to your developer to update the app.</li>
+                              </ul>
                           </AccordionContent>
                       </AccordionItem>
                       <AccordionItem value="billing-permissions">
