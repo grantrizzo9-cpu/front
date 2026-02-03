@@ -7,10 +7,10 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { Copy, Loader2, PartyPopper, Info, Mail } from "lucide-react";
 import { useUser, useFirestore, useDoc, updateDocumentNonBlocking, useMemoFirebase } from "@/firebase";
-import { doc, setDoc, writeBatch } from "firebase/firestore";
-import { updateEmail } from "firebase/auth";
+import { doc, writeBatch } from "firebase/firestore";
+import { verifyBeforeUpdateEmail } from "firebase/auth";
 import type { User as UserType } from "@/lib/types";
-import { useState, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useAdmin } from "@/hooks/use-admin";
 import { Label } from "@/components/ui/label";
@@ -45,6 +45,10 @@ export default function SettingsPage() {
   const isLinkPubliclyRegistered = !!usernameDoc;
   const isLinkOwnedByCurrentUser = usernameDoc?.uid === user?.uid;
   const isLinkActiveAndCorrect = isLinkPubliclyRegistered && isLinkOwnedByCurrentUser;
+
+  const isGoogleUser = useMemo(() => {
+      return user?.providerData.some(p => p.providerId === 'google.com');
+  }, [user]);
 
   const handleCopyLink = () => {
     if (affiliateLink) {
@@ -98,27 +102,32 @@ export default function SettingsPage() {
     
     setIsUpdatingEmail(true);
     try {
-        // 1. Update Firebase Auth Email
-        await updateEmail(user, newEmail);
+        // Modern Firebase security requirements: verify the new email before it's updated.
+        await verifyBeforeUpdateEmail(user, newEmail);
         
-        // 2. Update Firestore User Doc
+        // We update the Firestore document email now so the UI reflects the change requested.
+        // The actual Auth login email will update once the user clicks the verification link.
         if (userDocRef) {
             updateDocumentNonBlocking(userDocRef, { email: newEmail });
         }
         
         toast({
-            title: "Email Updated",
-            description: `Your account email has been changed to ${newEmail}.`,
+            title: "Verification Sent",
+            description: `A verification link has been sent to ${newEmail}. Please click the link in your inbox to complete the update.`,
         });
         setNewEmail('');
     } catch (error: any) {
         console.error("Email update error:", error);
         let message = "An error occurred while updating your email.";
+        
         if (error.code === 'auth/requires-recent-login') {
             message = "This operation is sensitive and requires recent authentication. Please log out and log back in, then try again.";
+        } else if (error.code === 'auth/operation-not-allowed') {
+            message = "Email updates are currently restricted. Please ensure you are following the verification link sent to your inbox.";
         } else if (error.message) {
             message = error.message;
         }
+        
         toast({
             variant: "destructive",
             title: "Update Failed",
@@ -156,30 +165,40 @@ export default function SettingsPage() {
           <CardDescription>Update your login email address.</CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleUpdateEmail} className="space-y-4">
-            <div className="space-y-2">
-                <Label htmlFor="current-email">Current Email</Label>
-                <Input id="current-email" type="email" value={user?.email || ''} disabled className="bg-muted" />
-            </div>
-            <div className="space-y-2">
-                <Label htmlFor="new-email">New Email Address</Label>
-                <div className="flex gap-2">
-                    <Input 
-                        id="new-email" 
-                        type="email" 
-                        placeholder="new-email@example.com" 
-                        value={newEmail}
-                        onChange={(e) => setNewEmail(e.target.value)}
-                        required
-                        disabled={isUpdatingEmail}
-                    />
-                    <Button type="submit" disabled={isUpdatingEmail || !newEmail}>
-                        {isUpdatingEmail ? <Loader2 className="animate-spin h-4 w-4" /> : <Mail className="h-4 w-4 mr-2" />}
-                        Update
-                    </Button>
+          {isGoogleUser ? (
+              <Alert className="bg-muted">
+                  <Info className="h-4 w-4" />
+                  <AlertTitle>Google Account Connected</AlertTitle>
+                  <AlertDescription>
+                      Your account is managed by Google. To change your email address, please update it through your <a href="https://myaccount.google.com/" target="_blank" rel="noopener noreferrer" className="underline font-semibold">Google Account settings</a>.
+                  </AlertDescription>
+              </Alert>
+          ) : (
+              <form onSubmit={handleUpdateEmail} className="space-y-4">
+                <div className="space-y-2">
+                    <Label htmlFor="current-email">Current Email</Label>
+                    <Input id="current-email" type="email" value={user?.email || ''} disabled className="bg-muted" />
                 </div>
-            </div>
-          </form>
+                <div className="space-y-2">
+                    <Label htmlFor="new-email">New Email Address</Label>
+                    <div className="flex gap-2">
+                        <Input 
+                            id="new-email" 
+                            type="email" 
+                            placeholder="new-email@example.com" 
+                            value={newEmail}
+                            onChange={(e) => setNewEmail(e.target.value)}
+                            required
+                            disabled={isUpdatingEmail}
+                        />
+                        <Button type="submit" disabled={isUpdatingEmail || !newEmail}>
+                            {isUpdatingEmail ? <Loader2 className="animate-spin h-4 w-4" /> : <Mail className="h-4 w-4 mr-2" />}
+                            Update
+                        </Button>
+                    </div>
+                </div>
+              </form>
+          )}
         </CardContent>
       </Card>
 
