@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { Copy, Loader2, PartyPopper, Info, Mail, AlertCircle, LogOut, CheckCircle2, HelpCircle, ShieldCheck } from "lucide-react";
+import { Copy, Loader2, PartyPopper, Info, Mail, AlertCircle, LogOut, CheckCircle2, HelpCircle, ShieldCheck, ExternalLink, CreditCard } from "lucide-react";
 import { useUser, useFirestore, useDoc, updateDocumentNonBlocking, useMemoFirebase, useAuth } from "@/firebase";
 import { doc, writeBatch } from "firebase/firestore";
 import { verifyBeforeUpdateEmail, signOut } from "firebase/auth";
@@ -20,6 +20,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import Link from "next/link";
 
 export default function SettingsPage() {
   const { user, isUserLoading } = useUser();
@@ -107,12 +108,8 @@ export default function SettingsPage() {
     setVerificationSentTo(null);
 
     try {
-        // Modern Firebase requires verification link before updating sensitive fields.
         await verifyBeforeUpdateEmail(user, newEmail);
-        
-        // We set local state to show the user they need to check their email.
         setVerificationSentTo(newEmail);
-        
         toast({
             title: "Check Your Inbox",
             description: `A verification link has been sent to ${newEmail}.`,
@@ -167,6 +164,66 @@ export default function SettingsPage() {
         <p className="text-muted-foreground">Manage your account and affiliate settings.</p>
       </div>
 
+      {/* ADMIN TECHNICAL GUIDE SECTION */}
+      {isPlatformOwner && (
+          <Card className="border-primary/50 bg-primary/5 overflow-hidden">
+              <CardHeader className="bg-primary/10">
+                  <CardTitle className="text-lg flex items-center gap-2">
+                      <ShieldCheck className="h-5 w-5 text-primary" />
+                      Administrator Technical Guide
+                  </CardTitle>
+                  <CardDescription>Common setup tasks and project "linking" instructions.</CardDescription>
+              </CardHeader>
+              <CardContent className="pt-6">
+                  <Accordion type="single" collapsible className="w-full">
+                      <AccordionItem value="linking">
+                          <AccordionTrigger className="text-sm font-semibold">Cloud vs Firebase: Linking Your Account</AccordionTrigger>
+                          <AccordionContent className="text-sm space-y-3 text-muted-foreground">
+                              <p><strong>They are already linked!</strong> Every Firebase project is a Google Cloud project. If you don't see your project in Cloud, ensure you are logged into the same Google Account in both tabs.</p>
+                              <div className="space-y-2">
+                                  <p className="font-semibold text-foreground">Why link Billing?</p>
+                                  <p>To use paid features (AI generators, high-volume hosting), you must link a <strong>Billing Account</strong> in the Google Cloud Console.</p>
+                                  <Button asChild variant="outline" size="sm" className="w-full">
+                                      <Link href="https://console.cloud.google.com/billing" target="_blank">
+                                          Open Cloud Billing <ExternalLink className="ml-2 h-3 w-3" />
+                                      </Link>
+                                  </Button>
+                              </div>
+                          </AccordionContent>
+                      </AccordionItem>
+                      <AccordionItem value="emails">
+                          <AccordionTrigger className="text-sm font-semibold">Fixing "Sender Name" & Verification</AccordionTrigger>
+                          <AccordionContent className="text-sm space-y-3 text-muted-foreground">
+                              <p>If Cloud won't let you change your "Public Name" due to verification, use this shortcut to fix your emails immediately:</p>
+                              <ol className="list-decimal list-inside space-y-1">
+                                  <li>Go to <strong>Auth &gt; Templates</strong> in Firebase.</li>
+                                  <li>Edit any template (e.g., Email address change).</li>
+                                  <li>In the <strong>Sender</strong> section, click the pencil.</li>
+                                  <li>Update <strong>Display Name</strong> to "Affiliate AI Host".</li>
+                              </ol>
+                              <Button asChild variant="outline" size="sm" className="w-full">
+                                  <Link href="https://console.firebase.google.com/project/_/authentication/emails" target="_blank">
+                                      Open Auth Templates <ExternalLink className="ml-2 h-3 w-3" />
+                                  </Link>
+                              </Button>
+                          </AccordionContent>
+                      </AccordionItem>
+                      <AccordionItem value="spam">
+                          <AccordionTrigger className="text-sm font-semibold">Prevent Emails from Going to Spam</AccordionTrigger>
+                          <AccordionContent className="text-sm space-y-2 text-muted-foreground">
+                              <p>To ensure your users receive emails, you must authorize your domain (DKIM/SPF):</p>
+                              <ol className="list-decimal list-inside">
+                                  <li>Go to <strong>Auth &gt; Templates</strong>.</li>
+                                  <li>Click <strong>"customize domain"</strong> next to the sender.</li>
+                                  <li>Enter <code>hostproai.com</code> and add the provided DNS records to your registrar.</li>
+                              </ol>
+                          </AccordionContent>
+                      </AccordionItem>
+                  </Accordion>
+              </CardContent>
+          </Card>
+      )}
+
       <Card>
         <CardHeader>
           <CardTitle>Account Settings</CardTitle>
@@ -207,17 +264,6 @@ export default function SettingsPage() {
                         <p>• Check your <strong>Spam or Junk</strong> folder.</p>
                         <p>• Wait up to 5 minutes for the internet to deliver the message.</p>
                         <p>• Ensure you typed the email correctly: <strong>{verificationSentTo}</strong>.</p>
-                        {isPlatformOwner && (
-                            <div className="pt-2 mt-2 border-t border-amber-200">
-                                <p className="font-bold text-amber-800 dark:text-amber-200 mb-1 flex items-center gap-1">
-                                    <ShieldCheck className="h-3 w-3" /> Admin Tip: Prevent Spam
-                                </p>
-                                <div className="space-y-2">
-                                    <p>1. <strong>Set Sender Name:</strong> Go to Auth &gt; Templates &gt; edit any template. Change the &quot;Display name&quot; in the Sender row. This bypasses the Brand Verification check.</p>
-                                    <p>2. <strong>Authorize Domain:</strong> In the same Templates section, click <strong>&quot;customize domain&quot;</strong>. This adds DKIM/SPF records which tells email providers your site is trusted.</p>
-                                </div>
-                            </div>
-                        )}
                     </CardContent>
                 </Card>
               </div>
