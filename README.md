@@ -53,7 +53,7 @@ An AI-powered web hosting and affiliate marketing platform built with Next.js, F
 
 ## Firebase Configuration
 
-Ensure your `src/firebase/config.ts` matches your Firebase project settings.
+This app is linked to the project: **rent-a-host-a55fd**. Ensure your `src/firebase/config.ts` matches your Firebase project settings from the console.
 
 ## License
 
