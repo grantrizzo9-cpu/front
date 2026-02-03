@@ -184,8 +184,8 @@ export default function SettingsPage() {
                                   <p className="font-semibold text-foreground">How to fix it (Do NOT go to Project IAM):</p>
                                   <ol className="list-decimal list-inside space-y-1">
                                       <li>Click the <strong>Hamburger Menu</strong> (top left) and select <strong>Billing</strong>.</li>
-                                      <li>Select your billing account from the list.</li>
-                                      <li>Click on <strong>"Account Management"</strong> in the left sidebar of the Billing page.</li>
+                                      <li><strong>CRITICAL:</strong> Click the specific <strong>name</strong> of your billing account from the list (e.g. "My Billing Account").</li>
+                                      <li>Now that you are <em>inside</em> the account view, click on <strong>"Account Management"</strong> in the left sidebar.</li>
                                       <li>Look at the <strong>"Permissions"</strong> panel on the right side of the screen.</li>
                                       <li>Click <strong>"ADD PRINCIPAL"</strong>, enter your email address.</li>
                                       <li>In the <strong>"Role"</strong> box, select <strong>Billing &gt; Billing Account Administrator</strong>.</li>
@@ -226,7 +226,7 @@ export default function SettingsPage() {
                           </AccordionContent>
                       </AccordionItem>
                       <AccordionItem value="emails">
-                          <AccordionTrigger className="text-sm font-semibold">Fixing "Sender Name" & Verification</AccordionTrigger>
+                          <AccordionTrigger className="text-sm font-semibold">Fixing "Sender Name" &amp; Verification</AccordionTrigger>
                           <AccordionContent className="text-sm space-y-3 text-muted-foreground">
                               <p>If Cloud won't let you change your "Public Name" due to verification, use this shortcut to fix your emails immediately:</p>
                               <ol className="list-decimal list-inside space-y-1">
