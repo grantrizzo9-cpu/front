@@ -1,4 +1,3 @@
-
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -213,7 +212,7 @@ export default function SettingsPage() {
                                 <p className="font-bold text-amber-800 dark:text-amber-200 mb-1 flex items-center gap-1">
                                     <ShieldCheck className="h-3 w-3" /> Admin Tip: Prevent Spam
                                 </p>
-                                <p>Go to your Firebase Console > Auth > Templates and <strong>customize your domain</strong>. This adds DKIM/SPF records which tells email providers your site is trusted.</p>
+                                <p>Go to your Firebase Console &gt; Auth &gt; Templates and <strong>customize your domain</strong>. This adds DKIM/SPF records which tells email providers your site is trusted.</p>
                             </div>
                         )}
                     </CardContent>
