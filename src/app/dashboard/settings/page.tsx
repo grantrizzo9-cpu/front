@@ -184,23 +184,6 @@ export default function SettingsPage() {
                               </div>
                           </AccordionContent>
                       </AccordionItem>
-                      <AccordionItem value="workspace">
-                          <AccordionTrigger className="text-sm font-semibold text-left">Using Google Workspace? (Avoid $70 fees)</AccordionTrigger>
-                          <AccordionContent className="text-sm space-y-3 text-muted-foreground">
-                              <p>Google Workspace is excellent for professional isolation, but you should <strong>not</strong> pay $70 just to use Firebase.</p>
-                              <div className="space-y-2 border-l-2 border-primary/20 pl-4 py-2">
-                                  <p className="font-semibold text-foreground">What to avoid:</p>
-                                  <ul className="list-disc list-inside space-y-1">
-                                      <li><strong>Avoid &quot;Google Cloud Premium Support&quot;:</strong> This costs money and is not needed for a standard Firebase project.</li>
-                                      <li><strong>Standard Workspace Cost:</strong> A basic Workspace account is usually $6-$12/month per user. If they are asking for $70, you might be looking at a &quot;Plus&quot; or &quot;Enterprise&quot; plan you don&apos;t need.</li>
-                                  </ul>
-                                  <p className="font-semibold text-foreground">The &quot;Free&quot; Way:</p>
-                                  <p>You can create a standard <strong>personal Gmail</strong> for free. Firebase projects on personal accounts still have the same Blaze Pay-as-you-go features as Workspace accounts once a billing card is added.</p>
-                                  <p className="font-semibold text-destructive mt-2">Warning: Workspace does not hide your Credit Card.</p>
-                                  <p>If you use the <strong>same credit card</strong> on a new Workspace account, Google will likely link it to your restricted accounts and freeze the new one too.</p>
-                              </div>
-                          </AccordionContent>
-                      </AccordionItem>
                       <AccordionItem value="clean-break">
                           <AccordionTrigger className="text-sm font-semibold text-left">The &quot;Clean Break&quot; Checklist</AccordionTrigger>
                           <AccordionContent className="text-sm space-y-3 text-muted-foreground">
@@ -223,24 +206,6 @@ export default function SettingsPage() {
                                           <li><strong>Avoid Old Logins:</strong> Never log into your old restricted Gmail accounts in the same browser window where you use the new one.</li>
                                       </ul>
                                   </div>
-                              </div>
-                          </AccordionContent>
-                      </AccordionItem>
-                      <AccordionItem value="billing-permissions">
-                          <AccordionTrigger className="text-sm font-semibold text-destructive text-left">Error: &quot;No available billing accounts&quot;?</AccordionTrigger>
-                          <AccordionContent className="text-sm space-y-3 text-muted-foreground">
-                              <p>This happens when you are an owner of the <strong>Project</strong>, but you don&apos;t have permission to manage the <strong>Billing Account</strong> itself.</p>
-                              <div className="space-y-2 border-l-2 border-primary/20 pl-4 py-2">
-                                  <p className="font-semibold text-foreground">How to fix it (Do NOT go to Project IAM):</p>
-                                  <ol className="list-decimal list-inside space-y-1">
-                                      <li>Click the <strong>Hamburger Menu</strong> (top left) and select <strong>Billing</strong>.</li>
-                                      <li><strong>CRITICAL:</strong> Click the specific <strong>name</strong> of your billing account from the list.</li>
-                                      <li>Now that you are <em>inside</em> the account view, click on <strong>&quot;Account Management&quot;</strong> in the left sidebar.</li>
-                                      <li>Look at the <strong>&quot;Permissions&quot;</strong> panel on the right side of the screen.</li>
-                                      <li>Click <strong>&quot;ADD PRINCIPAL&quot;</strong>, enter your email address.</li>
-                                      <li>In the <strong>&quot;Role&quot;</strong> box, select <strong>Billing &gt; Billing Account Administrator</strong>.</li>
-                                      <li>Save, then you can go back to the &quot;Projects&quot; tab and link your project.</li>
-                                  </ol>
                               </div>
                           </AccordionContent>
                       </AccordionItem>
