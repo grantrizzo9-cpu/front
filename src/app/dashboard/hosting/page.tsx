@@ -9,13 +9,19 @@ import { useToast } from '@/hooks/use-toast';
 import { useUser, useFirestore, useDoc, useMemoFirebase, updateDocumentNonBlocking } from '@/firebase';
 import { doc } from 'firebase/firestore';
 import type { User as UserType } from '@/lib/types';
-import { Loader2, Globe, CheckCircle, Search, BookOpen, Send, ShieldCheck, ArrowRight, Copy, Info } from 'lucide-react';
+import { Loader2, Globe, CheckCircle, Search, BookOpen, Send, ShieldCheck, ArrowRight, Copy, Info, HelpCircle } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
 import { RegistrarLogo } from '@/components/registrar-logo';
 import { firebaseConfig } from '@/firebase/config';
 import { useAdmin } from '@/hooks/use-admin';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 export default function HostingPage() {
     const { user, isUserLoading } = useUser();
@@ -183,7 +189,22 @@ export default function HostingPage() {
                     <CardContent className="space-y-6">
                         <div className="grid gap-4">
                             <div className="p-4 bg-background border rounded-lg">
-                                <p className="text-sm font-semibold mb-3">Add these two "A Records" to your DNS settings:</p>
+                                <div className="flex items-center justify-between mb-3">
+                                    <p className="text-sm font-semibold">Add these two "A Records" to your DNS settings:</p>
+                                    <TooltipProvider>
+                                        <Tooltip>
+                                            <TooltipTrigger asChild>
+                                                <div className="flex items-center gap-1 text-xs text-muted-foreground cursor-help">
+                                                    <HelpCircle className="h-3 w-3" />
+                                                    Why two records?
+                                                </div>
+                                            </TooltipTrigger>
+                                            <TooltipContent className="max-w-xs">
+                                                <p>For root domains (like example.com), industry standards require A records instead of CNAME. We provide two for high-availability redundancy to ensure your site never goes offline.</p>
+                                            </TooltipContent>
+                                        </Tooltip>
+                                    </TooltipProvider>
+                                </div>
                                 <div className="space-y-3">
                                     <div className="flex items-center justify-between p-2 bg-secondary/50 rounded border border-dashed">
                                         <div className="flex gap-4 text-xs font-mono">
@@ -219,7 +240,7 @@ export default function HostingPage() {
                             <div className="space-y-2 text-sm text-muted-foreground">
                                 <p>1. Log in to your domain registrar's account.</p>
                                 <p>2. Find the DNS Management or "Advanced DNS" section for <strong>{domainInput}</strong>.</p>
-                                <p>3. Create the two records shown above.</p>
+                                <p>3. Create the two records shown above. If your registrar asks for a 'TTL', you can leave it at the default or set it to 'Auto'.</p>
                                 <p>4. Once you've saved your DNS changes, it can take anywhere from 30 minutes to 24 hours for the internet to update (propagate).</p>
                             </div>
                         </div>
@@ -292,7 +313,7 @@ export default function HostingPage() {
                                 <Globe className="h-4 w-4" />
                                 <AlertTitle>Access Hosting Console</AlertTitle>
                                 <AlertDescription>
-                                    Click below to open the Firebase Hosting console. You must be logged in as <strong>grantrizzo2@gmail.com</strong>.
+                                    Click below to open the Firebase Hosting console. You must be logged in as an owner.
                                     <Button asChild className="w-full mt-4">
                                         <Link href={hostingConsoleUrl} target="_blank" rel="noopener noreferrer">
                                             Open Hosting Console <ArrowRight className="ml-2 h-4 w-4" />
