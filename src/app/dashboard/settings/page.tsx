@@ -172,6 +172,16 @@ export default function SettingsPage() {
               </CardHeader>
               <CardContent className="pt-6">
                   <Accordion type="single" collapsible className="w-full">
+                      <AccordionItem value="dns">
+                          <AccordionTrigger className="text-sm font-semibold text-left">DNS Not Resolving?</AccordionTrigger>
+                          <AccordionContent className="text-sm space-y-3 text-muted-foreground">
+                              <p>Remember that DNS records are only the &quot;address&quot;. For your domain to actually show your content, you MUST successfully complete the <strong>Publisher</strong> process.</p>
+                              <div className="space-y-2 border-l-2 border-primary/20 pl-4 py-2">
+                                  <p className="font-semibold text-foreground">Why this is required:</p>
+                                  <p>The Publisher handles the internal account activation and the issuance of your SSL certificate (HTTPS). Without this, your site will either not load or show a security warning.</p>
+                              </div>
+                          </AccordionContent>
+                      </AccordionItem>
                       <AccordionItem value="suspension">
                           <AccordionTrigger className="text-sm font-semibold text-destructive text-left">Account Suspended or Restricted?</AccordionTrigger>
                           <AccordionContent className="text-sm space-y-3 text-muted-foreground">
@@ -209,17 +219,13 @@ export default function SettingsPage() {
                               </div>
                           </AccordionContent>
                       </AccordionItem>
-                      <AccordionItem value="billing-support">
-                          <AccordionTrigger className="text-sm font-semibold text-left">How to contact Billing Support?</AccordionTrigger>
+                      <AccordionItem value="workspace">
+                          <AccordionTrigger className="text-sm font-semibold text-left">Using Google Workspace?</AccordionTrigger>
                           <AccordionContent className="text-sm space-y-3 text-muted-foreground">
-                              <div className="space-y-2">
-                                  <ol className="list-decimal list-inside space-y-1">
-                                      <li>Go to the <a href="https://console.cloud.google.com/billing" target="_blank" className="text-primary underline">Google Cloud Billing Console</a>.</li>
-                                      <li>Click on the <strong>name</strong> of your billing account.</li>
-                                      <li>Click on <strong>&quot;Support&quot;</strong> in the left-hand sidebar menu.</li>
-                                      <li>Click the <strong>&quot;Contact Support&quot;</strong> button at the top of the page.</li>
-                                  </ol>
-                                  <p>Billing support is free for all accounts, even on the free tier.</p>
+                              <p>Google Workspace is great for professional branding, but you should not have to pay large upfront fees just to use Firebase.</p>
+                              <div className="space-y-2 border-l-2 border-primary/20 pl-4 py-2">
+                                  <p className="font-semibold text-foreground">Blaze Plan is Pay-as-you-go</p>
+                                  <p>You only need to link a credit card to enable the Blaze plan. Most small projects stay within the free tier usage. If Workspace is asking for a large upfront payment, ensure you aren&apos;t accidentally signing up for an enterprise support tier.</p>
                               </div>
                           </AccordionContent>
                       </AccordionItem>
