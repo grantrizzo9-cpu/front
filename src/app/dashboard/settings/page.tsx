@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { Copy, Loader2, PartyPopper, Info, Mail, AlertCircle, LogOut, CheckCircle2, HelpCircle, ShieldCheck, ExternalLink, CreditCard, RefreshCcw } from "lucide-react";
+import { Copy, Loader2, PartyPopper, Info, Mail, AlertCircle, LogOut, CheckCircle2, HelpCircle, ShieldCheck } from "lucide-react";
 import { useUser, useFirestore, useDoc, updateDocumentNonBlocking, useMemoFirebase, useAuth } from "@/firebase";
 import { doc, writeBatch } from "firebase/firestore";
 import { verifyBeforeUpdateEmail, signOut } from "firebase/auth";
@@ -27,7 +27,7 @@ export default function SettingsPage() {
   const auth = useAuth();
   const firestore = useFirestore();
   const { toast } = useToast();
-  const { isAdmin, isPlatformOwner, isLoading: isAdminLoading } = useAdmin();
+  const { isPlatformOwner, isLoading: isAdminLoading } = useAdmin();
   const router = useRouter();
 
   const [isRepairing, setIsRepairing] = useState(false);
@@ -160,7 +160,6 @@ export default function SettingsPage() {
         <p className="text-muted-foreground">Manage your account and affiliate settings.</p>
       </div>
 
-      {/* ADMIN TECHNICAL GUIDE SECTION */}
       {isPlatformOwner && (
           <Card className="border-primary/50 bg-primary/5 overflow-hidden">
               <CardHeader className="bg-primary/10">
@@ -188,44 +187,9 @@ export default function SettingsPage() {
                               <p>If Google has restricted your account, it is almost always due to automated <strong>Identity Verification</strong> or <strong>Payment Verification</strong> flags.</p>
                               <div className="space-y-2 border-l-2 border-destructive/20 pl-4 py-2">
                                   <p className="font-semibold text-foreground">Important: Multiple Accounts policy</p>
-                                  <p>Google may restrict new accounts if they are linked to older accounts with outstanding billing issues. If this happens, your best path forward is to start fresh with a completely new email and project configuration.</p>
+                                  <p>Google may restrict new accounts if they are linked to older accounts with outstanding billing issues.</p>
                                   <p className="font-semibold text-foreground">Your code is safe!</p>
-                                  <p>The code we&apos;ve built here is separate from your Firebase account. You can create a new project in a new Firebase account, and we can simply swap the configuration to point to the new one. Your app will be back online in minutes.</p>
-                              </div>
-                          </AccordionContent>
-                      </AccordionItem>
-                      <AccordionItem value="clean-break">
-                          <AccordionTrigger className="text-sm font-semibold text-left">The &quot;Clean Break&quot; Checklist</AccordionTrigger>
-                          <AccordionContent className="text-sm space-y-3 text-muted-foreground">
-                              <p>To prevent Google&apos;s systems from linking a new project to old restricted accounts, follow these steps exactly:</p>
-                              <div className="space-y-4">
-                                  <div className="p-3 bg-secondary/50 rounded-lg border border-destructive/20">
-                                      <p className="font-semibold text-destructive mb-2">Phase 1: Creation (The Most Critical)</p>
-                                      <ul className="list-decimal list-inside space-y-1">
-                                          <li><strong>New Device &amp; Network:</strong> Have a friend create the Gmail and Firebase project on their computer and home network (not your hotspot).</li>
-                                          <li><strong>New Phone Number:</strong> Use a phone number that has never been linked to your restricted accounts for verification.</li>
-                                          <li><strong>New Payment Method:</strong> <strong>CRITICAL.</strong> Use a credit card that has NEVER been used with Google before. If you use your old card, the account will be linked and likely restricted.</li>
-                                      </ul>
-                                  </div>
-                                  <div className="p-3 bg-secondary/50 rounded-lg border">
-                                      <p className="font-semibold text-foreground mb-2">Phase 2: Usage (On Your Laptop)</p>
-                                      <p>Even if you are on the same hotspot, you can avoid linking by isolating your browser:</p>
-                                      <ul className="list-decimal list-inside space-y-1">
-                                          <li><strong>New Browser Profile:</strong> In Chrome, create a brand new &quot;Profile&quot; (the icon next to the address bar). This ensures NO cookies or history from your old accounts are sent to Google.</li>
-                                          <li><strong>Switch Browsers:</strong> If you used Chrome, switch to Firefox or Edge specifically for this new account.</li>
-                                          <li><strong>Avoid Old Logins:</strong> Never log into your old restricted Gmail accounts in the same browser window where you use the new one.</li>
-                                      </ul>
-                                  </div>
-                              </div>
-                          </AccordionContent>
-                      </AccordionItem>
-                      <AccordionItem value="workspace">
-                          <AccordionTrigger className="text-sm font-semibold text-left">Using Google Workspace?</AccordionTrigger>
-                          <AccordionContent className="text-sm space-y-3 text-muted-foreground">
-                              <p>Google Workspace is great for professional branding, but you should not have to pay large upfront fees just to use Firebase.</p>
-                              <div className="space-y-2 border-l-2 border-primary/20 pl-4 py-2">
-                                  <p className="font-semibold text-foreground">Blaze Plan is Pay-as-you-go</p>
-                                  <p>You only need to link a credit card to enable the Blaze plan. Most small projects stay within the free tier usage. If Workspace is asking for a large upfront payment, ensure you aren&apos;t accidentally signing up for an enterprise support tier.</p>
+                                  <p>The code we&apos;ve built here is separate from your Firebase account. You can create a new project in a new Firebase account, and we can simply swap the configuration to point to the new one.</p>
                               </div>
                           </AccordionContent>
                       </AccordionItem>
@@ -245,7 +209,7 @@ export default function SettingsPage() {
                   <AlertCircle className="h-4 w-4" />
                   <AlertTitle>Action Required: Recent Login Needed</AlertTitle>
                   <AlertDescription className="space-y-3">
-                      <p>To protect your account, Firebase requires you to have logged in recently to perform this change. Please log out and log back in to continue.</p>
+                      <p>To protect your account, Firebase requires you to have logged in recently to perform this change.</p>
                       <Button variant="outline" size="sm" onClick={handleLogout} className="bg-destructive/10 hover:bg-destructive/20 border-destructive/20 text-destructive">
                           <LogOut className="mr-2 h-4 w-4" /> Log out and sign back in
                       </Button>
@@ -254,35 +218,13 @@ export default function SettingsPage() {
           )}
 
           {verificationSentTo && (
-              <div className="space-y-4">
-                <Alert className="bg-green-50 border-green-200 dark:bg-green-950 dark:border-green-800">
-                    <CheckCircle2 className="h-4 w-4 text-green-600" />
-                    <AlertTitle className="text-green-800 dark:text-green-200 font-bold">Verification Link Sent!</AlertTitle>
-                    <AlertDescription className="text-green-700 dark:text-green-300">
-                        <p>We&apos;ve sent a confirmation link to <strong>{verificationSentTo}</strong>. Your account email will not change until you click that link.</p>
-                    </AlertDescription>
-                </Alert>
-
-                <Card className="border-amber-200 bg-amber-50 dark:bg-amber-950/20">
-                    <CardHeader className="py-3">
-                        <CardTitle className="text-sm flex items-center gap-2">
-                            <HelpCircle className="h-4 w-4 text-amber-600" />
-                            Didn&apos;t get the email?
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent className="text-xs text-muted-foreground space-y-2 pb-3">
-                        <p>• Check your <strong>Spam or Junk</strong> folder.</p>
-                        <p>• Wait up to 5 minutes for the internet to deliver the message.</p>
-                        <p>• Ensure you typed the email correctly: <strong>{verificationSentTo}</strong>.</p>
-                        <div className="mt-4 p-3 bg-primary/10 rounded border border-primary/20 text-foreground">
-                            <p className="font-semibold flex items-center gap-1 mb-1">
-                                <ShieldCheck className="h-3 w-3" /> Admin Tip: Prevent Spam
-                            </p>
-                            <p>Go to your Firebase Console &gt; Auth &gt; Templates and <strong>customize your domain</strong>. This adds DKIM/SPF records which tells email providers your site is trusted.</p>
-                        </div>
-                    </CardContent>
-                </Card>
-              </div>
+              <Alert className="bg-green-50 border-green-200 dark:bg-green-950 dark:border-green-800">
+                  <CheckCircle2 className="h-4 w-4 text-green-600" />
+                  <AlertTitle className="text-green-800 dark:text-green-200 font-bold">Verification Link Sent!</AlertTitle>
+                  <AlertDescription className="text-green-700 dark:text-green-300">
+                      <p>We&apos;ve sent a confirmation link to <strong>{verificationSentTo}</strong>. Your account email will not change until you click that link.</p>
+                  </AlertDescription>
+              </Alert>
           )}
 
           {isGoogleUser ? (
@@ -318,11 +260,6 @@ export default function SettingsPage() {
                             </Button>
                         </div>
                     </div>
-                )}
-                {verificationSentTo && (
-                    <Button variant="ghost" size="sm" onClick={() => setVerificationSentTo(null)} className="text-xs">
-                        Change email address or resend
-                    </Button>
                 )}
               </form>
           )}
@@ -376,7 +313,7 @@ export default function SettingsPage() {
                 <Info className="h-4 w-4" />
                 <AlertTitle>Your Affiliate Link is Inactive!</AlertTitle>
                 <AlertDescription>
-                    Your public affiliate username is not correctly linked to your account. This will prevent you from receiving credit for referrals. Click the button below to reclaim your link.
+                    Your public affiliate username is not correctly linked to your account.
                     <Button 
                         onClick={handleRepairLink} 
                         className="mt-2 w-full"
