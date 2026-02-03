@@ -179,16 +179,17 @@ export default function SettingsPage() {
                       <AccordionItem value="billing-permissions">
                           <AccordionTrigger className="text-sm font-semibold text-destructive text-left">Error: "No available billing accounts"?</AccordionTrigger>
                           <AccordionContent className="text-sm space-y-3 text-muted-foreground">
-                              <p>If you see "No available billing accounts" in Google Cloud, it means your account is an owner of the project but doesn't have permission to use the <strong>Billing Account</strong> itself.</p>
-                              <div className="space-y-2">
-                                  <p className="font-semibold text-foreground">How to fix it:</p>
+                              <p>This happens when you are an owner of the <strong>Project</strong>, but you don't have permission to manage the <strong>Billing Account</strong> itself. They are managed in two different places.</p>
+                              <div className="space-y-2 border-l-2 border-primary/20 pl-4 py-2">
+                                  <p className="font-semibold text-foreground">How to fix it (Do NOT go to Project IAM):</p>
                                   <ol className="list-decimal list-inside space-y-1">
-                                      <li>Go to the <a href="https://console.cloud.google.com/billing" target="_blank" className="text-primary underline">Billing Management page</a>.</li>
-                                      <li>Click on <strong>"Account Management"</strong> in the left sidebar.</li>
-                                      <li>Look at the <strong>"Permissions"</strong> panel on the right.</li>
-                                      <li>Click <strong>"ADD PRINCIPAL"</strong> and enter your email address.</li>
+                                      <li>Click the <strong>Hamburger Menu</strong> (top left) and select <strong>Billing</strong>.</li>
+                                      <li>Select your billing account from the list.</li>
+                                      <li>Click on <strong>"Account Management"</strong> in the left sidebar of the Billing page.</li>
+                                      <li>Look at the <strong>"Permissions"</strong> panel on the right side of the screen.</li>
+                                      <li>Click <strong>"ADD PRINCIPAL"</strong>, enter your email address.</li>
                                       <li>In the <strong>"Role"</strong> box, select <strong>Billing &gt; Billing Account Administrator</strong>.</li>
-                                      <li>Save, then go back to the "Projects" tab and you will now be able to link your project.</li>
+                                      <li>Save, then you can go back to the "Projects" tab and link your project.</li>
                                   </ol>
                               </div>
                           </AccordionContent>
@@ -196,7 +197,7 @@ export default function SettingsPage() {
                       <AccordionItem value="billing-hang">
                           <AccordionTrigger className="text-sm font-semibold">Stuck on "Waiting for Billing Account"?</AccordionTrigger>
                           <AccordionContent className="text-sm space-y-3 text-muted-foreground">
-                              <p>If the publisher is stuck on Step 2 even after you've paid, it's usually because the <strong>project</strong> isn't manually linked to your <strong>Billing Account</strong> yet.</p>
+                              <p>If the publisher is stuck even after you've paid, it's usually because the <strong>project</strong> isn't manually linked to your <strong>Billing Account</strong> yet.</p>
                               <div className="space-y-2">
                                   <p className="font-semibold text-foreground">How to fix it:</p>
                                   <ol className="list-decimal list-inside space-y-1">
