@@ -167,7 +167,7 @@ export default function SettingsPage() {
                       <ShieldCheck className="h-5 w-5 text-primary" />
                       Administrator Technical Guide
                   </CardTitle>
-                  <CardDescription>Troubleshooting, Multi-Cloud, and Clean Break strategies.</CardDescription>
+                  <CardDescription>Troubleshooting, AWS Hosting, and Account Isolation.</CardDescription>
               </CardHeader>
               <CardContent className="pt-6">
                   <Accordion type="single" collapsible className="w-full">
@@ -175,20 +175,19 @@ export default function SettingsPage() {
                           <AccordionTrigger className="text-sm font-semibold text-left">
                               <div className="flex items-center gap-2">
                                   <Server className="h-4 w-4" />
-                                  How to host on Amazon (AWS)
+                                  Host everything on Amazon (AWS)
                               </div>
                           </AccordionTrigger>
                           <AccordionContent className="text-sm space-y-3 text-muted-foreground">
-                              <p>You can host this frontend on AWS while keeping the Firebase database. This is great for redundancy.</p>
+                              <p>If you cannot activate Firebase Hosting, you can host the entire website on AWS Amplify for free/cheap while still using Firebase for your database.</p>
                               <div className="space-y-2 border-l-2 border-orange-500/20 pl-4 py-2">
                                   <p className="font-semibold text-foreground">AWS Amplify Setup:</p>
                                   <ol className="list-decimal list-inside space-y-1">
                                       <li>Push your code to <strong>GitHub</strong>.</li>
-                                      <li>Log in to the <strong>AWS Management Console</strong>.</li>
-                                      <li>Search for <strong>AWS Amplify</strong>.</li>
-                                      <li>Click "Create new app" &gt; "GitHub".</li>
-                                      <li>Select this repository and the <code>main</code> branch.</li>
-                                      <li><strong>Crucial:</strong> Add your environment variables (GEMINI_API_KEY, etc.) in the Amplify "Environment Variables" settings.</li>
+                                      <li>In AWS Amplify, click "Create new app" &gt; "GitHub".</li>
+                                      <li>Select your repository and the <code>main</code> branch.</li>
+                                      <li><strong>Critical:</strong> Add your <code>GEMINI_API_KEY</code> and other keys in the Amplify "Environment Variables" settings.</li>
+                                      <li>Save and deploy. Amplify will give you a live URL.</li>
                                   </ol>
                               </div>
                           </AccordionContent>
@@ -197,35 +196,18 @@ export default function SettingsPage() {
                           <AccordionTrigger className="text-sm font-semibold text-left">
                               <div className="flex items-center gap-2">
                                   <CheckCircle2 className="h-4 w-4" />
-                                  The "Clean Break" Account Strategy
+                                  Google account restricted?
                               </div>
                           </AccordionTrigger>
                           <AccordionContent className="text-sm space-y-3 text-muted-foreground">
-                              <p>If you are creating a new account to avoid restrictions, you must follow these rules strictly.</p>
+                              <p>If you create a new account, Google will link it to your old one if you use the same card.</p>
                               <div className="space-y-2 border-l-2 border-primary/20 pl-4 py-2">
-                                  <p className="font-semibold text-foreground">Phase 1: Creation (The "Clean" Identity)</p>
+                                  <p className="font-semibold text-foreground">Rules for a "Clean Break":</p>
                                   <ul className="list-disc list-inside space-y-1">
-                                      <li>Use a <strong>different person's</strong> details if possible.</li>
+                                      <li>Use a <strong>new credit card</strong>.</li>
                                       <li>Use a <strong>new phone number</strong> for verification.</li>
-                                      <li>Use a <strong>new credit card</strong> (prepaid cards often fail).</li>
-                                      <li>Create the account on a <strong>different network</strong> (e.g., a friend's house).</li>
+                                      <li>Create the account on a <strong>different browser profile</strong> or different laptop.</li>
                                   </ul>
-                                  <p className="font-semibold text-foreground mt-4">Phase 2: Usage (Isolation on your Laptop)</p>
-                                  <ul className="list-disc list-inside space-y-1">
-                                      <li><strong>New Browser Profile:</strong> In Chrome, click your profile icon &gt; Add. Never log into old accounts in this profile.</li>
-                                      <li><strong>Different Browser:</strong> Use Firefox or Edge exclusively for the new account.</li>
-                                      <li><strong>Clear All Data:</strong> If you must use the same browser, clear all history, cookies, and cache before logging in.</li>
-                                  </ul>
-                              </div>
-                          </AccordionContent>
-                      </AccordionItem>
-                      <AccordionItem value="dns">
-                          <AccordionTrigger className="text-sm font-semibold text-left">DNS Not Resolving?</AccordionTrigger>
-                          <AccordionContent className="text-sm space-y-3 text-muted-foreground">
-                              <p>Remember that DNS records are only the "address". For your domain to actually show your content, you MUST successfully complete the <strong>Publisher</strong> process.</p>
-                              <div className="space-y-2 border-l-2 border-primary/20 pl-4 py-2">
-                                  <p className="font-semibold text-foreground">Why this is required:</p>
-                                  <p>The Publisher handles internal activation and SSL certificate (HTTPS) issuance. Without this, your site will show a security warning.</p>
                               </div>
                           </AccordionContent>
                       </AccordionItem>

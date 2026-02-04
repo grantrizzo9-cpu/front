@@ -1,47 +1,35 @@
-# Affiliate AI Host
+# Affiliate AI Host - AWS Amplify Ready
 
-An AI-powered web hosting and affiliate marketing platform built with Next.js, Firebase, and Genkit.
+This is a Next.js application designed for a "Multi-Cloud" architecture. It uses **AWS Amplify** for global high-speed hosting and **Firebase** for its real-time database and authentication.
 
-## 🚀 Features
+## 🚀 Deployment to AWS Amplify
 
-- **Daily PayPal Payouts**: Automated commission system for recurring sales.
-- **AI Content Generator**: Built-in tools for blog posts, email copy, and social media.
-- **One-Click Website Builder**: Instantly generate and preview affiliate landing pages.
-- **Multi-Cloud Ready**: Can be hosted on Firebase, Vercel, or AWS Amplify.
+If you want to host your website on Amazon instead of Firebase, follow these steps:
 
-## 🛠 Tech Stack
+1. **GitHub Push**: Push your current code to a private GitHub repository.
+2. **AWS Amplify**: Log in to the AWS Console, search for **Amplify**, and click "Create new app" -> "GitHub".
+3. **Repository Linking**: Authorize AWS to access your GitHub and select the `front` repository and `main` branch.
+4. **Build Settings**: Amplify will automatically detect Next.js.
+5. **Environment Variables**: Under "App Settings" -> "Environment Variables", you **MUST** add these keys from your `.env` file:
+   - `GEMINI_API_KEY`
+   - `NEXT_PUBLIC_PAYPAL_SANDBOX_CLIENT_ID`
+   - `PAYPAL_SANDBOX_CLIENT_SECRET`
+   - `PAYPAL_SANDBOX=true`
+6. **Save and Deploy**: AWS will build your site and provide a live URL.
 
-- **Framework**: Next.js 15 (App Router)
-- **Database & Auth**: Firebase (Firestore & Authentication)
-- **AI Orchestration**: Google Genkit (Gemini & Imagen)
-- **Payments**: PayPal SDK Integration
+## ⚙️ How it works (Multi-Cloud)
+- **Frontend**: Hosted on AWS Amplify (Global CDN).
+- **Database**: Firestore (Firebase) - Linked via `src/firebase/config.ts`.
+- **Authentication**: Firebase Auth - Linked via `src/firebase/config.ts`.
 
-## 📦 Setup & Deployment
+This allows you to bypass Firebase Hosting restrictions while still using their powerful database backend.
 
-### 1. Environment Variables
-Create a `.env` file in the root and add your keys:
-```env
-GEMINI_API_KEY=your_key
-NEXT_PUBLIC_PAYPAL_SANDBOX_CLIENT_ID=your_id
-PAYPAL_SANDBOX_CLIENT_SECRET=your_secret
-PAYPAL_SANDBOX=true
-```
+## 🛠 Local Development
 
-### 2. Local Development
 ```bash
 npm install
 npm run dev
 ```
-
-### 3. Deployment to AWS Amplify
-1. Push this code to a **GitHub** repository.
-2. In the AWS Console, search for **Amplify**.
-3. Connect your GitHub repo and select the `main` branch.
-4. Add your `.env` variables in the Amplify Console under **App Settings > Environment Variables**.
-5. Deploy! Amplify will automatically build and host your Next.js app.
-
-## 🛡 Security
-This project uses a `.gitignore` file to ensure sensitive keys are never pushed to public repositories. Ensure your `.env` file is never committed.
 
 ---
 © 2024 Affiliate AI Host. All rights reserved.
