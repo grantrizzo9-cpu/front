@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { Copy, Loader2, PartyPopper, Info, Mail, AlertCircle, LogOut, CheckCircle2, HelpCircle, ShieldCheck } from "lucide-react";
+import { Copy, Loader2, PartyPopper, Info, Mail, AlertCircle, LogOut, CheckCircle2, HelpCircle, ShieldCheck, Server } from "lucide-react";
 import { useUser, useFirestore, useDoc, updateDocumentNonBlocking, useMemoFirebase, useAuth } from "@/firebase";
 import { doc, writeBatch } from "firebase/firestore";
 import { verifyBeforeUpdateEmail, signOut } from "firebase/auth";
@@ -167,29 +167,65 @@ export default function SettingsPage() {
                       <ShieldCheck className="h-5 w-5 text-primary" />
                       Administrator Technical Guide
                   </CardTitle>
-                  <CardDescription>Troubleshooting and support for platform owners.</CardDescription>
+                  <CardDescription>Troubleshooting, Multi-Cloud, and Clean Break strategies.</CardDescription>
               </CardHeader>
               <CardContent className="pt-6">
                   <Accordion type="single" collapsible className="w-full">
-                      <AccordionItem value="dns">
-                          <AccordionTrigger className="text-sm font-semibold text-left">DNS Not Resolving?</AccordionTrigger>
+                      <AccordionItem value="aws">
+                          <AccordionTrigger className="text-sm font-semibold text-left">
+                              <div className="flex items-center gap-2">
+                                  <Server className="h-4 w-4" />
+                                  How to host on Amazon (AWS)
+                              </div>
+                          </AccordionTrigger>
                           <AccordionContent className="text-sm space-y-3 text-muted-foreground">
-                              <p>Remember that DNS records are only the &quot;address&quot;. For your domain to actually show your content, you MUST successfully complete the <strong>Publisher</strong> process.</p>
-                              <div className="space-y-2 border-l-2 border-primary/20 pl-4 py-2">
-                                  <p className="font-semibold text-foreground">Why this is required:</p>
-                                  <p>The Publisher handles the internal account activation and the issuance of your SSL certificate (HTTPS). Without this, your site will either not load or show a security warning.</p>
+                              <p>You can host this frontend on AWS while keeping the Firebase database. This is great for redundancy.</p>
+                              <div className="space-y-2 border-l-2 border-orange-500/20 pl-4 py-2">
+                                  <p className="font-semibold text-foreground">AWS Amplify Setup:</p>
+                                  <ol className="list-decimal list-inside space-y-1">
+                                      <li>Push your code to <strong>GitHub</strong>.</li>
+                                      <li>Log in to the <strong>AWS Management Console</strong>.</li>
+                                      <li>Search for <strong>AWS Amplify</strong>.</li>
+                                      <li>Click "Create new app" &gt; "GitHub".</li>
+                                      <li>Select this repository and the <code>main</code> branch.</li>
+                                      <li><strong>Crucial:</strong> Add your environment variables (GEMINI_API_KEY, etc.) in the Amplify "Environment Variables" settings.</li>
+                                  </ol>
                               </div>
                           </AccordionContent>
                       </AccordionItem>
-                      <AccordionItem value="suspension">
-                          <AccordionTrigger className="text-sm font-semibold text-destructive text-left">Account Suspended or Restricted?</AccordionTrigger>
+                      <AccordionItem value="clean-break">
+                          <AccordionTrigger className="text-sm font-semibold text-left">
+                              <div className="flex items-center gap-2">
+                                  <CheckCircle2 className="h-4 w-4" />
+                                  The "Clean Break" Account Strategy
+                              </div>
+                          </AccordionTrigger>
                           <AccordionContent className="text-sm space-y-3 text-muted-foreground">
-                              <p>If Google has restricted your account, it is almost always due to automated <strong>Identity Verification</strong> or <strong>Payment Verification</strong> flags.</p>
-                              <div className="space-y-2 border-l-2 border-destructive/20 pl-4 py-2">
-                                  <p className="font-semibold text-foreground">Important: Multiple Accounts policy</p>
-                                  <p>Google may restrict new accounts if they are linked to older accounts with outstanding billing issues.</p>
-                                  <p className="font-semibold text-foreground">Your code is safe!</p>
-                                  <p>The code we&apos;ve built here is separate from your Firebase account. You can create a new project in a new Firebase account, and we can simply swap the configuration to point to the new one.</p>
+                              <p>If you are creating a new account to avoid restrictions, you must follow these rules strictly.</p>
+                              <div className="space-y-2 border-l-2 border-primary/20 pl-4 py-2">
+                                  <p className="font-semibold text-foreground">Phase 1: Creation (The "Clean" Identity)</p>
+                                  <ul className="list-disc list-inside space-y-1">
+                                      <li>Use a <strong>different person's</strong> details if possible.</li>
+                                      <li>Use a <strong>new phone number</strong> for verification.</li>
+                                      <li>Use a <strong>new credit card</strong> (prepaid cards often fail).</li>
+                                      <li>Create the account on a <strong>different network</strong> (e.g., a friend's house).</li>
+                                  </ul>
+                                  <p className="font-semibold text-foreground mt-4">Phase 2: Usage (Isolation on your Laptop)</p>
+                                  <ul className="list-disc list-inside space-y-1">
+                                      <li><strong>New Browser Profile:</strong> In Chrome, click your profile icon &gt; Add. Never log into old accounts in this profile.</li>
+                                      <li><strong>Different Browser:</strong> Use Firefox or Edge exclusively for the new account.</li>
+                                      <li><strong>Clear All Data:</strong> If you must use the same browser, clear all history, cookies, and cache before logging in.</li>
+                                  </ul>
+                              </div>
+                          </AccordionContent>
+                      </AccordionItem>
+                      <AccordionItem value="dns">
+                          <AccordionTrigger className="text-sm font-semibold text-left">DNS Not Resolving?</AccordionTrigger>
+                          <AccordionContent className="text-sm space-y-3 text-muted-foreground">
+                              <p>Remember that DNS records are only the "address". For your domain to actually show your content, you MUST successfully complete the <strong>Publisher</strong> process.</p>
+                              <div className="space-y-2 border-l-2 border-primary/20 pl-4 py-2">
+                                  <p className="font-semibold text-foreground">Why this is required:</p>
+                                  <p>The Publisher handles internal activation and SSL certificate (HTTPS) issuance. Without this, your site will show a security warning.</p>
                               </div>
                           </AccordionContent>
                       </AccordionItem>
