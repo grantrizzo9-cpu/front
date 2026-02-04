@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useMemo, type ReactNode } from 'react';
@@ -22,6 +23,7 @@ export function FirebaseClientProvider({ children }: { children: ReactNode }) {
       const auth = getAuth(app);
       const firestore = getFirestore(app);
 
+      // Enable offline persistence to handle flaky connections or restricted project states
       if (typeof window !== 'undefined') {
         enableMultiTabIndexedDbPersistence(firestore).catch((err) => {
           if (err.code === 'failed-precondition') {
