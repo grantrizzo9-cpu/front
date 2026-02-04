@@ -178,15 +178,15 @@ export default function SettingsPage() {
                               </div>
                           </AccordionTrigger>
                           <AccordionContent className="text-sm space-y-3 text-muted-foreground">
-                              <p>If you cannot activate Firebase Hosting, you can host the entire website on AWS Amplify for free/cheap while still using Firebase for your database.</p>
+                              <p>If you cannot activate Firebase Hosting due to billing restrictions, you can host the frontend on AWS Amplify for free while keeping the backend here.</p>
                               <div className="space-y-2 border-l-2 border-orange-500/20 pl-4 py-2">
                                   <p className="font-semibold text-foreground">AWS Amplify Setup:</p>
                                   <ol className="list-decimal list-inside space-y-1">
-                                      <li>Push your code to <strong>GitHub</strong>.</li>
-                                      <li>In AWS Amplify, click "Create new app" &gt; "GitHub".</li>
-                                      <li>Select your repository and the <code>main</code> branch.</li>
-                                      <li><strong>Critical:</strong> Add your <code>GEMINI_API_KEY</code> and other keys in the Amplify "Environment Variables" settings.</li>
-                                      <li>Save and deploy. Amplify will give you a live URL.</li>
+                                      <li>Push your latest code to <strong>GitHub</strong>.</li>
+                                      <li>Log into <strong>AWS Amplify</strong> console.</li>
+                                      <li>Click "Create new app" > "GitHub" and select your <code>front</code> repo.</li>
+                                      <li><strong>Critical:</strong> Under App Settings > Environment Variables, manually add your <code>GEMINI_API_KEY</code> and PayPal keys.</li>
+                                      <li>Deploy. Amplify will provide a live URL instantly.</li>
                                   </ol>
                               </div>
                           </AccordionContent>
@@ -195,17 +195,16 @@ export default function SettingsPage() {
                           <AccordionTrigger className="text-sm font-semibold text-left">
                               <div className="flex items-center gap-2">
                                   <CheckCircle2 className="h-4 w-4" />
-                                  Google account restricted?
+                                  Rules for a "Clean Break" Account
                               </div>
                           </AccordionTrigger>
                           <AccordionContent className="text-sm space-y-3 text-muted-foreground">
-                              <p>If you create a new account, Google will link it to your old one if you use the same card or phone number.</p>
+                              <p>To avoid Google linking your new account to restricted ones, follow these rules strictly:</p>
                               <div className="space-y-2 border-l-2 border-primary/20 pl-4 py-2">
-                                  <p className="font-semibold text-foreground">Rules for a "Clean Break":</p>
                                   <ul className="list-disc list-inside space-y-1">
-                                      <li>Use a <strong>brand new credit card</strong> never used with Google.</li>
-                                      <li>Use a <strong>new phone number</strong> for verification.</li>
-                                      <li>Create the account on a <strong>different physical device</strong> or network.</li>
+                                      <li><strong>New Payment Method:</strong> Use a card never used with Google before.</li>
+                                      <li><strong>New Phone Number:</strong> Google verifies identity via SMS. Do not reuse your old number.</li>
+                                      <li><strong>New Device/IP:</strong> Create the account on a different device or use a VPN/Mobile Hotspot to avoid IP linking.</li>
                                   </ul>
                               </div>
                           </AccordionContent>
@@ -239,7 +238,7 @@ export default function SettingsPage() {
                   <CheckCircle2 className="h-4 w-4 text-green-600" />
                   <AlertTitle className="text-green-800 dark:text-green-200 font-bold">Verification Link Sent!</AlertTitle>
                   <AlertDescription className="text-green-700 dark:text-green-300">
-                      <p>We&apos;ve sent a confirmation link to <strong>{verificationSentTo}</strong>. Your account email will not change until you click that link.</p>
+                      <p>We've sent a confirmation link to <strong>{verificationSentTo}</strong>. Your account email will not change until you click that link.</p>
                   </AlertDescription>
               </Alert>
           )}

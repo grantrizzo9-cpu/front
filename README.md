@@ -23,12 +23,5 @@ To host your website on Amazon instead of Firebase, follow these steps:
 
 This allows you to bypass Firebase Hosting billing restrictions while still using their powerful database backend.
 
-## 🛠 Local Development
-
-```bash
-npm install
-npm run dev
-```
-
 ---
 © 2024 Affiliate AI Host. All rights reserved.
