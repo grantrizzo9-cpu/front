@@ -13,7 +13,7 @@ To host your website on Amazon instead of Firebase (highly recommended for bypas
     *   `GEMINI_API_KEY`
     *   `NEXT_PUBLIC_PAYPAL_SANDBOX_CLIENT_ID`
     *   `PAYPAL_SANDBOX_CLIENT_SECRET`
-    *   `PAYPAL_SANDBOX=true`
+    *   `PAYPAL_SANDBOX=true` (or false if you are using Live)
 5.  **Build and Deploy**: AWS will automatically build your site and provide a live URL.
 
 ## ⚙️ How it works (Multi-Cloud)
