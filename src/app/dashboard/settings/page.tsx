@@ -1,4 +1,3 @@
-
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -185,8 +184,8 @@ export default function SettingsPage() {
                                   <ol className="list-decimal list-inside space-y-1">
                                       <li>Push your latest code to <strong>GitHub</strong>.</li>
                                       <li>Log into <strong>AWS Amplify</strong> console.</li>
-                                      <li>Click "Create new app" &gt; "GitHub" and select your <code>front</code> repo.</li>
-                                      <li><strong>Critical:</strong> Under App Settings &gt; Environment Variables, manually add your <code>GEMINI_API_KEY</code> and PayPal keys.</li>
+                                      <li>Click "Create new app" {"->"} "GitHub" and select your <code>front</code> repo.</li>
+                                      <li><strong>Critical:</strong> Under App Settings {"->"} Environment Variables, manually add your <code>GEMINI_API_KEY</code> and PayPal keys.</li>
                                       <li>Deploy. Amplify will provide a live URL instantly.</li>
                                   </ol>
                               </div>
