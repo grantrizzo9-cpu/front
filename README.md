@@ -4,11 +4,11 @@ This is a professional Next.js application designed for a **Multi-Cloud** archit
 
 ## 🚀 Deployment to AWS Amplify
 
-To host your website on Amazon instead of Firebase, follow these steps:
+To host your website on Amazon instead of Firebase (highly recommended for bypassing billing restrictions), follow these steps:
 
-1.  **Push to GitHub**: Ensure your latest code is pushed to your private repository at `https://github.com/grantrizzo9-cpu/front`.
+1.  **Push to GitHub**: Ensure your latest code is pushed to your private repository.
 2.  **AWS Amplify Console**: Log in to the AWS Management Console, search for **AWS Amplify**, and click "Create new app" -> "GitHub".
-3.  **Authorize**: Authorize AWS to access your GitHub and select the `front` repository and `main` branch.
+3.  **Authorize**: Authorize AWS to access your GitHub and select your repository and `main` branch.
 4.  **Environment Variables**: Under "App Settings" -> "Environment Variables", you **MUST** add these keys from your local `.env` file:
     *   `GEMINI_API_KEY`
     *   `NEXT_PUBLIC_PAYPAL_SANDBOX_CLIENT_ID`
