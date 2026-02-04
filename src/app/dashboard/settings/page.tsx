@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { Copy, Loader2, PartyPopper, Info, Mail, AlertCircle, LogOut, CheckCircle2, HelpCircle, ShieldCheck, Server } from "lucide-react";
+import { Copy, Loader2, PartyPopper, Info, Mail, AlertCircle, LogOut, CheckCircle2, ShieldCheck, Server } from "lucide-react";
 import { useUser, useFirestore, useDoc, updateDocumentNonBlocking, useMemoFirebase, useAuth } from "@/firebase";
 import { doc, writeBatch } from "firebase/firestore";
 import { verifyBeforeUpdateEmail, signOut } from "firebase/auth";
@@ -20,7 +20,6 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import Link from "next/link";
 
 export default function SettingsPage() {
   const { user, isUserLoading } = useUser();
@@ -200,13 +199,13 @@ export default function SettingsPage() {
                               </div>
                           </AccordionTrigger>
                           <AccordionContent className="text-sm space-y-3 text-muted-foreground">
-                              <p>If you create a new account, Google will link it to your old one if you use the same card.</p>
+                              <p>If you create a new account, Google will link it to your old one if you use the same card or phone number.</p>
                               <div className="space-y-2 border-l-2 border-primary/20 pl-4 py-2">
                                   <p className="font-semibold text-foreground">Rules for a "Clean Break":</p>
                                   <ul className="list-disc list-inside space-y-1">
-                                      <li>Use a <strong>new credit card</strong>.</li>
+                                      <li>Use a <strong>brand new credit card</strong> never used with Google.</li>
                                       <li>Use a <strong>new phone number</strong> for verification.</li>
-                                      <li>Create the account on a <strong>different browser profile</strong> or different laptop.</li>
+                                      <li>Create the account on a <strong>different physical device</strong> or network.</li>
                                   </ul>
                               </div>
                           </AccordionContent>
