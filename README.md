@@ -3,38 +3,34 @@
 
 Your application is hosted on **AWS Amplify** and accessible at [hostproai.com](https://hostproai.com).
 
-## 🌐 Pointing Your Domain to AWS (Route 53)
-Since you have moved your nameservers to Amazon, you must connect the domain inside the AWS console:
-1.  Log in to the **[AWS Amplify Console](https://console.aws.amazon.com/amplify/home)**.
-2.  Select your app: **`rent-a-host`**.
-3.  Go to **App Settings** -> **Domain management**.
-4.  Click **Add domain** and enter: `hostproai.com`.
-5.  If your domain is in the same AWS account (Route 53), Amplify will offer to configure DNS automatically. **Accept this.**
-6.  If not, it will provide **CNAME records**. Add these to your **Route 53 Hosted Zone** for `hostproai.com`.
+## ⚠️ CRITICAL: DO NOT Use the Firebase Hosting Wizard
+If the Firebase Console asks you to **"Add records"** or **"Remove records (13.249.x.x)"**, **DO NOT DO IT**. 
+Those `13.249` records are your **Amazon (AWS)** records. If you follow the Firebase Hosting wizard, you will break your AWS deployment.
 
 ---
 
-## 🚨 FIX: "Backend Connection Failed" / "Client Offline"
-If your live site displays an "Offline" message, your Firebase backend is rejecting the connection from your new domain.
+## 🌐 How to fix the "Backend Connection Failed" / "Client Offline" error
+If your site loads but says "Offline", your Firebase backend is rejecting the connection from your domain.
 
-### Step 1: Authorize Domain in Firebase Console (Immediate Fix)
-1.  Go to the [Firebase Console](https://console.firebase.google.com/).
-2.  Select your project: **`rent-a-host-a55fd`**.
-3.  Go to **Build** -> **Authentication** -> **Settings** -> **Authorized domains**.
-4.  Click **Add domain** and enter: `hostproai.com`.
-5.  Click **Add domain** again and enter: `*.hostproai.com`.
+### Step 1: Authorize Domain in Firebase Auth (Free & Immediate)
+1. Go to the [Firebase Console](https://console.firebase.google.com/).
+2. Select your project: **`rent-a-host-a55fd`**.
+3. Go to **Build** -> **Authentication** -> **Settings** -> **Authorized domains**.
+4. Click **Add domain** and enter: `hostproai.com`.
+5. Click **Add domain** again and enter: `*.hostproai.com`.
+*This tells Firebase that your AWS domain is "safe" to talk to.*
 
-### Step 2: Whitelist in Google Cloud Console (Critical Security)
-Once your Google Cloud account is approved, you must perform this step to allow API access:
-1.  Go to [Google Cloud API Credentials](https://console.cloud.google.com/apis/credentials).
-2.  Select project **`rent-a-host-a55fd`**.
-3.  Edit the **"Browser key (auto-created by Firebase)"**.
-4.  Under **"Website restrictions"**, add `https://hostproai.com/*` and `https://*.hostproai.com/*`.
-5.  Click **Save**.
+### Step 2: Whitelist in Google Cloud (Only after Account Approval)
+Once your Google Cloud account is approved, perform this step:
+1. Go to [Google Cloud API Credentials](https://console.cloud.google.com/apis/credentials).
+2. Select project **`rent-a-host-a55fd`**.
+3. Edit the **"Browser key (auto-created by Firebase)"**.
+4. Under **"Website restrictions"**, add `https://hostproai.com/*` and `https://*.hostproai.com/*`.
+5. Click **Save**.
 
 ---
 
-## 🛠️ Required AWS Environment Variables
+## 🛠️ Required AWS Amplify Secrets
 Add these in **Amplify Console** -> **App Settings** -> **Environment Variables**:
 
 | Variable Name | Value Description |
@@ -50,7 +46,7 @@ Add these in **Amplify Console** -> **App Settings** -> **Environment Variables*
 
 ## 🚀 Push Changes
 1. `git add .`
-2. `git commit -m "Fix AWS build errors and update domain guide"`
+2. `git commit -m "Fix build errors and update technical guide"`
 3. `git push origin main`
 
 © 2024 Affiliate AI Host. All rights reserved.
