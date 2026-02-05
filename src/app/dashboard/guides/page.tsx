@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useMemo, useEffect } from 'react';
@@ -65,7 +66,7 @@ const allGuides: Guide[] = [
             <li><strong>The "Money" Page - Your In-Depth Review:</strong> This is your primary sales tool. It must be detailed, honest, and compelling. Refer to our <strong>"Content is King: Writing Compelling Product Reviews"</strong> guide for a full-length template and strategy. Your review should cover:
                 <ul>
                     <li>An attention-grabbing headline.</li>
-                    <li>A personal story about why you chose Affiliate AI Host.</li>
+                    <li>a personal story about why you chose Affiliate AI Host.</li>
                     <li>A detailed breakdown of the key features (daily pay, high commission, AI tools).</li>
                     <li>Screenshots of the dashboard and tools in action.</li>
                     <li>A clear explanation of the pricing and the value proposition.</li>

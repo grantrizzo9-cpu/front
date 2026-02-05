@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -195,7 +196,7 @@ export default function SettingsPage() {
                           <AccordionTrigger className="text-sm font-semibold text-left">
                               <div className="flex items-center gap-2">
                                   <CheckCircle2 className="h-4 w-4" />
-                                  Rules for a &quot;Clean Break&quot; Account
+                                  Rules for a "Clean Break" Account
                               </div>
                           </AccordionTrigger>
                           <AccordionContent className="text-sm space-y-3 text-muted-foreground">
