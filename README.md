@@ -4,16 +4,16 @@
 Your application is hosted on **AWS Amplify** and accessible at [hostproai.com](https://hostproai.com).
 
 ## 🚨 Fix "Backend Connection Failed" / "Client Offline"
-If your live site displays a "Backend Connection Failed" message, follow these steps to whitelist your domain in Google Cloud. This allows your browser to talk to the Firebase database without activation fees:
+If your live site displays a "Backend Connection Failed" or "Client Offline" message, it is because Google's API restrictions are blocking your live domain. Follow these steps to whitelist it:
 
-1.  Go to [Google Cloud Console API Credentials](https://console.cloud.google.com/apis/credentials).
-2.  Ensure project `rent-a-host-a55fd` is selected in the top dropdown.
-3.  Click the **Edit** icon next to your **"Browser key (auto-created by Firebase)"**.
-4.  Scroll down to **"Website restrictions"**.
+1.  Go to the [Google Cloud Console API Credentials](https://console.cloud.google.com/apis/credentials).
+2.  Ensure project **`rent-a-host-a55fd`** is selected in the top dropdown.
+3.  Under **"API Keys"**, click the **Edit** icon next to your **"Browser key (auto-created by Firebase)"**.
+4.  Scroll down to the **"Website restrictions"** section.
 5.  Add these two entries to the list exactly:
     *   `https://hostproai.com/*`
     *   `https://*.hostproai.com/*`
-6.  Click **Save**. It may take up to 5 minutes to take effect.
+6.  Click **Save**. It may take up to 5 minutes to take effect globally.
 
 ## 🛠️ Required Environment Variables (Secrets)
 In your **AWS Amplify Console**, go to **App Settings** -> **Environment Variables**. You **MUST** add these exactly as shown for the site features to work:
@@ -35,7 +35,7 @@ Use these commands in your terminal to update your live site:
 1.  **Stage and Commit**:
    ```bash
    git add .
-   git commit -m "Fix Accordion import path and update secrets README"
+   git commit -m "Fix Accordion import path and update troubleshoot guide"
    ```
 2.  **Push to GitHub**:
    ```bash
