@@ -10,14 +10,17 @@ Those `13.249` records are your **Amazon (AWS)** records. If you follow the Fire
 ---
 
 ## 🌐 How to fix the "Backend Connection Failed" / "Client Offline" error
-If your site loads but says "Offline" or fails to create an account, your Firebase backend is rejecting the connection from your custom domain.
+If your site loads but says "Offline" or fails to create an account, follow these steps in order:
 
 ### Step 1: Authorize Domain in Firebase Auth (Free & Immediate)
 1. Go to the [Firebase Console](https://console.firebase.google.com/).
 2. Select your project: **`rent-a-host-a55fd`**.
-3. Go to **Build** -> **Authentication** -> **Settings** -> **Authorized domains**.
-4. Click **Add domain** and enter: `hostproai.com`.
-5. Click **Add domain** again and enter: `*.hostproai.com`.
+3. Look at the **Left Sidebar**. Click the word **"Build"** to expand the menu.
+4. Click **Authentication**.
+5. Click the **Settings** tab (usually at the top of the screen).
+6. Click **Authorized domains** in the left-hand sub-menu.
+7. Click **Add domain** and enter: `hostproai.com`.
+8. Click **Add domain** again and enter: `*.hostproai.com`.
 *This allows login/signup to work on your domain.*
 
 ### Step 2: Whitelist in Google Cloud (Required for Database/Firestore)
@@ -35,10 +38,6 @@ If your site loads but says "Offline" or fails to create an account, your Fireba
 If you have enabled a Firewall in AWS (WAF), it may block Firebase WebSockets. 
 **Fix Implemented:** The application is now using **Long Polling (v1.0.4)**, which uses standard HTTPS traffic to bypass firewall restrictions.
 
-**If the error persists:**
-1. Try deactivating your AWS Firewall temporarily to test.
-2. If it works without the firewall, you need to add an exception in AWS for `*.googleapis.com` and `*.firebaseio.com`.
-
 ---
 
 ## 🛠️ Required AWS Amplify Secrets
@@ -55,10 +54,10 @@ Add these in **Amplify Console** -> **App Settings** -> **Environment Variables*
 ---
 
 ## 🚀 Push Changes
-Run these commands in your terminal to deploy the fixes:
+Run these commands in your terminal to deploy the latest connectivity fixes:
 
 1. `git add .`
-2. `git commit -m "Connectivity fix v1.0.4: Enhanced Long Polling"`
+2. `git commit -m "Connectivity fix v1.0.4: Enhanced Long Polling and UI navigation"`
 3. `git push origin main`
 
 © 2025 Affiliate AI Host. All rights reserved.
