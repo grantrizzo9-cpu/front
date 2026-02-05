@@ -10,11 +10,12 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { subscriptionTiers } from "@/lib/data";
-import { Loader2, Users } from "lucide-react";
+import { Loader2, Users, AlertCircle } from "lucide-react";
 import { useAuth, useFirestore } from "@/firebase";
 import { createUserWithEmailAndPassword, updateProfile, GoogleAuthProvider, signInWithPopup, User } from "firebase/auth";
 import { doc, getDoc, writeBatch, serverTimestamp, setDoc, collection } from "firebase/firestore";
 import { Skeleton } from '@/components/ui/skeleton';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 
 const GoogleIcon = () => (
@@ -33,6 +34,7 @@ function SignupFormComponent() {
     const [password, setPassword] = useState('');
     const [isProcessing, setIsProcessing] = useState(false);
     const [errors, setErrors] = useState({ username: '', email: '', password: '' });
+    const [isOffline, setIsOffline] = useState(false);
 
     const [planId, setPlanId] = useState('starter');
     const [referralCode, setReferralCode] = useState<string | null>(null);
@@ -118,9 +120,9 @@ function SignupFormComponent() {
     const handleSignup = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setIsProcessing(true);
+        setIsOffline(false);
         
         const finalUsername = username.toLowerCase();
-        // Direct-read referral code from URL at the moment of action
         const params = new URLSearchParams(window.location.search);
         const refCodeFromUrl = params.get('ref');
 
@@ -138,12 +140,14 @@ function SignupFormComponent() {
             await postSignupFlow(userCredential.user, finalUsername, refCodeFromUrl);
 
         } catch (error: any) {
-            let description;
-            switch (error.code) {
-                case 'auth/email-already-in-use': description = "This email address is already in use by another account."; break;
-                case 'auth/weak-password': description = "The password is too weak. Please use at least 6 characters."; break;
-                default: description = error.message || "An unknown error occurred while creating your account.";
+            console.error("Signup error:", error);
+            let description = error.message || "An unknown error occurred.";
+            
+            if (description.includes("offline") || description.includes("network-request-failed")) {
+                setIsOffline(true);
+                description = "Connection Failed: Your domain 'hostproai.com' is currently blocking the database connection. Please check the README for the Google Cloud whitelist fix.";
             }
+
             toast({ variant: "destructive", title: "Account Creation Failed", description: description });
             setIsProcessing(false);
         }
@@ -151,6 +155,7 @@ function SignupFormComponent() {
     
     const handleGoogleSignIn = async () => {
         setIsProcessing(true);
+        setIsOffline(false);
         const provider = new GoogleAuthProvider();
         try {
             const result = await signInWithPopup(auth, provider);
@@ -163,7 +168,6 @@ function SignupFormComponent() {
                 const initialUsernameDoc = await getDoc(doc(firestore, "usernames", g_username));
                 if (initialUsernameDoc.exists()) g_username = `${g_username}${Math.floor(100 + Math.random() * 900)}`;
                 
-                // Direct-read referral code from URL at the moment of action
                 const params = new URLSearchParams(window.location.search);
                 const refCodeFromUrl = params.get('ref');
 
@@ -173,7 +177,9 @@ function SignupFormComponent() {
                  router.push("/dashboard");
             }
         } catch (error: any) {
-             toast({ variant: "destructive", title: "Google Sign-In Failed", description: error.message });
+             let description = error.message;
+             if (description.includes("offline")) setIsOffline(true);
+             toast({ variant: "destructive", title: "Google Sign-In Failed", description: description });
              setIsProcessing(false);
         }
     };
@@ -187,6 +193,17 @@ function SignupFormComponent() {
                 </CardDescription>
             </CardHeader>
             <CardContent>
+                {isOffline && (
+                    <Alert variant="destructive" className="mb-6">
+                        <AlertCircle className="h-4 w-4" />
+                        <AlertTitle>Connectivity Error</AlertTitle>
+                        <AlertDescription>
+                            Your domain <strong>hostproai.com</strong> is currently blocking the connection to our database.
+                            <p className="mt-2 text-xs font-semibold underline">Required Action:</p>
+                            <p className="text-xs">Follow "Step 2" in the README to whitelist this domain in your Google Cloud Console.</p>
+                        </AlertDescription>
+                    </Alert>
+                )}
                 <form className="space-y-4" onSubmit={handleSignup}>
                     <div className="space-y-2">
                         <Label htmlFor="username">Username</Label>

@@ -10,7 +10,7 @@ Those `13.249` records are your **Amazon (AWS)** records. If you follow the Fire
 ---
 
 ## 🌐 How to fix the "Backend Connection Failed" / "Client Offline" error
-If your site loads but says "Offline" or fails to create an account, your Firebase backend is rejecting the connection from your domain.
+If your site loads but says "Offline" or fails to create an account, your Firebase backend is rejecting the connection from your custom domain.
 
 ### Step 1: Authorize Domain in Firebase Auth (Free & Immediate)
 1. Go to the [Firebase Console](https://console.firebase.google.com/).
@@ -31,8 +31,13 @@ If your site loads but says "Offline" or fails to create an account, your Fireba
 
 ---
 
-## 🛡️ Amazon Firewall Note
-If you have enabled a Firewall in AWS (WAF), it may block Firebase WebSockets. The application has been updated to use **Long Polling**, which uses standard HTTPS traffic to bypass firewall restrictions. Keep your firewall active, but if connection issues persist, try deactivating it temporarily to test.
+## 🛡️ Amazon Firewall / WAF Note
+If you have enabled a Firewall in AWS (WAF), it may block Firebase WebSockets. 
+**Fix Implemented:** The application is now using **Long Polling (v1.0.4)**, which uses standard HTTPS traffic to bypass firewall restrictions.
+
+**If the error persists:**
+1. Try deactivating your AWS Firewall temporarily to test.
+2. If it works without the firewall, you need to add an exception in AWS for `*.googleapis.com` and `*.firebaseio.com`.
 
 ---
 
@@ -46,7 +51,6 @@ Add these in **Amplify Console** -> **App Settings** -> **Environment Variables*
 | `NEXT_PUBLIC_PAYPAL_SANDBOX_CLIENT_ID` | PayPal Client ID (Frontend) |
 | `PAYPAL_SANDBOX_CLIENT_ID` | PayPal Client ID (Backend) |
 | `PAYPAL_SANDBOX_CLIENT_SECRET` | PayPal Client Secret |
-| `OPENSRS_API_KEY` | Your key for OpenSRS domain registration |
 
 ---
 
@@ -54,7 +58,7 @@ Add these in **Amplify Console** -> **App Settings** -> **Environment Variables*
 Run these commands in your terminal to deploy the fixes:
 
 1. `git add .`
-2. `git commit -m "Final connectivity fix: Long Polling enabled"`
+2. `git commit -m "Connectivity fix v1.0.4: Enhanced Long Polling"`
 3. `git push origin main`
 
 © 2025 Affiliate AI Host. All rights reserved.
