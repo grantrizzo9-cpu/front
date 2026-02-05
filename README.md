@@ -25,6 +25,7 @@ In your **AWS Amplify Console**, go to **App Settings** -> **Environment Variabl
 | `NEXT_PUBLIC_PAYPAL_SANDBOX_CLIENT_ID` | PayPal Client ID (Frontend) |
 | `PAYPAL_SANDBOX_CLIENT_ID` | PayPal Client ID (Backend) |
 | `PAYPAL_SANDBOX_CLIENT_SECRET` | PayPal Client Secret |
+| `OPENSRS_API_KEY` | Your key for OpenSRS domain registration |
 
 *Note: Firebase configuration is already included in your code and does not need to be added to AWS secrets.*
 
@@ -34,7 +35,7 @@ Use these commands in your terminal to update your live site:
 1.  **Stage and Commit**:
    ```bash
    git add .
-   git commit -m "Fix build errors and update domain instructions"
+   git commit -m "Fix Accordion import path and update secrets README"
    ```
 2.  **Push to GitHub**:
    ```bash
