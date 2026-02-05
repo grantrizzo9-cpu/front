@@ -17,11 +17,11 @@ Your application is now configured for high-speed deployment on **Railway** (v1.
 ---
 
 ## 🛠️ Fix GitHub Authentication (ECONNREFUSED)
-If you see "ECONNREFUSED" or "Authentication failed" in your terminal, run this command to fix it:
+If you see "ECONNREFUSED" or "Authentication failed" in your terminal, it means the built-in password helper is broken. Run this command to fix it:
 
 `git config --global credential.helper store`
 
-**Then, when prompted for your password, you MUST use a GitHub Personal Access Token (PAT), not your normal password.**
+**Then, when you try to push and it prompts for your password, you MUST paste your GitHub Personal Access Token (PAT), not your normal password.**
 
 ---
 
@@ -48,7 +48,7 @@ If you use a custom domain, you must complete these steps:
 ## 🛠️ Push Changes to GitHub
 Run these commands in your terminal to sync your local code with GitHub and trigger the Railway deployment:
 
-1. `git add .`
+1. `git add .` (Don't forget the dot!)
 2. `git commit -m "Max-performance update: Version 1.0.7 enabled"`
 3. `git push origin main`
 
