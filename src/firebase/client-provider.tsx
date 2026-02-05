@@ -26,7 +26,7 @@ export function FirebaseClientProvider({ children }: { children: ReactNode }) {
       const auth = getAuth(app);
       
       // Standard High-Performance initialization. 
-      // Removed all experimental connection restrictions for maximum Railway/AWS speed.
+      // Removed all experimental connection restrictions for maximum Railway speed.
       const firestore = getFirestore(app);
 
       return { firebaseApp: app, auth, firestore };

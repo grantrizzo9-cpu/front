@@ -4,7 +4,7 @@ import { StatCard } from "@/components/stat-card";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { format } from "date-fns";
-import { DollarSign, Users, BrainCircuit, ArrowRight, Loader2, TrendingUp, Info, UserCheck, UserPlus, AlertCircle, HardDrive } from "lucide-react";
+import { DollarSign, Users, BrainCircuit, ArrowRight, Loader2, TrendingUp, Info, UserPlus, AlertCircle, HardDrive } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import Link from 'next/link';
 import { Button } from "@/components/ui/button";

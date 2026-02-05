@@ -1,7 +1,7 @@
 'use client';
 
 import { useFirestore, useUser } from '@/firebase';
-import { doc, getDoc, writeBatch } from 'firebase/firestore';
+import { doc, getDoc } from 'firebase/firestore';
 import { useState, useEffect } from 'react';
 
 /**
