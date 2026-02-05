@@ -14,7 +14,7 @@ In your **AWS Amplify Console**, go to **App Settings** -> **Environment Variabl
 | `PAYPAL_SANDBOX_CLIENT_ID` | PayPal Client ID (Backend) |
 | `PAYPAL_SANDBOX_CLIENT_SECRET` | PayPal Client Secret |
 
-*Note: Firebase configuration is already hardcoded in `src/firebase/config.ts` and does not need to be added to AWS.*
+*Note: Firebase configuration is already included in your code and does not need to be added to AWS.*
 
 ## 🚨 Resolving "Backend Connection Failed"
 If your live site displays a "Backend Connection Failed" message, follow these steps to whitelist your domain in Google Cloud:
@@ -28,8 +28,8 @@ If your live site displays a "Backend Connection Failed" message, follow these s
     *   `https://*.hostproai.com/*`
 6.  Click **Save**. It may take up to 5 minutes to take effect.
 
-## 🚀 How to Push Changes
-Use these commands in your terminal to update your live site and fix build errors:
+## 🚀 How to Push Changes to GitHub
+Use these commands in your terminal to update your live site:
 
 1.  **Stage and Commit**:
    ```bash
