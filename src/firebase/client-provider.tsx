@@ -13,8 +13,8 @@ import type { FirebaseServices } from '@/firebase';
 
 /**
  * FirebaseClientProvider
- * Connectivity Version: 1.0.4 (Enhanced Long Polling for AWS Amplify)
- * This configuration is optimized for domains hosted behind AWS WAF or Amplify Proxies.
+ * Connectivity Version: 1.0.4 (Enhanced Long Polling for Railway/Proxy support)
+ * This configuration is optimized for domains behind load balancers.
  */
 export function FirebaseClientProvider({ children }: { children: ReactNode }) {
   const firebaseServices = useMemo<FirebaseServices | null>(() => {
@@ -28,8 +28,8 @@ export function FirebaseClientProvider({ children }: { children: ReactNode }) {
       const auth = getAuth(app);
       
       // FORCED LONG POLLING (v1.0.4)
-      // This bypasses WebSocket restrictions often found in AWS firewalls and WAFs.
-      // It ensures Firestore uses standard HTTPS traffic.
+      // This bypasses WebSocket restrictions often found in cloud proxies and firewalls.
+      // It ensures Firestore uses standard HTTPS traffic for maximum compatibility.
       const firestore = initializeFirestore(app, {
         experimentalForceLongPolling: true,
         useFetchStreams: false, 
@@ -56,7 +56,7 @@ export function FirebaseClientProvider({ children }: { children: ReactNode }) {
                     The application is unable to connect to the Firebase backend. 
                     <br/><br/>
                     <strong>Why is this happening?</strong>
-                    <p className="mt-2">Your domain <strong>hostproai.com</strong> is currently unauthorized to access the database. This is a security feature of Google Cloud.</p>
+                    <p className="mt-2">Your domain <strong>hostproai.com</strong> might be blocked by Google Cloud API restrictions.</p>
                     <p className="mt-4 font-bold underline">Required Action (Step 2 in README):</p>
                     <p className="mt-1">Whitelist this domain in your Google Cloud Console once your account is verified.</p>
                 </AlertDescription>
