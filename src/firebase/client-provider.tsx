@@ -1,11 +1,10 @@
-
 'use client';
 
 import React, { useMemo, type ReactNode } from 'react';
 import { FirebaseProvider } from '@/firebase/provider';
 import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
-import { initializeFirestore } from 'firebase/firestore';
+import { getFirestore } from 'firebase/firestore';
 import { firebaseConfig } from '@/firebase/config';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { CloudOff, ShieldAlert } from 'lucide-react';
@@ -13,7 +12,7 @@ import type { FirebaseServices } from '@/firebase';
 
 /**
  * FirebaseClientProvider
- * Connectivity Version: 1.0.5 (Optimized for Railway Performance)
+ * Performance Version: 1.0.6 (Optimized for Speed)
  */
 export function FirebaseClientProvider({ children }: { children: ReactNode }) {
   const firebaseServices = useMemo<FirebaseServices | null>(() => {
@@ -26,13 +25,9 @@ export function FirebaseClientProvider({ children }: { children: ReactNode }) {
 
       const auth = getAuth(app);
       
-      // OPTIMIZED FIRESTORE SETTINGS (v1.0.5)
-      // Long Polling is kept for firewall compatibility, but Fetch Streams is enabled
-      // to improve the speed of real-time updates on Railway.
-      const firestore = initializeFirestore(app, {
-        experimentalForceLongPolling: true,
-        useFetchStreams: true, 
-      });
+      // Removed experimentalForceLongPolling for maximum speed.
+      // Railway and most modern hosts support the faster WebSocket protocol.
+      const firestore = getFirestore(app);
 
       return { firebaseApp: app, auth, firestore };
     } catch (e: any) {

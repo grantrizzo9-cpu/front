@@ -1,10 +1,8 @@
-
 'use client';
 
 import { useFirestore, useUser } from '@/firebase';
 import { doc, getDoc, writeBatch } from 'firebase/firestore';
 import { useState, useEffect } from 'react';
-import { subscriptionTiers } from '@/lib/data';
 
 export function useAdmin() {
   const { user, isUserLoading } = useUser();
@@ -17,22 +15,18 @@ export function useAdmin() {
   const platformOwnerEmails = ['rentapog@gmail.com', 'grantrizzo2@gmail.com'];
 
   useEffect(() => {
-    setIsLoading(true);
-    setIsAdmin(false);
-    setIsPlatformOwner(false);
-
-    if (isUserLoading) {
-      return;
-    }
+    if (isUserLoading) return;
 
     if (!user) {
+      setIsAdmin(false);
+      setIsPlatformOwner(false);
       setIsLoading(false);
       return;
     }
 
     const email = user.email?.toLowerCase();
 
-    // PRIMARY check: Hardcoded platform owner emails.
+    // PRIMARY check: Hardcoded platform owner emails (Instant)
     if (email && platformOwnerEmails.includes(email)) {
       setIsAdmin(true);
       setIsPlatformOwner(true);
@@ -63,53 +57,41 @@ export function useAdmin() {
     checkRoleDoc();
   }, [user, isUserLoading, firestore]);
 
-  // DB Consistency Effect
+  // Optimized DB Consistency: Only run if state is actually missing
   useEffect(() => {
-    if (isPlatformOwner && user && firestore) {
+    if (isPlatformOwner && user && firestore && !isLoading) {
       const ensureAdminDbState = async () => {
         try {
           const userDocRef = doc(firestore, 'users', user.uid);
-          const adminRoleRef = doc(firestore, 'roles_admin', user.uid);
-
           const userDoc = await getDoc(userDocRef);
-          let username = userDoc.data()?.username;
-
-          if (!username) {
-            username = (user.displayName || user.email?.split('@')[0] || `admin`).replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
-          }
           
-          const lowerCaseUsername = username.toLowerCase();
-          const usernameDocRef = doc(firestore, 'usernames', lowerCaseUsername);
-          const usernameDocSnap = await getDoc(usernameDocRef);
-
-          const batch = writeBatch(firestore);
-
-          batch.set(userDocRef, {
-              id: user.uid,
-              email: user.email,
-              username: lowerCaseUsername,
-              isAffiliate: true,
-          }, { merge: true });
-          
-          batch.set(adminRoleRef, {}, { merge: true });
-
-          if (usernameDocSnap.exists()) {
-              if (usernameDocSnap.data()?.uid === user.uid) {
-                  batch.set(usernameDocRef, { uid: user.uid });
-              }
-          } else {
-              batch.set(usernameDocRef, { uid: user.uid });
+          // Only perform the write if the document doesn't exist or is missing critical info
+          if (!userDoc.exists() || !userDoc.data()?.isAffiliate) {
+            const adminRoleRef = doc(firestore, 'roles_admin', user.uid);
+            let username = userDoc.data()?.username || (user.displayName || user.email?.split('@')[0] || `admin`).replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
+            
+            const batch = writeBatch(firestore);
+            batch.set(userDocRef, {
+                id: user.uid,
+                email: user.email,
+                username: username,
+                isAffiliate: true,
+            }, { merge: true });
+            
+            batch.set(adminRoleRef, {}, { merge: true });
+            batch.set(doc(firestore, 'usernames', username), { uid: user.uid }, { merge: true });
+            
+            await batch.commit();
+            console.log("Admin DB state verified and updated.");
           }
-
-          await batch.commit();
         } catch (e) {
-          console.error("Non-critical error during admin DB state verification:", e);
+          console.warn("Non-critical admin state sync error:", e);
         }
       };
 
       ensureAdminDbState();
     }
-  }, [isPlatformOwner, user, firestore]);
+  }, [isPlatformOwner, user, firestore, isLoading]);
 
   return { isAdmin, isPlatformOwner, isLoading };
 }
