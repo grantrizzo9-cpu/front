@@ -185,8 +185,8 @@ export default function SettingsPage() {
                                   <ol className="list-decimal list-inside space-y-1">
                                       <li>Push your latest code to <strong>GitHub</strong>.</li>
                                       <li>Log into <strong>AWS Amplify</strong> console.</li>
-                                      <li>Click "Create new app" -> "GitHub" and select your repo.</li>
-                                      <li><strong>Critical:</strong> Under App Settings -> Environment Variables, manually add the secrets listed in README.md.</li>
+                                      <li>Click "Create new app" -&gt; "GitHub" and select your repo.</li>
+                                      <li><strong>Critical:</strong> Under App Settings -&gt; Environment Variables, manually add the secrets listed in README.md.</li>
                                       <li>Deploy. Amplify will provide a live URL instantly.</li>
                                   </ol>
                               </div>
@@ -196,7 +196,7 @@ export default function SettingsPage() {
                           <AccordionTrigger className="text-sm font-semibold text-left">
                               <div className="flex items-center gap-2">
                                   <CheckCircle2 className="h-4 w-4" />
-                                  Rules for a "Clean Break" Account
+                                  Rules for a &quot;Clean Break&quot; Account
                               </div>
                           </AccordionTrigger>
                           <AccordionContent className="text-sm space-y-3 text-muted-foreground">
@@ -239,7 +239,7 @@ export default function SettingsPage() {
                   <CheckCircle2 className="h-4 w-4 text-green-600" />
                   <AlertTitle className="text-green-800 dark:text-green-200 font-bold">Verification Link Sent!</AlertTitle>
                   <AlertDescription className="text-green-700 dark:text-green-300">
-                      <p>We've sent a confirmation link to <strong>{verificationSentTo}</strong>. Your account email will not change until you click that link.</p>
+                      <p>We&apos;ve sent a confirmation link to <strong>{verificationSentTo}</strong>. Your account email will not change until you click that link.</p>
                   </AlertDescription>
               </Alert>
           )}

@@ -4,7 +4,7 @@
 Your application is hosted on **AWS Amplify** and accessible at [hostproai.com](https://hostproai.com).
 
 ## 🚨 Fix "Backend Connection Failed" / "Client Offline"
-If your live site displays a "Backend Connection Failed" message, follow these steps to whitelist your domain in Google Cloud:
+If your live site displays a "Backend Connection Failed" message, follow these steps to whitelist your domain in Google Cloud. This allows your browser to talk to the Firebase database without activation fees:
 
 1.  Go to [Google Cloud Console API Credentials](https://console.cloud.google.com/apis/credentials).
 2.  Ensure project `rent-a-host-a55fd` is selected in the top dropdown.
