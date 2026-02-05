@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -184,7 +185,7 @@ export default function SettingsPage() {
                                   <ol className="list-decimal list-inside space-y-1">
                                       <li>Push your latest code to <strong>GitHub</strong>.</li>
                                       <li>Log into <strong>AWS Amplify</strong> console.</li>
-                                      <li>Click "Create new app" &rarr; "GitHub" and select your <code>front</code> repo.</li>
+                                      <li>Click &quot;Create new app&quot; &rarr; &quot;GitHub&quot; and select your <code>front</code> repo.</li>
                                       <li><strong>Critical:</strong> Under App Settings &rarr; Environment Variables, manually add your <code>GEMINI_API_KEY</code> and PayPal keys.</li>
                                       <li>Deploy. Amplify will provide a live URL instantly.</li>
                                   </ol>
@@ -195,7 +196,7 @@ export default function SettingsPage() {
                           <AccordionTrigger className="text-sm font-semibold text-left">
                               <div className="flex items-center gap-2">
                                   <CheckCircle2 className="h-4 w-4" />
-                                  Rules for a "Clean Break" Account
+                                  Rules for a &quot;Clean Break&quot; Account
                               </div>
                           </AccordionTrigger>
                           <AccordionContent className="text-sm space-y-3 text-muted-foreground">

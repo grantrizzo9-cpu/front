@@ -1,8 +1,9 @@
 export const firebaseConfig = {
-  apiKey: "AIzaSyCSp_3nPfU-VVdU4itDaIlwQztFgYrwrxM",
+  apiKey: "AIzaSyCVM8NoXlgZXbvYohxzLJaje4gU7sK4qdA",
   authDomain: "rent-a-host-a55fd.firebaseapp.com",
   projectId: "rent-a-host-a55fd",
-  storageBucket: "rent-a-host-a55fd.appspot.com",
-  messagingSenderId: "952747771167",
-  appId: "1:952747771167:web:98a340b20944ed8810dc2a"
+  storageBucket: "rent-a-host-a55fd.firebasestorage.app",
+  messagingSenderId: "675996746308",
+  appId: "1:675996746308:web:8a22f37db14f2f700b3211",
+  measurementId: "G-8YBHMBD5QG"
 };

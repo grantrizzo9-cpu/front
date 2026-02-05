@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useMemo, type ReactNode } from 'react';
@@ -7,7 +8,7 @@ import { getAuth } from 'firebase/auth';
 import { getFirestore, enableMultiTabIndexedDbPersistence } from 'firebase/firestore';
 import { firebaseConfig } from '@/firebase/config';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { AlertTriangle, WifiOff, CloudOff } from 'lucide-react';
+import { CloudOff, ShieldAlert } from 'lucide-react';
 import type { FirebaseServices } from '@/firebase';
 
 export function FirebaseClientProvider({ children }: { children: ReactNode }) {
@@ -46,18 +47,21 @@ export function FirebaseClientProvider({ children }: { children: ReactNode }) {
         <div className="max-w-lg w-full space-y-6 text-center">
             <CloudOff className="h-16 w-16 mx-auto text-destructive opacity-50" />
             <Alert variant="destructive">
-                <AlertTitle className="text-lg font-bold">Backend Connection Failed</AlertTitle>
+                <AlertTitle className="text-lg font-bold flex items-center justify-center gap-2">
+                    <ShieldAlert className="h-5 w-5" />
+                    Backend Connection Failed
+                </AlertTitle>
                 <AlertDescription className="mt-2 text-sm">
-                    The application is unable to connect to the Firebase backend. 
+                    The application is unable to connect to the Firebase backend (Project: <strong>{firebaseConfig.projectId}</strong>). 
                     <br/><br/>
                     <strong>Common causes:</strong>
                     <ul className="list-disc list-inside text-left mt-2 space-y-1">
-                        <li>The Firebase project is suspended (Billing issues).</li>
-                        <li>API Keys are invalid or restricted.</li>
-                        <li>Your internet connection is blocking Firebase domains.</li>
+                        <li>The Firebase project is suspended (Check billing in Google Cloud Console).</li>
+                        <li>API Keys are restricted to specific domains (Ensure <strong>hostproai.com</strong> is allowed).</li>
+                        <li>The project reached its free-tier usage limit.</li>
                     </ul>
                     <br/>
-                    Please check the Firebase console for project status notifications.
+                    Please check the <strong>Firebase Console</strong> or <strong>Google Cloud Console</strong> for alerts.
                 </AlertDescription>
             </Alert>
         </div>
