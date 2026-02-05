@@ -5,7 +5,7 @@ import React, { useMemo, type ReactNode } from 'react';
 import { FirebaseProvider } from '@/firebase/provider';
 import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
+import { initializeFirestore } from 'firebase/firestore';
 import { firebaseConfig } from '@/firebase/config';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { CloudOff, ShieldAlert } from 'lucide-react';
@@ -21,10 +21,13 @@ export function FirebaseClientProvider({ children }: { children: ReactNode }) {
       }
 
       const auth = getAuth(app);
-      const firestore = getFirestore(app);
-
-      // Persistence is disabled temporarily to fix the "Offline" hang on custom domains
-      // until the Google Cloud Whitelisting is completed by the user.
+      
+      // We use initializeFirestore instead of getFirestore to force Long Polling.
+      // This is a "Plan C" workaround for when domain whitelisting in Google Cloud isn't possible yet.
+      // It helps the client stay "Online" on custom domains by using standard HTTP instead of WebSockets.
+      const firestore = initializeFirestore(app, {
+        experimentalForceLongPolling: true,
+      });
 
       return { firebaseApp: app, auth, firestore };
     } catch (e: any) {
