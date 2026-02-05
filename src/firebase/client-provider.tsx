@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useMemo, type ReactNode } from 'react';
@@ -8,7 +7,7 @@ import { getAuth } from 'firebase/auth';
 import { getFirestore, enableMultiTabIndexedDbPersistence } from 'firebase/firestore';
 import { firebaseConfig } from '@/firebase/config';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { AlertTriangle, WifiOff } from 'lucide-react';
+import { AlertTriangle, WifiOff, CloudOff } from 'lucide-react';
 import type { FirebaseServices } from '@/firebase';
 
 export function FirebaseClientProvider({ children }: { children: ReactNode }) {
@@ -23,7 +22,7 @@ export function FirebaseClientProvider({ children }: { children: ReactNode }) {
       const auth = getAuth(app);
       const firestore = getFirestore(app);
 
-      // Enable offline persistence to handle flaky connections or restricted project states
+      // Enable offline persistence to handle connection gaps
       if (typeof window !== 'undefined') {
         enableMultiTabIndexedDbPersistence(firestore).catch((err) => {
           if (err.code === 'failed-precondition') {
@@ -44,13 +43,24 @@ export function FirebaseClientProvider({ children }: { children: ReactNode }) {
   if (!firebaseServices) {
     return (
       <div className="flex h-screen w-screen items-center justify-center p-4 bg-background">
-        <Alert variant="destructive" className="max-w-lg">
-          <WifiOff className="h-4 w-4" />
-          <AlertTitle>Connection Error</AlertTitle>
-          <AlertDescription>
-            The application is unable to reach the backend services. This typically happens if your project account is suspended or the client is offline. Please check your Firebase console or internet connection.
-          </AlertDescription>
-        </Alert>
+        <div className="max-w-lg w-full space-y-6 text-center">
+            <CloudOff className="h-16 w-16 mx-auto text-destructive opacity-50" />
+            <Alert variant="destructive">
+                <AlertTitle className="text-lg font-bold">Backend Connection Failed</AlertTitle>
+                <AlertDescription className="mt-2 text-sm">
+                    The application is unable to connect to the Firebase backend. 
+                    <br/><br/>
+                    <strong>Common causes:</strong>
+                    <ul className="list-disc list-inside text-left mt-2 space-y-1">
+                        <li>The Firebase project is suspended (Billing issues).</li>
+                        <li>API Keys are invalid or restricted.</li>
+                        <li>Your internet connection is blocking Firebase domains.</li>
+                    </ul>
+                    <br/>
+                    Please check the Firebase console for project status notifications.
+                </AlertDescription>
+            </Alert>
+        </div>
       </div>
     );
   }
