@@ -1,7 +1,7 @@
 
 # Affiliate AI Host - Railway Deployment Guide
 
-Your application is now configured for deployment on **Railway**.
+Your application is now configured for high-speed deployment on **Railway** (v1.0.7).
 
 ## 🚀 How to Deploy to Railway
 
@@ -13,6 +13,15 @@ Your application is now configured for deployment on **Railway**.
 3.  **Set Environment Variables**: 
     - In your Railway project, go to **Variables**.
     - Add the variables from your `.env` file (e.g., `GEMINI_API_KEY`, `PAYPAL_SANDBOX_CLIENT_ID`, etc.).
+
+---
+
+## 🛠️ Fix GitHub Authentication (ECONNREFUSED)
+If you see "ECONNREFUSED" or "Authentication failed" in your terminal, run this command to fix it:
+
+`git config --global credential.helper store`
+
+**Then, when prompted for your password, you MUST use a GitHub Personal Access Token (PAT), not your normal password.**
 
 ---
 
@@ -39,9 +48,8 @@ If you use a custom domain, you must complete these steps:
 ## 🛠️ Push Changes to GitHub
 Run these commands in your terminal to sync your local code with GitHub and trigger the Railway deployment:
 
-1. `git remote set-url origin https://github.com/grantrizzo9-cpu/front.git`
-2. `git add .`
-3. `git commit -m "Fix Railway build plan: Added start script and Node engine"`
-4. `git push origin main`
+1. `git add .`
+2. `git commit -m "Max-performance update: Version 1.0.7 enabled"`
+3. `git push origin main`
 
 © 2025 Affiliate AI Host. All rights reserved.

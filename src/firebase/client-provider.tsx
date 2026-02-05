@@ -13,6 +13,7 @@ import type { FirebaseServices } from '@/firebase';
 /**
  * FirebaseClientProvider
  * Performance Version: 1.0.7 (Max-Performance Mode)
+ * Optimized for Railway WebSockets.
  */
 export function FirebaseClientProvider({ children }: { children: ReactNode }) {
   const firebaseServices = useMemo<FirebaseServices | null>(() => {
@@ -25,7 +26,6 @@ export function FirebaseClientProvider({ children }: { children: ReactNode }) {
 
       const auth = getAuth(app);
       
-      // Max-Performance Firestore Initialization.
       // Standard WebSocket connection is fastest for Railway deployments.
       const firestore = initializeFirestore(app, {
           ignoreUndefinedProperties: true,
