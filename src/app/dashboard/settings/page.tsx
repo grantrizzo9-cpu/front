@@ -19,7 +19,7 @@ import {
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from "@/components/accordion";
+} from "@/components/ui/accordion";
 
 export default function SettingsPage() {
   const { user, isUserLoading } = useUser();
@@ -153,7 +153,7 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="space-y-8 max-w-2xl">
+    <div className="space-y-8 max-2xl mx-auto">
       <div>
         <h1 className="text-3xl font-bold font-headline">Settings</h1>
         <p className="text-muted-foreground">Manage your account and affiliate settings.</p>
@@ -184,8 +184,8 @@ export default function SettingsPage() {
                                   <ol className="list-decimal list-inside space-y-1">
                                       <li>Push your latest code to <strong>GitHub</strong>.</li>
                                       <li>Log into <strong>AWS Amplify</strong> console.</li>
-                                      <li>Click "Create new app" &rarr; "GitHub" and select your repository.</li>
-                                      <li><strong>Critical:</strong> Under App Settings &rarr; Environment Variables, manually add your <code>GEMINI_API_KEY</code> and PayPal keys.</li>
+                                      <li>Click &quot;Create new app&quot; {"->"} &quot;GitHub&quot; and select your <code>front</code> repo.</li>
+                                      <li><strong>Critical:</strong> Under App Settings {"->"} Environment Variables, manually add your <code>GEMINI_API_KEY</code> and PayPal keys.</li>
                                       <li>Deploy. Amplify will provide a live URL instantly.</li>
                                   </ol>
                               </div>
@@ -195,7 +195,7 @@ export default function SettingsPage() {
                           <AccordionTrigger className="text-sm font-semibold text-left">
                               <div className="flex items-center gap-2">
                                   <CheckCircle2 className="h-4 w-4" />
-                                  Rules for a "Clean Break" Account
+                                  Rules for a &quot;Clean Break&quot; Account
                               </div>
                           </AccordionTrigger>
                           <AccordionContent className="text-sm space-y-3 text-muted-foreground">
@@ -238,7 +238,7 @@ export default function SettingsPage() {
                   <CheckCircle2 className="h-4 w-4 text-green-600" />
                   <AlertTitle className="text-green-800 dark:text-green-200 font-bold">Verification Link Sent!</AlertTitle>
                   <AlertDescription className="text-green-700 dark:text-green-300">
-                      <p>We've sent a confirmation link to <strong>{verificationSentTo}</strong>. Your account email will not change until you click that link.</p>
+                      <p>We&apos;ve sent a confirmation link to <strong>{verificationSentTo}</strong>. Your account email will not change until you click that link.</p>
                   </AlertDescription>
               </Alert>
           )}
