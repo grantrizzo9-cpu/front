@@ -18,7 +18,7 @@ Your application is now configured for deployment on **Railway**.
 
 ## 🌐 Fixing the "Client Offline" error on hostproai.com
 
-Even on Railway, if you use a custom domain, you must complete these steps:
+If you use a custom domain, you must complete these steps:
 
 ### Step 1: Authorize Domain in Firebase Auth (COMPLETED ✅)
 1. Go to the [Firebase Console](https://console.firebase.google.com/).
@@ -41,7 +41,7 @@ Run these commands in your terminal to sync your local code with GitHub and trig
 
 1. `git remote set-url origin https://github.com/grantrizzo9-cpu/front.git`
 2. `git add .`
-3. `git commit -m "Deployment fix v1.0.4: Re-optimized for Railway"`
+3. `git commit -m "Fix Railway build plan: Added start script and Node engine"`
 4. `git push origin main`
 
 © 2025 Affiliate AI Host. All rights reserved.
