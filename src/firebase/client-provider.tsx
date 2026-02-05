@@ -4,7 +4,7 @@ import React, { useMemo, type ReactNode } from 'react';
 import { FirebaseProvider } from '@/firebase/provider';
 import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
+import { initializeFirestore } from 'firebase/firestore';
 import { firebaseConfig } from '@/firebase/config';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { CloudOff, ShieldAlert } from 'lucide-react';
@@ -12,7 +12,7 @@ import type { FirebaseServices } from '@/firebase';
 
 /**
  * FirebaseClientProvider
- * Performance Version: 1.0.7 (High-Performance Mode)
+ * Performance Version: 1.0.7 (Max-Performance Mode)
  */
 export function FirebaseClientProvider({ children }: { children: ReactNode }) {
   const firebaseServices = useMemo<FirebaseServices | null>(() => {
@@ -25,9 +25,11 @@ export function FirebaseClientProvider({ children }: { children: ReactNode }) {
 
       const auth = getAuth(app);
       
-      // Standard High-Performance initialization. 
-      // Removed all experimental connection restrictions for maximum Railway speed.
-      const firestore = getFirestore(app);
+      // Max-Performance Firestore Initialization.
+      // Standard WebSocket connection is fastest for Railway deployments.
+      const firestore = initializeFirestore(app, {
+          ignoreUndefinedProperties: true,
+      });
 
       return { firebaseApp: app, auth, firestore };
     } catch (e: any) {

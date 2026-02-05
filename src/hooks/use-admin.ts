@@ -48,7 +48,7 @@ export function useAdmin() {
           setIsAdmin(true);
         }
       } catch (error) {
-        console.warn("Secondary admin check failed (likely permissions).");
+        // Silent catch for performance
       } finally {
         setIsLoading(false);
       }
