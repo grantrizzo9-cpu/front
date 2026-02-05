@@ -21,7 +21,7 @@ If your site loads but says "Offline" or fails to create an account, your Fireba
 *This allows login/signup to work on your domain.*
 
 ### Step 2: Whitelist in Google Cloud (Required for Database/Firestore)
-*If Step 1 doesn't fix account creation, you MUST do this. If you cannot access Google Cloud Console yet, wait for account verification.*
+*If Step 1 doesn't fix account creation, you MUST do this once your Google Cloud account is verified.*
 1. Go to [Google Cloud API Credentials](https://console.cloud.google.com/apis/credentials).
 2. Select project **`rent-a-host-a55fd`**.
 3. Edit the key named **"Browser key (auto-created by Firebase)"**.
