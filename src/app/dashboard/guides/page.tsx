@@ -348,11 +348,11 @@ const allGuides: Guide[] = [
       <p>This is the software that manages your list, sends your emails, and tracks your results. You cannot simply use Gmail or Outlook. Using an ESP is essential for managing subscribers, complying with anti-spam laws, and automating your campaigns.</p>
       <p><strong>Top Recommendations for Beginners (with Free Tiers):</strong></p>
       <ul>
-          <li><strong>MailerLite:</strong> Extremely user-friendly with a generous free plan for up to 1,000 subscribers. Excellent for beginners.</li>
-          <li><strong>ConvertKit:</strong> Built by creators, for creators. Powerful automation features. Free for up to 1,000 subscribers.</li>
-          <li><strong>Brevo (formerly Sendinblue):</strong> Offers a good free plan with more advanced features like SMS marketing and a sales CRM.</li>
+          <li>Look for providers that offer user-friendly interfaces and robust free plans for your first 1,000 subscribers.</li>
+          <li>Choose an ESP built for creators with powerful automation features.</li>
+          <li>Prioritize platforms that offer advanced segmentation and SMS marketing integration.</li>
       </ul>
-      <p><strong>Your Action:</strong> Sign up for a free account with one of these providers today. Explore their interface.</p>
+      <p><strong>Your Action:</strong> Sign up for a free account with an Email Service Provider today. Explore their interface.</p>
       
       <h4><strong>2. The Lead Magnet: The Ethical Bribe</strong></h4>
       <p>People are protective of their email addresses. You need to offer them something of genuine value in exchange for it. This is your "lead magnet." It's an ethical bribe that provides an instant win for your new subscriber.</p>
@@ -601,7 +601,7 @@ const allGuides: Guide[] = [
     level: "pro",
     imageId: "guide-email-sequence",
     content: `
-        <p>A new email subscriber is a hot lead. They have just raised their hand and expressed interest in what you have to offer. This 7-day automated email sequence, also known as a "drip campaign," is your most powerful tool for converting that initial interest into a paying referral. It's designed to be set up once in your email service provider (like MailerLite or ConvertKit) and then works for you 24/7, nurturing every new subscriber.</p>
+        <p>A new email subscriber is a hot lead. They have just raised their hand and expressed interest in what you have to offer. This 7-day automated email sequence, also known as a "drip campaign," is your most powerful tool for converting that initial interest into a paying referral. It's designed to be set up once in your email service provider and then works for you 24/7, nurturing every new subscriber.</p>
         <p>This sequence is strategically designed to build trust, deliver value, handle objections, and then ask for the sale. Each email has a specific purpose. Let's dive in.</p>
 
         <hr class="my-6 border-border" />

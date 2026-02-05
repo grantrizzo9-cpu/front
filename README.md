@@ -4,14 +4,15 @@
 Your application is hosted on **AWS Amplify** and accessible at [hostproai.com](https://hostproai.com).
 
 ## 🛠️ Required Environment Variables (Secrets)
-In your **AWS Amplify Console**, go to **App Settings** -> **Environment Variables**. You **MUST** add these for the site to work:
+In your **AWS Amplify Console**, go to **App Settings** -> **Environment Variables**. You **MUST** add these exactly as shown for the site features to work:
 
-| Variable Name | Description | Example Value |
-| :--- | :--- | :--- |
-| `GEMINI_API_KEY` | Your key from Google AI Studio | `AIza...` |
-| `NEXT_PUBLIC_PAYPAL_SANDBOX_CLIENT_ID` | PayPal Sandbox Client ID | `Ac7...` |
-| `PAYPAL_SANDBOX_CLIENT_SECRET` | PayPal Sandbox Secret | `EKl...` |
-| `PAYPAL_SANDBOX` | Use sandbox for testing | `true` |
+| Variable Name | Description |
+| :--- | :--- |
+| `GEMINI_API_KEY` | Your key from Google AI Studio |
+| `PAYPAL_SANDBOX` | Use `true` for testing, `false` for live |
+| `NEXT_PUBLIC_PAYPAL_SANDBOX_CLIENT_ID` | PayPal Client ID (Frontend) |
+| `PAYPAL_SANDBOX_CLIENT_ID` | PayPal Client ID (Backend) |
+| `PAYPAL_SANDBOX_CLIENT_SECRET` | PayPal Client Secret |
 
 *Note: Firebase configuration is already hardcoded in `src/firebase/config.ts` and does not need to be added to AWS.*
 
@@ -28,17 +29,14 @@ If your live site displays a "Backend Connection Failed" message, follow these s
 6.  Click **Save**. It may take up to 5 minutes to take effect.
 
 ## 🚀 How to Push Changes
-Use these commands in your terminal to update your live site:
+Use these commands in your terminal to update your live site and fix build errors:
 
-1.  **Stage your changes**:
+1.  **Stage and Commit**:
    ```bash
    git add .
-   ```
-2.  **Commit your changes**:
-   ```bash
    git commit -m "Fix build errors and update AWS guide"
    ```
-3.  **Push to GitHub**:
+2.  **Push to GitHub**:
    ```bash
    git push origin main
    ```
