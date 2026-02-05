@@ -4,279 +4,215 @@
 import { Header } from '@/components/header';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { CheckCircle, Zap, Users, Shield, ArrowRight, DollarSign, BrainCircuit, BookOpen } from 'lucide-react';
+import { CheckCircle, Zap, Users, Shield, ArrowRight, DollarSign, BrainCircuit, BookOpen, Star, Sparkles } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Footer } from '@/components/footer';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useSearchParams } from 'next/navigation';
+import { PricingCards } from './pricing/pricing-cards';
+import { cn } from '@/lib/utils';
 
 export function HomeContent() {
   const searchParams = useSearchParams();
   const refCode = searchParams.get('ref');
-  const pricingLink = refCode ? `/pricing?ref=${refCode}` : '/pricing';
+  const signupLink = refCode ? `/pricing?ref=${refCode}` : '/pricing';
 
-  const heroImage = PlaceHolderImages.find((img) => img.id === 'hero');
   const featureImage1 = PlaceHolderImages.find((img) => img.id === 'feature-1');
-  const guidesImage = PlaceHolderImages.find((img) => img.id === 'feature-2');
-  const featureImage3 = PlaceHolderImages.find((img) => img.id === 'feature-3');
   const avatar1 = PlaceHolderImages.find((img) => img.id === 'testimonial-1');
   const avatar2 = PlaceHolderImages.find((img) => img.id === 'testimonial-2');
   const avatar3 = PlaceHolderImages.find((img) => img.id === 'testimonial-3');
 
-  const features = [
-    {
-        icon: <DollarSign className="w-8 h-8 text-primary" />,
-        title: 'Generous 70% Commissions',
-        description: 'Earn a massive 70% commission on every recurring sale. Super affiliates who refer over 10 customers unlock an even higher 75% commission rate!',
-    },
-    {
-      icon: <Zap className="w-8 h-8 text-primary" />,
-      title: 'Daily PayPal Payouts',
-      description: 'No more waiting for your money. We pay out your commissions every single day directly to your PayPal account, like clockwork.',
-    },
-    {
-      icon: <Users className="w-8 h-8 text-primary" />,
-      title: 'Permanent Referrals',
-      description: 'Once you refer a user, they are linked to you for life. You earn commissions on their recurring subscription payments after their trial ends.',
-    },
-    {
-      icon: <BrainCircuit className="w-8 h-8 text-primary" />,
-      title: 'Integrated AI Tools',
-      description: 'Our subscription plans include access to powerful AI tools designed to help you and your referrals build and grow businesses faster.',
-    },
-    {
-        icon: <BookOpen className="w-8 h-8 text-primary" />,
-        title: 'Exclusive Marketing Guides',
-        description: 'Access a library of expert-written guides. The more you upgrade, the more advanced strategies you unlock to boost your sales.',
-    },
-    {
-      icon: <Shield className="w-8 h-8 text-primary" />,
-      title: 'Reliable Web Hosting',
-      description: 'Offer your referrals top-tier, secure, and high-performance web hosting that they can depend on, increasing your conversion rates.',
-    },
-  ];
-
   const testimonials = [
-    { name: 'Sarah J.', role: 'Super Affiliate', avatar: avatar1, text: "I've never seen daily payouts this reliable. Affiliate AI Host has completely changed my financial outlook. The 70% commission is just unbeatable." },
-    { name: 'Mike R.', role: 'Tech Blogger', avatar: avatar2, text: "The combination of web hosting and AI tools is genius. It's an incredibly easy sell, and my audience loves it. My earnings have skyrocketed." },
-    { name: 'Emily C.', role: 'Digital Marketer', avatar: avatar3, text: "The affiliate dashboard is a dream. All the stats I need are right there. This is the most transparent and profitable program I've ever been a part of." },
-  ];
-
-  const faqs = [
-    { q: "How does the referral tracking work?", a: "When someone clicks your unique affiliate link, our system permanently links their account to yours. You will see them on your dashboard immediately as 'Pending Activation'. Once they pay their one-time activation fee, you will earn 70-75% commission on all their subsequent daily subscription payments." },
-    { q: "How and when do I get paid?", a: "We process all commission payouts daily. All your earned commissions from recurring payments are automatically sent to the PayPal account you have on file." },
-    { q: "What am I selling?", a: "You are promoting our subscription plans which include web hosting and AI tools. To start, every new user pays a one-time activation fee (which goes to the platform owner). This fee activates their 3-day trial. After the trial, their daily subscription begins, and you earn commissions on those payments." },
-    { q: "Is there a limit to how much I can earn?", a: "Absolutely not! There is no cap on your potential earnings. The more customers you refer, the more you earn. With a base 70% commission rate that rises to 75% for top affiliates, the sky is the limit." },
-    { q: "Can I get a refund on the activation fee?", a: "Yes. We offer a no-questions-asked refund on your one-time activation fee if you request it within 24 hours of joining. We want you to be happy. If you decide it's not for you, just let us know, and we'll process it with no hard feelings. Please note that if you choose to receive a refund, your account will be closed, and you will no longer be able to log in." },
+    { name: 'Sarah J.', role: 'Super Affiliate', avatar: avatar1, text: "I've never seen daily payouts this reliable. Affiliate AI Host has completely changed my financial outlook." },
+    { name: 'Mike R.', role: 'Tech Blogger', avatar: avatar2, text: "The combination of web hosting and AI tools is genius. It's an incredibly easy sell, and my audience loves it." },
+    { name: 'Emily C.', role: 'Digital Marketer', avatar: avatar3, text: "The most transparent and profitable program I've ever been a part of. The 70% commission is unbeatable." },
   ];
 
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="flex min-h-screen flex-col bg-background selection:bg-primary selection:text-white">
       <Header />
       <main className="flex-1">
-        {/* Hero Section */}
-        <section className="relative w-full pt-20 pb-24 md:pt-32 md:pb-40 text-center bg-card">
-          <div className="container z-10 relative">
-            <h1 className="font-headline text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl">
-              Earn 70%-75% Daily Commissions with <span className="text-primary">AI-Powered Hosting</span>
+        {/* Modern Hero Section */}
+        <section className="relative overflow-hidden py-24 md:py-32 lg:py-40">
+          <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-background/50 to-background"></div>
+          
+          <div className="container relative z-10 text-center">
+            <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 text-sm font-medium text-primary mb-8 animate-in fade-in slide-in-from-top-4 duration-1000">
+              <Sparkles className="h-4 w-4" />
+              <span>Next-Gen AI Hosting & Affiliate Platform</span>
+            </div>
+            
+            <h1 className="font-headline text-5xl font-bold tracking-tight sm:text-6xl md:text-7xl lg:text-8xl bg-clip-text text-transparent bg-gradient-to-b from-foreground to-foreground/70 pb-4">
+              Premium Hosting <br className="hidden md:block" />
+              <span className="text-primary">Built for Affiliates</span>
             </h1>
-            <p className="mt-6 max-w-2xl mx-auto text-lg text-muted-foreground md:text-xl">
-              Get started today and get paid daily for every referral you make. Our automated system handles everything.
+            
+            <p className="mt-8 max-w-2xl mx-auto text-lg text-muted-foreground md:text-xl leading-relaxed">
+              Unlock 70%-75% recurring daily commissions. We provide the tools, the hosting, and the automated payouts. You just refer and earn.
             </p>
-            <div className="mt-10 flex justify-center gap-4">
-              <Button size="lg" asChild>
-                <Link href={pricingLink}>Get Started</Link>
+            
+            <div className="mt-12 flex flex-col sm:flex-row justify-center gap-4 animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-200">
+              <Button size="lg" className="h-14 px-8 text-lg font-semibold rounded-full shadow-xl shadow-primary/20" asChild>
+                <Link href="#packages">View Packages <ArrowRight className="ml-2 h-5 w-5" /></Link>
               </Button>
-              <Button size="lg" variant="outline" asChild>
-                <Link href="#features">Learn More</Link>
+              <Button size="lg" variant="outline" className="h-14 px-8 text-lg font-semibold rounded-full bg-background/50 backdrop-blur-sm" asChild>
+                <Link href="#features">How it Works</Link>
               </Button>
+            </div>
+
+            <div className="mt-16 flex items-center justify-center gap-8 opacity-50 grayscale transition-all hover:grayscale-0">
+                <div className="flex items-center gap-2 font-headline font-bold text-xl"><Shield className="h-6 w-6" /> SECURE</div>
+                <div className="flex items-center gap-2 font-headline font-bold text-xl"><Zap className="h-6 w-6" /> FAST</div>
+                <div className="flex items-center gap-2 font-headline font-bold text-xl"><Users className="h-6 w-6" /> TRUSTED</div>
             </div>
           </div>
         </section>
 
-        {/* Features Section */}
-        <section id="features" className="w-full py-20 md:py-32">
+        {/* Packages Section - The main focus */}
+        <section id="packages" className="py-24 bg-secondary/30">
           <div className="container">
-            <div className="text-center">
-              <h2 className="font-headline text-3xl font-bold tracking-tight sm:text-4xl">Why Partner with Affiliate AI Host?</h2>
+            <div className="mb-16 text-center">
+              <h2 className="font-headline text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl">Choose Your Package</h2>
               <p className="mt-4 max-w-2xl mx-auto text-lg text-muted-foreground">
-                We've built the ultimate platform for affiliates to thrive.
+                All plans include professional hosting, AI content tools, and a high-ticket affiliate partnership.
               </p>
             </div>
-            <div className="mt-16 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-              {features.map((feature) => (
-                <Card key={feature.title} className="flex flex-col items-center text-center p-6">
-                  <div className="mb-4">{feature.icon}</div>
-                  <CardTitle className="font-headline mb-2 text-xl">{feature.title}</CardTitle>
-                  <CardDescription>{feature.description}</CardDescription>
-                </Card>
-              ))}
+            
+            <PricingCards />
+            
+            <p className="mt-12 text-center text-sm text-muted-foreground">
+              * One-time activation fee applies to all new trials. Daily recurring payments begin after 3 days.
+            </p>
+          </div>
+        </section>
+
+        {/* Features Grid */}
+        <section id="features" className="py-24">
+          <div className="container">
+            <div className="grid gap-12 lg:grid-cols-3">
+              <div className="flex flex-col gap-4 p-8 rounded-3xl border bg-card/50 transition-all hover:shadow-lg">
+                <div className="h-12 w-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary">
+                  <DollarSign className="h-6 w-6" />
+                </div>
+                <h3 className="text-xl font-bold font-headline">75% Commissions</h3>
+                <p className="text-muted-foreground">Highest payouts in the industry. Earn more for every user you bring to the platform.</p>
+              </div>
+              <div className="flex flex-col gap-4 p-8 rounded-3xl border bg-card/50 transition-all hover:shadow-lg">
+                <div className="h-12 w-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary">
+                  <Zap className="h-6 w-6" />
+                </div>
+                <h3 className="text-xl font-bold font-headline">Daily Payouts</h3>
+                <p className="text-muted-foreground">No net-30. No net-60. Get your commissions sent to your PayPal every single day.</p>
+              </div>
+              <div className="flex flex-col gap-4 p-8 rounded-3xl border bg-card/50 transition-all hover:shadow-lg">
+                <div className="h-12 w-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary">
+                  <BrainCircuit className="h-6 w-6" />
+                </div>
+                <h3 className="text-xl font-bold font-headline">AI Suite Included</h3>
+                <p className="text-muted-foreground">Generate high-converting ads, blog posts, and websites using our built-in AI tools.</p>
+              </div>
             </div>
           </div>
         </section>
 
-        {/* How it works Section */}
-        <section className="w-full py-20 md:py-32 bg-card">
-          <div className="container grid gap-12 lg:grid-cols-2 items-center">
-            <div>
-              <h2 className="font-headline text-3xl font-bold tracking-tight sm:text-4xl">Your Simple Path to Daily Income</h2>
-              <p className="mt-4 text-lg text-muted-foreground">In just three easy steps, you can be on your way to earning reliable, daily income.</p>
-              <ul className="mt-8 space-y-6">
-                <li className="flex gap-4">
-                  <div className="flex-shrink-0 w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-bold">1</div>
-                  <div>
-                    <h3 className="font-semibold text-lg">Create Your Account &amp; Choose a Plan</h3>
-                    <p className="text-muted-foreground">Sign up to get your unique referral link. Your referred users will immediately appear on your dashboard.</p>
-                  </div>
-                </li>
-                <li className="flex gap-4">
-                  <div className="flex-shrink-0 w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-bold">2</div>
-                  <div>
-                    <h3 className="font-semibold text-lg">Activate Your 3-Day Trial</h3>
-                    <p className="text-muted-foreground">Pay a one-time activation fee to get instant access to your dashboard and tools. This fee goes to the platform owner, not your referrer.</p>
-                  </div>
-                </li>
-                <li className="flex gap-4">
-                  <div className="flex-shrink-0 w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-bold">3</div>
-                  <div>
-                    <h3 className="font-semibold text-lg">Promote, Refer &amp; Get Paid Daily</h3>
-                    <p className="text-muted-foreground">Earn 70-75% commission on recurring daily sales from your referrals after their trial ends. Payouts are sent automatically to your PayPal every day.</p>
-                  </div>
-                </li>
+        {/* Comparison Section */}
+        <section className="py-24 bg-card border-y">
+          <div className="container grid gap-16 lg:grid-cols-2 items-center">
+            <div className="space-y-8">
+              <h2 className="text-left font-headline text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl">Built for Scale</h2>
+              <p className="text-lg text-muted-foreground">
+                Affiliate AI Host isn't just hosting. It's a business engine designed to help you build an automated income stream.
+              </p>
+              <ul className="space-y-4">
+                {[
+                  "Unlimited bandwidth on high-tier plans",
+                  "Global CDN for lightning fast load times",
+                  "1-Click affiliate website deployment",
+                  "Tiered marketing guides from beginner to pro",
+                  "24/7 Priority support for all partners"
+                ].map((item, i) => (
+                  <li key={i} className="flex items-center gap-3">
+                    <div className="flex-shrink-0 h-6 w-6 rounded-full bg-primary/20 flex items-center justify-center">
+                      <CheckCircle className="h-4 w-4 text-primary" />
+                    </div>
+                    <span className="font-medium">{item}</span>
+                  </li>
+                ))}
               </ul>
+              <Button size="lg" className="rounded-full" asChild>
+                <Link href={signupLink}>Start Your Journey</Link>
+              </Button>
             </div>
-            <div className="relative h-80 lg:h-full w-full">
+            <div className="relative aspect-square lg:aspect-video overflow-hidden rounded-3xl border bg-muted shadow-2xl">
               {featureImage1 && (
                 <Image
                   src={featureImage1.imageUrl}
-                  alt={featureImage1.description}
-                  data-ai-hint={featureImage1.imageHint}
+                  alt="Dashboard Preview"
+                  data-ai-hint="dashboard analytics"
                   fill
-                  className="object-cover rounded-lg shadow-lg"
+                  className="object-cover transition-transform hover:scale-105 duration-700"
                 />
               )}
+              <div className="absolute inset-0 bg-gradient-to-tr from-primary/20 to-transparent"></div>
             </div>
           </div>
         </section>
 
-        {/* Marketing Guides Section */}
-        <section id="guides" className="w-full py-20 md:py-32">
-          <div className="container grid gap-12 lg:grid-cols-2 items-center">
-             <div className="relative h-80 lg:h-full w-full">
-              {guidesImage && (
-                <Image
-                  src={guidesImage.imageUrl}
-                  alt={guidesImage.description}
-                  data-ai-hint={guidesImage.imageHint}
-                  fill
-                  className="object-cover rounded-lg shadow-lg"
-                />
-              )}
-            </div>
-            <div>
-              <h2 className="font-headline text-3xl font-bold tracking-tight sm:text-4xl">From Beginner to Pro: Your Marketing Playbook</h2>
-              <p className="mt-4 text-lg text-muted-foreground">
-                  Our subscription tiers come with a tiered library of marketing guides. The higher your plan, the more you learn, and the more you earn.
-              </p>
-              <ul className="mt-8 space-y-4">
-                <li className="flex items-start gap-3">
-                  <CheckCircle className="w-5 h-5 text-primary flex-shrink-0 mt-1" />
-                  <div>
-                    <h3 className="font-semibold">Starter Guides</h3>
-                    <p className="text-muted-foreground text-sm">Learn the fundamentals of affiliate marketing, SEO basics, and social media promotion.</p>
-                  </div>
-                </li>
-                 <li className="flex items-start gap-3">
-                  <CheckCircle className="w-5 h-5 text-primary flex-shrink-0 mt-1" />
-                  <div>
-                    <h3 className="font-semibold">Plus Guides</h3>
-                    <p className="text-muted-foreground text-sm">Dive into content creation, email marketing, and web analytics to grow your audience.</p>
-                  </div>
-                </li>
-                <li className="flex items-start gap-3">
-                  <CheckCircle className="w-5 h-5 text-primary flex-shrink-0 mt-1" />
-                  <div>
-                    <h3 className="font-semibold">Pro &amp; Enterprise Guides</h3>
-                    <p className="text-muted-foreground text-sm">Master advanced SEO, PPC advertising, conversion optimization, and strategic partnerships to scale your income.</p>
-                  </div>
-                </li>
-              </ul>
-            </div>
-          </div>
-        </section>
-
-
-        {/* Testimonials */}
-        <section id="testimonials" className="py-20 md:py-32 bg-card">
+        {/* Social Proof */}
+        <section className="py-24 overflow-hidden">
           <div className="container">
-            <div className="text-center">
-              <h2 className="font-headline text-3xl font-bold tracking-tight sm:text-4xl">Trusted by Top Earners</h2>
-              <p className="mt-4 max-w-2xl mx-auto text-lg text-muted-foreground">
-                Don't just take our word for it. Here's what our affiliates are saying.
-              </p>
+            <div className="flex flex-col md:flex-row items-center justify-between gap-8 mb-16">
+                <div>
+                    <h2 className="text-left font-headline text-3xl font-bold m-0">Join the Top 1%</h2>
+                    <p className="text-muted-foreground mt-2">Hear from our most successful affiliate partners.</p>
+                </div>
+                <div className="flex gap-1 text-primary">
+                    {[...Array(5)].map((_, i) => <Star key={i} className="h-6 w-6 fill-current" />)}
+                </div>
             </div>
-            <div className="mt-16 grid gap-8 md:grid-cols-1 lg:grid-cols-3">
+            <div className="grid gap-8 md:grid-cols-3">
               {testimonials.map((testimonial) => (
-                <Card key={testimonial.name}>
-                  <CardContent className="pt-6">
-                    <p className="italic">"{testimonial.text}"</p>
-                  </CardContent>
-                  <CardFooter className="flex items-center gap-4">
-                    {testimonial.avatar && (
-                       <Avatar>
-                         <AvatarImage src={testimonial.avatar.imageUrl} alt={testimonial.name} data-ai-hint={testimonial.avatar.imageHint} />
-                         <AvatarFallback>{testimonial.name.charAt(0)}</AvatarFallback>
-                       </Avatar>
-                    )}
-                    <div>
-                      <p className="font-semibold">{testimonial.name}</p>
-                      <p className="text-sm text-muted-foreground">{testimonial.role}</p>
+                <Card key={testimonial.name} className="bg-background border-none shadow-none text-left p-0">
+                  <CardContent className="p-8 rounded-3xl bg-secondary/20 relative">
+                    <div className="absolute -top-4 left-8 text-6xl text-primary/20 font-serif leading-none">“</div>
+                    <p className="italic text-lg mb-6 leading-relaxed">"{testimonial.text}"</p>
+                    <div className="flex items-center gap-4">
+                        {testimonial.avatar && (
+                        <Avatar className="h-12 w-12 border-2 border-background shadow-sm">
+                            <AvatarImage src={testimonial.avatar.imageUrl} alt={testimonial.name} data-ai-hint="person portrait" />
+                            <AvatarFallback>{testimonial.name.charAt(0)}</AvatarFallback>
+                        </Avatar>
+                        )}
+                        <div>
+                        <p className="font-bold">{testimonial.name}</p>
+                        <p className="text-xs text-muted-foreground uppercase tracking-widest">{testimonial.role}</p>
+                        </div>
                     </div>
-                  </CardFooter>
+                  </CardContent>
                 </Card>
               ))}
             </div>
           </div>
         </section>
 
-        {/* FAQ Section */}
-        <section id="faq" className="w-full py-20 md:py-32">
-          <div className="container max-w-4xl mx-auto">
-            <div className="text-center">
-              <h2 className="font-headline text-3xl font-bold tracking-tight sm:text-4xl">Frequently Asked Questions</h2>
-              <p className="mt-4 text-lg text-muted-foreground">
-                Have questions? We have answers.
-              </p>
-            </div>
-            <Accordion type="single" collapsible className="w-full mt-12">
-              {faqs.map((faq, i) => (
-                <AccordionItem value={`item-${i}`} key={i}>
-                  <AccordionTrigger className="text-lg font-semibold text-left">{faq.q}</AccordionTrigger>
-                  <AccordionContent className="text-base text-muted-foreground">
-                    {faq.a}
-                  </AccordionContent>
-                </AccordionItem>
-              ))}
-            </Accordion>
-          </div>
-        </section>
-
-        {/* CTA Section */}
-        <section className="w-full py-20 md:py-32">
-          <div className="container text-center">
-            <h2 className="font-headline text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl">Ready to Start Earning?</h2>
-            <p className="mt-4 max-w-2xl mx-auto text-lg text-muted-foreground">
-              Join hundreds of affiliates earning daily commissions. Your journey to financial freedom starts here. It takes less than 60 seconds to get started.
+        {/* Large Final CTA */}
+        <section className="py-24 lg:py-32 bg-primary text-primary-foreground">
+          <div className="container text-center max-w-4xl">
+            <h2 className="font-headline text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl mb-8">
+              Start Your 3-Day <br className="md:hidden" /> Trial Today
+            </h2>
+            <p className="text-xl md:text-2xl text-primary-foreground/80 mb-12 max-w-2xl mx-auto font-medium">
+              Join hundreds of affiliates earning daily commissions. It takes less than 60 seconds to get started.
             </p>
-            <div className="mt-8">
-              <Button size="lg" asChild className="text-lg py-7 px-10">
-                <Link href={pricingLink}>
-                  Get Started Now
-                  <ArrowRight className="ml-2 h-5 w-5" />
-                </Link>
+            <div className="flex flex-col sm:flex-row justify-center gap-4">
+              <Button size="lg" variant="secondary" className="h-16 px-10 text-xl font-bold rounded-full shadow-2xl" asChild>
+                <Link href={signupLink}>Get Started Now</Link>
+              </Button>
+              <Button size="lg" variant="outline" className="h-16 px-10 text-xl font-bold rounded-full border-primary-foreground/20 hover:bg-primary-foreground/10" asChild>
+                <Link href="/about">Learn More</Link>
               </Button>
             </div>
           </div>
