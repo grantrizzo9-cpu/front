@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, Suspense, useEffect } from 'react';
@@ -10,18 +9,16 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { subscriptionTiers } from "@/lib/data";
-import { Loader2, Users, AlertCircle } from "lucide-react";
+import { Loader2, Users, AlertCircle, WifiOff } from "lucide-react";
 import { useAuth, useFirestore } from "@/firebase";
 import { createUserWithEmailAndPassword, updateProfile, GoogleAuthProvider, signInWithPopup, User } from "firebase/auth";
 import { doc, getDoc, writeBatch, serverTimestamp, setDoc, collection } from "firebase/firestore";
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
-
 const GoogleIcon = () => (
     <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" className="mr-2 h-4 w-4 fill-current"><title>Google</title><path d="M12.48 10.92v3.28h7.84c-.24 1.84-.85 3.18-1.73 4.1-1.02 1.02-2.62 1.98-4.48 1.98-3.62 0-6.55-2.92-6.55-6.55s2.93-6.55 6.55-6.55c2.03 0 3.33.82 4.1 1.59l2.48-2.48C17.22 3.43 15.14 2 12.48 2 7.08 2 3 6.08 3 11.48s4.08 9.48 9.48 9.48c5.13 0 9.1-3.48 9.1-9.28 0-.6-.08-1.12-.2-1.68H3.48v.01z"></path></svg>
 );
-
 
 function SignupFormComponent() {
     const router = useRouter();
@@ -143,9 +140,9 @@ function SignupFormComponent() {
             console.error("Signup error:", error);
             let description = error.message || "An unknown error occurred.";
             
-            if (description.includes("offline") || description.includes("network-request-failed")) {
+            if (description.includes("offline") || description.includes("network-request-failed") || description.includes("failed-precondition")) {
                 setIsOffline(true);
-                description = "Connection Failed: Your domain 'hostproai.com' is currently blocking the database connection. Please check the README for the Google Cloud whitelist fix.";
+                description = "Connection Failed: Your domain 'hostproai.com' is currently blocking the database connection. Please check README Step 2 for the Google Cloud whitelist fix.";
             }
 
             toast({ variant: "destructive", title: "Account Creation Failed", description: description });
@@ -178,7 +175,7 @@ function SignupFormComponent() {
             }
         } catch (error: any) {
              let description = error.message;
-             if (description.includes("offline")) setIsOffline(true);
+             if (description.includes("offline") || description.includes("failed-precondition")) setIsOffline(true);
              toast({ variant: "destructive", title: "Google Sign-In Failed", description: description });
              setIsProcessing(false);
         }
@@ -189,7 +186,7 @@ function SignupFormComponent() {
             <CardHeader>
                 <CardTitle className="font-headline text-2xl">Create Your Account</CardTitle>
                 <CardDescription>
-                    You're creating an account for the <strong>{plan.name}</strong> plan. On the next step, you'll pay a one-time activation fee to start your 3-day trial.
+                    You're creating an account for the <strong>{plan.name}</strong> plan.
                 </CardDescription>
             </CardHeader>
             <CardContent>
@@ -200,7 +197,7 @@ function SignupFormComponent() {
                         <AlertDescription>
                             Your domain <strong>hostproai.com</strong> is currently blocking the connection to our database.
                             <p className="mt-2 text-xs font-semibold underline">Required Action:</p>
-                            <p className="text-xs">Follow "Step 2" in the README to whitelist this domain in your Google Cloud Console.</p>
+                            <p className="text-xs">Follow "Step 2" in the README to whitelist this domain in your Google Cloud Console once your account is verified.</p>
                         </AlertDescription>
                     </Alert>
                 )}
@@ -227,7 +224,7 @@ function SignupFormComponent() {
                         </div>
                     )}
                     <Button type="submit" className="w-full" disabled={!isFormValid || isProcessing}>
-                        {isProcessing ? <Loader2 className="animate-spin" /> : "Create Account & Proceed to Payment"}
+                        {isProcessing ? <Loader2 className="animate-spin" /> : "Create Account & Proceed"}
                     </Button>
                 </form>
                 <div className="relative my-4">
@@ -268,11 +265,6 @@ function SignupLoadingSkeleton() {
           <div className="space-y-2">
               <Skeleton className="h-4 w-1/4" />
               <Skeleton className="h-10 w-full" />
-          </div>
-          <Skeleton className="h-10 w-full" />
-          <div className="relative my-4">
-              <div className="absolute inset-0 flex items-center"><span className="w-full border-t" /></div>
-              <div className="relative flex justify-center text-xs uppercase"><span className="bg-card px-2 text-muted-foreground">Or</span></div>
           </div>
           <Skeleton className="h-10 w-full" />
         </CardContent>

@@ -10,21 +10,16 @@ Those `13.249` records are your **Amazon (AWS)** records. If you follow the Fire
 ---
 
 ## 🌐 How to fix the "Backend Connection Failed" / "Client Offline" error
-If your site loads but says "Offline" or fails to create an account, follow these steps in order:
+If your site loads but fails to create an account, follow these steps in order:
 
-### Step 1: Authorize Domain in Firebase Auth (Free & Immediate)
+### Step 1: Authorize Domain in Firebase Auth (COMPLETED ✅)
+*You have already added `hostproai.com`. Ensure you also add `*.hostproai.com` for complete coverage.*
 1. Go to the [Firebase Console](https://console.firebase.google.com/).
-2. Select your project: **`rent-a-host-a55fd`**.
-3. Look at the **Left Sidebar**. Click the word **"Build"** to expand the menu.
-4. Click **Authentication**.
-5. Click the **Settings** tab (usually at the top of the screen).
-6. Click **Authorized domains** in the left-hand sub-menu.
-7. Click **Add domain** and enter: `hostproai.com`.
-8. Click **Add domain** again and enter: `*.hostproai.com`.
-*This allows login/signup to work on your domain.*
+2. Select **Authentication** -> **Settings** -> **Authorized domains**.
+3. Add `*.hostproai.com`.
 
 ### Step 2: Whitelist in Google Cloud (Required for Database/Firestore)
-*If Step 1 doesn't fix account creation, you MUST do this once your Google Cloud account is verified.*
+*This is the final step once your Google Cloud account is verified.*
 1. Go to [Google Cloud API Credentials](https://console.cloud.google.com/apis/credentials).
 2. Select project **`rent-a-host-a55fd`**.
 3. Edit the key named **"Browser key (auto-created by Firebase)"**.
@@ -35,13 +30,12 @@ If your site loads but says "Offline" or fails to create an account, follow thes
 ---
 
 ## 🛡️ Amazon Firewall / WAF Note
-If you have enabled a Firewall in AWS (WAF), it may block Firebase WebSockets. 
-**Fix Implemented:** The application is now using **Long Polling (v1.0.4)**, which uses standard HTTPS traffic to bypass firewall restrictions.
+The application is using **Long Polling (v1.0.4)**, which uses standard HTTPS traffic to bypass AWS firewall restrictions. You can keep your AWS WAF enabled.
 
 ---
 
 ## 🛠️ Required AWS Amplify Secrets
-Add these in **Amplify Console** -> **App Settings** -> **Environment Variables**:
+Ensure these are set in **Amplify Console** -> **App Settings** -> **Environment Variables**:
 
 | Variable Name | Value Description |
 | :--- | :--- |
