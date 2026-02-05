@@ -13,7 +13,7 @@ import type { FirebaseServices } from '@/firebase';
 
 /**
  * FirebaseClientProvider
- * Connectivity Version: 1.0.2 (Force Long Polling for AWS Firewall bypass)
+ * Connectivity Version: 1.0.3 (Forced Long Polling for AWS Firewall bypass)
  */
 export function FirebaseClientProvider({ children }: { children: ReactNode }) {
   const firebaseServices = useMemo<FirebaseServices | null>(() => {

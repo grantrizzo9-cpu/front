@@ -15,7 +15,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useAdmin } from "@/hooks/use-admin";
 import { Label } from "@/components/ui/label";
 import { useRouter } from "next/navigation";
-// Fixed path: Ensure this is @/components/ui/accordion for AWS build
+// Corrected path for ShadCN Accordion
 import {
   Accordion,
   AccordionContent,
