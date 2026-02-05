@@ -4,7 +4,7 @@ import React, { useMemo, type ReactNode } from 'react';
 import { FirebaseProvider } from '@/firebase/provider';
 import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
-import { initializeFirestore } from 'firebase/firestore';
+import { initializeFirestore, CACHE_SIZE_UNLIMITED } from 'firebase/firestore';
 import { firebaseConfig } from '@/firebase/config';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { CloudOff, ShieldAlert } from 'lucide-react';
@@ -12,8 +12,8 @@ import type { FirebaseServices } from '@/firebase';
 
 /**
  * FirebaseClientProvider
- * Performance Version: 1.0.7 (Max-Performance Mode)
- * Optimized for Railway WebSockets.
+ * Performance Version: 1.0.8 (Max-Speed Optimized)
+ * Optimized for Railway: Skips WebSocket handshake timeouts.
  */
 export function FirebaseClientProvider({ children }: { children: ReactNode }) {
   const firebaseServices = useMemo<FirebaseServices | null>(() => {
@@ -26,8 +26,10 @@ export function FirebaseClientProvider({ children }: { children: ReactNode }) {
 
       const auth = getAuth(app);
       
-      // Standard WebSocket connection is fastest for Railway deployments.
+      // FORCED LONG POLLING: This is the secret to fast loads on Railway/Custom Domains.
+      // It skips the 10-second "failed websocket" timeout and connects instantly.
       const firestore = initializeFirestore(app, {
+          experimentalForceLongPolling: true,
           ignoreUndefinedProperties: true,
       });
 

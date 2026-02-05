@@ -40,7 +40,7 @@ export default function DashboardPage() {
   }, [firestore, user?.uid]);
   const { data: userData, isLoading: isUserDataLoading } = useDoc<UserType>(userDocRef);
 
-  // --- Admin-Only Data Fetching ---
+  // --- Admin-Only Data Fetching (Fires ONLY if owner) ---
   const allReferralsQuery = useMemoFirebase(() => {
     if (!isPlatformOwner || !firestore) return null;
     return collectionGroup(firestore, 'referrals');
@@ -89,13 +89,13 @@ export default function DashboardPage() {
   }, [userTier]);
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500">
+    <div className="space-y-8 animate-in fade-in duration-300">
         {/* ======== ADMIN SECTION ======== */}
         {!isAdminLoading && isPlatformOwner && (
-            <div className="space-y-6">
+            <div className="space-y-6 border-b border-dashed pb-8">
                 <div>
                     <h1 className="text-3xl font-bold font-headline">Admin Dashboard</h1>
-                    <p className="text-muted-foreground">Platform-wide summary.</p>
+                    <p className="text-muted-foreground">Global Overview (High-Priority Sync)</p>
                 </div>
 
                 {!platformStats ? (
@@ -106,55 +106,29 @@ export default function DashboardPage() {
                         <StatSkeleton />
                     </div>
                 ) : (
-                    <>
-                        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                            <StatCard title="Revenue" value={`$${platformStats.platformRevenue.toFixed(2)}`} icon={<TrendingUp />} />
-                            <StatCard title="Payouts" value={`$${platformStats.totalAffiliatePayouts.toFixed(2)}`} icon={<DollarSign />} />
-                            <StatCard title="Referrals" value={`+${platformStats.totalPlatformReferrals}`} icon={<UserPlus />} />
-                        </div>
-                         <Card>
-                            <CardHeader><CardTitle>Recent Platform Referrals</CardTitle></CardHeader>
-                            <CardContent>
-                                <Table>
-                                    <TableHeader>
-                                        <TableRow>
-                                            <TableHead>User</TableHead>
-                                            <TableHead>Plan</TableHead>
-                                            <TableHead>Status</TableHead>
-                                        </TableRow>
-                                    </TableHeader>
-                                    <TableBody>
-                                        {platformStats.recentAllReferrals.map((r) => (
-                                            <TableRow key={r.id}>
-                                                <TableCell className="font-medium">{r.referredUserUsername}</TableCell>
-                                                <TableCell>{r.planPurchased}</TableCell>
-                                                <TableCell><Badge className={r.activationStatus === 'activated' ? 'bg-green-500' : 'bg-amber-500'}>{r.activationStatus}</Badge></TableCell>
-                                            </TableRow>
-                                        ))}
-                                    </TableBody>
-                                </Table>
-                            </CardContent>
-                        </Card>
-                    </>
+                    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                        <StatCard title="Revenue" value={`$${platformStats.platformRevenue.toFixed(2)}`} icon={<TrendingUp />} />
+                        <StatCard title="Payouts" value={`$${platformStats.totalAffiliatePayouts.toFixed(2)}`} icon={<DollarSign />} />
+                        <StatCard title="Total Referrals" value={`+${platformStats.totalPlatformReferrals}`} icon={<UserPlus />} />
+                    </div>
                 )}
-                <hr className="my-8 border-dashed" />
             </div>
         )}
 
         {/* ======== PERSONAL SECTION ======== */}
         <div className="space-y-6">
             <div>
-                <h1 className="text-3xl font-bold font-headline">Personal Dashboard</h1>
-                <p className="text-muted-foreground">Your affiliate progress.</p>
+                <h1 className="text-3xl font-bold font-headline">My Dashboard</h1>
+                <p className="text-muted-foreground">Your affiliate progress and usage.</p>
             </div>
 
             {!isUserDataLoading && userData?.subscription?.status === 'inactive' && !isPlatformOwner && (
-                <Alert variant="destructive">
+                <Alert variant="destructive" className="animate-pulse">
                     <AlertCircle className="h-4 w-4" />
-                    <AlertTitle>Inactive Plan</AlertTitle>
+                    <AlertTitle>Action Required: Inactive Plan</AlertTitle>
                     <AlertDescription className="flex items-center justify-between">
-                        Activate your trial to unlock marketing tools.
-                        <Button asChild size="sm" variant="outline" className="ml-4"><Link href={`/dashboard/upgrade?plan=${userData?.subscription?.tierId || 'starter'}`}>Activate</Link></Button>
+                        Activate your trial to unlock marketing tools and custom domains.
+                        <Button asChild size="sm" variant="outline" className="ml-4 bg-white/10"><Link href={`/dashboard/upgrade?plan=${userData?.subscription?.tierId || 'starter'}`}>Activate Now</Link></Button>
                     </AlertDescription>
                 </Alert>
             )}
@@ -170,18 +144,18 @@ export default function DashboardPage() {
                 ) : (
                     <>
                         <StatCard title="Total Earnings" value={`$${personalStats.totalCommission.toFixed(2)}`} icon={<DollarSign />} />
-                        <StatCard title="Referrals" value={`+${personalStats.totalReferrals}`} icon={<Users />} />
+                        <StatCard title="Total Referrals" value={`+${personalStats.totalReferrals}`} icon={<Users />} />
                         <Card>
                             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                <CardTitle className="text-sm font-medium">Storage</CardTitle>
+                                <CardTitle className="text-sm font-medium">Storage Usage</CardTitle>
                                 <HardDrive className="h-5 w-5 text-muted-foreground" />
                             </CardHeader>
                             <CardContent>
                                 <div className="text-2xl font-bold">{storageStats.totalStorage > 0 ? `${storageStats.totalStorage} GB` : 'N/A'}</div>
-                                <Progress value={storageStats.usagePercentage} className="mt-2" />
+                                <Progress value={storageStats.usagePercentage} className="mt-2 h-1.5" />
                             </CardContent>
                         </Card>
-                        <StatCard title="Unpaid" value={`$${personalStats.unpaidCommissions.toFixed(2)}`} icon={<DollarSign className="text-green-500" />} />
+                        <StatCard title="Unpaid Payouts" value={`$${personalStats.unpaidCommissions.toFixed(2)}`} icon={<DollarSign className="text-green-500" />} />
                     </>
                 )}
             </div>
@@ -191,10 +165,10 @@ export default function DashboardPage() {
                     <CardHeader><CardTitle>Recent Referrals</CardTitle></CardHeader>
                     <CardContent>
                         {personalReferralsLoading ? (
-                            <div className="space-y-2">
-                                <Skeleton className="h-8 w-full" />
-                                <Skeleton className="h-8 w-full" />
-                                <Skeleton className="h-8 w-full" />
+                            <div className="space-y-3">
+                                <Skeleton className="h-10 w-full" />
+                                <Skeleton className="h-10 w-full" />
+                                <Skeleton className="h-10 w-full" />
                             </div>
                         ) : personalStats && personalStats.recentPersonalReferrals.length > 0 ? (
                             <Table>
@@ -209,27 +183,31 @@ export default function DashboardPage() {
                                     {personalStats.recentPersonalReferrals.map((r) => (
                                         <TableRow key={r.id}>
                                             <TableCell className="font-medium">{r.referredUserUsername}</TableCell>
-                                            <TableCell><Badge className={r.activationStatus === 'activated' ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800'}>{r.activationStatus}</Badge></TableCell>
+                                            <TableCell><Badge variant="outline" className={r.activationStatus === 'activated' ? 'border-green-500 text-green-700' : 'border-amber-500 text-amber-700'}>{r.activationStatus}</Badge></TableCell>
                                             <TableCell className="text-right">{r.date ? format(r.date.toDate(), 'MMM d') : 'N/A'}</TableCell>
                                         </TableRow>
                                     ))}
                                 </TableBody>
                             </Table>
                         ) : (
-                            <div className="text-center py-10 text-muted-foreground">No referrals yet.</div>
+                            <div className="text-center py-10 text-muted-foreground border-2 border-dashed rounded-lg">
+                                <p>No referrals yet.</p>
+                                <Button asChild variant="link" size="sm"><Link href="/dashboard/settings">Get Referral Link</Link></Button>
+                            </div>
                         )}
                     </CardContent>
                 </Card>
 
-                <Card className="bg-primary/5 border-primary/20">
+                <Card className="bg-primary/5 border-primary/20 flex flex-col">
                     <CardHeader>
-                        <CardTitle className="flex items-center gap-2"><BrainCircuit className="w-6 h-6 text-primary" />AI Content Tools</CardTitle>
+                        <CardTitle className="flex items-center gap-2"><BrainCircuit className="w-6 h-6 text-primary" />AI Content Studio</CardTitle>
+                        <CardDescription>Generate ads and blog posts in seconds.</CardDescription>
                     </CardHeader>
-                    <CardContent>
-                        <p className="text-muted-foreground text-sm">Use AI to generate high-converting blog posts and ads.</p>
+                    <CardContent className="flex-grow">
+                        <p className="text-muted-foreground text-sm">Your subscription includes high-performance AI tools to help you scale your affiliate business faster.</p>
                     </CardContent>
-                    <CardFooter>
-                        <Button asChild className="w-full"><Link href="/dashboard/website">Open AI Suite <ArrowRight className="ml-2 h-4 w-4" /></Link></Button>
+                    <CardFooter className="pt-0">
+                        <Button asChild className="w-full shadow-lg"><Link href="/dashboard/website">Launch AI Suite <ArrowRight className="ml-2 h-4 w-4" /></Link></Button>
                     </CardFooter>
                 </Card>
             </div>

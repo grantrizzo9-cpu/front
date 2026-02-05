@@ -1,7 +1,7 @@
 
 # Affiliate AI Host - Railway Deployment Guide
 
-Your application is now configured for high-speed deployment on **Railway** (v1.0.7).
+Your application is now configured for high-speed deployment on **Railway** (v1.0.8).
 
 ## 🚀 How to Deploy to Railway
 
@@ -17,7 +17,7 @@ Your application is now configured for high-speed deployment on **Railway** (v1.
 ---
 
 ## 🛠️ Fix GitHub Authentication (ECONNREFUSED)
-If you see "ECONNREFUSED" or "Authentication failed" in your terminal, it means the built-in password helper is broken. Run this command to fix it:
+If you see "ECONNREFUSED" in your terminal, it means the built-in password helper is broken. Run this command to fix it:
 
 `git config --global credential.helper store`
 
@@ -49,7 +49,7 @@ If you use a custom domain, you must complete these steps:
 Run these commands in your terminal to sync your local code with GitHub and trigger the Railway deployment:
 
 1. `git add .` (Don't forget the dot!)
-2. `git commit -m "Max-performance update: Version 1.0.7 enabled"`
+2. `git commit -m "Max-performance update: Version 1.0.8 enabled"`
 3. `git push origin main`
 
 © 2025 Affiliate AI Host. All rights reserved.

@@ -5,8 +5,8 @@ import { doc, getDoc } from 'firebase/firestore';
 import { useState, useEffect } from 'react';
 
 /**
- * Optimized Admin Hook (v1.0.7)
- * Prioritizes hardcoded checks for instant results.
+ * Max-Speed Admin Hook (v1.0.8)
+ * Optimized to prevent blocking main UI renders.
  */
 export function useAdmin() {
   const { user, isUserLoading } = useUser();
@@ -30,7 +30,7 @@ export function useAdmin() {
 
     const email = user.email?.toLowerCase();
 
-    // 1. Instant check for Platform Owners
+    // 1. Instant check for Platform Owners (Fastest path)
     if (email && platformOwnerEmails.includes(email)) {
       setIsAdmin(true);
       setIsPlatformOwner(true);
@@ -38,7 +38,7 @@ export function useAdmin() {
       return;
     }
 
-    // 2. Database check for secondary admins (Non-blocking)
+    // 2. Database check for secondary admins
     const checkRoleDoc = async () => {
       try {
         if (!firestore) return;
@@ -48,7 +48,7 @@ export function useAdmin() {
           setIsAdmin(true);
         }
       } catch (error) {
-        // Silent catch for performance
+        // Silent catch
       } finally {
         setIsLoading(false);
       }
