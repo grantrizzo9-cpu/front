@@ -49,7 +49,7 @@ Add these in **Amplify Console** -> **App Settings** -> **Environment Variables*
 Run these commands in your terminal to deploy the fixes:
 
 1. `git add .`
-2. `git commit -m "Force Long Polling to fix offline error and fix build path"`
+2. `git commit -m "Final connectivity fix: Long Polling enabled"`
 3. `git push origin main`
 
-© 2024 Affiliate AI Host. All rights reserved.
+© 2025 Affiliate AI Host. All rights reserved.

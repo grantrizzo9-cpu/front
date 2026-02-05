@@ -11,6 +11,11 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { CloudOff, ShieldAlert } from 'lucide-react';
 import type { FirebaseServices } from '@/firebase';
 
+/**
+ * FirebaseClientProvider
+ * This version forces 'experimentalForceLongPolling' to ensure connectivity 
+ * on AWS Amplify domains that haven't been fully whitelisted in Google Cloud yet.
+ */
 export function FirebaseClientProvider({ children }: { children: ReactNode }) {
   const firebaseServices = useMemo<FirebaseServices | null>(() => {
     try {
@@ -22,9 +27,8 @@ export function FirebaseClientProvider({ children }: { children: ReactNode }) {
 
       const auth = getAuth(app);
       
-      // We use initializeFirestore instead of getFirestore to force Long Polling.
-      // This is a "Plan C" workaround for when domain whitelisting in Google Cloud isn't possible yet.
-      // It helps the client stay "Online" on custom domains by using standard HTTP instead of WebSockets.
+      // PLAN C: Force Long Polling. 
+      // This bypasses WebSocket restrictions often found on AWS Amplify/Proxies.
       const firestore = initializeFirestore(app, {
         experimentalForceLongPolling: true,
       });
@@ -49,14 +53,13 @@ export function FirebaseClientProvider({ children }: { children: ReactNode }) {
                 <AlertDescription className="mt-2 text-sm">
                     The application is unable to connect to the Firebase backend (Project: <strong>{firebaseConfig.projectId}</strong>). 
                     <br/><br/>
-                    <strong>Common causes:</strong>
+                    <strong>Required Fix:</strong>
+                    <p className="mt-2">Your domain <strong>hostproai.com</strong> is currently blocking the database connection.</p>
                     <ul className="list-disc list-inside text-left mt-2 space-y-1">
-                        <li>The Firebase project is suspended (Check billing in Google Cloud Console).</li>
-                        <li>API Keys are restricted to specific domains (Ensure <strong>hostproai.com</strong> is allowed).</li>
-                        <li>The project reached its free-tier usage limit.</li>
+                        <li>Log into Google Cloud Console.</li>
+                        <li>Edit your "Browser Key".</li>
+                        <li>Add <code>https://hostproai.com/*</code> to the website restrictions.</li>
                     </ul>
-                    <br/>
-                    Please check the <strong>Firebase Console</strong> or <strong>Google Cloud Console</strong> for alerts.
                 </AlertDescription>
             </Alert>
         </div>
