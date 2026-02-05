@@ -3,11 +3,21 @@
 
 Your application is hosted on **AWS Amplify** and accessible at [hostproai.com](https://hostproai.com).
 
-## 🚨 CRITICAL: Fix "Backend Connection Failed" / "Client Offline"
-If your live site displays a "Backend Connection Failed" or "Client Offline" message, it is because Firebase is blocking your live domain. **Follow these two steps:**
+## 🌐 IMPORTANT: Point Your Domain to AWS
+To connect your domain (`hostproai.com`) to your site, follow these steps in your AWS Console:
+1.  Log in to the **[AWS Amplify Console](https://console.aws.amazon.com/amplify/home)**.
+2.  Select your app: **`rent-a-host`**.
+3.  Go to **App Settings** -> **Domain management**.
+4.  Click **Add domain** and enter: `hostproai.com`.
+5.  Click **Configure domain**. Amplify will generate **CNAME records**.
+6.  Copy these CNAME records and add them to your domain registrar's DNS settings (Shopco/OpenSRS).
 
-### Step 1: Authorize Domain in Firebase Console (Plan B - No GCP needed)
-This step is usually available even if your full Google Cloud account is pending approval:
+---
+
+## 🚨 FIX: "Backend Connection Failed" / "Client Offline"
+If your live site displays an "Offline" message, follow these two steps to authorize your domain:
+
+### Step 1: Authorize Domain in Firebase Console (No GCP needed)
 1.  Go to the [Firebase Console](https://console.firebase.google.com/).
 2.  Select your project: **`rent-a-host-a55fd`**.
 3.  Go to **Build** -> **Authentication** -> **Settings** -> **Authorized domains**.
@@ -20,12 +30,12 @@ This step is usually available even if your full Google Cloud account is pending
 3.  Under **"API Keys"**, click the **Edit** icon next to your **"Browser key (auto-created by Firebase)"**.
 4.  Scroll down to the **"Website restrictions"** section.
 5.  Add `https://hostproai.com/*` and `https://*.hostproai.com/*`.
-6.  Click **Save**. It may take up to 5 minutes to take effect.
+6.  Click **Save**.
 
 ---
 
 ## 🛠️ Required Environment Variables (Secrets)
-In your **AWS Amplify Console**, go to **App Settings** -> **Environment Variables**. You **MUST** add these exactly as shown for the site features to work:
+In your **AWS Amplify Console**, go to **App Settings** -> **Environment Variables**. You **MUST** add these exactly as shown:
 
 | Variable Name | Value Description |
 | :--- | :--- |
@@ -39,17 +49,10 @@ In your **AWS Amplify Console**, go to **App Settings** -> **Environment Variabl
 ---
 
 ## 🚀 How to Push Changes to GitHub
-Use these commands in your terminal to update your live site:
-
-1.  **Stage and Commit**:
-   ```bash
-   git add .
-   git commit -m "Fix Accordion import path and update troubleshooting guide"
-   ```
-2.  **Push to GitHub**:
-   ```bash
-   git push origin main
-   ```
+Run these commands in your terminal:
+1.  `git add .`
+2.  `git commit -m "Fix import paths, remove MailerLite, and update DNS guide"`
+3.  `git push origin main`
 
 ---
 © 2024 Affiliate AI Host. All rights reserved.

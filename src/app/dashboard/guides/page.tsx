@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useMemo, useEffect } from 'react';
@@ -346,11 +345,11 @@ const allGuides: Guide[] = [
 
       <h4><strong>1. The Email Service Provider (ESP)</strong></h4>
       <p>This is the software that manages your list, sends your emails, and tracks your results. You cannot simply use Gmail or Outlook. Using an ESP is essential for managing subscribers, complying with anti-spam laws, and automating your campaigns.</p>
-      <p><strong>Top Recommendations for Beginners (with Free Tiers):</strong></p>
+      <p><strong>Top Recommendations for Beginners:</strong></p>
       <ul>
           <li>Look for providers that offer user-friendly interfaces and robust free plans for your first 1,000 subscribers.</li>
           <li>Choose an ESP built for creators with powerful automation features.</li>
-          <li>Prioritize platforms that offer advanced segmentation and SMS marketing integration.</li>
+          <li>Prioritize platforms that offer high deliverability rates and easy-to-use template builders.</li>
       </ul>
       <p><strong>Your Action:</strong> Sign up for a free account with an Email Service Provider today. Explore their interface.</p>
       
