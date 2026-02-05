@@ -13,8 +13,7 @@ import type { FirebaseServices } from '@/firebase';
 
 /**
  * FirebaseClientProvider
- * Connectivity Version: 1.0.4 (Enhanced Long Polling for Railway/Proxy support)
- * This configuration is optimized for domains behind load balancers.
+ * Connectivity Version: 1.0.5 (Optimized for Railway Performance)
  */
 export function FirebaseClientProvider({ children }: { children: ReactNode }) {
   const firebaseServices = useMemo<FirebaseServices | null>(() => {
@@ -27,12 +26,12 @@ export function FirebaseClientProvider({ children }: { children: ReactNode }) {
 
       const auth = getAuth(app);
       
-      // FORCED LONG POLLING (v1.0.4)
-      // This bypasses WebSocket restrictions often found in cloud proxies and firewalls.
-      // It ensures Firestore uses standard HTTPS traffic for maximum compatibility.
+      // OPTIMIZED FIRESTORE SETTINGS (v1.0.5)
+      // Long Polling is kept for firewall compatibility, but Fetch Streams is enabled
+      // to improve the speed of real-time updates on Railway.
       const firestore = initializeFirestore(app, {
         experimentalForceLongPolling: true,
-        useFetchStreams: false, 
+        useFetchStreams: true, 
       });
 
       return { firebaseApp: app, auth, firestore };
@@ -55,10 +54,8 @@ export function FirebaseClientProvider({ children }: { children: ReactNode }) {
                 <AlertDescription className="mt-2 text-sm text-left">
                     The application is unable to connect to the Firebase backend. 
                     <br/><br/>
-                    <strong>Why is this happening?</strong>
-                    <p className="mt-2">Your domain <strong>hostproai.com</strong> might be blocked by Google Cloud API restrictions.</p>
-                    <p className="mt-4 font-bold underline">Required Action (Step 2 in README):</p>
-                    <p className="mt-1">Whitelist this domain in your Google Cloud Console once your account is verified.</p>
+                    <strong>Required Action:</strong>
+                    <p className="mt-2">Ensure your domain <strong>hostproai.com</strong> is whitelisted in your Google Cloud Console API Credentials.</p>
                 </AlertDescription>
             </Alert>
         </div>
