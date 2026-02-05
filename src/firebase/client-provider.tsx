@@ -12,7 +12,7 @@ import type { FirebaseServices } from '@/firebase';
 
 /**
  * FirebaseClientProvider
- * Performance Version: 1.0.6 (Optimized for Speed)
+ * Performance Version: 1.0.7 (High-Performance Mode)
  */
 export function FirebaseClientProvider({ children }: { children: ReactNode }) {
   const firebaseServices = useMemo<FirebaseServices | null>(() => {
@@ -25,8 +25,8 @@ export function FirebaseClientProvider({ children }: { children: ReactNode }) {
 
       const auth = getAuth(app);
       
-      // Removed experimentalForceLongPolling for maximum speed.
-      // Railway and most modern hosts support the faster WebSocket protocol.
+      // Standard High-Performance initialization. 
+      // Removed all experimental connection restrictions for maximum Railway/AWS speed.
       const firestore = getFirestore(app);
 
       return { firebaseApp: app, auth, firestore };
@@ -50,7 +50,7 @@ export function FirebaseClientProvider({ children }: { children: ReactNode }) {
                     The application is unable to connect to the Firebase backend. 
                     <br/><br/>
                     <strong>Required Action:</strong>
-                    <p className="mt-2">Ensure your domain <strong>hostproai.com</strong> is whitelisted in your Google Cloud Console API Credentials.</p>
+                    <p className="mt-2">Ensure your domain <strong>hostproai.com</strong> is whitelisted in your Google Cloud Console API Credentials (README Step 2).</p>
                 </AlertDescription>
             </Alert>
         </div>
