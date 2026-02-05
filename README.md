@@ -46,6 +46,8 @@ Add these in **Amplify Console** -> **App Settings** -> **Environment Variables*
 ---
 
 ## 🚀 Push Changes
+Run these commands in your terminal to deploy the fixes:
+
 1. `git add .`
 2. `git commit -m "Force Long Polling to fix offline error and fix build path"`
 3. `git push origin main`
