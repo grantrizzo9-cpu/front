@@ -34,7 +34,7 @@ Use these commands in your terminal to update your live site:
 1.  **Stage and Commit**:
    ```bash
    git add .
-   git commit -m "Fix import paths and update domain instructions"
+   git commit -m "Fix build errors and update domain instructions"
    ```
 2.  **Push to GitHub**:
    ```bash
