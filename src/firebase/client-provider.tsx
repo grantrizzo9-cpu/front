@@ -13,8 +13,7 @@ import type { FirebaseServices } from '@/firebase';
 
 /**
  * FirebaseClientProvider
- * This version forces 'experimentalForceLongPolling' to ensure connectivity 
- * on AWS Amplify domains that haven't been fully whitelisted in Google Cloud yet.
+ * Connectivity Version: 1.0.2 (Force Long Polling for AWS Firewall bypass)
  */
 export function FirebaseClientProvider({ children }: { children: ReactNode }) {
   const firebaseServices = useMemo<FirebaseServices | null>(() => {
@@ -28,7 +27,7 @@ export function FirebaseClientProvider({ children }: { children: ReactNode }) {
       const auth = getAuth(app);
       
       // PLAN C: Force Long Polling. 
-      // This bypasses WebSocket restrictions often found on AWS Amplify/Proxies.
+      // This bypasses WebSocket restrictions often found on AWS Amplify/Proxies/Firewalls.
       const firestore = initializeFirestore(app, {
         experimentalForceLongPolling: true,
       });

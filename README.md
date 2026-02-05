@@ -31,6 +31,11 @@ If your site loads but says "Offline" or fails to create an account, your Fireba
 
 ---
 
+## 🛡️ Amazon Firewall Note
+If you have enabled a Firewall in AWS (WAF), it may block Firebase WebSockets. The application has been updated to use **Long Polling**, which uses standard HTTPS traffic to bypass firewall restrictions.
+
+---
+
 ## 🛠️ Required AWS Amplify Secrets
 Add these in **Amplify Console** -> **App Settings** -> **Environment Variables**:
 
