@@ -9,10 +9,10 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { subscriptionTiers } from "@/lib/data";
-import { Loader2, Users, AlertCircle, WifiOff } from "lucide-react";
+import { Loader2, Users, AlertCircle, WifiOff, ShieldCheck } from "lucide-react";
 import { useAuth, useFirestore } from "@/firebase";
 import { createUserWithEmailAndPassword, updateProfile, GoogleAuthProvider, signInWithPopup, User } from "firebase/auth";
-import { doc, getDoc, writeBatch, serverTimestamp, setDoc, collection } from "firebase/firestore";
+import { doc, getDoc, writeBatch, serverTimestamp, collection } from "firebase/firestore";
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
@@ -140,12 +140,13 @@ function SignupFormComponent() {
             console.error("Signup error:", error);
             let description = error.message || "An unknown error occurred.";
             
-            if (description.includes("offline") || description.includes("network-request-failed") || description.includes("failed-precondition")) {
+            // Check for common connectivity/restriction errors
+            if (description.includes("offline") || description.includes("network-request-failed") || description.includes("failed-precondition") || description.includes("permission-denied")) {
                 setIsOffline(true);
-                description = "Connection Failed: Your domain 'hostproai.com' is currently blocking the database connection. Please check README Step 2 for the Google Cloud whitelist fix.";
+                description = "Database Connection Blocked: Your domain 'hostproai.com' is registered but not yet whitelisted in Google Cloud (README Step 2).";
             }
 
-            toast({ variant: "destructive", title: "Account Creation Failed", description: description });
+            toast({ variant: "destructive", title: "Action Required", description: description });
             setIsProcessing(false);
         }
     };
@@ -176,7 +177,7 @@ function SignupFormComponent() {
         } catch (error: any) {
              let description = error.message;
              if (description.includes("offline") || description.includes("failed-precondition")) setIsOffline(true);
-             toast({ variant: "destructive", title: "Google Sign-In Failed", description: description });
+             toast({ variant: "destructive", title: "Sign-In Blocked", description: "Connectivity issue: Domain whitelist required in Google Cloud." });
              setIsProcessing(false);
         }
     };
@@ -191,16 +192,25 @@ function SignupFormComponent() {
             </CardHeader>
             <CardContent>
                 {isOffline && (
-                    <Alert variant="destructive" className="mb-6">
+                    <Alert variant="destructive" className="mb-6 border-red-500 bg-red-50 dark:bg-red-950">
                         <AlertCircle className="h-4 w-4" />
-                        <AlertTitle>Connectivity Error</AlertTitle>
-                        <AlertDescription>
-                            Your domain <strong>hostproai.com</strong> is currently blocking the connection to our database.
-                            <p className="mt-2 text-xs font-semibold underline">Required Action:</p>
-                            <p className="text-xs">Follow "Step 2" in the README to whitelist this domain in your Google Cloud Console once your account is verified.</p>
+                        <AlertTitle className="font-bold">Domain Security Block</AlertTitle>
+                        <AlertDescription className="text-xs space-y-2">
+                            <p>Great job! You've completed <strong>Step 1</strong> (Authorized Domains).</p>
+                            <p>However, the <strong>Database</strong> is still blocking <strong>hostproai.com</strong> because of API Key restrictions.</p>
+                            <p className="font-semibold underline">Final Action Required:</p>
+                            <p>Once your Google Cloud account is active, follow <strong>Step 2</strong> in the README to whitelist this domain in the API Credentials section.</p>
                         </AlertDescription>
                     </Alert>
                 )}
+                
+                {!isOffline && (
+                    <div className="mb-6 p-3 bg-green-50 border border-green-200 rounded-lg flex items-center gap-2 text-xs text-green-700">
+                        <ShieldCheck className="h-4 w-4" />
+                        <span>Authorized Domain Check: hostproai.com is active (Step 1 complete).</span>
+                    </div>
+                )}
+
                 <form className="space-y-4" onSubmit={handleSignup}>
                     <div className="space-y-2">
                         <Label htmlFor="username">Username</Label>

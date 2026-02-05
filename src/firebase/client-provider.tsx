@@ -27,7 +27,8 @@ export function FirebaseClientProvider({ children }: { children: ReactNode }) {
       const auth = getAuth(app);
       
       // FORCED LONG POLLING (v1.0.4)
-      // This bypasses WebSocket restrictions often found in AWS firewalls.
+      // This bypasses WebSocket restrictions often found in AWS firewalls and WAFs.
+      // It ensures Firestore uses standard HTTPS traffic.
       const firestore = initializeFirestore(app, {
         experimentalForceLongPolling: true,
         useFetchStreams: false, 
@@ -50,11 +51,13 @@ export function FirebaseClientProvider({ children }: { children: ReactNode }) {
                     <ShieldAlert className="h-5 w-5" />
                     Backend Connection Failed
                 </AlertTitle>
-                <AlertDescription className="mt-2 text-sm">
+                <AlertDescription className="mt-2 text-sm text-left">
                     The application is unable to connect to the Firebase backend. 
                     <br/><br/>
-                    <strong>Required Action:</strong>
-                    <p className="mt-2">Your domain <strong>hostproai.com</strong> must be whitelisted in your Google Cloud Console (See README Step 2).</p>
+                    <strong>Why is this happening?</strong>
+                    <p className="mt-2">Your domain <strong>hostproai.com</strong> is currently unauthorized to access the database. This is a security feature of Google Cloud.</p>
+                    <p className="mt-4 font-bold underline">Required Action (Step 2 in README):</p>
+                    <p className="mt-1">Whitelist this domain in your Google Cloud Console once your account is verified.</p>
                 </AlertDescription>
             </Alert>
         </div>
