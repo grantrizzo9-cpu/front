@@ -3,6 +3,18 @@
 
 Your application is hosted on **AWS Amplify** and accessible at [hostproai.com](https://hostproai.com).
 
+## 🚨 Fix "Backend Connection Failed" / "Client Offline"
+If your live site displays a "Backend Connection Failed" message, follow these steps to whitelist your domain in Google Cloud:
+
+1.  Go to [Google Cloud Console API Credentials](https://console.cloud.google.com/apis/credentials).
+2.  Ensure project `rent-a-host-a55fd` is selected in the top dropdown.
+3.  Click the **Edit** icon next to your **"Browser key (auto-created by Firebase)"**.
+4.  Scroll down to **"Website restrictions"**.
+5.  Add these two entries to the list exactly:
+    *   `https://hostproai.com/*`
+    *   `https://*.hostproai.com/*`
+6.  Click **Save**. It may take up to 5 minutes to take effect.
+
 ## 🛠️ Required Environment Variables (Secrets)
 In your **AWS Amplify Console**, go to **App Settings** -> **Environment Variables**. You **MUST** add these exactly as shown for the site features to work:
 
@@ -14,19 +26,7 @@ In your **AWS Amplify Console**, go to **App Settings** -> **Environment Variabl
 | `PAYPAL_SANDBOX_CLIENT_ID` | PayPal Client ID (Backend) |
 | `PAYPAL_SANDBOX_CLIENT_SECRET` | PayPal Client Secret |
 
-*Note: Firebase configuration is already included in your code and does not need to be added to AWS.*
-
-## 🚨 Resolving "Backend Connection Failed"
-If your live site displays a "Backend Connection Failed" message, follow these steps to whitelist your domain in Google Cloud:
-
-1.  Go to [Google Cloud Console API Credentials](https://console.cloud.google.com/apis/credentials).
-2.  Ensure project `rent-a-host-a55fd` is selected.
-3.  Edit your **"Browser key (auto-created by Firebase)"**.
-4.  Scroll down to **"Website restrictions"**.
-5.  Add these two entries to the list:
-    *   `https://hostproai.com/*`
-    *   `https://*.hostproai.com/*`
-6.  Click **Save**. It may take up to 5 minutes to take effect.
+*Note: Firebase configuration is already included in your code and does not need to be added to AWS secrets.*
 
 ## 🚀 How to Push Changes to GitHub
 Use these commands in your terminal to update your live site:
