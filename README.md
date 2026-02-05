@@ -10,7 +10,7 @@ Those `13.249` records are your **Amazon (AWS)** records. If you follow the Fire
 ---
 
 ## 🌐 How to fix the "Backend Connection Failed" / "Client Offline" error
-If your site loads but says "Offline", your Firebase backend is rejecting the connection from your domain.
+If your site loads but says "Offline" or fails to create an account, your Firebase backend is rejecting the connection from your domain. You must complete BOTH steps below.
 
 ### Step 1: Authorize Domain in Firebase Auth (Free & Immediate)
 1. Go to the [Firebase Console](https://console.firebase.google.com/).
@@ -18,15 +18,17 @@ If your site loads but says "Offline", your Firebase backend is rejecting the co
 3. Go to **Build** -> **Authentication** -> **Settings** -> **Authorized domains**.
 4. Click **Add domain** and enter: `hostproai.com`.
 5. Click **Add domain** again and enter: `*.hostproai.com`.
-*This tells Firebase that your AWS domain is "safe" to talk to.*
+*This tells Firebase Auth that your AWS domain is "safe".*
 
-### Step 2: Whitelist in Google Cloud (Only after Account Approval)
-Once your Google Cloud account is approved, perform this step:
+### Step 2: Whitelist in Google Cloud (Required for Database/Firestore)
+Even if you did Step 1, Firestore will fail unless you do this:
 1. Go to [Google Cloud API Credentials](https://console.cloud.google.com/apis/credentials).
 2. Select project **`rent-a-host-a55fd`**.
-3. Edit the **"Browser key (auto-created by Firebase)"**.
-4. Under **"Website restrictions"**, add `https://hostproai.com/*` and `https://*.hostproai.com/*`.
-5. Click **Save**.
+3. Edit the key named **"Browser key (auto-created by Firebase)"**.
+4. Scroll to **"Website restrictions"**.
+5. Add `https://hostproai.com/*` and `https://*.hostproai.com/*`.
+6. Click **Save**. 
+*Note: It can take up to 5 minutes for Google to update this global restriction.*
 
 ---
 

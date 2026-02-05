@@ -5,7 +5,7 @@ import React, { useMemo, type ReactNode } from 'react';
 import { FirebaseProvider } from '@/firebase/provider';
 import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
-import { getFirestore, enableMultiTabIndexedDbPersistence } from 'firebase/firestore';
+import { getFirestore } from 'firebase/firestore';
 import { firebaseConfig } from '@/firebase/config';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { CloudOff, ShieldAlert } from 'lucide-react';
@@ -23,16 +23,8 @@ export function FirebaseClientProvider({ children }: { children: ReactNode }) {
       const auth = getAuth(app);
       const firestore = getFirestore(app);
 
-      // Enable offline persistence to handle connection gaps
-      if (typeof window !== 'undefined') {
-        enableMultiTabIndexedDbPersistence(firestore).catch((err) => {
-          if (err.code === 'failed-precondition') {
-            console.warn("Firestore persistence: Multiple tabs open.");
-          } else if (err.code === 'unimplemented') {
-            console.warn("Firestore persistence: Browser not supported.");
-          }
-        });
-      }
+      // Persistence is disabled temporarily to fix the "Offline" hang on custom domains
+      // until the Google Cloud Whitelisting is completed by the user.
 
       return { firebaseApp: app, auth, firestore };
     } catch (e: any) {
