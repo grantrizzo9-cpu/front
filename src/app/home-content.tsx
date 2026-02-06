@@ -1,10 +1,9 @@
-
 'use client';
 
 import { Header } from '@/components/header';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { CheckCircle, ArrowRight, TrendingUp, Zap, Shield, Sparkles, Globe, Cpu } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { ArrowRight, TrendingUp, Zap, Shield, Sparkles, Globe, Cpu } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Footer } from '@/components/footer';
@@ -25,6 +24,7 @@ export function HomeContent() {
       excerpt: "Traditional net-30 and net-60 payouts are killing your cash flow. We explore why real-time rewards are essential for high-velocity scaling.",
       date: "Nov 12, 2024",
       category: "Market Analysis",
+      slug: "daily-payouts",
       icon: <TrendingUp className="h-5 w-5" />
     },
     {
@@ -32,6 +32,7 @@ export function HomeContent() {
       excerpt: "Leveraging Large Language Models to generate copy isn't just a trend—it's a requirement for modern affiliate marketers.",
       date: "Nov 10, 2024",
       category: "Technical Guide",
+      slug: "ai-edge",
       icon: <Cpu className="h-5 w-5" />
     },
     {
@@ -39,6 +40,7 @@ export function HomeContent() {
       excerpt: "Stop paying for hosting and start getting paid for it. How our integrated ecosystem turns a business expense into a recurring asset.",
       date: "Nov 08, 2024",
       category: "Strategy",
+      slug: "infrastructure-income",
       icon: <Globe className="h-5 w-5" />
     }
   ];
@@ -62,7 +64,7 @@ export function HomeContent() {
               </h1>
               
               <p className="text-xl md:text-2xl text-slate-600 font-medium max-w-2xl mx-auto leading-relaxed">
-                Experience an ecosystem where high-performance hosting meets aggressive 70%-75% daily commissions. Built for those who demand more than 'standard'.
+                Experience an ecosystem where high-performance hosting meets aggressive 70% daily commissions. Built for those who demand more than 'standard'.
               </p>
               
               <div className="flex flex-col sm:flex-row justify-center gap-4 pt-4">
@@ -85,27 +87,31 @@ export function HomeContent() {
                 <h2 className="font-headline text-3xl md:text-4xl font-bold text-red-600 m-0">Latest Platform Updates</h2>
                 <p className="text-slate-600 text-lg max-w-xl">Deep dives into market dynamics, technical optimizations, and affiliate strategy.</p>
               </div>
-              <Button variant="link" className="text-blue-600 font-bold group">
-                Visit Knowledge Base <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+              <Button variant="link" className="text-blue-600 font-bold group" asChild>
+                <Link href="/insights">
+                  Visit Knowledge Base <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+                </Link>
               </Button>
             </div>
 
             <div className="grid gap-6 md:grid-cols-3">
               {blogPosts.map((post, i) => (
-                <Card key={i} className="bg-white hover:border-blue-200 transition-all duration-300 group cursor-pointer border-slate-200 shadow-sm">
-                  <CardHeader className="space-y-4">
-                    <div className="flex items-center justify-between text-xs font-bold uppercase tracking-widest text-blue-600">
-                      <span className="flex items-center gap-2">{post.icon} {post.category}</span>
-                      <span className="text-slate-400">{post.date}</span>
-                    </div>
-                    <CardTitle className="text-xl md:text-2xl font-headline group-hover:text-red-600 transition-colors leading-tight">
-                      {post.title}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-slate-600 leading-relaxed">{post.excerpt}</p>
-                  </CardContent>
-                </Card>
+                <Link key={i} href={`/insights/${post.slug}`}>
+                  <Card className="bg-white h-full hover:border-blue-400 hover:shadow-md transition-all duration-300 group cursor-pointer border-slate-200 shadow-sm">
+                    <CardHeader className="space-y-4">
+                      <div className="flex items-center justify-between text-xs font-bold uppercase tracking-widest text-blue-600">
+                        <span className="flex items-center gap-2">{post.icon} {post.category}</span>
+                        <span className="text-slate-400">{post.date}</span>
+                      </div>
+                      <CardTitle className="text-xl md:text-2xl font-headline group-hover:text-red-600 transition-colors leading-tight">
+                        {post.title}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-slate-600 leading-relaxed">{post.excerpt}</p>
+                    </CardContent>
+                  </Card>
+                </Link>
               ))}
             </div>
           </div>
@@ -141,7 +147,7 @@ export function HomeContent() {
               
               <div className="grid gap-6">
                 {[
-                  { title: "Aggressive Commissions", desc: "Up to 75% recurring payouts, tracked with precision-engineered cookies.", icon: <Zap className="text-blue-600" /> },
+                  { title: "Aggressive Commissions", desc: "Start at 70% recurring payouts, scaling to 75% after your 10th referral.", icon: <Zap className="text-blue-600" /> },
                   { title: "Daily PayPal Sync", desc: "Your earnings are processed and dispatched every 24 hours without fail.", icon: <TrendingUp className="text-blue-600" /> },
                   { title: "AI-Powered Content", desc: "Built-in LLM tools to generate landing pages, ads, and blogs in seconds.", icon: <Cpu className="text-blue-600" /> }
                 ].map((item, i) => (

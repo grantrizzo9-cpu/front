@@ -96,7 +96,7 @@ function SignupFormComponent() {
                 planPurchased: plan.name,
                 grossSale: 0,
                 commission: 0,
-                status: 'paid' as const,
+                status: 'unpaid' as const,
                 activationStatus: 'pending' as const,
                 date: serverTimestamp(),
                 subscriptionId: user.uid,
@@ -136,7 +136,6 @@ function SignupFormComponent() {
             console.error("Signup error:", error);
             let description = error.message || "An unknown error occurred.";
             
-            // Check for common connectivity/restriction errors
             if (description.includes("offline") || description.includes("network-request-failed") || description.includes("failed-precondition") || description.includes("permission-denied")) {
                 setIsOffline(true);
                 description = "Database Connection Blocked: Your domain 'hostproai.com' is registered but not yet whitelisted in Google Cloud (README Step 2).";
@@ -148,7 +147,7 @@ function SignupFormComponent() {
     };
     
     return (
-        <Card>
+        <Card className="shadow-xl">
             <CardHeader>
                 <CardTitle className="font-headline text-2xl">Create Your Account</CardTitle>
                 <CardDescription>
@@ -198,7 +197,7 @@ function SignupFormComponent() {
                             <span>You were referred by: <span className="font-semibold">{referralCode}</span></span>
                         </div>
                     )}
-                    <Button type="submit" className="w-full" disabled={!isFormValid || isProcessing}>
+                    <Button type="submit" className="w-full h-12 text-lg font-bold" disabled={!isFormValid || isProcessing}>
                         {isProcessing ? <Loader2 className="animate-spin" /> : "Create Account & Proceed"}
                     </Button>
                 </form>
@@ -206,7 +205,7 @@ function SignupFormComponent() {
             <CardFooter>
                  <div className="mt-4 text-center text-sm w-full">
                     Already have an account?{" "}
-                    <Link href="/login" className="text-primary hover:underline">Log in</Link>
+                    <Link href="/login" className="text-primary hover:underline font-bold">Log in</Link>
                 </div>
             </CardFooter>
         </Card>

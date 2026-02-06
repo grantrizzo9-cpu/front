@@ -63,7 +63,7 @@ export default function LoginPage() {
   };
 
   return (
-    <Card>
+    <Card className="shadow-xl">
       <CardHeader>
         <CardTitle className="font-headline text-2xl">Access Your Account</CardTitle>
         <CardDescription>Log in or create an account to get started.</CardDescription>
@@ -77,19 +77,19 @@ export default function LoginPage() {
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <Label htmlFor="password">Password</Label>
-              <Link href="/forgot-password" className="text-sm text-muted-foreground hover:text-primary">
+              <Link href="/forgot-password" name="forgot-password-link" className="text-sm text-muted-foreground hover:text-primary">
                 Forgot password?
               </Link>
             </div>
             <Input id="password" name="password" type="password" required disabled={isLoading}/>
           </div>
-          <Button type="submit" className="w-full" disabled={isLoading}>
+          <Button type="submit" className="w-full h-12 text-lg font-bold" disabled={isLoading}>
             {isLoading ? <Loader2 className="animate-spin" /> : "Log In"}
           </Button>
         </form>
         <div className="mt-4 text-center text-sm">
           Don't have an account?{" "}
-          <Link href="/signup" className="text-primary hover:underline">
+          <Link href="/signup" className="text-primary hover:underline font-bold">
             Sign up
           </Link>
         </div>
