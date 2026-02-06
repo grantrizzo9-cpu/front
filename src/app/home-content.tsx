@@ -3,7 +3,7 @@
 import { Header } from '@/components/header';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowRight, TrendingUp, Zap, Shield, Sparkles, Globe, Cpu } from 'lucide-react';
+import { ArrowRight, TrendingUp, Zap, Shield, Sparkles, Globe, Cpu, HelpCircle } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Footer } from '@/components/footer';
@@ -11,6 +11,12 @@ import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { useSearchParams } from 'next/navigation';
 import { PricingCards } from './pricing/pricing-cards';
 import { Suspense } from 'react';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 
 function HomeInner() {
   const searchParams = useSearchParams();
@@ -43,6 +49,29 @@ function HomeInner() {
       category: "Strategy",
       slug: "infrastructure-income",
       icon: <Globe className="h-5 w-5" />
+    }
+  ];
+
+  const faqs = [
+    {
+      question: "How does the 70% commission structure work?",
+      answer: "You start with a market-leading 70% recurring commission on every active referral from day one. This is not a one-time bonus; it is a lifetime share of the revenue for as long as your referral remains a customer."
+    },
+    {
+      question: "When do I reach the 75% commission milestone?",
+      answer: "Once you achieve 10 active referrals, your account is automatically upgraded to our 'Elite' tier. From that moment forward, you earn a massive 75% recurring commission on all existing and future referrals."
+    },
+    {
+      question: "How often are affiliate payouts processed?",
+      answer: "We believe in high-velocity cash flow. Payouts are processed and dispatched to your PayPal account every 24 hours. There are no 'Net-30' holds or arbitrary delays."
+    },
+    {
+      question: "What makes this hosting different for affiliates?",
+      answer: "We don't just provide space on a server; we provide a conversion engine. Our integrated AI tools allow your referrals to build high-converting sites instantly, meaning they stay customers longer, increasing your total lifetime earnings."
+    },
+    {
+      question: "Is there a minimum threshold for payouts?",
+      answer: "No. We do not believe in holding your hard-earned revenue. If you have earned commissions, they are synced and sent during our daily payout cycle regardless of the amount."
     }
   ];
 
@@ -83,12 +112,12 @@ function HomeInner() {
         <div className="container">
           <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-6 text-left">
             <div className="space-y-4">
-              <h2 className="font-headline text-3xl md:text-4xl font-bold text-red-600 m-0">Latest Platform Updates</h2>
+              <h2 className="font-headline text-3xl md:text-4xl font-bold text-red-600 m-0 uppercase tracking-tight">Latest Platform Updates</h2>
               <p className="text-slate-600 text-lg max-w-xl">Deep dives into market dynamics, technical optimizations, and affiliate strategy.</p>
             </div>
-            <Button variant="link" className="text-blue-600 font-bold group" asChild>
+            <Button variant="link" className="text-blue-600 font-bold group text-lg" asChild>
               <Link href="/insights">
-                Visit Knowledge Base <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+                Visit Knowledge Base <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
               </Link>
             </Button>
           </div>
@@ -116,7 +145,7 @@ function HomeInner() {
         </div>
       </section>
 
-      {/* Detailed Program Breakdown */}
+      {/* Breakdown Section */}
       <section className="py-24">
         <div className="container grid gap-16 lg:grid-cols-2 items-center">
           <div className="relative aspect-square md:aspect-video rounded-3xl overflow-hidden border border-slate-200 shadow-xl group">
@@ -137,8 +166,8 @@ function HomeInner() {
           </div>
           
           <div className="space-y-8 text-left">
-            <h2 className="text-left font-headline text-4xl md:text-5xl font-extrabold tracking-tight leading-tight m-0 text-red-600">
-              A Platform Engineered for <span className="text-blue-600">Performance & Profit</span>
+            <h2 className="text-left font-headline text-4xl md:text-5xl font-extrabold tracking-tight leading-tight m-0 text-red-600 uppercase">
+              PLATFORM PERFORMANCE <span className="text-blue-600">& PROFIT</span>
             </h2>
             <p className="text-lg text-slate-600 leading-relaxed">
               Most affiliate programs are an afterthought. Ours is the foundation. We've built a high-availability hosting infrastructure and layered it with premium AI tools, creating a product that users never want to leave.
@@ -169,35 +198,55 @@ function HomeInner() {
       <section id="packages" className="py-24 bg-slate-50 border-y border-slate-200">
         <div className="container text-center space-y-12">
           <div className="max-w-3xl mx-auto space-y-4">
-            <h2 className="font-headline text-4xl md:text-6xl font-bold m-0 tracking-tight text-red-600">Select Your Configuration</h2>
+            <h2 className="font-headline text-4xl md:text-6xl font-bold m-0 tracking-tight text-red-600 uppercase">Select Your Configuration</h2>
             <p className="text-slate-600 text-lg md:text-xl">Every plan acts as a gateway to our high-ticket affiliate network.</p>
           </div>
           
           <PricingCards />
-          
-          <div className="flex flex-wrap justify-center items-center gap-8 pt-8 opacity-60">
-            <div className="flex items-center gap-2 font-headline font-bold text-xl text-slate-400"><Shield className="h-6 w-6 text-blue-600" /> SECURE CORE</div>
-            <div className="flex items-center gap-2 font-headline font-bold text-xl text-slate-400"><Zap className="h-6 w-6 text-blue-600" /> RAPID EDGE</div>
-            <div className="flex items-center gap-2 font-headline font-bold text-xl text-slate-400"><Globe className="h-6 w-6 text-blue-600" /> GLOBAL REACH</div>
-          </div>
         </div>
       </section>
 
-      {/* Large Final Action */}
-      <section className="py-32 relative overflow-hidden bg-white">
+      {/* FAQ Section */}
+      <section id="faq" className="py-24 bg-white">
+        <div className="container max-w-4xl">
+          <div className="text-center mb-16 space-y-4">
+            <h2 className="font-headline text-4xl md:text-5xl font-bold text-red-600 m-0 uppercase tracking-tight">Frequently Asked Questions</h2>
+            <p className="text-slate-600 text-lg">Everything you need to know about our infrastructure and rewards.</p>
+          </div>
+          
+          <Accordion type="single" collapsible className="w-full space-y-4">
+            {faqs.map((faq, index) => (
+              <AccordionItem key={index} value={`item-${index}`} className="border rounded-2xl px-6 bg-slate-50/50 overflow-hidden transition-all data-[state=open]:border-blue-200 data-[state=open]:bg-white">
+                <AccordionTrigger className="text-left text-lg font-bold hover:no-underline py-6">
+                  <div className="flex items-center gap-4">
+                    <HelpCircle className="h-5 w-5 text-blue-600 shrink-0" />
+                    <span>{faq.question}</span>
+                  </div>
+                </AccordionTrigger>
+                <AccordionContent className="text-slate-600 text-lg leading-relaxed pb-6">
+                  {faq.answer}
+                </AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
+        </div>
+      </section>
+
+      {/* Final Action */}
+      <section className="py-32 relative overflow-hidden bg-slate-900 text-white">
         <div className="container relative z-10 text-center max-w-4xl space-y-10">
-          <h2 className="font-headline text-5xl md:text-7xl font-extrabold tracking-tighter leading-[1.1] m-0 text-slate-900">
+          <h2 className="font-headline text-5xl md:text-7xl font-extrabold tracking-tighter leading-[1.1] m-0">
             Ready to Shift Your <br />
             <span className="text-red-600">Income Velocity?</span>
           </h2>
-          <p className="text-xl md:text-2xl text-slate-600 font-medium max-w-2xl mx-auto leading-relaxed">
+          <p className="text-xl md:text-2xl text-slate-300 font-medium max-w-2xl mx-auto leading-relaxed">
             Join the elite circle of affiliates who leverage premium infrastructure to drive daily results. Start with 70% and scale to 75%.
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-6">
             <Button size="lg" className="h-16 px-12 text-xl font-bold rounded-2xl bg-blue-600 hover:bg-blue-700 text-white shadow-xl shadow-blue-200 transition-transform hover:scale-[1.02]" asChild>
               <Link href={signupLink}>Start Your 3-Day Trial</Link>
             </Button>
-            <Button size="lg" variant="outline" className="h-16 px-12 text-xl font-bold rounded-2xl border-slate-200 hover:bg-slate-50" asChild>
+            <Button size="lg" variant="outline" className="h-16 px-12 text-xl font-bold rounded-2xl border-slate-700 bg-white/5 hover:bg-white/10 text-white" asChild>
               <Link href="/about">Meet the Founders</Link>
             </Button>
           </div>
