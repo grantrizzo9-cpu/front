@@ -42,12 +42,13 @@
   }
   body {
     @apply bg-background text-foreground;
-    font-feature-settings: "rlig" 1, "calt" 1;
+    font-feature-settings: "rlig" 1, "alt" 1;
   }
 }
 
+/* Zero-Latency Snap Components */
 .glass-card {
-  @apply bg-white/80 backdrop-blur-md border border-slate-200 shadow-sm;
+  @apply bg-white border border-slate-200 shadow-sm;
 }
 
 .hero-gradient {
@@ -60,4 +61,9 @@
 
 .heading-red {
   @apply text-red-600;
+}
+
+/* Remove all delay-inducing transitions for Dashboard snapping */
+.animate-in {
+    animation-duration: 0s !important;
 }

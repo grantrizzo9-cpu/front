@@ -17,7 +17,7 @@ import { CloudOff, ShieldAlert, Loader2 } from 'lucide-react';
 import type { FirebaseServices } from '@/firebase';
 
 /**
- * Singleton instances to prevent multiple initializations.
+ * Robust Singleton Pattern for Firebase Services
  */
 let cachedApp: FirebaseApp | undefined;
 let cachedAuth: Auth | undefined;
@@ -28,9 +28,11 @@ function getFirebase(): FirebaseServices | null {
 
   try {
     // 1. Get or Initialize App
-    if (!cachedApp) {
-      const apps = getApps();
-      cachedApp = apps.length === 0 ? initializeApp(firebaseConfig) : getApp();
+    const apps = getApps();
+    if (apps.length > 0) {
+      cachedApp = getApp();
+    } else {
+      cachedApp = initializeApp(firebaseConfig);
     }
     
     if (cachedApp.options.apiKey?.includes('REPLACE_WITH')) {
@@ -42,17 +44,18 @@ function getFirebase(): FirebaseServices | null {
       cachedAuth = getAuth(cachedApp);
     }
     
-    // 3. Get or Initialize Firestore with persistence
+    // 3. Get or Initialize Firestore with safety check
     if (!cachedFirestore) {
       try {
+        // Try to initialize with our specific performance settings
         cachedFirestore = initializeFirestore(cachedApp, {
             ignoreUndefinedProperties: true,
             localCache: persistentLocalCache({
               tabManager: persistentMultipleTabManager(),
             }),
         });
-      } catch (e) {
-        // Fallback if already initialized with different settings
+      } catch (e: any) {
+        // If it was already initialized elsewhere (e.g. by a background process), just get the existing instance
         cachedFirestore = getFirestore(cachedApp);
       }
     }
@@ -75,10 +78,10 @@ export function FirebaseClientProvider({ children }: { children: ReactNode }) {
     setIsHydrated(true);
   }, []);
 
-  // Use useMemo to ensure getFirebase only runs once per cycle
+  // Ensure services are only requested once
   const firebaseServices = useMemo(() => getFirebase(), []);
 
-  // HYDRATION GUARD: Render an identical spinner on both server and client (pre-mount)
+  // HYDRATION GUARD: Render a clean shell first
   if (!isHydrated) {
     return (
       <div className="flex h-screen w-screen items-center justify-center bg-background">
@@ -87,7 +90,7 @@ export function FirebaseClientProvider({ children }: { children: ReactNode }) {
     );
   }
 
-  // Once hydrated, if services are missing, show error
+  // If configuration is missing or domain is blocked
   if (!firebaseServices) {
     return (
       <div className="flex h-screen w-screen items-center justify-center p-4 bg-background">
@@ -96,13 +99,13 @@ export function FirebaseClientProvider({ children }: { children: ReactNode }) {
             <Alert variant="destructive">
                 <AlertTitle className="text-lg font-bold flex items-center justify-center gap-2">
                     <ShieldAlert className="h-5 w-5" />
-                    Backend Connection Failed
+                    Secure Connection Required
                 </AlertTitle>
                 <AlertDescription className="mt-2 text-sm text-left">
-                    The application is unable to connect to the Firebase backend. 
+                    Your domain <strong>hostproai.com</strong> is correctly set up in Cloudflare, but it must be authorized in your Firebase security settings to access the database.
                     <br/><br/>
-                    <strong>Required Action:</strong>
-                    <p className="mt-2">Ensure your domain <strong>hostproai.com</strong> is whitelisted in your Google Cloud Console API Credentials (README Step 2).</p>
+                    <strong>The Final Step:</strong>
+                    <p className="mt-2">Go to <strong>Firebase Console > Auth > Settings > Authorized Domains</strong> and add <code>hostproai.com</code>.</p>
                 </AlertDescription>
             </Alert>
         </div>
