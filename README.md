@@ -45,7 +45,10 @@ Before deploying to Cloudflare, your code must be on GitHub. Run these commands 
     - Click **"Edit variables"** > **"Bulk edit"**.
     - Copy your entire `.env` file and paste it in. Click **Save**.
 
-4.  **Deploy**: Click **Save and Deploy**.
+4.  **Connect Your Domain**:
+    - After deployment, go to the **"Custom domains"** tab in your Pages project.
+    - Click **"Set up a custom domain"** and enter your domain (e.g., `yourdomain.com`).
+    - Cloudflare will automatically handle the DNS settings for you.
 
 ---
 
@@ -54,13 +57,13 @@ Before deploying to Cloudflare, your code must be on GitHub. Run these commands 
 ### Step 1: Authorize Domain in Firebase Auth
 1. Go to [Firebase Console](https://console.firebase.google.com/).
 2. **Build** -> **Authentication** -> **Settings** -> **Authorized domains**.
-3. Add your specific Cloudflare domain (e.g., `your-app.pages.dev`).
+3. Add your specific custom domain (e.g., `yourdomain.com`). This is required for Login/Signup to work.
 
 ### Step 2: Whitelist in Google Cloud (Critical)
 1. Go to [Google Cloud API Credentials](https://console.cloud.google.com/apis/credentials).
 2. Edit **"Browser key (auto-created by Firebase)"**.
 3. Under **"Website restrictions"**, add:
-   - `https://your-app.pages.dev/*`
+   - `https://yourdomain.com/*`
 4. Click **Save**.
 
 ---

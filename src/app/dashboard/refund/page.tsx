@@ -205,7 +205,7 @@ export default function RequestRefundPage() {
                     </CardFooter>
                     </form>
                 </Card>
-            ) : !hasPendingRequest && !userData?.subscription && (
+            ) : !hasPendingRequest && !userData?.subscription && !isLoadingData && (
                 <Card>
                     <CardHeader>
                         <CardTitle>No Active Subscription</CardTitle>
