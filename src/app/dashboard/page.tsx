@@ -1,4 +1,3 @@
-
 'use client';
 
 import { StatCard } from "@/components/stat-card";
@@ -21,6 +20,16 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 function StatSkeleton() {
     return <Skeleton className="h-24 w-full" />;
+}
+
+function TableSkeleton() {
+    return (
+        <div className="space-y-3">
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-10 w-full" />
+        </div>
+    );
 }
 
 export default function DashboardPage() {
@@ -96,26 +105,29 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-8 animate-in fade-in duration-300">
-        {!isAdminLoading && isPlatformOwner && (
+        {/* Instant Shell Admin */}
+        {isPlatformOwner && (
             <div className="space-y-6 border-b border-dashed pb-8">
                 <div>
                     <h1 className="text-3xl font-bold font-headline heading-red">Admin Dashboard</h1>
                     <p className="text-muted-foreground">Global Platform Overview</p>
                 </div>
 
-                {allPlatformReferralsLoading || !platformStats ? (
-                    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                        <StatSkeleton />
-                        <StatSkeleton />
-                        <StatSkeleton />
-                    </div>
-                ) : (
-                    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 animate-in slide-in-from-top-2">
-                        <StatCard title="Total Platform Revenue" value={`$${platformStats.platformRevenue.toFixed(2)}`} icon={<TrendingUp className="text-blue-600" />} />
-                        <StatCard title="Total Payouts" value={`$${platformStats.totalAffiliatePayouts.toFixed(2)}`} icon={<DollarSign className="text-blue-600" />} />
-                        <StatCard title="Active Referrals" value={`${platformStats.totalPlatformReferrals}`} icon={<UserPlus className="text-blue-600" />} />
-                    </div>
-                )}
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                    {allPlatformReferralsLoading || !platformStats ? (
+                        <>
+                            <StatSkeleton />
+                            <StatSkeleton />
+                            <StatSkeleton />
+                        </>
+                    ) : (
+                        <>
+                            <StatCard title="Total Platform Revenue" value={`$${platformStats.platformRevenue.toFixed(2)}`} icon={<TrendingUp className="text-blue-600" />} />
+                            <StatCard title="Total Payouts" value={`$${platformStats.totalAffiliatePayouts.toFixed(2)}`} icon={<DollarSign className="text-blue-600" />} />
+                            <StatCard title="Active Referrals" value={`${platformStats.totalPlatformReferrals}`} icon={<UserPlus className="text-blue-600" />} />
+                        </>
+                    )}
+                </div>
             </div>
         )}
 
@@ -137,7 +149,7 @@ export default function DashboardPage() {
             )}
 
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                {isUserLoading || personalReferralsLoading || !personalStats ? (
+                {personalReferralsLoading || !personalStats ? (
                     <>
                         <StatSkeleton />
                         <StatSkeleton />
@@ -168,11 +180,7 @@ export default function DashboardPage() {
                     <CardHeader><CardTitle>Recent Referrals</CardTitle></CardHeader>
                     <CardContent>
                         {recentReferralsLoading ? (
-                            <div className="space-y-3">
-                                <Skeleton className="h-10 w-full" />
-                                <Skeleton className="h-10 w-full" />
-                                <Skeleton className="h-10 w-full" />
-                            </div>
+                            <TableSkeleton />
                         ) : recentReferrals && recentReferrals.length > 0 ? (
                             <Table>
                                 <TableHeader>

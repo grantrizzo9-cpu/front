@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useMemo, useState, useEffect } from "react";
@@ -51,7 +50,6 @@ export default function AdminHostingPage() {
     setProcessingId(user.id);
     
     const userDocRef = doc(firestore, 'users', user.id);
-    
     updateDocumentNonBlocking(userDocRef, { 
         'customDomain.status': 'connected' 
     });
@@ -60,7 +58,6 @@ export default function AdminHostingPage() {
       title: "Domain Connected",
       description: `User ${user.username} has been notified that ${user.customDomain.name} is live.`,
     });
-    
     setProcessingId(null);
   };
 
@@ -101,7 +98,6 @@ export default function AdminHostingPage() {
         <CardContent>
             {usersLoading ? (
                 <div className="space-y-3">
-                    <Skeleton className="h-10 w-full" />
                     <Skeleton className="h-10 w-full" />
                     <Skeleton className="h-10 w-full" />
                 </div>

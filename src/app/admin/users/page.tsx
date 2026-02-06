@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useMemo, useState, useEffect } from 'react';
@@ -15,6 +14,16 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useRouter } from "next/navigation";
+
+function UserTableSkeleton() {
+    return (
+        <div className="space-y-3">
+            <Skeleton className="h-12 w-full" />
+            <Skeleton className="h-12 w-full" />
+            <Skeleton className="h-12 w-full" />
+        </div>
+    );
+}
 
 export default function AdminUsersPage() {
   const { toast } = useToast();
@@ -80,11 +89,7 @@ export default function AdminUsersPage() {
         </CardHeader>
         <CardContent>
              {usersLoading || rolesLoading || isAdminLoading ? (
-                <div className="space-y-3">
-                    <Skeleton className="h-12 w-full" />
-                    <Skeleton className="h-12 w-full" />
-                    <Skeleton className="h-12 w-full" />
-                </div>
+                <UserTableSkeleton />
             ) : users && users.length > 0 ? (
               <Table>
                 <TableHeader>

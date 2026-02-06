@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Button } from "@/components/ui/button";
@@ -15,6 +14,15 @@ import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { subscriptionTiers } from "@/lib/data";
 import { Skeleton } from "@/components/ui/skeleton";
+
+function RefundTableSkeleton() {
+    return (
+        <div className="space-y-3">
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-10 w-full" />
+        </div>
+    );
+}
 
 export default function RequestRefundPage() {
   const { user, isUserLoading } = useUser();
@@ -100,8 +108,8 @@ export default function RequestRefundPage() {
         });
   };
 
-  const isLoading = isUserLoading || isLoadingRequests || isUserDataLoading;
-  const showForm = !hasPendingRequest && !isLoading && !!userData?.subscription;
+  const isLoadingData = isUserDataLoading || isLoadingRequests;
+  const showForm = !hasPendingRequest && !isLoadingData && !!userData?.subscription;
 
   return (
     <div className="space-y-8 max-w-3xl animate-in fade-in duration-300">
@@ -110,104 +118,102 @@ export default function RequestRefundPage() {
         <p className="text-muted-foreground">Submit a refund request or view the status of your existing requests.</p>
       </div>
       
-      {isLoading && (
+      {isLoadingData ? (
         <Card>
             <CardHeader><Skeleton className="h-8 w-1/2" /></CardHeader>
-            <CardContent className="space-y-3">
-                <Skeleton className="h-10 w-full" />
-                <Skeleton className="h-10 w-full" />
-            </CardContent>
-        </Card>
-      )}
-
-      {refundRequests && refundRequests.length > 0 && !isLoadingRequests && (
-         <Card>
-            <CardHeader>
-                <CardTitle>Your Refund Requests</CardTitle>
-                <CardDescription>A history of all your submitted refund requests.</CardDescription>
-            </CardHeader>
             <CardContent>
-                <Table>
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead>Date Requested</TableHead>
-                            <TableHead>Reason</TableHead>
-                            <TableHead className="text-right">Status</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {refundRequests.map(request => (
-                            <TableRow key={request.id}>
-                                <TableCell>{request.requestedAt ? format(request.requestedAt.toDate(), 'PP') : "Pending..."}</TableCell>
-                                <TableCell className="max-w-xs truncate">{request.reason}</TableCell>
-                                <TableCell className="text-right">
-                                    <Badge variant={
-                                        request.status === 'processed' ? 'secondary' 
-                                        : request.status === 'pending' ? 'default' 
-                                        : 'destructive'
-                                    }
-                                    className={request.status === 'pending' ? 'bg-amber-500 hover:bg-amber-600 text-white' : ''}
-                                    >
-                                        {request.status}
-                                    </Badge>
-                                </TableCell>
-                            </TableRow>
-                        ))}
-                    </TableBody>
-                </Table>
+                <RefundTableSkeleton />
             </CardContent>
         </Card>
-      )}
+      ) : (
+        <>
+            {refundRequests && refundRequests.length > 0 && (
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Your Refund Requests</CardTitle>
+                        <CardDescription>A history of all your submitted refund requests.</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>Date Requested</TableHead>
+                                    <TableHead>Reason</TableHead>
+                                    <TableHead className="text-right">Status</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {refundRequests.map(request => (
+                                    <TableRow key={request.id}>
+                                        <TableCell>{request.requestedAt ? format(request.requestedAt.toDate(), 'PP') : "Pending..."}</TableCell>
+                                        <TableCell className="max-w-xs truncate">{request.reason}</TableCell>
+                                        <TableCell className="text-right">
+                                            <Badge variant={
+                                                request.status === 'processed' ? 'secondary' 
+                                                : request.status === 'pending' ? 'default' 
+                                                : 'destructive'
+                                            }
+                                            className={request.status === 'pending' ? 'bg-amber-500 hover:bg-amber-600 text-white' : ''}
+                                            >
+                                                {request.status}
+                                            </Badge>
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </CardContent>
+                </Card>
+            )}
 
-      {showForm && (
-        <Card className="animate-in slide-in-from-bottom-2">
-            <form onSubmit={handleSubmit}>
-              <CardHeader>
-                <CardTitle>New Refund Request</CardTitle>
-                <CardDescription>
-                  Your refund will be for your initial one-day payment. Please provide a reason below.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Textarea 
-                    id="reason"
-                    name="reason"
-                    placeholder="Please tell us why you are requesting a refund..." 
-                    required 
-                    rows={6}
-                    value={reason}
-                    onChange={(e) => setReason(e.target.value)}
-                    disabled={isSubmitting}
-                />
-              </CardContent>
-              <CardFooter>
-                <Button type="submit" disabled={isSubmitting}>
-                  {isSubmitting ? (
-                    <>
-                      <Loader2 className="animate-spin mr-2" />
-                      Submitting...
-                    </>
-                  ) : (
-                    <>
-                      <ShieldQuestion className="mr-2" />
-                      Submit Refund Request
-                    </>
-                  )}
-                </Button>
-              </CardFooter>
-            </form>
-        </Card>
+            {showForm ? (
+                <Card className="animate-in slide-in-from-bottom-2">
+                    <form onSubmit={handleSubmit}>
+                    <CardHeader>
+                        <CardTitle>New Refund Request</CardTitle>
+                        <CardDescription>
+                        Your refund will be for your initial one-day payment. Please provide a reason below.
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <Textarea 
+                            id="reason"
+                            name="reason"
+                            placeholder="Please tell us why you are requesting a refund..." 
+                            required 
+                            rows={6}
+                            value={reason}
+                            onChange={(e) => setReason(e.target.value)}
+                            disabled={isSubmitting}
+                        />
+                    </CardContent>
+                    <CardFooter>
+                        <Button type="submit" disabled={isSubmitting}>
+                        {isSubmitting ? (
+                            <>
+                            <Loader2 className="animate-spin mr-2" />
+                            Submitting...
+                            </>
+                        ) : (
+                            <>
+                            <ShieldQuestion className="mr-2" />
+                            Submit Refund Request
+                            </>
+                        )}
+                        </Button>
+                    </CardFooter>
+                    </form>
+                </Card>
+            ) : !hasPendingRequest && !userData?.subscription && (
+                <Card>
+                    <CardHeader>
+                        <CardTitle>No Active Subscription</CardTitle>
+                        <CardDescription>You can only request a refund if you have an active subscription or have recently paid the activation fee.</CardDescription>
+                    </CardHeader>
+                </Card>
+            )}
+        </>
       )}
-      
-       {!isLoading && (!refundRequests || refundRequests.length === 0) && !showForm && (
-         <Card>
-            <CardHeader>
-                 <CardTitle>No Active Subscription</CardTitle>
-                 <CardDescription>You can only request a refund if you have an active subscription or have recently paid the activation fee.</CardDescription>
-            </CardHeader>
-         </Card>
-       )}
-
     </div>
   );
 }

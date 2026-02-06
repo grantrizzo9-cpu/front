@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -47,7 +46,7 @@ export function UpgradeContent() {
         }
     }, [searchParams, userData]);
 
-    const isLoading = isUserLoading || isUserDataLoading;
+    const isLoading = isUserDataLoading;
     
     const availableTiers = useMemo(() => {
         if (!userData?.subscription || userData.subscription.status === 'inactive') {
@@ -102,9 +101,7 @@ export function UpgradeContent() {
             const isUpgrade = userData.subscription?.status === 'active';
             const oldSubscriptionId = userData.subscription?.paypalSubscriptionId;
 
-            // If this is an upgrade, cancel the old subscription first.
             if (isUpgrade && oldSubscriptionId) {
-                console.log(`Cancelling old subscription: ${oldSubscriptionId}`);
                 const cancelResponse = await fetch('/api/paypal', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -116,21 +113,16 @@ export function UpgradeContent() {
                 });
 
                 if (!cancelResponse.ok) {
-                    const errorData = await cancelResponse.json();
-                    console.warn("Failed to cancel old subscription, but proceeding with upgrade:", errorData.error || 'Unknown cancellation error');
                     toast({
                         variant: "default",
                         title: "Upgrade Notice",
                         description: "Your new plan is active, but we couldn't automatically cancel your old one. Please manage it in your PayPal account to avoid double billing.",
                         duration: 10000,
                     });
-                } else {
-                    console.log("Old subscription cancelled successfully.");
                 }
             }
             
             const batch = writeBatch(firestore);
-            
             const trialEnd = new Date();
             trialEnd.setDate(trialEnd.getDate() + 3);
 
@@ -145,11 +137,8 @@ export function UpgradeContent() {
             
             batch.update(userDocRef, { subscription: newSubscriptionData });
             
-            // If this is a new user activation AND they were referred...
             if (!isUpgrade && userData.referredBy) {
-                // Find the referral document in the referrer's subcollection.
                 const referralDocRef = doc(firestore, 'users', userData.referredBy, 'referrals', user.uid);
-                
                 batch.update(referralDocRef, { 
                     activationStatus: 'activated',
                     grossSale: tier.price,
@@ -158,7 +147,6 @@ export function UpgradeContent() {
             }
             
             await batch.commit();
-
             toast({ title: isUpgrade ? "Subscription Upgraded!" : "Trial Activated!", description: `You now have access to the ${tier.name} plan.` });
             router.push('/dashboard');
 
@@ -171,10 +159,8 @@ export function UpgradeContent() {
     };
     
     const onError = (err: any) => {
-        // This error is now primarily set by createSubscription, but this is a good fallback.
         if (!paymentError) {
             const errorMsg = `A client-side error occurred with PayPal. Raw error: ${err.toString()}`;
-            console.error("PayPal onError callback triggered.", err);
             setPaymentError(errorMsg);
         }
         setIsProcessing(false);
@@ -221,7 +207,6 @@ export function UpgradeContent() {
                 </AlertDescription>
             </Alert>
 
-
             {paymentError && (
                 <Alert variant="destructive">
                     <AlertTriangle className="h-4 w-4" />
@@ -236,13 +221,7 @@ export function UpgradeContent() {
                 intent: "subscription",
                 "disable-funding": "sepa,bancontact,giropay,ideal,mybank,p24,sofort",
             }}>
-                {isLoading ? (
-                    <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-                        <Skeleton className="h-[400px] w-full" />
-                        <Skeleton className="h-[400px] w-full" />
-                        <Skeleton className="h-[400px] w-full" />
-                    </div>
-                ) : selectedTierId ? (
+                {selectedTierId ? (
                     (() => {
                         const tier = subscriptionTiers.find(t => t.id === selectedTierId);
                         if (!tier) return null;

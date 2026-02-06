@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useMemo, useState, useEffect } from "react";
@@ -93,7 +92,6 @@ export default function AdminRefundsPage() {
         <CardContent>
             {requestsLoading ? (
                 <div className="space-y-3">
-                    <Skeleton className="h-10 w-full" />
                     <Skeleton className="h-10 w-full" />
                     <Skeleton className="h-10 w-full" />
                 </div>
