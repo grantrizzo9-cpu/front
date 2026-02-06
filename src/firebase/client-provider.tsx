@@ -17,8 +17,7 @@ import { CloudOff, ShieldAlert, Loader2 } from 'lucide-react';
 import type { FirebaseServices } from '@/firebase';
 
 /**
- * Robust Singleton Pattern for Firebase Services
- * Prevents "already initialized" errors and ensures persistent caching.
+ * Singleton Pattern for Firebase Services
  */
 let cachedApp: FirebaseApp | undefined;
 let cachedAuth: Auth | undefined;
@@ -28,7 +27,6 @@ function getFirebase(): FirebaseServices | null {
   if (typeof window === 'undefined') return null;
 
   try {
-    // 1. Get or Initialize App
     const apps = getApps();
     if (apps.length > 0) {
       cachedApp = getApp();
@@ -40,15 +38,12 @@ function getFirebase(): FirebaseServices | null {
       return null;
     }
 
-    // 2. Get or Initialize Auth
     if (!cachedAuth) {
       cachedAuth = getAuth(cachedApp);
     }
     
-    // 3. Get or Initialize Firestore with safety check
     if (!cachedFirestore) {
       try {
-        // Try to initialize with specific performance settings
         cachedFirestore = initializeFirestore(cachedApp, {
             ignoreUndefinedProperties: true,
             localCache: persistentLocalCache({
@@ -56,7 +51,6 @@ function getFirebase(): FirebaseServices | null {
             }),
         });
       } catch (e: any) {
-        // If it was already initialized, just get the existing instance
         cachedFirestore = getFirestore(cachedApp);
       }
     }
@@ -73,21 +67,19 @@ function getFirebase(): FirebaseServices | null {
 }
 
 export function FirebaseClientProvider({ children }: { children: ReactNode }) {
-  const [isMounted, setIsMounted] = useState(false);
+  const [isHydrated, setIsHydrated] = useState(false);
 
   useEffect(() => {
-    setIsMounted(true);
+    setIsHydrated(true);
   }, []);
 
-  // Ensure services are only requested once
   const firebaseServices = useMemo(() => {
-    if (typeof window === 'undefined') return null;
+    if (!isHydrated) return null;
     return getFirebase();
-  }, []);
+  }, [isHydrated]);
 
-  // HYDRATION GUARD: Server and Client MUST render the same first-pass shell
-  // We render a null or empty shell during the first pass to avoid mismatch.
-  if (!isMounted) {
+  // Initial pass shell
+  if (!isHydrated) {
     return (
       <div className="flex h-screen w-screen items-center justify-center bg-background">
         <Loader2 className="animate-spin text-primary" />
@@ -95,7 +87,6 @@ export function FirebaseClientProvider({ children }: { children: ReactNode }) {
     );
   }
 
-  // If configuration is missing or domain is blocked (after mounting)
   if (!firebaseServices) {
     return (
       <div className="flex h-screen w-screen items-center justify-center p-4 bg-background">
@@ -107,9 +98,9 @@ export function FirebaseClientProvider({ children }: { children: ReactNode }) {
                     Connection Blocked
                 </AlertTitle>
                 <AlertDescription className="mt-2 text-sm text-left">
-                    Your domain <strong>hostproai.com</strong> must be authorized in your Firebase security settings to access the database.
+                    Your domain <strong>hostproai.com</strong> must be authorized in your Firebase security settings.
                     <br/><br/>
-                    <strong>The Final Step:</strong>
+                    <strong>Required Step:</strong>
                     <p className="mt-2">Go to <strong>Firebase Console > Auth > Settings > Authorized Domains</strong> and add <code>hostproai.com</code>.</p>
                 </AlertDescription>
             </Alert>
