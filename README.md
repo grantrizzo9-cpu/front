@@ -1,6 +1,6 @@
 # Affiliate AI Host - Core Restoration Guide (v1.1.9)
 
-Your site is currently showing "Hello world" because the last Cloudflare deployment failed. Follow these steps exactly to fix it.
+Your site is currently showing "Hello world" because the last Cloudflare deployment used old code. Follow these steps exactly to fix it.
 
 ---
 

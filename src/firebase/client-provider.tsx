@@ -73,20 +73,22 @@ export function FirebaseClientProvider({ children }: { children: ReactNode }) {
     setIsHydrated(true);
   }, []);
 
+  // Use useMemo to get services only after hydration to prevent mismatch
   const firebaseServices = useMemo(() => {
     if (!isHydrated) return null;
     return getFirebase();
   }, [isHydrated]);
 
-  // Initial pass shell
+  // Pass 1: Server-side and Initial Client Render (Identical)
   if (!isHydrated) {
     return (
       <div className="flex h-screen w-screen items-center justify-center bg-background">
-        <Loader2 className="animate-spin text-primary" />
+        <Loader2 className="animate-spin text-primary h-8 w-8" />
       </div>
     );
   }
 
+  // Pass 2: Client-side after hydration
   if (!firebaseServices) {
     return (
       <div className="flex h-screen w-screen items-center justify-center p-4 bg-background">
