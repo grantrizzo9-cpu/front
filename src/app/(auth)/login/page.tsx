@@ -9,22 +9,14 @@ import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/firebase";
 import { signInWithEmailAndPassword } from "firebase/auth";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { Loader2 } from "lucide-react";
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter();
   const { toast } = useToast();
   const auth = useAuth();
   const [isLoading, setIsLoading] = useState(false);
-
-  const [planId, setPlanId] = useState('starter');
-
-  useEffect(() => {
-      const params = new URLSearchParams(window.location.search);
-      const plan = params.get('plan');
-      if (plan) setPlanId(plan);
-  }, []);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -66,7 +58,7 @@ export default function LoginPage() {
     <Card className="shadow-xl">
       <CardHeader>
         <CardTitle className="font-headline text-2xl">Access Your Account</CardTitle>
-        <CardDescription>Log in or create an account to get started.</CardDescription>
+        <CardDescription>Log in to manage your affiliate dashboard.</CardDescription>
       </CardHeader>
       <CardContent>
         <form className="space-y-4" onSubmit={handleSubmit}>
@@ -95,5 +87,13 @@ export default function LoginPage() {
         </div>
       </CardContent>
     </Card>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="flex justify-center p-12"><Loader2 className="animate-spin h-8 w-8 text-primary" /></div>}>
+      <LoginForm />
+    </Suspense>
   );
 }

@@ -115,7 +115,7 @@ Generate content for the following pages, formatted as a single JSON object:
     *   **subheadline**: A concise subheadline that explains the main benefit.
     *   **ctaButtonText**: Action-oriented text for the main call-to-action button in the hero section.
     *   **featuresHeadline**: A headline for the features section (e.g., "Why Partner with Affiliate AI Host?").
-    *   **features**: A list of exactly 3 key features of Affiliate AI Host. For each, provide a catchy title, a brief benefit-focused description, and a single, relevant emoji. Examples: "Daily PayPal Payouts", "Generous 70-75% Commissions", "Built-in AI Content Tools".
+    *   **features**: A list of exactly 3 key features of Affiliate AI Host. For each, provide a catchy title, a brief benefit-focused description, and a single, relevant emoji. Examples: "Daily PayPal Payouts", "Generous 70% Commissions (Scale to 75%)", "Built-in AI Content Tools".
     *   **howItWorksHeadline**: A headline for the "How it Works" section (e.g., "Your Simple Path to Daily Income").
     *   **howItWorksSteps**: A list of exactly 3 simple steps explaining the process: 1. Sign up, 2. Promote, 3. Get Paid Daily.
     *   **testimonialsHeadline**: A headline for the testimonials section (e.g., "Trusted by Top Earners").
