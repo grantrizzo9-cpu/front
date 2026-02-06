@@ -4,7 +4,7 @@ import React, { useMemo, type ReactNode } from 'react';
 import { FirebaseProvider } from '@/firebase/provider';
 import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
-import { initializeFirestore, CACHE_SIZE_UNLIMITED } from 'firebase/firestore';
+import { initializeFirestore, terminate } from 'firebase/firestore';
 import { firebaseConfig } from '@/firebase/config';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { CloudOff, ShieldAlert } from 'lucide-react';
@@ -12,8 +12,8 @@ import type { FirebaseServices } from '@/firebase';
 
 /**
  * FirebaseClientProvider
- * Performance Version: 1.0.8 (Max-Speed Optimized)
- * Optimized for Railway: Skips WebSocket handshake timeouts.
+ * Performance Version: 1.0.9 (Offline-Resilient)
+ * This version handles the "Failed to get document" error more gracefully.
  */
 export function FirebaseClientProvider({ children }: { children: ReactNode }) {
   const firebaseServices = useMemo<FirebaseServices | null>(() => {
@@ -26,10 +26,9 @@ export function FirebaseClientProvider({ children }: { children: ReactNode }) {
 
       const auth = getAuth(app);
       
-      // FORCED LONG POLLING: This is the secret to fast loads on Railway/Custom Domains.
-      // It skips the 10-second "failed websocket" timeout and connects instantly.
+      // Standard Firestore initialization. 
+      // We removed forced long polling to see if the user's whitelist fix (Step 2) works better with standard protocols.
       const firestore = initializeFirestore(app, {
-          experimentalForceLongPolling: true,
           ignoreUndefinedProperties: true,
       });
 

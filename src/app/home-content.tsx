@@ -72,7 +72,7 @@ export function HomeContent() {
                   <Link href="#packages">Explore Our Packages <ArrowRight className="ml-2 h-5 w-5" /></Link>
                 </Button>
                 <Button size="lg" variant="outline" className="h-14 px-8 text-lg font-bold rounded-xl border-slate-200 hover:bg-slate-50" asChild>
-                  <Link href="#insights">View Latest Insights</Link>
+                  <Link href="/insights">View Knowledge Base</Link>
                 </Button>
               </div>
             </div>
