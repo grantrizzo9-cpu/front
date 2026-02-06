@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,9 +8,22 @@ import type { Referral } from "@/lib/types";
 import { useUser, useFirestore, useCollection, useMemoFirebase } from "@/firebase";
 import { collection } from "firebase/firestore";
 import { Loader2 } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+
+function TableSkeleton() {
+    return (
+        <div className="space-y-3">
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-10 w-full" />
+        </div>
+    );
+}
 
 export default function ReferralsPage() {
-  const { user, isUserLoading } = useUser();
+  const { user } = useUser();
   const firestore = useFirestore();
 
   const referralsRef = useMemoFirebase(() => {
@@ -21,20 +33,10 @@ export default function ReferralsPage() {
 
   const { data: referrals, isLoading: referralsLoading } = useCollection<Referral>(referralsRef);
   
-  const isLoading = isUserLoading || referralsLoading;
-  
-  if (isLoading) {
-      return (
-          <div className="flex justify-center items-center h-full p-8">
-              <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          </div>
-      )
-  }
-
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 animate-in fade-in duration-300">
       <div>
-        <h1 className="text-3xl font-bold font-headline">Your Referrals</h1>
+        <h1 className="text-3xl font-bold font-headline heading-red">Your Referrals</h1>
         <p className="text-muted-foreground">A complete list of every user you've referred.</p>
       </div>
 
@@ -42,18 +44,20 @@ export default function ReferralsPage() {
         <CardHeader>
           <CardTitle>All Referrals</CardTitle>
           <CardDescription>
-            You have a total of {referrals?.length ?? 0} referrals. Commissions are paid on recurring payments after the user activates and completes their trial.
+            Commissions are paid on recurring payments after the user activates and completes their trial.
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {referrals && referrals.length > 0 ? (
+          {referralsLoading ? (
+            <TableSkeleton />
+          ) : referrals && referrals.length > 0 ? (
             <Table>
               <TableHeader>
                 <TableRow>
                   <TableHead>Username</TableHead>
                   <TableHead>Plan</TableHead>
                   <TableHead>Commission</TableHead>
-                  <TableHead>Activation Status</TableHead>
+                  <TableHead>Status</TableHead>
                   <TableHead className="text-right">Date</TableHead>
                 </TableRow>
               </TableHeader>
@@ -70,14 +74,14 @@ export default function ReferralsPage() {
                         {referral.activationStatus}
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-right">{referral.date ? format(referral.date.toDate(), 'PPpp') : 'No Date'}</TableCell>
+                    <TableCell className="text-right">{referral.date ? format(referral.date.toDate(), 'MMM d, yyyy') : 'N/A'}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
             </Table>
           ) : (
-            <div className="text-center text-muted-foreground py-10">
-              <p>No referrals to show.</p>
+            <div className="text-center text-muted-foreground py-10 border-2 border-dashed rounded-lg bg-slate-50/50">
+              <p>No referrals to show yet.</p>
               <p className="text-sm">Share your affiliate link to get started!</p>
             </div>
           )}

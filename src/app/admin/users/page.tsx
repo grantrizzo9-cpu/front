@@ -1,7 +1,6 @@
-
 'use client';
 
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -13,101 +12,66 @@ import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
 import { collection, doc, setDoc, deleteDoc } from 'firebase/firestore';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { useRouter } from 'next/navigation';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function AdminUsersPage() {
-  const router = useRouter();
   const { toast } = useToast();
   const firestore = useFirestore();
-  const { isPlatformOwner, isLoading: isAdminLoading } = useAdmin();
+  const { isPlatformOwner } = useAdmin();
   const [processingId, setProcessingId] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (!isAdminLoading && !isPlatformOwner) {
-      router.push('/dashboard');
-    }
-  }, [isPlatformOwner, isAdminLoading, router]);
-
-  // 1. Fetch all users
   const usersQuery = useMemoFirebase(() => {
     if (!firestore || !isPlatformOwner) return null;
     return collection(firestore, 'users');
   }, [firestore, isPlatformOwner]);
   const { data: users, isLoading: usersLoading } = useCollection<UserType>(usersQuery);
   
-  // 2. Fetch all admin role documents
   const adminRolesQuery = useMemoFirebase(() => {
     if (!firestore || !isPlatformOwner) return null;
     return collection(firestore, 'roles_admin');
   }, [firestore, isPlatformOwner]);
   const { data: adminRoles, isLoading: rolesLoading } = useCollection<{uid: string}>(adminRolesQuery);
 
-  // Create a fast lookup set of admin UIDs
   const adminUids = useMemo(() => new Set(adminRoles?.map(role => role.id) ?? []), [adminRoles]);
-
-  const isLoading = isAdminLoading || usersLoading || rolesLoading;
 
   const handleToggleAdmin = async (targetUser: UserType) => {
     if (!firestore) return;
-
     const isCurrentlyAdmin = adminUids.has(targetUser.id);
-    // Prevent the main admin from having their role revoked via the UI
-    if (targetUser.email === 'rentapog@gmail.com') {
-      toast({ variant: 'destructive', title: 'Action Not Allowed', description: 'The platform owner\'s admin status cannot be changed.' });
-      return;
-    }
+    if (targetUser.email === 'rentapog@gmail.com') return;
 
     setProcessingId(targetUser.id);
     const adminRoleRef = doc(firestore, 'roles_admin', targetUser.id);
     
     try {
         if (isCurrentlyAdmin) {
-            // Revoke admin
             await deleteDoc(adminRoleRef);
             toast({ title: 'Admin Revoked', description: `${targetUser.username} is no longer an admin.` });
         } else {
-            // Grant admin - create an empty document
             await setDoc(adminRoleRef, {}); 
             toast({ title: 'Admin Granted', description: `${targetUser.username} is now an admin.` });
         }
     } catch (error: any) {
-        console.error("Failed to toggle admin status:", error);
-        toast({ variant: 'destructive', title: 'Operation Failed', description: error.message || 'Could not update admin status. Check security rules.' });
+        toast({ variant: 'destructive', title: 'Error', description: error.message });
     } finally {
         setProcessingId(null);
     }
   };
 
-
-  if (isLoading || !isPlatformOwner) {
-    return (
-      <div className="flex justify-center items-center h-full p-8">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    );
-  }
-
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 animate-in fade-in duration-300">
       <div>
-        <h1 className="text-3xl font-bold font-headline">Manage Users & Admins</h1>
-        <p className="text-muted-foreground">Grant or revoke admin privileges for users.</p>
+        <h1 className="text-3xl font-bold font-headline heading-red">Manage Users</h1>
+        <p className="text-muted-foreground">Grant or revoke administrative privileges.</p>
       </div>
       
       <Card>
         <CardHeader>
-            <CardTitle>All Users</CardTitle>
-            <CardDescription>
-                {usersLoading ? "Loading users..." : (
-                    <>There are currently <span className="font-bold text-primary">{users?.length ?? 0}</span> users on the platform.</>
-                )}
-            </CardDescription>
+            <CardTitle>Platform Directory</CardTitle>
+            <CardDescription>Manage roles for all registered users.</CardDescription>
         </CardHeader>
         <CardContent>
-             {usersLoading ? (
-                <div className="flex justify-center items-center h-40">
-                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                </div>
+             {usersLoading || rolesLoading ? (
+                <div className="space-y-3"><Skeleton className="h-12 w-full" /><Skeleton className="h-12 w-full" /><Skeleton className="h-12 w-full" /></div>
             ) : users && users.length > 0 ? (
               <Table>
                 <TableHeader>
@@ -122,44 +86,20 @@ export default function AdminUsersPage() {
                     <TableRow key={u.id}>
                       <TableCell className="font-medium">
                         <div className="flex items-center gap-3">
-                           <Avatar>
+                           <Avatar className="h-8 w-8">
                                 <AvatarImage src={`https://picsum.photos/seed/${u.id}/100/100`} />
                                 <AvatarFallback>{u.username?.charAt(0).toUpperCase()}</AvatarFallback>
                            </Avatar>
-                           <div>
-                                <p className="font-semibold">{u.username}</p>
-                                <p className="text-xs text-muted-foreground">{u.email}</p>
-                           </div>
+                           <div><p className="font-semibold text-sm">{u.username}</p><p className="text-xs text-muted-foreground">{u.email}</p></div>
                         </div>
                       </TableCell>
                       <TableCell>
-                        {adminUids.has(u.id) ? (
-                            <Badge className="bg-primary hover:bg-primary text-primary-foreground">
-                                <Crown className="mr-2 h-3 w-3" />
-                                Admin
-                            </Badge>
-                        ) : (
-                             <Badge variant="secondary">
-                                <User className="mr-2 h-3 w-3" />
-                                User
-                            </Badge>
-                        )}
+                        {adminUids.has(u.id) ? <Badge className="bg-primary"><Crown className="mr-2 h-3 w-3" /> Admin</Badge> : <Badge variant="secondary"><User className="mr-2 h-3 w-3" /> User</Badge>}
                       </TableCell>
                       <TableCell className="text-right">
-                        <Button 
-                            variant="outline" 
-                            size="sm"
-                            onClick={() => handleToggleAdmin(u)}
-                            disabled={processingId === u.id || u.email === 'rentapog@gmail.com'}
-                        >
-                          {processingId === u.id ? (
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          ) : adminUids.has(u.id) ? (
-                            <ShieldOff className="mr-2 h-4 w-4" />
-                          ) : (
-                            <Crown className="mr-2 h-4 w-4" />
-                          )}
-                          {adminUids.has(u.id) ? 'Revoke Admin' : 'Grant Admin'}
+                        <Button variant="outline" size="sm" onClick={() => handleToggleAdmin(u)} disabled={processingId === u.id || u.email === 'rentapog@gmail.com'}>
+                          {processingId === u.id ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : adminUids.has(u.id) ? <ShieldOff className="mr-2 h-4 w-4" /> : <Crown className="mr-2 h-4 w-4" />}
+                          {adminUids.has(u.id) ? 'Revoke' : 'Grant'}
                         </Button>
                       </TableCell>
                     </TableRow>
@@ -167,11 +107,7 @@ export default function AdminUsersPage() {
                 </TableBody>
               </Table>
             ) : (
-                <div className="text-center text-muted-foreground py-10">
-                    <User className="mx-auto h-12 w-12 text-gray-400" />
-                    <p className="mt-4 font-semibold">No users found.</p>
-                    <p className="text-sm">The first user will appear here after they sign up.</p>
-                </div>
+                <div className="text-center text-muted-foreground py-10 border-2 border-dashed rounded-lg bg-slate-50/50"><p>No users found on the platform yet.</p></div>
             )}
         </CardContent>
       </Card>

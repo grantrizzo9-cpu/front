@@ -13,12 +13,13 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { useAdmin } from "@/hooks/use-admin";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function PayoutsPage() {
-  const { user, isUserLoading } = useUser();
+  const { user } = useUser();
   const firestore = useFirestore();
   const { toast } = useToast();
-  const { isAdmin, isLoading: isAdminLoading } = useAdmin();
+  const { isAdmin } = useAdmin();
 
   const payoutsRef = useMemoFirebase(() => {
     if (!user || !firestore) return null;
@@ -36,69 +37,54 @@ export default function PayoutsPage() {
     if (!user || !firestore) return null;
     return collection(firestore, 'users', user.uid, 'referrals');
   }, [firestore, user?.uid]);
-  const { data: referrals, isLoading: referralsLoading } = useCollection<Referral>(referralsRef);
+  const { data: referrals } = useCollection<Referral>(referralsRef);
 
-  const isLoading = isUserLoading || payoutsLoading || isUserDataLoading || referralsLoading || isAdminLoading;
   const referralCount = referrals?.length ?? 0;
 
   const handleSaveChanges = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!userDocRef) return;
-    
     const formData = new FormData(e.currentTarget);
     const newPaypalEmail = formData.get('paypal-email') as string;
-
     updateDocumentNonBlocking(userDocRef, { paypalEmail: newPaypalEmail });
-    
-    toast({
-      title: "Changes Saved",
-      description: "Your PayPal email has been updated.",
-    });
+    toast({ title: "Changes Saved", description: "Your PayPal email has been updated." });
   };
 
-  if (isLoading) {
-      return (
-          <div className="flex justify-center items-center h-full p-8">
-              <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          </div>
-      )
-  }
-
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 animate-in fade-in duration-300">
       <div>
-        <h1 className="text-3xl font-bold font-headline">Payouts</h1>
-        <p className="text-muted-foreground">Manage your payout settings and view your payout history.</p>
+        <h1 className="text-3xl font-bold font-headline heading-red">Payouts</h1>
+        <p className="text-muted-foreground">Manage your payout settings and history.</p>
       </div>
 
        {isAdmin ? (
-            <Card className="bg-blue-50 border-blue-200 dark:bg-blue-950 dark:border-blue-800">
+            <Card className="bg-blue-50 border-blue-200">
                 <CardHeader className="flex-row items-center gap-4">
-                    <ShieldCheck className="h-8 w-8 text-blue-600 dark:text-blue-400 flex-shrink-0" />
+                    <ShieldCheck className="h-8 w-8 text-blue-600 flex-shrink-0" />
                     <div>
-                        <CardTitle className="text-blue-800 dark:text-blue-200">Admin Payouts Unlocked</CardTitle>
-                        <CardDescription className="text-blue-700 dark:text-blue-300">As an admin, your payouts are automatically enabled. The 2-referral minimum does not apply to you.</CardDescription>
+                        <CardTitle className="text-blue-800">Admin Payouts Unlocked</CardTitle>
+                        <CardDescription className="text-blue-700">As an admin, your payouts are automatically enabled.</CardDescription>
                     </div>
                 </CardHeader>
             </Card>
         ) : referralCount >= 2 ? (
-            <Card className="bg-green-50 border-green-200 dark:bg-green-950 dark:border-green-800">
+            <Card className="bg-green-50 border-green-200">
                 <CardHeader className="flex-row items-center gap-4">
-                    <PartyPopper className="h-8 w-8 text-green-600 dark:text-green-400 flex-shrink-0" />
+                    <PartyPopper className="h-8 w-8 text-green-600 flex-shrink-0" />
                     <div>
-                        <CardTitle className="text-green-800 dark:text-green-200">Payouts Unlocked!</CardTitle>
-                        <CardDescription className="text-green-700 dark:text-green-300">Congratulations on getting {referralCount} referrals! Your recurring commissions will be paid out daily.</CardDescription>
+                        <CardTitle className="text-green-800">Payouts Unlocked!</CardTitle>
+                        <CardDescription className="text-green-700">Congratulations on getting {referralCount} referrals!</CardDescription>
                     </div>
                 </CardHeader>
             </Card>
         ) : (
-             <Card className="bg-amber-50 border-amber-200 dark:bg-amber-950 dark:border-amber-800">
+             <Card className="bg-amber-50 border-amber-200">
                 <CardHeader className="flex-row items-center gap-4">
-                     <TrendingUp className="h-8 w-8 text-amber-600 dark:text-amber-400 flex-shrink-0" />
+                     <TrendingUp className="h-8 w-8 text-amber-600 flex-shrink-0" />
                     <div>
-                        <CardTitle className="text-amber-800 dark:text-amber-200">Activate Your Payouts</CardTitle>
-                        <CardDescription className="text-amber-700 dark:text-amber-300">
-                            You have {referralCount} of 2 required referrals. Get 2 referrals to start earning from their recurring subscription payments.
+                        <CardTitle className="text-amber-800">Activate Your Payouts</CardTitle>
+                        <CardDescription className="text-amber-700">
+                            You have {referralCount} of 2 required referrals to start earning recurring commissions.
                         </CardDescription>
                     </div>
                 </CardHeader>
@@ -109,16 +95,18 @@ export default function PayoutsPage() {
         <form onSubmit={handleSaveChanges}>
           <CardHeader>
             <CardTitle>Payout Information</CardTitle>
-            <CardDescription>This is the PayPal email where your daily commissions will be sent.</CardDescription>
+            <CardDescription>Commissions are sent to this PayPal email daily.</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-2">
-              <Label htmlFor="paypal-email">PayPal Email</Label>
-              <Input id="paypal-email" name="paypal-email" type="email" defaultValue={userData?.paypalEmail || ''} required />
-            </div>
+            {isUserDataLoading ? <Skeleton className="h-10 w-full" /> : (
+              <div className="space-y-2">
+                <Label htmlFor="paypal-email">PayPal Email</Label>
+                <Input id="paypal-email" name="paypal-email" type="email" defaultValue={userData?.paypalEmail || ''} required />
+              </div>
+            )}
           </CardContent>
           <CardFooter>
-            <Button type="submit">Save Changes</Button>
+            <Button type="submit" disabled={isUserDataLoading}>Save Changes</Button>
           </CardFooter>
         </form>
       </Card>
@@ -126,18 +114,16 @@ export default function PayoutsPage() {
       <Card>
         <CardHeader>
           <CardTitle>Payout History</CardTitle>
-          <CardDescription>
-            Your complete history of daily commission payouts.
-          </CardDescription>
+          <CardDescription>Your complete history of commission payouts.</CardDescription>
         </CardHeader>
         <CardContent>
-          {payouts && payouts.length > 0 ? (
+          {payoutsLoading ? <div className="space-y-3"><Skeleton className="h-10 w-full" /><Skeleton className="h-10 w-full" /></div> : payouts && payouts.length > 0 ? (
             <Table>
               <TableHeader>
                 <TableRow>
                   <TableHead>Amount</TableHead>
                   <TableHead>Date</TableHead>
-                  <TableHead className="text-right">PayPal Transaction ID</TableHead>
+                  <TableHead className="text-right">Transaction ID</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -148,23 +134,17 @@ export default function PayoutsPage() {
                     <TableCell className="text-right font-mono text-xs">
                       {payout.transactionId ? (
                         <Link href={`https://www.paypal.com/activity/payment/${payout.transactionId}`} target="_blank" rel="noopener noreferrer" className="flex items-center justify-end gap-2 hover:text-primary">
-                            {payout.transactionId}
-                            <ArrowRight className="h-3 w-3" />
+                            {payout.transactionId} <ArrowRight className="h-3 w-3" />
                         </Link>
-                      ): (
-                        <span>Processing</span>
-                      )}
+                      ): <span>Processing</span>}
                     </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
             </Table>
           ) : (
-             <div className="text-center text-muted-foreground py-10 space-y-4">
-                <div>
-                  <p>No payout history to show.</p>
-                  <p className="text-sm">Your payouts will appear here once you start earning commissions.</p>
-                </div>
+             <div className="text-center text-muted-foreground py-10 border-2 border-dashed rounded-lg bg-slate-50/50">
+                <p>No payout history to show yet.</p>
             </div>
           )}
         </CardContent>

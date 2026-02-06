@@ -12,8 +12,8 @@ import type { FirebaseServices } from '@/firebase';
 
 /**
  * FirebaseClientProvider
- * Performance Version: 1.1.4 (High-Velocity Optimized)
- * Forces Long Polling and enables aggressive caching for instant dashboard transitions.
+ * Performance Version: 1.1.5 (Max-Velocity Optimized)
+ * Enables aggressive caching and experimental long polling for zero-latency dashboard feel.
  */
 export function FirebaseClientProvider({ children }: { children: ReactNode }) {
   const firebaseServices = useMemo<FirebaseServices | null>(() => {
@@ -54,7 +54,7 @@ export function FirebaseClientProvider({ children }: { children: ReactNode }) {
                     The application is unable to connect to the Firebase backend. 
                     <br/><br/>
                     <strong>Required Action:</strong>
-                    <p className="mt-2">Ensure your domain <strong>hostproai.com</strong> is whitelisted in your Google Cloud Console API Credentials (README Step 2).</p>
+                    <p className="mt-2">Ensure your domain <strong>hostproai.com</strong> is whitelisted in your Google Cloud Console API Credentials.</p>
                 </AlertDescription>
             </Alert>
         </div>

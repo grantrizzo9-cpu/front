@@ -5,9 +5,8 @@ import { doc, getDoc } from 'firebase/firestore';
 import { useState, useEffect } from 'react';
 
 /**
- * Max-Speed Admin Hook (v1.1.4)
- * Optimized for high-velocity platform owners and secure role verification.
- * Enables zero-latency dashbord UI rendering.
+ * Max-Speed Admin Hook (v1.1.5)
+ * Optimized for platform owners with near-instant role verification.
  */
 export function useAdmin() {
   const { user, isUserLoading } = useUser();
@@ -16,14 +15,12 @@ export function useAdmin() {
   const [isPlatformOwner, setIsPlatformOwner] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Hardcoded list of platform owner emails for instant verification
+  // Platform owner emails for instant bypass
   const platformOwnerEmails = ['rentapog@gmail.com', 'grantrizzo2@gmail.com'];
 
   useEffect(() => {
-    // If the user hasn't loaded yet, keep loading
     if (isUserLoading) return;
 
-    // If no user is logged in, reset and stop loading
     if (!user) {
       setIsAdmin(false);
       setIsPlatformOwner(false);
@@ -33,7 +30,7 @@ export function useAdmin() {
 
     const email = user.email?.toLowerCase();
 
-    // 1. HIGH-SPEED PATH: Instant check for Platform Owners
+    // 1. INSTANT BYPASS for Platform Owners
     if (email && platformOwnerEmails.includes(email)) {
       setIsAdmin(true);
       setIsPlatformOwner(true);
@@ -41,11 +38,10 @@ export function useAdmin() {
       return;
     }
 
-    // 2. SECURE PATH: Database check for secondary/invited admins
+    // 2. DATABASE CHECK for secondary admins
     const checkRoleDoc = async () => {
       try {
         if (!firestore) return;
-        // Check cache first for instant repeat visits
         const adminRoleRef = doc(firestore, 'roles_admin', user.uid);
         const adminDocSnap = await getDoc(adminRoleRef);
         if (adminDocSnap.exists()) {
