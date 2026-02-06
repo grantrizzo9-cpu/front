@@ -1,5 +1,5 @@
 
-# Affiliate AI Host - Deployment Guide (v1.1.7)
+# Affiliate AI Host - Deployment Guide (v1.1.8)
 
 This application is optimized for high-speed performance and global delivery. You can deploy it to **Cloudflare Pages** (Recommended).
 
@@ -16,7 +16,7 @@ Before deploying to Cloudflare, your code must be on GitHub. Run these commands 
 
 2.  **Commit your changes**:
     ```bash
-    git commit -m "Final Version 1.1.7: Max Velocity Shell"
+    git commit -m "Final Version 1.1.8: Absolute Velocity Shell"
     ```
 
 3.  **Push to GitHub**:
@@ -38,7 +38,7 @@ Before deploying to Cloudflare, your code must be on GitHub. Run these commands 
     - **Build command**: `npm run build`
     - **Build output directory**: `.next`
     - **Root directory**: `/`
-    - **⚠️ IMPORTANT**: Leave the "Deploy command" or any custom script fields **EMPTY**. Cloudflare handles the deployment automatically after the build command. Entering `npx wrangler deploy` here will cause the build to fail.
+    - **⚠️ IMPORTANT (DEPLOY COMMAND)**: Ensure the "Deploy command" field is completely **EMPTY**. Cloudflare handles the deployment automatically. Entering `npx wrangler deploy` here will cause the build to fail.
 
 3.  **Add Environment Variables (BULK UPLOAD)**:
     - Go to the **Settings** tab of your Pages project > **Variables and Secrets**.
@@ -70,4 +70,4 @@ Before deploying to Cloudflare, your code must be on GitHub. Run these commands 
 
 ---
 
-© 2025 Affiliate AI Host. Max-Velocity Version 1.1.7 Enabled.
+© 2025 Affiliate AI Host. Max-Velocity Version 1.1.8 Enabled.

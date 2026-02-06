@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useFirestore, useUser } from '@/firebase';
@@ -5,8 +6,8 @@ import { doc, getDoc } from 'firebase/firestore';
 import { useState, useEffect } from 'react';
 
 /**
- * Max-Speed Admin Hook (v1.1.5)
- * Optimized for platform owners with near-instant role verification.
+ * Absolute-Velocity Admin Hook (v1.1.8)
+ * Immediate bypass for hardcoded platform owners.
  */
 export function useAdmin() {
   const { user, isUserLoading } = useUser();
@@ -15,7 +16,7 @@ export function useAdmin() {
   const [isPlatformOwner, setIsPlatformOwner] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Platform owner emails for instant bypass
+  // Platform owner emails for zero-latency bypass
   const platformOwnerEmails = ['rentapog@gmail.com', 'grantrizzo2@gmail.com'];
 
   useEffect(() => {
@@ -30,7 +31,7 @@ export function useAdmin() {
 
     const email = user.email?.toLowerCase();
 
-    // 1. INSTANT BYPASS for Platform Owners
+    // 1. IMMEDIATE BYPASS - No database round-trip for platform owners
     if (email && platformOwnerEmails.includes(email)) {
       setIsAdmin(true);
       setIsPlatformOwner(true);

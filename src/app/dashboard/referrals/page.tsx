@@ -34,7 +34,7 @@ export default function ReferralsPage() {
   const { data: referrals, isLoading: referralsLoading } = useCollection<Referral>(referralsRef);
   
   return (
-    <div className="space-y-8 animate-in fade-in duration-300">
+    <div className="space-y-8">
       <div>
         <h1 className="text-3xl font-bold font-headline heading-red">Your Referrals</h1>
         <p className="text-muted-foreground">A complete list of every user you've referred.</p>

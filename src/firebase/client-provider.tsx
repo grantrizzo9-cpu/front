@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useMemo, type ReactNode } from 'react';
@@ -12,8 +13,8 @@ import type { FirebaseServices } from '@/firebase';
 
 /**
  * FirebaseClientProvider
- * Performance Version: 1.1.5 (Max-Velocity Optimized)
- * Enables aggressive caching and experimental long polling for zero-latency dashboard feel.
+ * Performance Version: 1.1.8 (Absolute Velocity Optimized)
+ * Uses standard connections for lower latency and unlimited caching.
  */
 export function FirebaseClientProvider({ children }: { children: ReactNode }) {
   const firebaseServices = useMemo<FirebaseServices | null>(() => {
@@ -26,9 +27,8 @@ export function FirebaseClientProvider({ children }: { children: ReactNode }) {
 
       const auth = getAuth(app);
       
-      // Force Long Polling and enable unlimited cache for snappier navigation
+      // Standard connection with unlimited cache for instant responses
       const firestore = initializeFirestore(app, {
-          experimentalForceLongPolling: true,
           ignoreUndefinedProperties: true,
           cacheSizeBytes: CACHE_SIZE_UNLIMITED
       });

@@ -76,9 +76,8 @@ export default function AdminUsersPage() {
     }
   };
 
-  // Instant-Shell: Render frame immediately regardless of loading state
   return (
-    <div className="space-y-8 animate-in fade-in duration-300">
+    <div className="space-y-8">
       <div>
         <h1 className="text-3xl font-bold font-headline heading-red">Manage Users</h1>
         <p className="text-muted-foreground">Grant or revoke administrative privileges.</p>

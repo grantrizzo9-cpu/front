@@ -105,7 +105,7 @@ export default function DashboardPage() {
   }, [userTier]);
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-300">
+    <div className="space-y-8">
         {/* Admin Section Shell: Renders instantly if user is likely owner */}
         {(isPlatformOwner || isAdminLoading) && (
             <div className="space-y-6 border-b border-dashed pb-8">
@@ -139,7 +139,7 @@ export default function DashboardPage() {
             </div>
 
             {!isUserDataLoading && userData?.subscription?.status === 'inactive' && !isPlatformOwner && (
-                <Alert variant="destructive" className="bg-red-50 border-red-200 text-red-900 animate-in zoom-in-95">
+                <Alert variant="destructive" className="bg-red-50 border-red-200 text-red-900">
                     <AlertCircle className="h-4 w-4 text-red-600" />
                     <AlertTitle className="font-bold">Action Required: Plan Inactive</AlertTitle>
                     <AlertDescription className="flex items-center justify-between">
