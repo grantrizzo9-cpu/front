@@ -1,7 +1,7 @@
 
 # Affiliate AI Host - Deployment Guide (v1.1.7)
 
-This application is optimized for high-speed performance and global delivery. You can deploy it to **Cloudflare Pages** (Recommended) or **Railway**.
+This application is optimized for high-speed performance and global delivery. You can deploy it to **Cloudflare Pages** (Recommended).
 
 ---
 
@@ -38,12 +38,13 @@ Before deploying to Cloudflare, your code must be on GitHub. Run these commands 
     - **Build command**: `npm run build`
     - **Build output directory**: `.next`
     - **Root directory**: `/`
-    - **⚠️ IMPORTANT**: Leave the "Deploy command" or any custom script fields **EMPTY**. Cloudflare handles the deployment automatically after the build command. If you enter `wrangler deploy` here, the build will fail.
+    - **⚠️ IMPORTANT**: Leave the "Deploy command" or any custom script fields **EMPTY**. Cloudflare handles the deployment automatically after the build command. Entering `npx wrangler deploy` here will cause the build to fail.
 
 3.  **Add Environment Variables (BULK UPLOAD)**:
     - Go to the **Settings** tab of your Pages project > **Variables and Secrets**.
     - Click **"Edit variables"** > **"Bulk edit"**.
     - Copy your entire `.env` file and paste it in. Click **Save**.
+    - **💡 Security Note**: Cloudflare shows the *names* of variables in logs to track changes, but your *values* are encrypted and never shown publicly.
 
 4.  **Connect Your Domain**:
     - After deployment, go to the **"Custom domains"** tab in your Pages project.
@@ -57,13 +58,14 @@ Before deploying to Cloudflare, your code must be on GitHub. Run these commands 
 ### Step 1: Authorize Domain in Firebase Auth
 1. Go to [Firebase Console](https://console.firebase.google.com/).
 2. **Build** -> **Authentication** -> **Settings** -> **Authorized domains**.
-3. Add your specific custom domain (e.g., `yourdomain.com`). This is required for Login/Signup to work.
+3. Add your specific custom domain (e.g., `yourdomain.com`) AND your Cloudflare preview URL (e.g., `yourproject.pages.dev`). This is required for Login/Signup to work.
 
 ### Step 2: Whitelist in Google Cloud (Critical)
 1. Go to [Google Cloud API Credentials](https://console.cloud.google.com/apis/credentials).
 2. Edit **"Browser key (auto-created by Firebase)"**.
 3. Under **"Website restrictions"**, add:
    - `https://yourdomain.com/*`
+   - `https://*.pages.dev/*`
 4. Click **Save**.
 
 ---

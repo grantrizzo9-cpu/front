@@ -67,7 +67,7 @@ export default function DashboardPage() {
   const { data: allPlatformReferrals, isLoading: allPlatformReferralsLoading } = useCollection<Referral>(allPlatformReferralsQuery);
   
   const platformStats = useMemo(() => {
-    if (!isPlatformOwner || !allPlatformReferrals) return null;
+    if (!allPlatformReferrals) return null;
     const activatedReferrals = allPlatformReferrals.filter(r => r.activationStatus === 'activated');
     const grossSales = activatedReferrals.reduce((sum, r) => {
         const tier = subscriptionTiers.find(t => t.name === r.planPurchased);
@@ -79,7 +79,7 @@ export default function DashboardPage() {
       totalAffiliatePayouts: payouts,
       totalPlatformReferrals: allPlatformReferrals.length,
     };
-  }, [allPlatformReferrals, isPlatformOwner]);
+  }, [allPlatformReferrals]);
 
    const personalStats = useMemo(() => {
       if (!allPersonalReferrals) return null;
@@ -106,7 +106,7 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-8 animate-in fade-in duration-300">
-        {/* Admin Shell: Always visible layout if user is platform owner */}
+        {/* Admin Section Shell: Renders instantly if user is likely owner */}
         {(isPlatformOwner || isAdminLoading) && (
             <div className="space-y-6 border-b border-dashed pb-8">
                 <div>

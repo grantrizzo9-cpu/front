@@ -76,8 +76,7 @@ export default function AdminUsersPage() {
     }
   };
 
-  const isAuthorized = isPlatformOwner || isAdminLoading;
-
+  // Instant-Shell: Render frame immediately regardless of loading state
   return (
     <div className="space-y-8 animate-in fade-in duration-300">
       <div>
@@ -91,7 +90,7 @@ export default function AdminUsersPage() {
             <CardDescription>Manage roles for all registered users.</CardDescription>
         </CardHeader>
         <CardContent>
-             {(!isAuthorized || usersLoading || rolesLoading) ? (
+             {(isAdminLoading || usersLoading || rolesLoading) ? (
                 <UserTableSkeleton />
             ) : users && users.length > 0 ? (
               <Table>
