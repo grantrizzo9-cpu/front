@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, Suspense, useEffect } from 'react';
@@ -10,16 +9,12 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { subscriptionTiers } from "@/lib/data";
-import { Loader2, Users, AlertCircle, WifiOff, ShieldCheck } from "lucide-react";
+import { Loader2, Users, AlertCircle, ShieldCheck } from "lucide-react";
 import { useAuth, useFirestore } from "@/firebase";
-import { createUserWithEmailAndPassword, updateProfile, GoogleAuthProvider, signInWithPopup, User } from "firebase/auth";
+import { createUserWithEmailAndPassword, updateProfile, User } from "firebase/auth";
 import { doc, getDoc, writeBatch, serverTimestamp, collection } from "firebase/firestore";
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-
-const GoogleIcon = () => (
-    <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" className="mr-2 h-4 w-4 fill-current"><title>Google</title><path d="M12.48 10.92v3.28h7.84c-.24 1.84-.85 3.18-1.73 4.1-1.02 1.02-2.62 1.98-4.48 1.98-3.62 0-6.55-2.92-6.55-6.55s2.93-6.55 6.55-6.55c2.03 0 3.33.82 4.1 1.59l2.48-2.48C17.22 3.43 15.14 2 12.48 2 7.08 2 3 6.08 3 11.48s4.08 9.48 9.48 9.48c5.13 0 9.1-3.48 9.1-9.28 0-.6-.08-1.12-.2-1.68H3.48v.01z"></path></svg>
-);
 
 function SignupFormComponent() {
     const router = useRouter();
@@ -152,37 +147,6 @@ function SignupFormComponent() {
         }
     };
     
-    const handleGoogleSignIn = async () => {
-        setIsProcessing(true);
-        setIsOffline(false);
-        const provider = new GoogleAuthProvider();
-        try {
-            const result = await signInWithPopup(auth, provider);
-            const user = result.user;
-            const userDocRef = doc(firestore, "users", user.uid);
-            const userDoc = await getDoc(userDocRef);
-
-            if (!userDoc.exists()) {
-                let g_username = (user.displayName || user.email?.split('@')[0] || `user${user.uid.substring(0,5)}`).replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
-                const initialUsernameDoc = await getDoc(doc(firestore, "usernames", g_username));
-                if (initialUsernameDoc.exists()) g_username = `${g_username}${Math.floor(100 + Math.random() * 900)}`;
-                
-                const params = new URLSearchParams(window.location.search);
-                const refCodeFromUrl = params.get('ref');
-
-                await postSignupFlow(user, g_username, refCodeFromUrl);
-            } else {
-                 toast({ title: "Login Successful", description: "Welcome back!" });
-                 router.push("/dashboard");
-            }
-        } catch (error: any) {
-             let description = error.message;
-             if (description.includes("offline") || description.includes("failed-precondition")) setIsOffline(true);
-             toast({ variant: "destructive", title: "Sign-In Blocked", description: "Connectivity issue: Domain whitelist required in Google Cloud." });
-             setIsProcessing(false);
-        }
-    };
-    
     return (
         <Card>
             <CardHeader>
@@ -238,14 +202,6 @@ function SignupFormComponent() {
                         {isProcessing ? <Loader2 className="animate-spin" /> : "Create Account & Proceed"}
                     </Button>
                 </form>
-                <div className="relative my-4">
-                    <div className="absolute inset-0 flex items-center"><span className="w-full border-t" /></div>
-                    <div className="relative flex justify-center text-xs uppercase"><span className="bg-card px-2 text-muted-foreground">Or</span></div>
-                </div>
-                 <Button variant="outline" className="w-full" onClick={handleGoogleSignIn} disabled={isProcessing}>
-                    {isProcessing ? <Loader2 className="animate-spin" /> : <GoogleIcon />}
-                    Sign Up with Google
-                </Button>
             </CardContent>
             <CardFooter>
                  <div className="mt-4 text-center text-sm w-full">
