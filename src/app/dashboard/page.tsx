@@ -1,10 +1,11 @@
+
 'use client';
 
 import { StatCard } from "@/components/stat-card";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { format } from "date-fns";
-import { DollarSign, Users, BrainCircuit, ArrowRight, TrendingUp, UserPlus, AlertCircle, HardDrive } from "lucide-react";
+import { DollarSign, Users, BrainCircuit, ArrowRight, TrendingUp, UserPlus, AlertCircle, HardDrive, Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import Link from 'next/link';
 import { Button } from "@/components/ui/button";
@@ -108,9 +109,13 @@ export default function DashboardPage() {
     return { totalStorage: total, usedStorage: 4.72, usagePercentage: total > 0 ? (4.72 / total) * 100 : 0 };
   }, [userTier]);
 
+  // HYDRATION GUARD
+  if (!isHydrated) {
+    return <div className="flex h-full w-full items-center justify-center p-12"><Loader2 className="animate-spin h-8 w-8 text-primary" /></div>;
+  }
+
   return (
     <div className="space-y-8">
-        {/* Admin Section Shell: Renders instantly if user is likely owner */}
         {(isPlatformOwner || isAdminLoading) && (
             <div className="space-y-6 border-b border-dashed pb-8">
                 <div>
@@ -205,7 +210,7 @@ export default function DashboardPage() {
                                                 </Badge>
                                             </TableCell>
                                             <TableCell className="text-right text-muted-foreground">
-                                                {isHydrated && r.date ? format(r.date.toDate(), 'MMM d') : '...'}
+                                                {r.date ? format(r.date.toDate(), 'MMM d') : '...'}
                                             </TableCell>
                                         </TableRow>
                                     ))}

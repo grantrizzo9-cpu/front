@@ -1,8 +1,9 @@
+
 "use client";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { CheckCircle } from "lucide-react";
+import { CheckCircle, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { subscriptionTiers } from "@/lib/data";
 import { cn } from "@/lib/utils";
@@ -26,6 +27,11 @@ export function PricingCards() {
     }
     return link;
   };
+
+  // HYDRATION GUARD: Prevents link mismatch during SSR
+  if (!isHydrated) {
+    return <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3 w-full"><Loader2 className="animate-spin mx-auto h-8 w-8 text-primary" /></div>;
+  }
 
   return (
     <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">

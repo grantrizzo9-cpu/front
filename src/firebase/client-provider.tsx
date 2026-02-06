@@ -19,6 +19,7 @@ import type { FirebaseServices } from '@/firebase';
 
 /**
  * Robust Singleton Pattern for Firebase Services
+ * Prevents "already initialized" errors and ensures persistent caching.
  */
 let cachedApp: FirebaseApp | undefined;
 let cachedAuth: Auth | undefined;
@@ -48,7 +49,7 @@ function getFirebase(): FirebaseServices | null {
     // 3. Get or Initialize Firestore with safety check
     if (!cachedFirestore) {
       try {
-        // Try to initialize with our specific performance settings
+        // Try to initialize with specific performance settings
         cachedFirestore = initializeFirestore(cachedApp, {
             ignoreUndefinedProperties: true,
             localCache: persistentLocalCache({
@@ -56,7 +57,7 @@ function getFirebase(): FirebaseServices | null {
             }),
         });
       } catch (e: any) {
-        // If it was already initialized elsewhere, just get the existing instance
+        // If it was already initialized, just get the existing instance
         cachedFirestore = getFirestore(cachedApp);
       }
     }
@@ -82,7 +83,7 @@ export function FirebaseClientProvider({ children }: { children: ReactNode }) {
   // Ensure services are only requested once
   const firebaseServices = useMemo(() => getFirebase(), []);
 
-  // HYDRATION GUARD: Render a clean shell first
+  // HYDRATION GUARD: Render a clean shell first to prevent DOM mismatch
   if (!isHydrated) {
     return (
       <div className="flex h-screen w-screen items-center justify-center bg-background">

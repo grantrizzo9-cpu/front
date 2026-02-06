@@ -27,7 +27,7 @@ The database will **NOT** work until you do this:
 1. Go to [Firebase Console](https://console.firebase.google.com/).
 2. Click **Authentication** -> **Settings** -> **Authorized domains**.
 3. Add `hostproai.com`.
-4. Add your `.pages.dev` or `.workers.dev` URL (from your Cloudflare screenshot).
+4. Add your `.pages.dev` URL (found on your Cloudflare dashboard).
 
 ---
 
@@ -40,5 +40,14 @@ The database will **NOT** work until you do this:
 4. Click **Save**.
 
 ---
+
+## 🛡️ Step 5: OAuth Consent Screen
+1. Go to [OAuth Consent Screen](https://console.cloud.google.com/apis/credentials/consent).
+2. Select **External** and click Create.
+3. Fill in only the **Required** fields:
+   - **App Name**: Affiliate AI Host
+   - **User Support Email**: (Your email)
+   - **Developer Contact Info**: (Your email)
+4. Click **Save and Continue** through the remaining steps (you don't need to add scopes or test users).
 
 © 2025 Affiliate AI Host. Absolute-Velocity Enabled.
