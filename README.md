@@ -1,6 +1,6 @@
 # Affiliate AI Host - Core Restoration Guide (v1.1.9)
 
-Your site is currently showing "Hello world" because of two reasons: old code cached in Cloudflare, or incorrect build settings. Follow these steps exactly to fix it.
+Your site is currently showing "Hello world" because of two reasons: a Cloudflare Worker is intercepting your domain, or incorrect build settings. Follow these steps exactly to fix it.
 
 ---
 
@@ -13,27 +13,25 @@ Run these commands in your terminal **one by one**. Do NOT use commas or run the
 
 ---
 
-## ☁️ Step 2: Configure Cloudflare Pages (CRITICAL)
-If your deployment says "Permission Denied" or "Hello World", your settings are wrong.
-1. Go to your **Cloudflare Dashboard > Pages**.
-2. Click on your project and go to **Settings > Build & deployments**.
-3. Under **Build configuration**, click **Edit**:
-   - **Framework preset**: Select `Next.js`.
-   - **Build command**: `npm run build`
-   - **Build output directory**: `.next`
-   - **Deploy command**: (LEAVE THIS COMPLETELY EMPTY - DELETE EVERYTHING IN THIS BOX)
-4. Click **Save**.
-5. Go to the **Deployments** tab and click **"Create new deployment"** or **"Retry deployment"**.
+## 🛠️ Step 2: Remove the "Hello World" Interceptor (CRITICAL)
+Your screenshot shows a **Worker** record for `hostproai.com`. This is what is showing "Hello world."
+1. Go to your **Cloudflare Dashboard**.
+2. Go to **Workers & Pages** -> **Overview**.
+3. Look for a Worker named **"front"**.
+4. Click on it, go to the **Settings** or **Triggers** tab, and **Remove the Route** for `hostproai.com`. 
+5. The DNS record should ideally be managed by your **Pages** project, not a manual Worker.
 
 ---
 
-## ⚡ Step 3: Purge Cache (IMPORTANT)
-If you still see "Hello world" after Step 2:
-1. Go to the **Cloudflare Dashboard > Workers & Pages**.
-2. Select your project.
-3. Go to **Settings > Build & deployments**.
-4. Look for a "Purge Cache" or similar button if available, or simply trigger a fresh build.
-5. In your browser, press `Ctrl + F5` (Windows) or `Cmd + Shift + R` (Mac) to clear your local cache.
+## ☁️ Step 3: Configure Cloudflare Pages
+1. Go to your **Cloudflare Dashboard > Pages**.
+2. Select your project and go to **Custom domains**. Ensure `hostproai.com` is added here.
+3. Go to **Settings > Build & deployments**. Click **Edit**:
+   - **Framework preset**: Select `Next.js`.
+   - **Build command**: `npm run build`
+   - **Build output directory**: `.next`
+   - **Deploy command**: (LEAVE THIS COMPLETELY EMPTY)
+4. Click **Save** and trigger a **Retry deployment**.
 
 ---
 
