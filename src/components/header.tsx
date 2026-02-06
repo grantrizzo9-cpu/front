@@ -6,22 +6,24 @@ import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger, SheetClose } from '@/components/ui/sheet';
 import { Logo } from '@/components/logo';
 import { useSearchParams } from 'next/navigation';
-import { Suspense } from 'react';
+import { Suspense, useState, useEffect } from 'react';
 
 function HeaderContent() {
   const searchParams = useSearchParams();
-  const refCode = searchParams.get('ref');
+  const [isHydrated, setIsHydrated] = useState(false);
+
+  useEffect(() => {
+    setIsHydrated(true);
+  }, []);
+
+  const refCode = isHydrated ? searchParams.get('ref') : null;
 
   const getLinkWithRef = (baseHref: string) => {
     if (!refCode) return baseHref;
-    
-    // Split path and hash
     const [path, hash] = baseHref.split('#');
     const urlPath = path || '/';
-    
     const url = new URL(urlPath, 'http://dummybase.com');
     url.searchParams.set('ref', refCode);
-    
     return `${url.pathname}${url.search}${hash ? '#' + hash : ''}`;
   };
   

@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Logo } from "@/components/logo";
@@ -8,27 +7,26 @@ import { Suspense, useState, useEffect } from "react";
 
 function FooterContent() {
   const searchParams = useSearchParams();
-  const refCode = searchParams.get('ref');
+  const [isHydrated, setIsHydrated] = useState(false);
   const [year, setYear] = useState<number | null>(null);
 
   useEffect(() => {
+    setIsHydrated(true);
     setYear(new Date().getFullYear());
   }, []);
 
+  if (!isHydrated) return null;
+
+  const refCode = searchParams.get('ref');
+
   const getLinkWithRef = (baseHref: string) => {
     if (!refCode) return baseHref;
-    
-    // Split path and hash
     const [path, hash] = baseHref.split('#');
     const urlPath = path || '/';
-    
     const url = new URL(urlPath, 'http://dummybase.com');
     url.searchParams.set('ref', refCode);
-    
     return `${url.pathname}${url.search}${hash ? '#' + hash : ''}`;
   };
-
-  const homeLink = getLinkWithRef('/');
 
   const footerLinks = {
     platform: [
@@ -52,13 +50,13 @@ function FooterContent() {
     <div className="container py-12">
       <div className="grid grid-cols-1 gap-8 md:grid-cols-4">
         <div className="flex flex-col gap-4 pr-8">
-          <Logo href={homeLink} />
+          <Logo href={getLinkWithRef('/')} />
           <p className="text-muted-foreground text-sm">
             The future of affiliate marketing and web hosting, powered by AI.
           </p>
         </div>
         <div>
-          <h4 className="font-headline font-semibold mb-4">Platform</h4>
+          <h4 className="font-headline font-semibold mb-4 text-foreground">Platform</h4>
           <ul className="space-y-2">
             {footerLinks.platform.map(link => (
               <li key={link.href}><Link href={link.href} className="text-sm text-muted-foreground hover:text-foreground">{link.label}</Link></li>
@@ -66,7 +64,7 @@ function FooterContent() {
           </ul>
         </div>
         <div>
-          <h4 className="font-headline font-semibold mb-4">Legal</h4>
+          <h4 className="font-headline font-semibold mb-4 text-foreground">Legal</h4>
           <ul className="space-y-2">
             {footerLinks.legal.map(link => (
               <li key={link.href}><Link href={link.href} className="text-sm text-muted-foreground hover:text-foreground">{link.label}</Link></li>
@@ -74,7 +72,7 @@ function FooterContent() {
           </ul>
         </div>
          <div>
-          <h4 className="font-headline font-semibold mb-4">Company</h4>
+          <h4 className="font-headline font-semibold mb-4 text-foreground">Company</h4>
           <ul className="space-y-2">
             {footerLinks.company.map(link => (
               <li key={link.href}><Link href={link.href} className="text-sm text-muted-foreground hover:text-foreground">{link.label}</Link></li>

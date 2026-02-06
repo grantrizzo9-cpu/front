@@ -1,33 +1,36 @@
-
 'use client';
 
-import React, { useMemo, type ReactNode } from 'react';
+import React, { useMemo, type ReactNode, useState, useEffect } from 'react';
 import { FirebaseProvider } from '@/firebase/provider';
 import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager } from 'firebase/firestore';
 import { firebaseConfig } from '@/firebase/config';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { CloudOff, ShieldAlert } from 'lucide-react';
+import { CloudOff, ShieldAlert, Loader2 } from 'lucide-react';
 import type { FirebaseServices } from '@/firebase';
 
 /**
  * FirebaseClientProvider
- * Performance Version: 1.1.8 (Absolute Velocity Optimized)
- * Uses Persistent Local Caching for instant data retrieval on return visits.
+ * Performance Version: 1.1.8 (Hydration Safe)
  */
 export function FirebaseClientProvider({ children }: { children: ReactNode }) {
+  const [isHydrated, setIsHydrated] = useState(false);
+
+  useEffect(() => {
+    setIsHydrated(true);
+  }, []);
+
   const firebaseServices = useMemo<FirebaseServices | null>(() => {
     try {
       const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
       
       if (app.options.apiKey?.includes('REPLACE_WITH')) {
-        throw new Error("Missing Firebase configuration.");
+        return null;
       }
 
       const auth = getAuth(app);
       
-      // Aggressive caching for instantaneous dashboard transitions
       const firestore = initializeFirestore(app, {
           ignoreUndefinedProperties: true,
           localCache: persistentLocalCache({
@@ -41,6 +44,11 @@ export function FirebaseClientProvider({ children }: { children: ReactNode }) {
       return null;
     }
   }, []);
+
+  // Avoid hydration mismatch by rendering a simple loader until client-side mount
+  if (!isHydrated) {
+    return <div className="flex h-screen w-screen items-center justify-center bg-background"><Loader2 className="animate-spin text-primary" /></div>;
+  }
 
   if (!firebaseServices) {
     return (
@@ -56,7 +64,7 @@ export function FirebaseClientProvider({ children }: { children: ReactNode }) {
                     The application is unable to connect to the Firebase backend. 
                     <br/><br/>
                     <strong>Required Action:</strong>
-                    <p className="mt-2">Ensure your domain <strong>hostproai.com</strong> is whitelisted in your Google Cloud Console API Credentials.</p>
+                    <p className="mt-2">Ensure your domain <strong>hostproai.com</strong> is whitelisted in your Google Cloud Console API Credentials (README Step 2).</p>
                 </AlertDescription>
             </Alert>
         </div>
