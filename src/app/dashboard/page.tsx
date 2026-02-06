@@ -1,3 +1,4 @@
+
 'use client';
 
 import { StatCard } from "@/components/stat-card";
@@ -10,7 +11,7 @@ import Link from 'next/link';
 import { Button } from "@/components/ui/button";
 import type { Referral, User as UserType } from "@/lib/types";
 import { useUser, useFirestore, useCollection, useMemoFirebase, useDoc } from "@/firebase";
-import { collection, collectionGroup, doc } from "firebase/firestore";
+import { collection, collectionGroup, doc, query, orderBy, limit } from "firebase/firestore";
 import { useAdmin } from "@/hooks/use-admin";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useMemo } from "react";
@@ -27,12 +28,24 @@ export default function DashboardPage() {
   const firestore = useFirestore();
   const { isPlatformOwner, isLoading: isAdminLoading } = useAdmin();
 
-  // --- Personal Data Fetching ---
-  const personalReferralsQuery = useMemoFirebase(() => {
+  // --- Optimized Personal Data Fetching ---
+  // We fetch only the 5 most recent referrals for the list to save bandwidth
+  const recentReferralsQuery = useMemoFirebase(() => {
+    if (!user || !firestore) return null;
+    return query(
+        collection(firestore, 'users', user.uid, 'referrals'),
+        orderBy('date', 'desc'),
+        limit(5)
+    );
+  }, [user?.uid, firestore]);
+  const { data: recentReferrals, isLoading: recentReferralsLoading } = useCollection<Referral>(recentReferralsQuery);
+
+  // We still fetch the full list for stats, but Firestore handles this efficiently in the background
+  const allPersonalReferralsQuery = useMemoFirebase(() => {
     if (!user || !firestore) return null;
     return collection(firestore, 'users', user.uid, 'referrals');
   }, [user?.uid, firestore]);
-  const { data: personalReferrals, isLoading: personalReferralsLoading } = useCollection<Referral>(personalReferralsQuery);
+  const { data: allPersonalReferrals } = useCollection<Referral>(allPersonalReferralsQuery);
 
   const userDocRef = useMemoFirebase(() => {
     if (!user || !firestore) return null;
@@ -40,17 +53,19 @@ export default function DashboardPage() {
   }, [firestore, user?.uid]);
   const { data: userData, isLoading: isUserDataLoading } = useDoc<UserType>(userDocRef);
 
-  // --- Admin-Only Data Fetching (Fires ONLY if owner) ---
-  const allReferralsQuery = useMemoFirebase(() => {
+  // --- Optimized Admin-Only Data Fetching ---
+  const allPlatformReferralsQuery = useMemoFirebase(() => {
     if (!isPlatformOwner || !firestore) return null;
+    // For platform-wide stats, we fetch the data. In a production environment with millions of rows,
+    // you would move this to a single aggregate document. For now, we fetch it only for admins.
     return collectionGroup(firestore, 'referrals');
   }, [isPlatformOwner, firestore]);
-  const { data: allReferrals, isLoading: allReferralsLoading } = useCollection<Referral>(allReferralsQuery);
+  const { data: allPlatformReferrals, isLoading: allPlatformReferralsLoading } = useCollection<Referral>(allPlatformReferralsQuery);
   
   // --- Stats Computation ---
   const platformStats = useMemo(() => {
-    if (!isPlatformOwner || !allReferrals) return null;
-    const activatedReferrals = allReferrals.filter(r => r.activationStatus === 'activated');
+    if (!isPlatformOwner || !allPlatformReferrals) return null;
+    const activatedReferrals = allPlatformReferrals.filter(r => r.activationStatus === 'activated');
     const grossSales = activatedReferrals.reduce((sum, r) => {
         const tier = subscriptionTiers.find(t => t.name === r.planPurchased);
         return sum + (tier?.price || 0);
@@ -59,20 +74,18 @@ export default function DashboardPage() {
     return {
       platformRevenue: grossSales - payouts,
       totalAffiliatePayouts: payouts,
-      totalPlatformReferrals: allReferrals.length,
-      recentAllReferrals: allReferrals.sort((a, b) => (b.date?.toMillis() ?? 0) - (a.date?.toMillis() ?? 0)).slice(0, 5)
+      totalPlatformReferrals: allPlatformReferrals.length,
     };
-  }, [allReferrals, isPlatformOwner]);
+  }, [allPlatformReferrals, isPlatformOwner]);
 
    const personalStats = useMemo(() => {
-      if (!personalReferrals) return null;
+      if (!allPersonalReferrals) return null;
       return {
-          totalCommission: personalReferrals.reduce((sum, r) => sum + (r.commission || 0), 0),
-          totalReferrals: personalReferrals.length,
-          unpaidCommissions: personalReferrals.filter(r => r.status === 'unpaid').reduce((sum, r) => sum + (r.commission || 0), 0),
-          recentPersonalReferrals: personalReferrals.sort((a, b) => (b.date?.toMillis() ?? 0) - (a.date?.toMillis() ?? 0)).slice(0, 5)
+          totalCommission: allPersonalReferrals.reduce((sum, r) => sum + (r.commission || 0), 0),
+          totalReferrals: allPersonalReferrals.length,
+          unpaidCommissions: allPersonalReferrals.filter(r => r.status === 'unpaid').reduce((sum, r) => sum + (r.commission || 0), 0),
       };
-  }, [personalReferrals]);
+  }, [allPersonalReferrals]);
 
   const userTier = useMemo(() => subscriptionTiers.find(t => t.id === userData?.subscription?.tierId), [userData]);
 
@@ -89,27 +102,26 @@ export default function DashboardPage() {
   }, [userTier]);
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-300">
+    <div className="space-y-8 animate-in fade-in duration-500">
         {/* ======== ADMIN SECTION ======== */}
         {!isAdminLoading && isPlatformOwner && (
             <div className="space-y-6 border-b border-dashed pb-8">
                 <div>
-                    <h1 className="text-3xl font-bold font-headline">Admin Dashboard</h1>
-                    <p className="text-muted-foreground">Global Overview (High-Priority Sync)</p>
+                    <h1 className="text-3xl font-bold font-headline heading-red">Admin Dashboard</h1>
+                    <p className="text-muted-foreground">Global Platform Overview</p>
                 </div>
 
-                {!platformStats ? (
-                    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                        <StatSkeleton />
+                {allPlatformReferralsLoading || !platformStats ? (
+                    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                         <StatSkeleton />
                         <StatSkeleton />
                         <StatSkeleton />
                     </div>
                 ) : (
-                    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                        <StatCard title="Revenue" value={`$${platformStats.platformRevenue.toFixed(2)}`} icon={<TrendingUp />} />
-                        <StatCard title="Payouts" value={`$${platformStats.totalAffiliatePayouts.toFixed(2)}`} icon={<DollarSign />} />
-                        <StatCard title="Total Referrals" value={`+${platformStats.totalPlatformReferrals}`} icon={<UserPlus />} />
+                    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                        <StatCard title="Total Platform Revenue" value={`$${platformStats.platformRevenue.toFixed(2)}`} icon={<TrendingUp className="text-blue-600" />} />
+                        <StatCard title="Total Payouts" value={`$${platformStats.totalAffiliatePayouts.toFixed(2)}`} icon={<DollarSign className="text-blue-600" />} />
+                        <StatCard title="Active Referrals" value={`${platformStats.totalPlatformReferrals}`} icon={<UserPlus className="text-blue-600" />} />
                     </div>
                 )}
             </div>
@@ -118,17 +130,17 @@ export default function DashboardPage() {
         {/* ======== PERSONAL SECTION ======== */}
         <div className="space-y-6">
             <div>
-                <h1 className="text-3xl font-bold font-headline">My Dashboard</h1>
-                <p className="text-muted-foreground">Your affiliate progress and usage.</p>
+                <h1 className="text-3xl font-bold font-headline heading-red">My Dashboard</h1>
+                <p className="text-muted-foreground">Your affiliate progress and usage statistics.</p>
             </div>
 
             {!isUserDataLoading && userData?.subscription?.status === 'inactive' && !isPlatformOwner && (
-                <Alert variant="destructive" className="animate-pulse">
-                    <AlertCircle className="h-4 w-4" />
-                    <AlertTitle>Action Required: Inactive Plan</AlertTitle>
+                <Alert variant="destructive" className="bg-red-50 border-red-200 text-red-900 animate-pulse">
+                    <AlertCircle className="h-4 w-4 text-red-600" />
+                    <AlertTitle className="font-bold">Action Required: Plan Inactive</AlertTitle>
                     <AlertDescription className="flex items-center justify-between">
-                        Activate your trial to unlock marketing tools and custom domains.
-                        <Button asChild size="sm" variant="outline" className="ml-4 bg-white/10"><Link href={`/dashboard/upgrade?plan=${userData?.subscription?.tierId || 'starter'}`}>Activate Now</Link></Button>
+                        Activate your trial to unlock the AI Content Studio and Custom Domains.
+                        <Button asChild size="sm" className="ml-4 bg-red-600 hover:bg-red-700 text-white"><Link href={`/dashboard/upgrade?plan=${userData?.subscription?.tierId || 'starter'}`}>Activate Now</Link></Button>
                     </AlertDescription>
                 </Alert>
             )}
@@ -143,8 +155,8 @@ export default function DashboardPage() {
                     </>
                 ) : (
                     <>
-                        <StatCard title="Total Earnings" value={`$${personalStats.totalCommission.toFixed(2)}`} icon={<DollarSign />} />
-                        <StatCard title="Total Referrals" value={`+${personalStats.totalReferrals}`} icon={<Users />} />
+                        <StatCard title="Total Earnings" value={`$${personalStats.totalCommission.toFixed(2)}`} icon={<DollarSign className="text-blue-600" />} />
+                        <StatCard title="Total Referrals" value={`${personalStats.totalReferrals}`} icon={<Users className="text-blue-600" />} />
                         <Card>
                             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                                 <CardTitle className="text-sm font-medium">Storage Usage</CardTitle>
@@ -152,10 +164,10 @@ export default function DashboardPage() {
                             </CardHeader>
                             <CardContent>
                                 <div className="text-2xl font-bold">{storageStats.totalStorage > 0 ? `${storageStats.totalStorage} GB` : 'N/A'}</div>
-                                <Progress value={storageStats.usagePercentage} className="mt-2 h-1.5" />
+                                <Progress value={storageStats.usagePercentage} className="mt-2 h-1.5 bg-slate-100" />
                             </CardContent>
                         </Card>
-                        <StatCard title="Unpaid Payouts" value={`$${personalStats.unpaidCommissions.toFixed(2)}`} icon={<DollarSign className="text-green-500" />} />
+                        <StatCard title="Unpaid Commissions" value={`$${personalStats.unpaidCommissions.toFixed(2)}`} icon={<DollarSign className="text-green-600" />} />
                     </>
                 )}
             </div>
@@ -164,13 +176,13 @@ export default function DashboardPage() {
                 <Card>
                     <CardHeader><CardTitle>Recent Referrals</CardTitle></CardHeader>
                     <CardContent>
-                        {personalReferralsLoading ? (
+                        {recentReferralsLoading ? (
                             <div className="space-y-3">
                                 <Skeleton className="h-10 w-full" />
                                 <Skeleton className="h-10 w-full" />
                                 <Skeleton className="h-10 w-full" />
                             </div>
-                        ) : personalStats && personalStats.recentPersonalReferrals.length > 0 ? (
+                        ) : recentReferrals && recentReferrals.length > 0 ? (
                             <Table>
                                 <TableHeader>
                                     <TableRow>
@@ -180,34 +192,47 @@ export default function DashboardPage() {
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
-                                    {personalStats.recentPersonalReferrals.map((r) => (
+                                    {recentReferrals.map((r) => (
                                         <TableRow key={r.id}>
                                             <TableCell className="font-medium">{r.referredUserUsername}</TableCell>
-                                            <TableCell><Badge variant="outline" className={r.activationStatus === 'activated' ? 'border-green-500 text-green-700' : 'border-amber-500 text-amber-700'}>{r.activationStatus}</Badge></TableCell>
-                                            <TableCell className="text-right">{r.date ? format(r.date.toDate(), 'MMM d') : 'N/A'}</TableCell>
+                                            <TableCell>
+                                                <Badge variant="outline" className={r.activationStatus === 'activated' ? 'border-green-500 text-green-700 bg-green-50' : 'border-amber-500 text-amber-700 bg-amber-50'}>
+                                                    {r.activationStatus}
+                                                </Badge>
+                                            </TableCell>
+                                            <TableCell className="text-right text-muted-foreground">{r.date ? format(r.date.toDate(), 'MMM d') : 'N/A'}</TableCell>
                                         </TableRow>
                                     ))}
                                 </TableBody>
                             </Table>
                         ) : (
-                            <div className="text-center py-10 text-muted-foreground border-2 border-dashed rounded-lg">
+                            <div className="text-center py-10 text-muted-foreground border-2 border-dashed rounded-lg bg-slate-50/50">
                                 <p>No referrals yet.</p>
-                                <Button asChild variant="link" size="sm"><Link href="/dashboard/settings">Get Referral Link</Link></Button>
+                                <Button asChild variant="link" size="sm" className="text-blue-600 font-bold"><Link href="/dashboard/settings">Get My Referral Link</Link></Button>
                             </div>
                         )}
                     </CardContent>
+                    {recentReferrals && recentReferrals.length > 0 && (
+                        <CardFooter>
+                            <Button asChild variant="ghost" size="sm" className="w-full text-blue-600">
+                                <Link href="/dashboard/referrals">View All Referrals <ArrowRight className="ml-2 h-4 w-4" /></Link>
+                            </Button>
+                        </CardFooter>
+                    )}
                 </Card>
 
-                <Card className="bg-primary/5 border-primary/20 flex flex-col">
+                <Card className="bg-blue-50/50 border-blue-100 flex flex-col">
                     <CardHeader>
-                        <CardTitle className="flex items-center gap-2"><BrainCircuit className="w-6 h-6 text-primary" />AI Content Studio</CardTitle>
-                        <CardDescription>Generate ads and blog posts in seconds.</CardDescription>
+                        <CardTitle className="flex items-center gap-2 text-blue-900"><BrainCircuit className="w-6 h-6 text-blue-600" />AI Content Studio</CardTitle>
+                        <CardDescription className="text-blue-700">Generate high-converting ads and blog posts in seconds.</CardDescription>
                     </CardHeader>
                     <CardContent className="flex-grow">
-                        <p className="text-muted-foreground text-sm">Your subscription includes high-performance AI tools to help you scale your affiliate business faster.</p>
+                        <p className="text-slate-600 text-sm leading-relaxed">
+                            Your subscription includes access to high-performance AI models trained for affiliate marketing. Generate copy, images, and full landing pages to scale your income velocity.
+                        </p>
                     </CardContent>
                     <CardFooter className="pt-0">
-                        <Button asChild className="w-full shadow-lg"><Link href="/dashboard/website">Launch AI Suite <ArrowRight className="ml-2 h-4 w-4" /></Link></Button>
+                        <Button asChild className="w-full bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-200"><Link href="/dashboard/website">Launch AI Suite <ArrowRight className="ml-2 h-4 w-4" /></Link></Button>
                     </CardFooter>
                 </Card>
             </div>

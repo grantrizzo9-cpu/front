@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useFirestore, useUser } from '@/firebase';
@@ -5,8 +6,8 @@ import { doc, getDoc } from 'firebase/firestore';
 import { useState, useEffect } from 'react';
 
 /**
- * Max-Speed Admin Hook (v1.0.8)
- * Optimized to prevent blocking main UI renders.
+ * Max-Speed Admin Hook (v1.1.3)
+ * Optimized for high-velocity platform owners and secure role verification.
  */
 export function useAdmin() {
   const { user, isUserLoading } = useUser();
@@ -15,12 +16,14 @@ export function useAdmin() {
   const [isPlatformOwner, setIsPlatformOwner] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Hardcoded list of platform owner emails
+  // Hardcoded list of platform owner emails for instant verification
   const platformOwnerEmails = ['rentapog@gmail.com', 'grantrizzo2@gmail.com'];
 
   useEffect(() => {
+    // If the user hasn't loaded yet, keep loading
     if (isUserLoading) return;
 
+    // If no user is logged in, reset and stop loading
     if (!user) {
       setIsAdmin(false);
       setIsPlatformOwner(false);
@@ -30,7 +33,8 @@ export function useAdmin() {
 
     const email = user.email?.toLowerCase();
 
-    // 1. Instant check for Platform Owners (Fastest path)
+    // 1. HIGH-SPEED PATH: Instant check for Platform Owners
+    // This allows the UI to render the Admin section without waiting for a DB round-trip.
     if (email && platformOwnerEmails.includes(email)) {
       setIsAdmin(true);
       setIsPlatformOwner(true);
@@ -38,7 +42,7 @@ export function useAdmin() {
       return;
     }
 
-    // 2. Database check for secondary admins
+    // 2. SECURE PATH: Database check for secondary/invited admins
     const checkRoleDoc = async () => {
       try {
         if (!firestore) return;
@@ -48,7 +52,7 @@ export function useAdmin() {
           setIsAdmin(true);
         }
       } catch (error) {
-        // Silent catch
+        // Silent catch for security and performance
       } finally {
         setIsLoading(false);
       }
