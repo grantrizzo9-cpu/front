@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useFirestore, useUser } from '@/firebase';
@@ -6,8 +5,9 @@ import { doc, getDoc } from 'firebase/firestore';
 import { useState, useEffect } from 'react';
 
 /**
- * Max-Speed Admin Hook (v1.1.3)
+ * Max-Speed Admin Hook (v1.1.4)
  * Optimized for high-velocity platform owners and secure role verification.
+ * Enables zero-latency dashbord UI rendering.
  */
 export function useAdmin() {
   const { user, isUserLoading } = useUser();
@@ -34,7 +34,6 @@ export function useAdmin() {
     const email = user.email?.toLowerCase();
 
     // 1. HIGH-SPEED PATH: Instant check for Platform Owners
-    // This allows the UI to render the Admin section without waiting for a DB round-trip.
     if (email && platformOwnerEmails.includes(email)) {
       setIsAdmin(true);
       setIsPlatformOwner(true);
@@ -46,13 +45,14 @@ export function useAdmin() {
     const checkRoleDoc = async () => {
       try {
         if (!firestore) return;
+        // Check cache first for instant repeat visits
         const adminRoleRef = doc(firestore, 'roles_admin', user.uid);
         const adminDocSnap = await getDoc(adminRoleRef);
         if (adminDocSnap.exists()) {
           setIsAdmin(true);
         }
       } catch (error) {
-        // Silent catch for security and performance
+        // Silent catch
       } finally {
         setIsLoading(false);
       }

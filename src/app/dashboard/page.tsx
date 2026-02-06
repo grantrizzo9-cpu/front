@@ -1,4 +1,3 @@
-
 'use client';
 
 import { StatCard } from "@/components/stat-card";
@@ -28,8 +27,6 @@ export default function DashboardPage() {
   const firestore = useFirestore();
   const { isPlatformOwner, isLoading: isAdminLoading } = useAdmin();
 
-  // --- Optimized Personal Data Fetching ---
-  // We fetch only the 5 most recent referrals for the list to save bandwidth
   const recentReferralsQuery = useMemoFirebase(() => {
     if (!user || !firestore) return null;
     return query(
@@ -40,7 +37,6 @@ export default function DashboardPage() {
   }, [user?.uid, firestore]);
   const { data: recentReferrals, isLoading: recentReferralsLoading } = useCollection<Referral>(recentReferralsQuery);
 
-  // We still fetch the full list for stats, but Firestore handles this efficiently in the background
   const allPersonalReferralsQuery = useMemoFirebase(() => {
     if (!user || !firestore) return null;
     return collection(firestore, 'users', user.uid, 'referrals');
@@ -53,16 +49,12 @@ export default function DashboardPage() {
   }, [firestore, user?.uid]);
   const { data: userData, isLoading: isUserDataLoading } = useDoc<UserType>(userDocRef);
 
-  // --- Optimized Admin-Only Data Fetching ---
   const allPlatformReferralsQuery = useMemoFirebase(() => {
     if (!isPlatformOwner || !firestore) return null;
-    // For platform-wide stats, we fetch the data. In a production environment with millions of rows,
-    // you would move this to a single aggregate document. For now, we fetch it only for admins.
     return collectionGroup(firestore, 'referrals');
   }, [isPlatformOwner, firestore]);
   const { data: allPlatformReferrals, isLoading: allPlatformReferralsLoading } = useCollection<Referral>(allPlatformReferralsQuery);
   
-  // --- Stats Computation ---
   const platformStats = useMemo(() => {
     if (!isPlatformOwner || !allPlatformReferrals) return null;
     const activatedReferrals = allPlatformReferrals.filter(r => r.activationStatus === 'activated');
@@ -102,8 +94,7 @@ export default function DashboardPage() {
   }, [userTier]);
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500">
-        {/* ======== ADMIN SECTION ======== */}
+    <div className="space-y-8 animate-in fade-in duration-300">
         {!isAdminLoading && isPlatformOwner && (
             <div className="space-y-6 border-b border-dashed pb-8">
                 <div>
@@ -127,7 +118,6 @@ export default function DashboardPage() {
             </div>
         )}
 
-        {/* ======== PERSONAL SECTION ======== */}
         <div className="space-y-6">
             <div>
                 <h1 className="text-3xl font-bold font-headline heading-red">My Dashboard</h1>
@@ -135,7 +125,7 @@ export default function DashboardPage() {
             </div>
 
             {!isUserDataLoading && userData?.subscription?.status === 'inactive' && !isPlatformOwner && (
-                <Alert variant="destructive" className="bg-red-50 border-red-200 text-red-900 animate-pulse">
+                <Alert variant="destructive" className="bg-red-50 border-red-200 text-red-900">
                     <AlertCircle className="h-4 w-4 text-red-600" />
                     <AlertTitle className="font-bold">Action Required: Plan Inactive</AlertTitle>
                     <AlertDescription className="flex items-center justify-between">
@@ -146,7 +136,7 @@ export default function DashboardPage() {
             )}
 
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                {isUserLoading || isUserDataLoading || !personalStats ? (
+                {isUserLoading || !personalStats ? (
                     <>
                         <StatSkeleton />
                         <StatSkeleton />

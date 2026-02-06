@@ -4,7 +4,7 @@ import React, { useMemo, type ReactNode } from 'react';
 import { FirebaseProvider } from '@/firebase/provider';
 import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
-import { initializeFirestore } from 'firebase/firestore';
+import { initializeFirestore, CACHE_SIZE_UNLIMITED } from 'firebase/firestore';
 import { firebaseConfig } from '@/firebase/config';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { CloudOff, ShieldAlert } from 'lucide-react';
@@ -12,8 +12,8 @@ import type { FirebaseServices } from '@/firebase';
 
 /**
  * FirebaseClientProvider
- * Performance Version: 1.0.9 (Railway Optimized)
- * This version forces Long Polling to bypass WebSocket blocks common on Railway.
+ * Performance Version: 1.1.4 (High-Velocity Optimized)
+ * Forces Long Polling and enables aggressive caching for instant dashboard transitions.
  */
 export function FirebaseClientProvider({ children }: { children: ReactNode }) {
   const firebaseServices = useMemo<FirebaseServices | null>(() => {
@@ -26,10 +26,11 @@ export function FirebaseClientProvider({ children }: { children: ReactNode }) {
 
       const auth = getAuth(app);
       
-      // Force Long Polling immediately to fix "Client Offline" errors on Railway
+      // Force Long Polling and enable unlimited cache for snappier navigation
       const firestore = initializeFirestore(app, {
           experimentalForceLongPolling: true,
           ignoreUndefinedProperties: true,
+          cacheSizeBytes: CACHE_SIZE_UNLIMITED
       });
 
       return { firebaseApp: app, auth, firestore };

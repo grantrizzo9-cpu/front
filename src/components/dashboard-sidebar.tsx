@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect } from "react";
@@ -28,9 +27,6 @@ import {
   ShieldCheck,
   BookOpen,
   Globe,
-  ImageIcon,
-  Clapperboard,
-  Send,
   Wand2,
 } from "lucide-react";
 import Link from "next/link";
@@ -58,7 +54,6 @@ export function DashboardSidebar() {
   useEffect(() => {
     setHasMounted(true);
   }, []);
-
 
   const isActive = (path: string) => pathname === path;
 
@@ -132,29 +127,20 @@ export function DashboardSidebar() {
       </SidebarContent>
       <SidebarFooter>
         <div className="flex items-center gap-3">
-           <Avatar>
+           <Avatar className="h-8 w-8">
             {isUserLoading || !hasMounted ? (
-              <Skeleton className="h-10 w-10 rounded-full" />
+              <Skeleton className="h-8 w-8 rounded-full" />
             ) : (
-              <>
-                <AvatarImage src={user?.photoURL ?? `https://picsum.photos/seed/${user?.uid}/100/100`} />
-                <AvatarFallback>
-                  {user?.email?.[0]?.toUpperCase() || 'U'}
-                </AvatarFallback>
-              </>
+              <AvatarFallback className="text-xs">
+                {user?.email?.[0]?.toUpperCase() || 'U'}
+              </AvatarFallback>
             )}
           </Avatar>
           <div className="flex-1 overflow-hidden">
             {isUserLoading || !hasMounted ? (
-              <div className="space-y-1">
-                <Skeleton className="h-4 w-24" />
-                <Skeleton className="h-3 w-32" />
-              </div>
+              <Skeleton className="h-3 w-20" />
             ) : (
-              <>
-                <p className="font-semibold text-sm truncate">{user?.displayName || user?.email}</p>
-                <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
-              </>
+              <p className="font-semibold text-xs truncate">{user?.displayName || user?.email}</p>
             )}
           </div>
           <DropdownMenu>
