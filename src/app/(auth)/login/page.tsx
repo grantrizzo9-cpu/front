@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/firebase";
 import { signInWithEmailAndPassword } from "firebase/auth";
@@ -14,9 +14,18 @@ import { Loader2 } from "lucide-react";
 
 function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const refCode = searchParams.get('ref');
   const { toast } = useToast();
   const auth = useAuth();
   const [isLoading, setIsLoading] = useState(false);
+
+  const getLinkWithRef = (baseHref: string) => {
+    if (!refCode) return baseHref;
+    const url = new URL(baseHref, 'http://dummybase.com');
+    url.searchParams.set('ref', refCode);
+    return `${url.pathname}${url.search}`;
+  };
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -57,7 +66,7 @@ function LoginForm() {
   return (
     <Card className="shadow-xl">
       <CardHeader>
-        <CardTitle className="font-headline text-2xl">Access Your Account</CardTitle>
+        <CardTitle className="font-headline text-2xl text-red-600">Access Your Account</CardTitle>
         <CardDescription>Log in to manage your affiliate dashboard.</CardDescription>
       </CardHeader>
       <CardContent>
@@ -69,19 +78,19 @@ function LoginForm() {
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <Label htmlFor="password">Password</Label>
-              <Link href="/forgot-password" name="forgot-password-link" className="text-sm text-muted-foreground hover:text-primary">
+              <Link href={getLinkWithRef('/forgot-password')} name="forgot-password-link" className="text-sm text-muted-foreground hover:text-primary">
                 Forgot password?
               </Link>
             </div>
             <Input id="password" name="password" type="password" required disabled={isLoading}/>
           </div>
-          <Button type="submit" className="w-full h-12 text-lg font-bold" disabled={isLoading}>
+          <Button type="submit" className="w-full h-12 text-lg font-bold bg-blue-600 hover:bg-blue-700" disabled={isLoading}>
             {isLoading ? <Loader2 className="animate-spin" /> : "Log In"}
           </Button>
         </form>
         <div className="mt-4 text-center text-sm">
           Don't have an account?{" "}
-          <Link href="/signup" className="text-primary hover:underline font-bold">
+          <Link href={getLinkWithRef('/signup')} className="text-primary hover:underline font-bold">
             Sign up
           </Link>
         </div>

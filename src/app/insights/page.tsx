@@ -6,8 +6,19 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { TrendingUp, Cpu, Globe, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import { Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 
 function InsightsContent() {
+  const searchParams = useSearchParams();
+  const refCode = searchParams.get('ref');
+
+  const getLinkWithRef = (baseHref: string) => {
+    if (!refCode) return baseHref;
+    const url = new URL(baseHref, 'http://dummybase.com');
+    url.searchParams.set('ref', refCode);
+    return `${url.pathname}${url.search}`;
+  };
+
   const articles = [
     {
       title: "Why Daily Payouts are the New Industry Standard",
@@ -44,7 +55,7 @@ function InsightsContent() {
 
       <div className="grid gap-8">
         {articles.map((article) => (
-          <Link key={article.slug} href={`/insights/${article.slug}`}>
+          <Link key={article.slug} href={getLinkWithRef(`/insights/${article.slug}`)}>
             <Card className="hover:border-blue-400 hover:shadow-lg transition-all group overflow-hidden">
               <div className="flex flex-col md:flex-row">
                 <CardHeader className="flex-1 p-8">

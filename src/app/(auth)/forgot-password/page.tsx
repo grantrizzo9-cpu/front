@@ -8,14 +8,24 @@ import Link from "next/link";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/firebase";
 import { sendPasswordResetEmail } from "firebase/auth";
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { Loader2 } from "lucide-react";
+import { useSearchParams } from "next/navigation";
 
-export default function ForgotPasswordPage() {
+function ForgotPasswordForm() {
   const { toast } = useToast();
+  const searchParams = useSearchParams();
+  const refCode = searchParams.get('ref');
   const auth = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
+
+  const getLinkWithRef = (baseHref: string) => {
+    if (!refCode) return baseHref;
+    const url = new URL(baseHref, 'http://dummybase.com');
+    url.searchParams.set('ref', refCode);
+    return `${url.pathname}${url.search}`;
+  };
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -33,8 +43,6 @@ export default function ForgotPasswordPage() {
     } catch (error: any) {
       let description = "An error occurred. Please try again.";
       if (error.code === 'auth/user-not-found') {
-        // We don't want to reveal if a user exists or not for security reasons.
-        // So we show the same message as success.
         setEmailSent(true);
         toast({
             title: "Password Reset Email Sent",
@@ -55,7 +63,7 @@ export default function ForgotPasswordPage() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="font-headline text-2xl">Forgot Password</CardTitle>
+        <CardTitle className="font-headline text-2xl text-red-600">Forgot Password</CardTitle>
         <CardDescription>
             {emailSent 
                 ? "Check your inbox for a password reset link."
@@ -68,7 +76,7 @@ export default function ForgotPasswordPage() {
              <div className="text-center">
                  <p className="text-muted-foreground mb-4">Didn't receive an email? Check your spam folder or try again.</p>
                  <Button asChild variant="secondary">
-                     <Link href="/login">Back to Log In</Link>
+                     <Link href={getLinkWithRef('/login')}>Back to Log In</Link>
                  </Button>
              </div>
         ) : (
@@ -77,18 +85,26 @@ export default function ForgotPasswordPage() {
                 <Label htmlFor="email">Email</Label>
                 <Input id="email" name="email" type="email" placeholder="you@example.com" required disabled={isLoading} />
             </div>
-            <Button type="submit" className="w-full" disabled={isLoading}>
+            <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700" disabled={isLoading}>
                 {isLoading ? <Loader2 className="animate-spin" /> : "Send Reset Link"}
             </Button>
             </form>
         )}
         <div className="mt-4 text-center text-sm">
             Remember your password?{" "}
-            <Link href="/login" className="text-primary hover:underline">
+            <Link href={getLinkWithRef('/login')} className="text-primary hover:underline">
                 Log in
             </Link>
         </div>
       </CardContent>
     </Card>
+  );
+}
+
+export default function ForgotPasswordPage() {
+  return (
+    <Suspense fallback={<div className="flex justify-center p-12"><Loader2 className="animate-spin h-8 w-8 text-primary" /></div>}>
+      <ForgotPasswordForm />
+    </Suspense>
   );
 }

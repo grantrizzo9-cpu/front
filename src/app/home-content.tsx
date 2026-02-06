@@ -21,7 +21,16 @@ import {
 function HomeInner() {
   const searchParams = useSearchParams();
   const refCode = searchParams.get('ref');
-  const signupLink = refCode ? `/pricing?ref=${refCode}` : '/pricing';
+
+  const getLinkWithRef = (baseHref: string) => {
+    if (baseHref.startsWith('/#') || baseHref.startsWith('#')) return baseHref;
+    if (!refCode) return baseHref;
+    const url = new URL(baseHref, 'http://dummybase.com');
+    url.searchParams.set('ref', refCode);
+    return `${url.pathname}${url.search}`;
+  };
+
+  const signupLink = getLinkWithRef('/pricing');
 
   const featureImage1 = PlaceHolderImages.find((img) => img.id === 'feature-1');
 
@@ -100,7 +109,7 @@ function HomeInner() {
                 <Link href="#packages">Explore Our Packages <ArrowRight className="ml-2 h-5 w-5" /></Link>
               </Button>
               <Button size="lg" variant="outline" className="h-14 px-8 text-lg font-bold rounded-xl border-slate-200 hover:bg-slate-50" asChild>
-                <Link href="/insights">View Knowledge Base</Link>
+                <Link href={getLinkWithRef('/insights')}>View Knowledge Base</Link>
               </Button>
             </div>
           </div>
@@ -116,7 +125,7 @@ function HomeInner() {
               <p className="text-slate-600 text-lg max-w-xl">Deep dives into market dynamics, technical optimizations, and affiliate strategy.</p>
             </div>
             <Button variant="link" className="text-blue-600 font-bold group text-lg" asChild>
-              <Link href="/insights">
+              <Link href={getLinkWithRef('/insights')}>
                 Visit Knowledge Base <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
               </Link>
             </Button>
@@ -124,7 +133,7 @@ function HomeInner() {
 
           <div className="grid gap-6 md:grid-cols-3">
             {blogPosts.map((post, i) => (
-              <Link key={i} href={`/insights/${post.slug}`}>
+              <Link key={i} href={getLinkWithRef(`/insights/${post.slug}`)}>
                 <Card className="bg-white h-full hover:border-blue-400 hover:shadow-md transition-all duration-300 group cursor-pointer border-slate-200 shadow-sm">
                   <CardHeader className="space-y-4">
                     <div className="flex items-center justify-between text-xs font-bold uppercase tracking-widest text-blue-600">
@@ -247,7 +256,7 @@ function HomeInner() {
               <Link href={signupLink}>Start Your 3-Day Trial</Link>
             </Button>
             <Button size="lg" variant="outline" className="h-16 px-12 text-xl font-bold rounded-2xl border-slate-700 bg-white/5 hover:bg-white/10 text-white" asChild>
-              <Link href="/about">Meet the Founders</Link>
+              <Link href={getLinkWithRef('/about')}>Meet the Founders</Link>
             </Button>
           </div>
         </div>
