@@ -13,17 +13,22 @@ function HeaderContent() {
   const refCode = searchParams.get('ref');
 
   const getLinkWithRef = (baseHref: string) => {
-    if (baseHref.startsWith('/#')) return baseHref;
     if (!refCode) return baseHref;
-    const url = new URL(baseHref, 'http://dummybase.com');
+    
+    // Split path and hash
+    const [path, hash] = baseHref.split('#');
+    const urlPath = path || '/';
+    
+    const url = new URL(urlPath, 'http://dummybase.com');
     url.searchParams.set('ref', refCode);
-    return `${url.pathname}${url.search}`;
+    
+    return `${url.pathname}${url.search}${hash ? '#' + hash : ''}`;
   };
   
   const navLinks = [
     { href: getLinkWithRef('/pricing'), label: 'Pricing' },
-    { href: '/#features', label: 'Features' },
-    { href: '/#insights', label: 'Insights' },
+    { href: getLinkWithRef('/#features'), label: 'Features' },
+    { href: getLinkWithRef('/#insights'), label: 'Insights' },
   ];
 
   const homeLink = getLinkWithRef('/');

@@ -3,7 +3,7 @@
 import { Header } from '@/components/header';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowRight, TrendingUp, Zap, Shield, Sparkles, Globe, Cpu, HelpCircle } from 'lucide-react';
+import { ArrowRight, TrendingUp, Zap, Sparkles, Globe, Cpu, HelpCircle } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Footer } from '@/components/footer';
@@ -23,11 +23,15 @@ function HomeInner() {
   const refCode = searchParams.get('ref');
 
   const getLinkWithRef = (baseHref: string) => {
-    if (baseHref.startsWith('/#') || baseHref.startsWith('#')) return baseHref;
     if (!refCode) return baseHref;
-    const url = new URL(baseHref, 'http://dummybase.com');
+    
+    const [path, hash] = baseHref.split('#');
+    const urlPath = path || '/';
+    
+    const url = new URL(urlPath, 'http://dummybase.com');
     url.searchParams.set('ref', refCode);
-    return `${url.pathname}${url.search}`;
+    
+    return `${url.pathname}${url.search}${hash ? '#' + hash : ''}`;
   };
 
   const signupLink = getLinkWithRef('/pricing');
@@ -106,7 +110,7 @@ function HomeInner() {
             
             <div className="flex flex-col sm:flex-row justify-center gap-4 pt-4">
               <Button size="lg" className="h-14 px-8 text-lg font-bold rounded-xl bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-200" asChild>
-                <Link href="#packages">Explore Our Packages <ArrowRight className="ml-2 h-5 w-5" /></Link>
+                <Link href={getLinkWithRef('/#packages')}>Explore Our Packages <ArrowRight className="ml-2 h-5 w-5" /></Link>
               </Button>
               <Button size="lg" variant="outline" className="h-14 px-8 text-lg font-bold rounded-xl border-slate-200 hover:bg-slate-50" asChild>
                 <Link href={getLinkWithRef('/insights')}>View Knowledge Base</Link>
@@ -154,8 +158,8 @@ function HomeInner() {
         </div>
       </section>
 
-      {/* Breakdown Section */}
-      <section className="py-24">
+      {/* Features Section */}
+      <section id="features" className="py-24">
         <div className="container grid gap-16 lg:grid-cols-2 items-center">
           <div className="relative aspect-square md:aspect-video rounded-3xl overflow-hidden border border-slate-200 shadow-xl group">
             {featureImage1 && (
