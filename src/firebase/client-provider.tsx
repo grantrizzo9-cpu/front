@@ -4,7 +4,7 @@ import React, { useMemo, type ReactNode } from 'react';
 import { FirebaseProvider } from '@/firebase/provider';
 import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
-import { initializeFirestore, terminate } from 'firebase/firestore';
+import { initializeFirestore } from 'firebase/firestore';
 import { firebaseConfig } from '@/firebase/config';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { CloudOff, ShieldAlert } from 'lucide-react';
@@ -12,8 +12,8 @@ import type { FirebaseServices } from '@/firebase';
 
 /**
  * FirebaseClientProvider
- * Performance Version: 1.0.9 (Offline-Resilient)
- * This version handles the "Failed to get document" error more gracefully.
+ * Performance Version: 1.0.9 (Railway Optimized)
+ * This version forces Long Polling to bypass WebSocket blocks common on Railway.
  */
 export function FirebaseClientProvider({ children }: { children: ReactNode }) {
   const firebaseServices = useMemo<FirebaseServices | null>(() => {
@@ -26,9 +26,9 @@ export function FirebaseClientProvider({ children }: { children: ReactNode }) {
 
       const auth = getAuth(app);
       
-      // Standard Firestore initialization. 
-      // We removed forced long polling to see if the user's whitelist fix (Step 2) works better with standard protocols.
+      // Force Long Polling immediately to fix "Client Offline" errors on Railway
       const firestore = initializeFirestore(app, {
+          experimentalForceLongPolling: true,
           ignoreUndefinedProperties: true,
       });
 
