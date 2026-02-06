@@ -56,7 +56,7 @@ function getFirebase(): FirebaseServices | null {
             }),
         });
       } catch (e: any) {
-        // If it was already initialized elsewhere (e.g. by a background process), just get the existing instance
+        // If it was already initialized elsewhere, just get the existing instance
         cachedFirestore = getFirestore(cachedApp);
       }
     }
@@ -100,10 +100,10 @@ export function FirebaseClientProvider({ children }: { children: ReactNode }) {
             <Alert variant="destructive">
                 <AlertTitle className="text-lg font-bold flex items-center justify-center gap-2">
                     <ShieldAlert className="h-5 w-5" />
-                    Secure Connection Required
+                    Connection Blocked
                 </AlertTitle>
                 <AlertDescription className="mt-2 text-sm text-left">
-                    Your domain <strong>hostproai.com</strong> is correctly set up in Cloudflare, but it must be authorized in your Firebase security settings to access the database.
+                    Your domain <strong>hostproai.com</strong> must be authorized in your Firebase security settings to access the database.
                     <br/><br/>
                     <strong>The Final Step:</strong>
                     <p className="mt-2">Go to <strong>Firebase Console > Auth > Settings > Authorized Domains</strong> and add <code>hostproai.com</code>.</p>
