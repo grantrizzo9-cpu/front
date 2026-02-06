@@ -1,4 +1,3 @@
-
 "use client";
 
 import { Header } from "@/components/header";
@@ -49,7 +48,7 @@ export function AboutContent() {
               <ul className="space-y-3 pt-4">
                 <li className="flex items-center gap-2">
                   <CheckCircle className="w-5 h-5 text-primary" />
-                  <span>Generous 70%-75% Commissions</span>
+                  <span>Start at 70% Commissions (Scale to 75%)</span>
                 </li>
                 <li className="flex items-center gap-2">
                   <CheckCircle className="w-5 h-5 text-primary" />

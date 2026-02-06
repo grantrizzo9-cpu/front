@@ -59,7 +59,7 @@ export const subscriptionTiers: SubscriptionTier[] = [
       'Advanced AI Suite',
       'Access to Pro Marketing Guides',
       'Priority Support',
-      '70% Affiliate Commission (75% after 10 referrals)',
+      '70% Base / 75% Target Commission',
     ],
     isMostPopular: true,
   },
@@ -82,7 +82,7 @@ export const subscriptionTiers: SubscriptionTier[] = [
       'Pro AI Suite',
       'Access to Business Marketing Guides',
       'Priority Support',
-      '70% Affiliate Commission (75% after 10 referrals)',
+      '70% Base / 75% Target Commission',
     ],
   },
   {
@@ -104,7 +104,7 @@ export const subscriptionTiers: SubscriptionTier[] = [
       'Business AI Suite',
       'Access to Scale-Level Marketing Guides',
       'Dedicated Support',
-      '70% Affiliate Commission (75% after 10 referrals)',
+      '70% Base / 75% Target Commission',
     ],
   },
   {
@@ -126,7 +126,7 @@ export const subscriptionTiers: SubscriptionTier[] = [
       'Enterprise AI Suite',
       'Access to Enterprise Marketing Guides',
       'Dedicated Account Manager',
-      '70% Affiliate Commission (75% after 10 referrals)',
+      '70% Base / 75% Target Commission',
     ],
   },
 ];
