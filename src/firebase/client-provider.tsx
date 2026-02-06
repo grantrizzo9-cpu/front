@@ -27,16 +27,23 @@ function getFirebase(): FirebaseServices | null {
   if (typeof window === 'undefined') return null;
 
   try {
+    // 1. Get or Initialize App
     if (!cachedApp) {
-      cachedApp = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
-      
-      if (cachedApp.options.apiKey?.includes('REPLACE_WITH')) {
-        return null;
-      }
+      const apps = getApps();
+      cachedApp = apps.length === 0 ? initializeApp(firebaseConfig) : getApp();
+    }
+    
+    if (cachedApp.options.apiKey?.includes('REPLACE_WITH')) {
+      return null;
+    }
 
+    // 2. Get or Initialize Auth
+    if (!cachedAuth) {
       cachedAuth = getAuth(cachedApp);
-      
-      // Attempt initialization with persistence
+    }
+    
+    // 3. Get or Initialize Firestore with persistence
+    if (!cachedFirestore) {
       try {
         cachedFirestore = initializeFirestore(cachedApp, {
             ignoreUndefinedProperties: true,
@@ -45,7 +52,7 @@ function getFirebase(): FirebaseServices | null {
             }),
         });
       } catch (e) {
-        // Fallback if already initialized or unsupported
+        // Fallback if already initialized with different settings
         cachedFirestore = getFirestore(cachedApp);
       }
     }

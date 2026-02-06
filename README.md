@@ -1,22 +1,22 @@
 
 # Affiliate AI Host - Deployment Guide (v1.1.8)
 
-This application is optimized for high-speed performance and global delivery. You can deploy it to **Cloudflare Pages** (Recommended).
+This application is optimized for high-speed performance. Follow these steps exactly to ensure your site is live and the database is connected.
 
 ---
 
-## 🚀 How to Upload to GitHub (Step-by-Step)
+## 🚀 How to Sync Your Code (Run these ONE BY ONE)
 
-To avoid terminal errors, run these commands **one by one**. Do not use commas.
+Do not use commas. Copy and paste each line into the terminal, then press Enter.
 
-1.  **Stage your changes**:
+1.  **Stage changes**:
     ```bash
     git add .
     ```
 
-2.  **Commit your changes**:
+2.  **Commit changes**:
     ```bash
-    git commit -m "Final Version 1.1.8: Absolute Velocity Shell"
+    git commit -m "Final Version 1.1.8: Absolute Velocity"
     ```
 
 3.  **Push to GitHub**:
@@ -26,51 +26,44 @@ To avoid terminal errors, run these commands **one by one**. Do not use commas.
 
 ---
 
-## ☁️ How to Deploy to Cloudflare Pages (Recommended)
+## ☁️ How to Deploy to Cloudflare Pages
 
-1.  **Connect to Cloudflare**:
-    - Log in to your [Cloudflare Dashboard](https://dash.cloudflare.com/).
-    - Go to **Workers & Pages** > **Create application** > **Pages** > **Connect to Git**.
-    - Select your GitHub repository.
-
-2.  **Configure Build Settings (CRITICAL)**:
-    - **Framework preset**: `Next.js`
+1.  **Select Repository**: In your Cloudflare Dashboard, go to **Workers & Pages** > **Create Application** > **Pages** > **Connect to Git** and select your repo.
+2.  **Configure Build**:
+    - **Framework preset**: Select `Next.js`.
     - **Build command**: `npm run build`
     - **Build output directory**: `.next`
-    - **Root directory**: `/`
-    - **⚠️ IMPORTANT (DEPLOY COMMAND)**: 
-      - The "Deploy command" field must be completely **EMPTY**. 
-      - If the UI marks it as **"Required"** (common in Workers projects), enter `:` (a single colon) or `exit 0`. 
-      - **DO NOT** enter `/` as this causes a "Permission Denied" error.
-
-3.  **Add Environment Variables (BULK UPLOAD)**:
-    - Go to the **Settings** tab of your Pages project > **Variables and Secrets**.
-    - Click **"Edit variables"** > **"Bulk edit"**.
-    - Copy your entire `.env` file and paste it in. Click **Save**.
-    - **💡 Security Note**: Cloudflare shows the *names* of variables in logs to track changes, but your *values* are encrypted and never shown publicly.
-
-4.  **Connect Your Domain**:
-    - After deployment, go to the **"Custom domains"** tab in your Pages project.
-    - Click **"Set up a custom domain"** and enter your domain (e.g., `yourdomain.com`).
-    - Cloudflare will automatically handle the DNS settings for you.
+    - **⚠️ IMPORTANT (DEPLOY COMMAND)**: This field must be completely **EMPTY**. If Cloudflare forces a value, enter `:` (a single colon). **DO NOT** enter `/`.
+3.  **Add Environment Variables**: Go to the **Settings** tab > **Variables and Secrets** > **Bulk edit**. Copy your `.env` file content here.
 
 ---
 
-## 🛠️ Firebase Configuration (Required for Database)
+## 🛠️ Fix "Site Can't Be Reached" (NXDOMAIN)
 
-### Step 1: Authorize Domain in Firebase Auth
-1. Go to [Firebase Console](https://console.firebase.google.com/).
-2. **Build** -> **Authentication** -> **Settings** -> **Authorized domains**.
-3. Add your specific custom domain (e.g., `yourdomain.com`) AND your Cloudflare preview URL (e.g., `yourproject.pages.dev`). This is required for Login/Signup to work.
+If you see an "NXDOMAIN" error after pointing your nameservers to Cloudflare:
 
-### Step 2: Whitelist in Google Cloud (Critical)
-1. Go to [Google Cloud API Credentials](https://console.cloud.google.com/apis/credentials).
-2. Edit **"Browser key (auto-created by Firebase)"**.
-3. Under **"Website restrictions"**, add:
-   - `https://yourdomain.com/*`
+1.  Go to your project in the **Cloudflare Pages Dashboard**.
+2.  Click the **"Custom domains"** tab.
+3.  Click **"Set up a custom domain"**.
+4.  Enter `hostproai.com` and click Continue.
+5.  Cloudflare will automatically configure the DNS records to point your domain to the Pages project. **Wait 5-10 minutes** for this to update globally.
+
+---
+
+## 🔐 Authorize Domain in Firebase (Required for Database)
+
+The database will **NOT** work until you complete these steps:
+
+1.  Go to [Firebase Console](https://console.firebase.google.com/).
+2.  **Authentication** -> **Settings** -> **Authorized domains**.
+3.  Add `hostproai.com` AND your `*.pages.dev` URL.
+4.  Go to [Google Cloud API Credentials](https://console.cloud.google.com/apis/credentials).
+5.  Edit **"Browser key (auto-created by Firebase)"**.
+6.  Under **"Website restrictions"**, add:
+   - `https://hostproai.com/*`
    - `https://*.pages.dev/*`
-4. Click **Save**.
+7.  Click **Save**.
 
 ---
 
-© 2025 Affiliate AI Host. Max-Velocity Version 1.1.8 Enabled.
+© 2025 Affiliate AI Host. Absolute-Velocity Version 1.1.8 Enabled.
