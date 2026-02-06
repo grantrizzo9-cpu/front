@@ -5,7 +5,7 @@ import React, { useMemo, type ReactNode } from 'react';
 import { FirebaseProvider } from '@/firebase/provider';
 import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
-import { initializeFirestore, CACHE_SIZE_UNLIMITED } from 'firebase/firestore';
+import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager } from 'firebase/firestore';
 import { firebaseConfig } from '@/firebase/config';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { CloudOff, ShieldAlert } from 'lucide-react';
@@ -14,7 +14,7 @@ import type { FirebaseServices } from '@/firebase';
 /**
  * FirebaseClientProvider
  * Performance Version: 1.1.8 (Absolute Velocity Optimized)
- * Uses standard connections for lower latency and unlimited caching.
+ * Uses Persistent Local Caching for instant data retrieval on return visits.
  */
 export function FirebaseClientProvider({ children }: { children: ReactNode }) {
   const firebaseServices = useMemo<FirebaseServices | null>(() => {
@@ -27,10 +27,12 @@ export function FirebaseClientProvider({ children }: { children: ReactNode }) {
 
       const auth = getAuth(app);
       
-      // Standard connection with unlimited cache for instant responses
+      // Aggressive caching for instantaneous dashboard transitions
       const firestore = initializeFirestore(app, {
           ignoreUndefinedProperties: true,
-          cacheSizeBytes: CACHE_SIZE_UNLIMITED
+          localCache: persistentLocalCache({
+            tabManager: persistentMultipleTabManager(),
+          }),
       });
 
       return { firebaseApp: app, auth, firestore };

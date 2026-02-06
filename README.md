@@ -38,7 +38,7 @@ Before deploying to Cloudflare, your code must be on GitHub. Run these commands 
     - **Build command**: `npm run build`
     - **Build output directory**: `.next`
     - **Root directory**: `/`
-    - **⚠️ IMPORTANT (DEPLOY COMMAND)**: Ensure the "Deploy command" field is completely **EMPTY**. Cloudflare handles the deployment automatically. Entering `npx wrangler deploy` here will cause the build to fail.
+    - **⚠️ IMPORTANT (DEPLOY COMMAND)**: Ensure the "Deploy command" field is completely **EMPTY**. Cloudflare handles the deployment automatically. Entering a `/` or any command here will cause a "Permission Denied" error.
 
 3.  **Add Environment Variables (BULK UPLOAD)**:
     - Go to the **Settings** tab of your Pages project > **Variables and Secrets**.
