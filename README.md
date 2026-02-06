@@ -7,7 +7,7 @@ This application is optimized for high-speed performance and global delivery. Yo
 
 ## 🚀 How to Upload to GitHub (Step-by-Step)
 
-Before deploying to Cloudflare, your code must be on GitHub. Run these commands **one by one** in the terminal:
+To avoid terminal errors, run these commands **one by one**. Do not use commas.
 
 1.  **Stage your changes**:
     ```bash
@@ -39,8 +39,8 @@ Before deploying to Cloudflare, your code must be on GitHub. Run these commands 
     - **Build output directory**: `.next`
     - **Root directory**: `/`
     - **⚠️ IMPORTANT (DEPLOY COMMAND)**: 
-      - If you are creating a **Pages** project (Correct method), ensure the "Deploy command" field is completely **EMPTY**.
-      - If the UI marks it as **"Required"** (usually in Workers projects), enter `:` (a single colon) or `exit 0`. 
+      - The "Deploy command" field must be completely **EMPTY**. 
+      - If the UI marks it as **"Required"** (common in Workers projects), enter `:` (a single colon) or `exit 0`. 
       - **DO NOT** enter `/` as this causes a "Permission Denied" error.
 
 3.  **Add Environment Variables (BULK UPLOAD)**:

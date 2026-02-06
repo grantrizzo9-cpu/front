@@ -17,8 +17,7 @@ import { CloudOff, ShieldAlert, Loader2 } from 'lucide-react';
 import type { FirebaseServices } from '@/firebase';
 
 /**
- * Singleton instances to prevent multiple initializations (v1.1.8)
- * This fixes: "FirebaseError: initializeFirestore() has already been called with different options."
+ * Singleton instances to prevent multiple initializations.
  */
 let cachedApp: FirebaseApp | undefined;
 let cachedAuth: Auth | undefined;
@@ -37,7 +36,7 @@ function getFirebase(): FirebaseServices | null {
 
       cachedAuth = getAuth(cachedApp);
       
-      // Safe initialization: try to init with custom options, fallback to getFirestore if already init
+      // Attempt initialization with persistence
       try {
         cachedFirestore = initializeFirestore(cachedApp, {
             ignoreUndefinedProperties: true,
@@ -46,6 +45,7 @@ function getFirebase(): FirebaseServices | null {
             }),
         });
       } catch (e) {
+        // Fallback if already initialized or unsupported
         cachedFirestore = getFirestore(cachedApp);
       }
     }
@@ -68,9 +68,10 @@ export function FirebaseClientProvider({ children }: { children: ReactNode }) {
     setIsHydrated(true);
   }, []);
 
+  // Use useMemo to ensure getFirebase only runs once per cycle
   const firebaseServices = useMemo(() => getFirebase(), []);
 
-  // Avoid hydration mismatch by rendering a loader until client-side mount
+  // HYDRATION GUARD: Render an identical spinner on both server and client (pre-mount)
   if (!isHydrated) {
     return (
       <div className="flex h-screen w-screen items-center justify-center bg-background">
@@ -79,6 +80,7 @@ export function FirebaseClientProvider({ children }: { children: ReactNode }) {
     );
   }
 
+  // Once hydrated, if services are missing, show error
   if (!firebaseServices) {
     return (
       <div className="flex h-screen w-screen items-center justify-center p-4 bg-background">
