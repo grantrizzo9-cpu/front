@@ -1,6 +1,6 @@
 # Affiliate AI Host - Core Restoration Guide (v1.1.9)
 
-Your site is currently showing "Hello world" because the last Cloudflare deployment used old code. Follow these steps exactly to fix it.
+Your site is currently showing "Hello world" because of two reasons: old code cached in Cloudflare, or incorrect build settings. Follow these steps exactly to fix it.
 
 ---
 
@@ -27,20 +27,20 @@ If your deployment says "Permission Denied" or "Hello World", your settings are 
 
 ---
 
-## 🔐 Step 3: Authorize Domain in Firebase
+## ⚡ Step 3: Purge Cache (IMPORTANT)
+If you still see "Hello world" after Step 2:
+1. Go to the **Cloudflare Dashboard > Workers & Pages**.
+2. Select your project.
+3. Go to **Settings > Build & deployments**.
+4. Look for a "Purge Cache" or similar button if available, or simply trigger a fresh build.
+5. In your browser, press `Ctrl + F5` (Windows) or `Cmd + Shift + R` (Mac) to clear your local cache.
+
+---
+
+## 🔐 Step 4: Authorize Domain in Firebase
 The database will **NOT** work until you do this:
 1. Go to [Firebase Console](https://console.firebase.google.com/).
 2. Click **Authentication** -> **Settings** -> **Authorized domains**.
 3. Add `hostproai.com`.
-
----
-
-## 🛠️ Step 4: Google Cloud API Key Restrictions
-1. Go to [Google Cloud API Credentials](https://console.cloud.google.com/apis/credentials).
-2. Edit **"Browser key (auto-created by Firebase)"**.
-3. Under **"Website restrictions"**, ensure you have these exact lines:
-   - `https://hostproai.com/*`
-   - `https://*.pages.dev/*`
-4. Click **Save**.
 
 © 2025 Affiliate AI Host. Core Restored.
