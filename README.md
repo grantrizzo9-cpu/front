@@ -1,5 +1,5 @@
 
-# Affiliate AI Host - Deployment Guide (v1.1.6)
+# Affiliate AI Host - Deployment Guide (v1.1.7)
 
 This application is optimized for high-speed performance and global delivery. You can deploy it to **Cloudflare Pages** (Recommended) or **Railway**.
 
@@ -25,11 +25,14 @@ Cloudflare Pages provides superior global speed and is excellent for Next.js app
     - **Build output directory**: `.next`
     - **Root directory**: `/`
 
-4.  **Add Environment Variables**:
-    - **CRITICAL STEP**: Go to the **Settings** tab of your Pages project > **Variables and Secrets**.
-    - Add every variable found in your `.env` file.
-    - Examples: `GEMINI_API_KEY`, `PAYPAL_SANDBOX_CLIENT_ID`, and all Firebase config values.
-    - *Note:* Variables prefixed with `NEXT_PUBLIC_` are automatically accessible to the browser.
+4.  **Add Environment Variables (BULK UPLOAD)**:
+    - You don't have to add them one by one!
+    - Go to the **Settings** tab of your Pages project > **Variables and Secrets**.
+    - Click **"Edit variables"** in the Environment Variables section.
+    - Look for the **"Bulk edit"** button (usually at the top right of the edit area).
+    - Copy the entire contents of your `.env` file and paste them into the text box. 
+    - Cloudflare will automatically parse the `KEY=VALUE` format.
+    - Click **Save**.
 
 5.  **Deploy**: Click **Save and Deploy**.
 
@@ -43,7 +46,7 @@ Cloudflare Pages provides superior global speed and is excellent for Next.js app
     - Create a "New Project" -> "Deploy from GitHub repo".
 3.  **Set Environment Variables**: 
     - In your Railway project, go to **Variables**.
-    - Add the variables from your `.env` file.
+    - Click **"Raw Editor"** to paste your entire `.env` file at once.
 
 ---
 
@@ -72,4 +75,4 @@ Then use your **GitHub Personal Access Token (PAT)** as the password when prompt
 
 ---
 
-© 2025 Affiliate AI Host. Max-Velocity Version 1.1.6 Enabled.
+© 2025 Affiliate AI Host. Max-Velocity Version 1.1.7 Enabled.
