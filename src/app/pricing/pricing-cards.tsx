@@ -1,4 +1,3 @@
-
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -8,10 +7,17 @@ import Link from "next/link";
 import { subscriptionTiers } from "@/lib/data";
 import { cn } from "@/lib/utils";
 import { useSearchParams } from "next/navigation";
+import { useState, useEffect } from "react";
 
 export function PricingCards() {
   const searchParams = useSearchParams();
-  const refCode = searchParams.get("ref");
+  const [isHydrated, setIsHydrated] = useState(false);
+
+  useEffect(() => {
+    setIsHydrated(true);
+  }, []);
+
+  const refCode = isHydrated ? searchParams.get("ref") : null;
 
   const getSignupLink = (tierId: string) => {
     let link = `/signup?plan=${tierId}`;

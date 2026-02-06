@@ -2,18 +2,65 @@
 
 import React, { useMemo, type ReactNode, useState, useEffect } from 'react';
 import { FirebaseProvider } from '@/firebase/provider';
-import { initializeApp, getApps, getApp } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
-import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager } from 'firebase/firestore';
+import { initializeApp, getApps, getApp, FirebaseApp } from 'firebase/app';
+import { getAuth, Auth } from 'firebase/auth';
+import { 
+  getFirestore, 
+  initializeFirestore, 
+  persistentLocalCache, 
+  persistentMultipleTabManager,
+  Firestore
+} from 'firebase/firestore';
 import { firebaseConfig } from '@/firebase/config';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { CloudOff, ShieldAlert, Loader2 } from 'lucide-react';
 import type { FirebaseServices } from '@/firebase';
 
 /**
- * FirebaseClientProvider
- * Performance Version: 1.1.8 (Hydration Safe)
+ * Singleton instances to prevent multiple initializations (v1.1.8)
+ * This fixes: "FirebaseError: initializeFirestore() has already been called with different options."
  */
+let cachedApp: FirebaseApp | undefined;
+let cachedAuth: Auth | undefined;
+let cachedFirestore: Firestore | undefined;
+
+function getFirebase(): FirebaseServices | null {
+  if (typeof window === 'undefined') return null;
+
+  try {
+    if (!cachedApp) {
+      cachedApp = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
+      
+      if (cachedApp.options.apiKey?.includes('REPLACE_WITH')) {
+        return null;
+      }
+
+      cachedAuth = getAuth(cachedApp);
+      
+      // Safe initialization: try to init with custom options, fallback to getFirestore if already init
+      try {
+        cachedFirestore = initializeFirestore(cachedApp, {
+            ignoreUndefinedProperties: true,
+            localCache: persistentLocalCache({
+              tabManager: persistentMultipleTabManager(),
+            }),
+        });
+      } catch (e) {
+        cachedFirestore = getFirestore(cachedApp);
+      }
+    }
+
+    return { 
+      firebaseApp: cachedApp, 
+      auth: cachedAuth!, 
+      firestore: cachedFirestore! 
+    };
+  } catch (e) {
+    console.error("Firebase critical init error:", e);
+    return null;
+  }
+}
+
 export function FirebaseClientProvider({ children }: { children: ReactNode }) {
   const [isHydrated, setIsHydrated] = useState(false);
 
@@ -21,33 +68,15 @@ export function FirebaseClientProvider({ children }: { children: ReactNode }) {
     setIsHydrated(true);
   }, []);
 
-  const firebaseServices = useMemo<FirebaseServices | null>(() => {
-    try {
-      const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
-      
-      if (app.options.apiKey?.includes('REPLACE_WITH')) {
-        return null;
-      }
+  const firebaseServices = useMemo(() => getFirebase(), []);
 
-      const auth = getAuth(app);
-      
-      const firestore = initializeFirestore(app, {
-          ignoreUndefinedProperties: true,
-          localCache: persistentLocalCache({
-            tabManager: persistentMultipleTabManager(),
-          }),
-      });
-
-      return { firebaseApp: app, auth, firestore };
-    } catch (e: any) {
-      console.error("Firebase Initialization Error:", e);
-      return null;
-    }
-  }, []);
-
-  // Avoid hydration mismatch by rendering a simple loader until client-side mount
+  // Avoid hydration mismatch by rendering a loader until client-side mount
   if (!isHydrated) {
-    return <div className="flex h-screen w-screen items-center justify-center bg-background"><Loader2 className="animate-spin text-primary" /></div>;
+    return (
+      <div className="flex h-screen w-screen items-center justify-center bg-background">
+        <Loader2 className="animate-spin text-primary" />
+      </div>
+    );
   }
 
   if (!firebaseServices) {

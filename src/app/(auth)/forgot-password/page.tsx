@@ -8,17 +8,23 @@ import Link from "next/link";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/firebase";
 import { sendPasswordResetEmail } from "firebase/auth";
-import { useState, Suspense } from "react";
+import { useState, Suspense, useEffect } from "react";
 import { Loader2 } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 
 function ForgotPasswordForm() {
   const { toast } = useToast();
   const searchParams = useSearchParams();
-  const refCode = searchParams.get('ref');
   const auth = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
+  const [isHydrated, setIsHydrated] = useState(false);
+
+  useEffect(() => {
+    setIsHydrated(true);
+  }, []);
+
+  const refCode = isHydrated ? searchParams.get('ref') : null;
 
   const getLinkWithRef = (baseHref: string) => {
     if (!refCode) return baseHref;

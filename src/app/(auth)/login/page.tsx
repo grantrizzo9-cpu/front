@@ -15,10 +15,16 @@ import { Loader2 } from "lucide-react";
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const refCode = searchParams.get('ref');
   const { toast } = useToast();
   const auth = useAuth();
   const [isLoading, setIsLoading] = useState(false);
+  const [isHydrated, setIsHydrated] = useState(false);
+
+  useEffect(() => {
+    setIsHydrated(true);
+  }, []);
+
+  const refCode = isHydrated ? searchParams.get('ref') : null;
 
   const getLinkWithRef = (baseHref: string) => {
     if (!refCode) return baseHref;
