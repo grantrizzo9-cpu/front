@@ -38,7 +38,6 @@ function HomeInner() {
   };
 
   const signupLink = getLinkWithRef('/pricing');
-  const featureImage1 = PlaceHolderImages.find((img) => img.id === 'feature-1');
 
   const blogPosts = [
     { title: "Why Daily Payouts are the New Industry Standard", excerpt: "Traditional net-30 and net-60 payouts are killing your cash flow.", date: "Nov 12, 2024", category: "Market Analysis", slug: "daily-payouts", icon: <TrendingUp className="h-5 w-5" /> },

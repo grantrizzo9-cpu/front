@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useMemo, type ReactNode, useState, useEffect } from 'react';
@@ -74,17 +73,21 @@ function getFirebase(): FirebaseServices | null {
 }
 
 export function FirebaseClientProvider({ children }: { children: ReactNode }) {
-  const [isHydrated, setIsHydrated] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
-    setIsHydrated(true);
+    setIsMounted(true);
   }, []);
 
   // Ensure services are only requested once
-  const firebaseServices = useMemo(() => getFirebase(), []);
+  const firebaseServices = useMemo(() => {
+    if (typeof window === 'undefined') return null;
+    return getFirebase();
+  }, []);
 
-  // HYDRATION GUARD: Render a clean shell first to prevent DOM mismatch
-  if (!isHydrated) {
+  // HYDRATION GUARD: Server and Client MUST render the same first-pass shell
+  // We render a null or empty shell during the first pass to avoid mismatch.
+  if (!isMounted) {
     return (
       <div className="flex h-screen w-screen items-center justify-center bg-background">
         <Loader2 className="animate-spin text-primary" />
@@ -92,7 +95,7 @@ export function FirebaseClientProvider({ children }: { children: ReactNode }) {
     );
   }
 
-  // If configuration is missing or domain is blocked
+  // If configuration is missing or domain is blocked (after mounting)
   if (!firebaseServices) {
     return (
       <div className="flex h-screen w-screen items-center justify-center p-4 bg-background">
