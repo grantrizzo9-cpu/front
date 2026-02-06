@@ -8,7 +8,6 @@ import { Badge } from "@/components/ui/badge";
 import type { Referral } from "@/lib/types";
 import { useUser, useFirestore, useCollection, useMemoFirebase } from "@/firebase";
 import { collection } from "firebase/firestore";
-import { Loader2 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 
 function TableSkeleton() {

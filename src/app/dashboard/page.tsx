@@ -106,7 +106,7 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-8 animate-in fade-in duration-300">
-        {/* Instant Shell Admin */}
+        {/* Admin Shell: Always visible if user is owner */}
         {isPlatformOwner && (
             <div className="space-y-6 border-b border-dashed pb-8">
                 <div>

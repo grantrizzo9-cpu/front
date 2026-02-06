@@ -5,29 +5,24 @@ This application is optimized for high-speed performance and global delivery. Yo
 
 ---
 
-## 🐙 How to Upload to GitHub (First Step)
+## 🐙 How to Upload to GitHub (Step-by-Step)
 
-Before deploying to Cloudflare or Railway, your code must be on GitHub.
+Before deploying to Cloudflare, your code must be on GitHub. Run these commands **one by one** in the terminal:
 
-1.  **Create a Repository**:
-    - Log in to [GitHub](https://github.com).
-    - Click **"New"** to create a repository.
-    - Give it a name (e.g., `affiliate-ai-host`).
-    - Keep it **Private** or **Public**. Do **not** initialize with a README or license.
-    - Click **"Create repository"**.
-
-2.  **Push from Firebase Studio**:
-    - Open the **Terminal** at the bottom of this screen.
-    - Run these commands one by one (Replace `YOUR_URL` with the one GitHub gave you):
+1.  **Initialize and Add**:
     ```bash
-    git init
     git add .
-    git commit -m "Initial commit v1.1.7"
-    git branch -M main
-    git remote add origin https://github.com/YOUR_USERNAME/YOUR_REPO_NAME.git
-    git push -u origin main
     ```
-    - *Note: If prompted for a password, use a **GitHub Personal Access Token (PAT)**.*
+
+2.  **Commit Your Changes**:
+    ```bash
+    git commit -m "Final Version 1.1.7: Max Velocity Shell"
+    ```
+
+3.  **Push to GitHub**:
+    ```bash
+    git push origin main
+    ```
 
 ---
 
@@ -49,16 +44,9 @@ Cloudflare Pages provides superior global speed.
 3.  **Add Environment Variables (BULK UPLOAD)**:
     - Go to the **Settings** tab of your Pages project > **Variables and Secrets**.
     - Click **"Edit variables"** > **"Bulk edit"**.
-    - Copy your entire `.env` file and paste it in. Click **Save**.
+    - Copy your entire `.env` file from Firebase Studio and paste it in. Click **Save**.
 
 4.  **Deploy**: Click **Save and Deploy**.
-
----
-
-## 🚀 How to Deploy to Railway (Alternative)
-
-1.  **Connect Railway**: Go to [railway.app](https://railway.app) and create a "New Project" from your GitHub repo.
-2.  **Set Variables**: Use the **"Raw Editor"** in the Variables tab to paste your `.env` content.
 
 ---
 
@@ -67,9 +55,9 @@ Cloudflare Pages provides superior global speed.
 ### Step 1: Authorize Domain in Firebase Auth
 1. Go to [Firebase Console](https://console.firebase.google.com/).
 2. **Build** -> **Authentication** -> **Settings** -> **Authorized domains**.
-3. Add `hostproai.com` (or your Cloudflare domain).
+3. Add `hostproai.com` (or your specific Cloudflare domain).
 
-### Step 2: Whitelist in Google Cloud
+### Step 2: Whitelist in Google Cloud (Critical)
 1. Go to [Google Cloud API Credentials](https://console.cloud.google.com/apis/credentials).
 2. Edit **"Browser key (auto-created by Firebase)"**.
 3. Under **"Website restrictions"**, add:

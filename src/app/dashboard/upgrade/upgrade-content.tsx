@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -18,7 +19,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 
 export function UpgradeContent() {
-    const { user, isUserLoading } = useUser();
+    const { user } = useUser();
     const firestore = useFirestore();
     const { toast } = useToast();
     const router = useRouter();
@@ -46,8 +47,6 @@ export function UpgradeContent() {
         }
     }, [searchParams, userData]);
 
-    const isLoading = isUserDataLoading;
-    
     const availableTiers = useMemo(() => {
         if (!userData?.subscription || userData.subscription.status === 'inactive') {
             return subscriptionTiers;
@@ -102,7 +101,7 @@ export function UpgradeContent() {
             const oldSubscriptionId = userData.subscription?.paypalSubscriptionId;
 
             if (isUpgrade && oldSubscriptionId) {
-                const cancelResponse = await fetch('/api/paypal', {
+                await fetch('/api/paypal', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -111,15 +110,6 @@ export function UpgradeContent() {
                         reason: `Upgrading to ${selectedTierId} plan.`
                     }),
                 });
-
-                if (!cancelResponse.ok) {
-                    toast({
-                        variant: "default",
-                        title: "Upgrade Notice",
-                        description: "Your new plan is active, but we couldn't automatically cancel your old one. Please manage it in your PayPal account to avoid double billing.",
-                        duration: 10000,
-                    });
-                }
             }
             
             const batch = writeBatch(firestore);
@@ -277,7 +267,7 @@ export function UpgradeContent() {
                     })()
                 ) : (
                     <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-                        {availableTiers.length > 0 ? availableTiers.map((tier) => (
+                        {isUserDataLoading ? [...Array(3)].map((_, i) => <Skeleton key={i} className="h-64 w-full" />) : availableTiers.length > 0 ? availableTiers.map((tier) => (
                         <Card 
                             key={tier.id} 
                             className={cn(

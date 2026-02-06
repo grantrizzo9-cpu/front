@@ -76,7 +76,6 @@ export default function AdminUsersPage() {
     }
   };
 
-  // Shell-First Rendering: Only block if we are SURE they aren't the owner
   const isAuthorized = isPlatformOwner || isAdminLoading;
 
   return (
@@ -92,7 +91,7 @@ export default function AdminUsersPage() {
             <CardDescription>Manage roles for all registered users.</CardDescription>
         </CardHeader>
         <CardContent>
-             {(!isAuthorized || usersLoading || rolesLoading || isAdminLoading) ? (
+             {(!isAuthorized || usersLoading || rolesLoading) ? (
                 <UserTableSkeleton />
             ) : users && users.length > 0 ? (
               <Table>
