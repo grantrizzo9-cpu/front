@@ -38,7 +38,7 @@ Before deploying to Cloudflare, your code must be on GitHub. Run these commands 
     - **Build command**: `npm run build`
     - **Build output directory**: `.next`
     - **Root directory**: `/`
-    - **⚠️ IMPORTANT**: Leave the "Deploy command" or any custom script fields **EMPTY**. Cloudflare handles the deployment automatically after the build command.
+    - **⚠️ IMPORTANT**: Leave the "Deploy command" or any custom script fields **EMPTY**. Cloudflare handles the deployment automatically after the build command. If you enter `wrangler deploy` here, the build will fail.
 
 3.  **Add Environment Variables (BULK UPLOAD)**:
     - Go to the **Settings** tab of your Pages project > **Variables and Secrets**.
