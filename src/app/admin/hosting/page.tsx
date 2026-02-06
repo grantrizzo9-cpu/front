@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useMemo, useState, useEffect } from "react";
@@ -63,6 +64,9 @@ export default function AdminHostingPage() {
 
   const hostingConsoleUrl = `https://console.firebase.google.com/project/${firebaseConfig.projectId}/hosting/custom-domains`;
 
+  // Shell-First: Render frame even while loading admin check
+  const isAuthorized = isPlatformOwner || isAdminLoading;
+
   return (
     <div className="space-y-8 animate-in fade-in duration-300">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -83,7 +87,7 @@ export default function AdminHostingPage() {
                 <CardTitle className="text-sm font-medium text-muted-foreground uppercase">Pending Requests</CardTitle>
             </CardHeader>
             <CardContent>
-                {usersLoading ? <Skeleton className="h-8 w-12" /> : <div className="text-2xl font-bold">{pendingCount}</div>}
+                {(!isAuthorized || usersLoading) ? <Skeleton className="h-8 w-12" /> : <div className="text-2xl font-bold">{pendingCount}</div>}
             </CardContent>
         </Card>
       </div>
@@ -96,7 +100,7 @@ export default function AdminHostingPage() {
             </CardDescription>
         </CardHeader>
         <CardContent>
-            {usersLoading ? (
+            {(!isAuthorized || usersLoading) ? (
                 <div className="space-y-3">
                     <Skeleton className="h-10 w-full" />
                     <Skeleton className="h-10 w-full" />

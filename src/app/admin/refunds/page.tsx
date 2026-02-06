@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useMemo, useState, useEffect } from "react";
@@ -64,6 +65,9 @@ export default function AdminRefundsPage() {
     );
   }, [refundRequests]);
 
+  // Shell-First: Instant structural render
+  const isAuthorized = isPlatformOwner || isAdminLoading;
+
   return (
     <div className="space-y-8 animate-in fade-in duration-300">
       <div>
@@ -74,7 +78,7 @@ export default function AdminRefundsPage() {
       <div className="grid gap-4 md:grid-cols-2">
         <StatCard
           title="Total Refunded"
-          value={requestsLoading ? "..." : `$${totalRefunded.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+          value={(!isAuthorized || requestsLoading) ? "..." : `$${totalRefunded.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
           icon={<DollarSign className="h-5 w-5 text-muted-foreground" />}
           description="Total amount processed for refunds."
         />
@@ -84,13 +88,13 @@ export default function AdminRefundsPage() {
         <CardHeader>
             <CardTitle>Pending Refund Requests</CardTitle>
             <CardDescription>
-                {requestsLoading ? "Loading requests..." : (
+                {(!isAuthorized || requestsLoading) ? "Loading requests..." : (
                     <>There are currently <span className="font-bold text-primary">{pendingRequests.length}</span> pending refund requests.</>
                 )}
             </CardDescription>
         </CardHeader>
         <CardContent>
-            {requestsLoading ? (
+            {(!isAuthorized || requestsLoading) ? (
                 <div className="space-y-3">
                     <Skeleton className="h-10 w-full" />
                     <Skeleton className="h-10 w-full" />

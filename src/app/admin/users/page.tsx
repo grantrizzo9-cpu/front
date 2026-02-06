@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useMemo, useState, useEffect } from 'react';
@@ -75,6 +76,9 @@ export default function AdminUsersPage() {
     }
   };
 
+  // Shell-First Rendering: Only block if we are SURE they aren't the owner
+  const isAuthorized = isPlatformOwner || isAdminLoading;
+
   return (
     <div className="space-y-8 animate-in fade-in duration-300">
       <div>
@@ -88,7 +92,7 @@ export default function AdminUsersPage() {
             <CardDescription>Manage roles for all registered users.</CardDescription>
         </CardHeader>
         <CardContent>
-             {usersLoading || rolesLoading || isAdminLoading ? (
+             {(!isAuthorized || usersLoading || rolesLoading || isAdminLoading) ? (
                 <UserTableSkeleton />
             ) : users && users.length > 0 ? (
               <Table>
