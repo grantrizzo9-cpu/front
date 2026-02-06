@@ -48,9 +48,9 @@ export default function ReferralsPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {referralsLoading ? (
+          {(referralsLoading || !referrals) ? (
             <TableSkeleton />
-          ) : referrals && referrals.length > 0 ? (
+          ) : referrals.length > 0 ? (
             <Table>
               <TableHeader>
                 <TableRow>

@@ -34,7 +34,7 @@ function TableSkeleton() {
 }
 
 export default function DashboardPage() {
-  const { user, isUserLoading } = useUser();
+  const { user } = useUser();
   const firestore = useFirestore();
   const { isPlatformOwner, isLoading: isAdminLoading } = useAdmin();
 
@@ -106,8 +106,8 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-8 animate-in fade-in duration-300">
-        {/* Admin Shell: Always visible if user is owner */}
-        {isPlatformOwner && (
+        {/* Admin Shell: Always visible layout if user is platform owner */}
+        {(isPlatformOwner || isAdminLoading) && (
             <div className="space-y-6 border-b border-dashed pb-8">
                 <div>
                     <h1 className="text-3xl font-bold font-headline heading-red">Admin Dashboard</h1>
@@ -115,7 +115,7 @@ export default function DashboardPage() {
                 </div>
 
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                    {allPlatformReferralsLoading || !platformStats ? (
+                    {(allPlatformReferralsLoading || !platformStats) ? (
                         <>
                             <StatSkeleton />
                             <StatSkeleton />
@@ -150,7 +150,7 @@ export default function DashboardPage() {
             )}
 
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                {personalReferralsLoading || !personalStats ? (
+                {(!allPersonalReferrals || personalReferralsLoading) ? (
                     <>
                         <StatSkeleton />
                         <StatSkeleton />
@@ -159,8 +159,8 @@ export default function DashboardPage() {
                     </>
                 ) : (
                     <>
-                        <StatCard title="Total Earnings" value={`$${personalStats.totalCommission.toFixed(2)}`} icon={<DollarSign className="text-blue-600" />} />
-                        <StatCard title="Total Referrals" value={`${personalStats.totalReferrals}`} icon={<Users className="text-blue-600" />} />
+                        <StatCard title="Total Earnings" value={`$${personalStats?.totalCommission.toFixed(2) || '0.00'}`} icon={<DollarSign className="text-blue-600" />} />
+                        <StatCard title="Total Referrals" value={`${personalStats?.totalReferrals || '0'}`} icon={<Users className="text-blue-600" />} />
                         <Card>
                             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                                 <CardTitle className="text-sm font-medium">Storage Usage</CardTitle>
@@ -171,7 +171,7 @@ export default function DashboardPage() {
                                 <Progress value={storageStats.usagePercentage} className="mt-2 h-1.5 bg-slate-100" />
                             </CardContent>
                         </Card>
-                        <StatCard title="Unpaid Commissions" value={`$${personalStats.unpaidCommissions.toFixed(2)}`} icon={<DollarSign className="text-green-600" />} />
+                        <StatCard title="Unpaid Commissions" value={`$${personalStats?.unpaidCommissions.toFixed(2) || '0.00'}`} icon={<DollarSign className="text-green-600" />} />
                     </>
                 )}
             </div>

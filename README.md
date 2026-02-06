@@ -5,16 +5,16 @@ This application is optimized for high-speed performance and global delivery. Yo
 
 ---
 
-## 🐙 How to Upload to GitHub (Step-by-Step)
+## 🚀 How to Upload to GitHub (Step-by-Step)
 
 Before deploying to Cloudflare, your code must be on GitHub. Run these commands **one by one** in the terminal:
 
-1.  **Initialize and Add**:
+1.  **Stage your changes**:
     ```bash
     git add .
     ```
 
-2.  **Commit Your Changes**:
+2.  **Commit your changes**:
     ```bash
     git commit -m "Final Version 1.1.7: Max Velocity Shell"
     ```
@@ -28,42 +28,39 @@ Before deploying to Cloudflare, your code must be on GitHub. Run these commands 
 
 ## ☁️ How to Deploy to Cloudflare Pages (Recommended)
 
-Cloudflare Pages provides superior global speed.
-
 1.  **Connect to Cloudflare**:
     - Log in to your [Cloudflare Dashboard](https://dash.cloudflare.com/).
     - Go to **Workers & Pages** > **Create application** > **Pages** > **Connect to Git**.
     - Select your GitHub repository.
 
-2.  **Configure Build Settings**:
+2.  **Configure Build Settings (CRITICAL)**:
     - **Framework preset**: `Next.js`
     - **Build command**: `npm run build`
     - **Build output directory**: `.next`
     - **Root directory**: `/`
+    - **⚠️ IMPORTANT**: Leave the "Deploy command" or any custom script fields **EMPTY**. Cloudflare handles the deployment automatically after the build command.
 
 3.  **Add Environment Variables (BULK UPLOAD)**:
     - Go to the **Settings** tab of your Pages project > **Variables and Secrets**.
     - Click **"Edit variables"** > **"Bulk edit"**.
-    - Copy your entire `.env` file from Firebase Studio and paste it in. Click **Save**.
+    - Copy your entire `.env` file and paste it in. Click **Save**.
 
 4.  **Deploy**: Click **Save and Deploy**.
 
 ---
 
-## 🛠️ Custom Domain Setup (Required for Database)
+## 🛠️ Firebase Configuration (Required for Database)
 
 ### Step 1: Authorize Domain in Firebase Auth
 1. Go to [Firebase Console](https://console.firebase.google.com/).
 2. **Build** -> **Authentication** -> **Settings** -> **Authorized domains**.
-3. Add `hostproai.com` (or your specific Cloudflare domain).
+3. Add your specific Cloudflare domain (e.g., `your-app.pages.dev`).
 
 ### Step 2: Whitelist in Google Cloud (Critical)
 1. Go to [Google Cloud API Credentials](https://console.cloud.google.com/apis/credentials).
 2. Edit **"Browser key (auto-created by Firebase)"**.
 3. Under **"Website restrictions"**, add:
-   - `https://hostproai.com/*`
-   - `https://*.hostproai.com/*`
-   - `https://YOUR_CLOUDFLARE_SUBDOMAIN.pages.dev/*`
+   - `https://your-app.pages.dev/*`
 4. Click **Save**.
 
 ---
