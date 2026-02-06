@@ -15,6 +15,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 import type { OnApproveData, CreateSubscriptionData } from "@paypal/paypal-js";
+import { Skeleton } from "@/components/ui/skeleton";
 
 
 export function UpgradeContent() {
@@ -185,22 +186,13 @@ export function UpgradeContent() {
         ? "Pay the one-time activation fee to start your 3-day trial and get instant access to all tools."
         : `You are currently on the ${subscriptionTiers.find(t => t.id === userData?.subscription?.tierId)?.name || 'Unknown'} plan. Unlock more features by upgrading.`;
 
-
-    if (isLoading) {
-        return (
-             <div className="flex justify-center items-center h-full p-8">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            </div>
-        );
-    }
-    
     if (!paypalClientId || paypalClientId.includes('REPLACE_WITH')) {
         const envString = useSandbox ? "Sandbox" : "Live";
         const missingVar = useSandbox ? "NEXT_PUBLIC_PAYPAL_SANDBOX_CLIENT_ID" : "NEXT_PUBLIC_PAYPAL_LIVE_CLIENT_ID";
       return (
           <div className="space-y-8">
               <div>
-                <h1 className="text-3xl font-bold font-headline">{pageTitle}</h1>
+                <h1 className="text-3xl font-bold font-headline heading-red">{pageTitle}</h1>
                 <p className="text-muted-foreground mt-2">{pageDescription}</p>
               </div>
               <Alert variant="destructive">
@@ -215,15 +207,15 @@ export function UpgradeContent() {
     }
 
     return (
-        <div className="space-y-8">
+        <div className="space-y-8 animate-in fade-in duration-300">
             <div>
-                <h1 className="text-3xl font-bold font-headline">{pageTitle}</h1>
+                <h1 className="text-3xl font-bold font-headline heading-red">{pageTitle}</h1>
                 <p className="text-muted-foreground mt-2">{pageDescription}</p>
             </div>
             
             <Alert>
-                <Info className="h-4 w-4" />
-                <AlertTitle>Important Information</AlertTitle>
+                <Info className="h-4 w-4 text-blue-600" />
+                <AlertTitle className="font-bold">Important Information</AlertTitle>
                 <AlertDescription>
                     Your first payment is a one-time activation fee. This fee goes to the platform owner and starts your 3-day trial. Recurring daily payments begin automatically after the trial.
                 </AlertDescription>
@@ -244,12 +236,18 @@ export function UpgradeContent() {
                 intent: "subscription",
                 "disable-funding": "sepa,bancontact,giropay,ideal,mybank,p24,sofort",
             }}>
-                {selectedTierId ? (
+                {isLoading ? (
+                    <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+                        <Skeleton className="h-[400px] w-full" />
+                        <Skeleton className="h-[400px] w-full" />
+                        <Skeleton className="h-[400px] w-full" />
+                    </div>
+                ) : selectedTierId ? (
                     (() => {
                         const tier = subscriptionTiers.find(t => t.id === selectedTierId);
                         if (!tier) return null;
                         return (
-                            <Card className="max-w-md mx-auto animate-in fade-in-50">
+                            <Card className="max-w-md mx-auto animate-in fade-in-50 zoom-in-95">
                                 <CardHeader>
                                     <CardTitle>Confirm Your Plan</CardTitle>
                                     <CardDescription>
@@ -304,7 +302,7 @@ export function UpgradeContent() {
                         <Card 
                             key={tier.id} 
                             className={cn(
-                            "flex flex-col",
+                            "flex flex-col transition-all hover:shadow-lg",
                             tier.isMostPopular ? "border-primary ring-2 ring-primary shadow-lg" : ""
                             )}
                         >

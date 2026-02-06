@@ -1,3 +1,4 @@
+
 'use client';
 
 import { StatCard } from "@/components/stat-card";
@@ -41,7 +42,7 @@ export default function DashboardPage() {
     if (!user || !firestore) return null;
     return collection(firestore, 'users', user.uid, 'referrals');
   }, [user?.uid, firestore]);
-  const { data: allPersonalReferrals } = useCollection<Referral>(allPersonalReferralsQuery);
+  const { data: allPersonalReferrals, isLoading: personalReferralsLoading } = useCollection<Referral>(allPersonalReferralsQuery);
 
   const userDocRef = useMemoFirebase(() => {
     if (!user || !firestore) return null;
@@ -109,7 +110,7 @@ export default function DashboardPage() {
                         <StatSkeleton />
                     </div>
                 ) : (
-                    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 animate-in slide-in-from-top-2">
                         <StatCard title="Total Platform Revenue" value={`$${platformStats.platformRevenue.toFixed(2)}`} icon={<TrendingUp className="text-blue-600" />} />
                         <StatCard title="Total Payouts" value={`$${platformStats.totalAffiliatePayouts.toFixed(2)}`} icon={<DollarSign className="text-blue-600" />} />
                         <StatCard title="Active Referrals" value={`${platformStats.totalPlatformReferrals}`} icon={<UserPlus className="text-blue-600" />} />
@@ -125,7 +126,7 @@ export default function DashboardPage() {
             </div>
 
             {!isUserDataLoading && userData?.subscription?.status === 'inactive' && !isPlatformOwner && (
-                <Alert variant="destructive" className="bg-red-50 border-red-200 text-red-900">
+                <Alert variant="destructive" className="bg-red-50 border-red-200 text-red-900 animate-in zoom-in-95">
                     <AlertCircle className="h-4 w-4 text-red-600" />
                     <AlertTitle className="font-bold">Action Required: Plan Inactive</AlertTitle>
                     <AlertDescription className="flex items-center justify-between">
@@ -136,7 +137,7 @@ export default function DashboardPage() {
             )}
 
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                {isUserLoading || !personalStats ? (
+                {isUserLoading || personalReferralsLoading || !personalStats ? (
                     <>
                         <StatSkeleton />
                         <StatSkeleton />

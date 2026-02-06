@@ -15,6 +15,7 @@ import { Badge } from "@/components/ui/badge";
 import { useRouter } from "next/navigation";
 import { firebaseConfig } from "@/firebase/config";
 import Link from "next/link";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function AdminHostingPage() {
   const { toast } = useToast();
@@ -32,7 +33,6 @@ export default function AdminHostingPage() {
   // Fetch all users who have a custom domain configured
   const usersQuery = useMemoFirebase(() => {
     if (!firestore || !isPlatformOwner) return null;
-    // We fetch all users and filter client-side for better flexibility in this MVP
     return collection(firestore, 'users');
   }, [firestore, isPlatformOwner]);
   
@@ -66,19 +66,11 @@ export default function AdminHostingPage() {
 
   const hostingConsoleUrl = `https://console.firebase.google.com/project/${firebaseConfig.projectId}/hosting/custom-domains`;
 
-  if (isAdminLoading || usersLoading || !isPlatformOwner) {
-    return (
-      <div className="flex justify-center items-center h-full p-8">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    );
-  }
-
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 animate-in fade-in duration-300">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-            <h1 className="text-3xl font-bold font-headline">Manage Custom Domains</h1>
+            <h1 className="text-3xl font-bold font-headline heading-red">Manage Custom Domains</h1>
             <p className="text-muted-foreground">Fulfill domain setup requests from your users.</p>
         </div>
         <Button asChild variant="outline">
@@ -94,7 +86,7 @@ export default function AdminHostingPage() {
                 <CardTitle className="text-sm font-medium text-muted-foreground uppercase">Pending Requests</CardTitle>
             </CardHeader>
             <CardContent>
-                <div className="text-2xl font-bold">{pendingCount}</div>
+                {usersLoading ? <Skeleton className="h-8 w-12" /> : <div className="text-2xl font-bold">{pendingCount}</div>}
             </CardContent>
         </Card>
       </div>
@@ -107,7 +99,13 @@ export default function AdminHostingPage() {
             </CardDescription>
         </CardHeader>
         <CardContent>
-            {domainRequests.length > 0 ? (
+            {usersLoading ? (
+                <div className="space-y-3">
+                    <Skeleton className="h-10 w-full" />
+                    <Skeleton className="h-10 w-full" />
+                    <Skeleton className="h-10 w-full" />
+                </div>
+            ) : domainRequests.length > 0 ? (
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -182,7 +180,7 @@ export default function AdminHostingPage() {
                   <li>Click <strong>"Open Firebase Console"</strong> to go to the Hosting settings.</li>
                   <li>Click <strong>"Add custom domain"</strong> and paste the domain name.</li>
                   <li>Follow the instructions in the Firebase wizard to get the <strong>A Records</strong> (IP addresses).</li>
-                  <li>Go to your domain registrar (e.g. GoDaddy or your reseller store) and add those A Records to the domain's DNS settings.</li>
+                  <li>Go to your domain registrar (e.g. GoDaddy) and add those A Records to the domain's DNS settings.</li>
                   <li>Once done, click <strong>"Mark as Connected"</strong> here so the user sees the "Live" badge on their dashboard.</li>
               </ol>
           </CardContent>

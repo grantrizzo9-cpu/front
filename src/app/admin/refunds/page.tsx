@@ -15,6 +15,7 @@ import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { StatCard } from "@/components/stat-card";
 import { useRouter } from "next/navigation";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function AdminRefundsPage() {
   const { toast } = useToast();
@@ -29,22 +30,17 @@ export default function AdminRefundsPage() {
     }
   }, [isPlatformOwner, isAdminLoading, router]);
 
-  // 1. Fetch all refund requests using a collection group query
   const refundRequestsQuery = useMemoFirebase(() => {
     if (!firestore || !isPlatformOwner) return null;
     return query(collectionGroup(firestore, 'refundRequests'));
   }, [firestore, isPlatformOwner]);
   const { data: refundRequests, isLoading: requestsLoading } = useCollection<RefundRequest>(refundRequestsQuery);
 
-  const isLoading = isAdminLoading || requestsLoading;
-
   const handleProcessRefund = async (request: RefundRequest) => {
     if (!firestore) return;
     setProcessingId(request.id);
     
-    // The request is in a subcollection, so we need the full path to its document.
     const requestDocRef = doc(firestore, 'users', request.userId, 'refundRequests', request.id);
-    
     updateDocumentNonBlocking(requestDocRef, { status: 'processed' });
     
     toast({
@@ -52,7 +48,6 @@ export default function AdminRefundsPage() {
       description: `Refund for ${request.userEmail} has been marked as processed.`,
     });
     
-    // Simulate API call delay
     setTimeout(() => {
         setProcessingId(null);
     }, 1500)
@@ -70,25 +65,17 @@ export default function AdminRefundsPage() {
     );
   }, [refundRequests]);
 
-  if (isLoading || !isPlatformOwner) {
-    return (
-      <div className="flex justify-center items-center h-full p-8">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    );
-  }
-
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 animate-in fade-in duration-300">
       <div>
-        <h1 className="text-3xl font-bold font-headline">Manage Refunds</h1>
+        <h1 className="text-3xl font-bold font-headline heading-red">Manage Refunds</h1>
         <p className="text-muted-foreground">Review and process user refund requests.</p>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
         <StatCard
           title="Total Refunded"
-          value={`$${totalRefunded.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+          value={requestsLoading ? "..." : `$${totalRefunded.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
           icon={<DollarSign className="h-5 w-5 text-muted-foreground" />}
           description="Total amount processed for refunds."
         />
@@ -105,8 +92,10 @@ export default function AdminRefundsPage() {
         </CardHeader>
         <CardContent>
             {requestsLoading ? (
-                <div className="flex justify-center items-center h-40">
-                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                <div className="space-y-3">
+                    <Skeleton className="h-10 w-full" />
+                    <Skeleton className="h-10 w-full" />
+                    <Skeleton className="h-10 w-full" />
                 </div>
             ) : pendingRequests.length > 0 ? (
               <Table>
@@ -127,7 +116,7 @@ export default function AdminRefundsPage() {
                       <TableCell>{request.userEmail}</TableCell>
                       <TableCell>${(request.amount ?? 0).toFixed(2)}</TableCell>
                       <TableCell className="max-w-xs truncate">{request.reason}</TableCell>
-                      <TableCell>{format(request.requestedAt.toDate(), 'PP')}</TableCell>
+                      <TableCell>{request.requestedAt ? format(request.requestedAt.toDate(), 'PP') : 'N/A'}</TableCell>
                       <TableCell className="text-right">
                         <Button 
                             variant="outline" 

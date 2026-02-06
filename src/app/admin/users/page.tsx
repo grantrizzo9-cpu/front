@@ -1,6 +1,7 @@
+
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -13,12 +14,20 @@ import { collection, doc, setDoc, deleteDoc } from 'firebase/firestore';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useRouter } from "next/navigation";
 
 export default function AdminUsersPage() {
   const { toast } = useToast();
   const firestore = useFirestore();
-  const { isPlatformOwner } = useAdmin();
+  const router = useRouter();
+  const { isPlatformOwner, isLoading: isAdminLoading } = useAdmin();
   const [processingId, setProcessingId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!isAdminLoading && !isPlatformOwner) {
+      router.push('/dashboard');
+    }
+  }, [isPlatformOwner, isAdminLoading, router]);
 
   const usersQuery = useMemoFirebase(() => {
     if (!firestore || !isPlatformOwner) return null;
@@ -70,8 +79,12 @@ export default function AdminUsersPage() {
             <CardDescription>Manage roles for all registered users.</CardDescription>
         </CardHeader>
         <CardContent>
-             {usersLoading || rolesLoading ? (
-                <div className="space-y-3"><Skeleton className="h-12 w-full" /><Skeleton className="h-12 w-full" /><Skeleton className="h-12 w-full" /></div>
+             {usersLoading || rolesLoading || isAdminLoading ? (
+                <div className="space-y-3">
+                    <Skeleton className="h-12 w-full" />
+                    <Skeleton className="h-12 w-full" />
+                    <Skeleton className="h-12 w-full" />
+                </div>
             ) : users && users.length > 0 ? (
               <Table>
                 <TableHeader>

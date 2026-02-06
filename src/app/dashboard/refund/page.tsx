@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Button } from "@/components/ui/button";
@@ -13,6 +14,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { subscriptionTiers } from "@/lib/data";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function RequestRefundPage() {
   const { user, isUserLoading } = useUser();
@@ -28,7 +30,6 @@ export default function RequestRefundPage() {
   }, [user?.uid, firestore]);
   const { data: userData, isLoading: isUserDataLoading } = useDoc<UserType>(userDocRef);
 
-  // Fetch ALL refund requests for the current user, ordered by date
   const refundRequestQuery = useMemoFirebase(() => {
     if (!user || !firestore) return null;
     return query(
@@ -39,7 +40,6 @@ export default function RequestRefundPage() {
 
   const { data: refundRequests, isLoading: isLoadingRequests } = useCollection<RefundRequest>(refundRequestQuery);
   
-  // Check if there's a pending request to decide if the form should be shown
   const hasPendingRequest = useMemo(() => {
       return refundRequests?.some(r => r.status === 'pending') ?? false;
   }, [refundRequests]);
@@ -79,20 +79,16 @@ export default function RequestRefundPage() {
 
     const userDocForUpdateRef = doc(firestore, 'users', user.uid);
 
-    // Use the non-blocking function and handle the result with .then() to manage UI state
     addDocumentNonBlocking(refundRef, newRefundRequest)
         .then(() => {
-            // Also cancel their subscription upon successful refund request
             updateDocumentNonBlocking(userDocForUpdateRef, { subscription: null });
-
             toast({
                 title: "Request Submitted",
                 description: "Your subscription has been cancelled. You can choose a new plan from the 'Upgrade' page.",
             });
             setReason("");
         })
-        .catch((error) => {
-            // This is for unexpected client-side errors, not security rules
+        .catch(() => {
             toast({
                 variant: "destructive",
                 title: "Submission Failed",
@@ -108,23 +104,23 @@ export default function RequestRefundPage() {
   const showForm = !hasPendingRequest && !isLoading && !!userData?.subscription;
 
   return (
-    <div className="space-y-8 max-w-3xl">
+    <div className="space-y-8 max-w-3xl animate-in fade-in duration-300">
       <div>
-        <h1 className="text-3xl font-bold font-headline">Request a Refund</h1>
+        <h1 className="text-3xl font-bold font-headline heading-red">Request a Refund</h1>
         <p className="text-muted-foreground">Submit a refund request or view the status of your existing requests.</p>
       </div>
       
       {isLoading && (
         <Card>
-            <CardContent className="pt-6">
-                <div className="flex justify-center items-center h-40">
-                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                </div>
+            <CardHeader><Skeleton className="h-8 w-1/2" /></CardHeader>
+            <CardContent className="space-y-3">
+                <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-10 w-full" />
             </CardContent>
         </Card>
       )}
 
-      {refundRequests && refundRequests.length > 0 && !isLoading && (
+      {refundRequests && refundRequests.length > 0 && !isLoadingRequests && (
          <Card>
             <CardHeader>
                 <CardTitle>Your Refund Requests</CardTitle>
@@ -164,7 +160,7 @@ export default function RequestRefundPage() {
       )}
 
       {showForm && (
-        <Card>
+        <Card className="animate-in slide-in-from-bottom-2">
             <form onSubmit={handleSubmit}>
               <CardHeader>
                 <CardTitle>New Refund Request</CardTitle>
@@ -206,8 +202,8 @@ export default function RequestRefundPage() {
        {!isLoading && (!refundRequests || refundRequests.length === 0) && !showForm && (
          <Card>
             <CardHeader>
-                 <CardTitle>No New Requests</CardTitle>
-                 <CardDescription>You can submit a new refund request once your pending request has been processed.</CardDescription>
+                 <CardTitle>No Active Subscription</CardTitle>
+                 <CardDescription>You can only request a refund if you have an active subscription or have recently paid the activation fee.</CardDescription>
             </CardHeader>
          </Card>
        )}
