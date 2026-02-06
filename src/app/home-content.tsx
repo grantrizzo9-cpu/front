@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Header } from '@/components/header';
@@ -61,7 +62,7 @@ export function HomeContent() {
               </h1>
               
               <p className="text-xl md:text-2xl text-slate-600 font-medium max-w-2xl mx-auto leading-relaxed">
-                Experience an ecosystem where high-performance hosting meets aggressive 75% daily commissions. Built for those who demand more than 'standard'.
+                Experience an ecosystem where high-performance hosting meets aggressive 70%-75% daily commissions. Built for those who demand more than 'standard'.
               </p>
               
               <div className="flex flex-col sm:flex-row justify-center gap-4 pt-4">
