@@ -1,42 +1,41 @@
-# Affiliate AI Host - Core Restoration Guide (v1.1.9)
+# Affiliate AI Host - Core Restoration Guide (v1.2.0)
 
-Your site is currently showing "Hello world" because of two reasons: a Cloudflare Worker is intercepting your domain, or incorrect build settings. Follow these steps exactly to fix it.
+Your site is currently showing "Hello world" because a **Cloudflare Worker** is intercepting your domain. Follow these exact steps to kill the interceptor and go live.
 
 ---
 
-## 🚀 Step 1: Sync Your Code correctly
-Run these commands in your terminal **one by one**. Do NOT use commas or run them as a single line.
+## 🛠️ Step 1: Kill the "Hello World" Interceptor (CRITICAL)
+Your screenshot shows you are in the **Workers** settings. This is what's blocking your site.
+1. Go to your **Cloudflare Dashboard**.
+2. Click **Workers & Pages** on the left sidebar.
+3. Look for the Worker named **"front"** (the one from your screenshot).
+4. Click on it, go to the **Settings** tab, then click **Triggers**.
+5. Look for **"Routes"** or **"Custom Domains"**. If you see `hostproai.com` listed there, **DELETE IT**.
+6. This "unplugs" the "Hello world" script from your domain.
 
+---
+
+## ☁️ Step 2: Set up Cloudflare Pages (The Real Site)
+1. In the same **Workers & Pages** section, click the **Pages** tab (not Workers).
+2. Click **Connect to Git** and select your `front` repository.
+3. **Build Settings**:
+   - **Framework preset**: `Next.js`
+   - **Build command**: `npm run build`
+   - **Build output directory**: `.next`
+   - **Deploy command**: (KEEP THIS COMPLETELY EMPTY)
+4. Go to the **Custom domains** tab of this **Pages** project and add `hostproai.com`.
+
+---
+
+## 🚀 Step 3: Sync Your Code
+Run these in your terminal to ensure the latest professional landing page is ready:
 1. `git add .`
-2. `git commit -m "Restore System v1.1.9"`
+2. `git commit -m "Restore System v1.2.0"`
 3. `git push origin main`
 
 ---
 
-## 🛠️ Step 2: Remove the "Hello World" Interceptor (CRITICAL)
-Your screenshot shows a **Worker** record for `hostproai.com`. This is what is showing "Hello world."
-1. Go to your **Cloudflare Dashboard**.
-2. Go to **Workers & Pages** -> **Overview**.
-3. Look for a Worker named **"front"**.
-4. Click on it, go to the **Settings** or **Triggers** tab, and **Remove the Route** for `hostproai.com`. 
-5. The DNS record should ideally be managed by your **Pages** project, not a manual Worker.
-
----
-
-## ☁️ Step 3: Configure Cloudflare Pages
-1. Go to your **Cloudflare Dashboard > Pages**.
-2. Select your project and go to **Custom domains**. Ensure `hostproai.com` is added here.
-3. Go to **Settings > Build & deployments**. Click **Edit**:
-   - **Framework preset**: Select `Next.js`.
-   - **Build command**: `npm run build`
-   - **Build output directory**: `.next`
-   - **Deploy command**: (LEAVE THIS COMPLETELY EMPTY)
-4. Click **Save** and trigger a **Retry deployment**.
-
----
-
 ## 🔐 Step 4: Authorize Domain in Firebase
-The database will **NOT** work until you do this:
 1. Go to [Firebase Console](https://console.firebase.google.com/).
 2. Click **Authentication** -> **Settings** -> **Authorized domains**.
 3. Add `hostproai.com`.
