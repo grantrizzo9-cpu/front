@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Button } from "@/components/ui/button";
@@ -9,7 +8,7 @@ import { Loader2, ShieldQuestion } from "lucide-react";
 import { useUser, useFirestore, useCollection, useMemoFirebase, addDocumentNonBlocking, updateDocumentNonBlocking, useDoc } from "@/firebase";
 import { collection, query, serverTimestamp, orderBy, doc, Timestamp } from "firebase/firestore";
 import type { RefundRequest, User as UserType } from "@/lib/types";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
@@ -29,6 +28,11 @@ export default function RequestRefundPage() {
   const { user } = useUser();
   const firestore = useFirestore();
   const { toast } = useToast();
+  const [isHydrated, setIsHydrated] = useState(false);
+
+  useEffect(() => {
+    setIsHydrated(true);
+  }, []);
   
   const [reason, setReason] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -146,7 +150,9 @@ export default function RequestRefundPage() {
                             <TableBody>
                                 {refundRequests.map(request => (
                                     <TableRow key={request.id}>
-                                        <TableCell>{request.requestedAt ? format(request.requestedAt.toDate(), 'PP') : "Pending..."}</TableCell>
+                                        <TableCell>
+                                            {isHydrated && request.requestedAt ? format(request.requestedAt.toDate(), 'PP') : "..."}
+                                        </TableCell>
                                         <TableCell className="max-w-xs truncate">{request.reason}</TableCell>
                                         <TableCell className="text-right">
                                             <Badge variant={

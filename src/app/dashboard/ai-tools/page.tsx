@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState } from 'react';
@@ -89,7 +88,7 @@ export default function AiToolsPage() {
                 <div className="space-y-2">
                   <Label htmlFor="content-type">Content Type</Label>
                   <Select value={contentType} onValueChange={setContentType}>
-                    <SelectTrigger id="content-type" suppressHydrationWarning>
+                    <SelectTrigger id="content-type">
                       <SelectValue placeholder="Select a content type" />
                     </SelectTrigger>
                     <SelectContent>

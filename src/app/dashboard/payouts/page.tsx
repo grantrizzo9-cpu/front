@@ -14,12 +14,18 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { useAdmin } from "@/hooks/use-admin";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useState, useEffect, useMemo } from "react";
 
 export default function PayoutsPage() {
   const { user } = useUser();
   const firestore = useFirestore();
   const { toast } = useToast();
   const { isAdmin } = useAdmin();
+  const [isHydrated, setIsHydrated] = useState(false);
+
+  useEffect(() => {
+    setIsHydrated(true);
+  }, []);
 
   const payoutsRef = useMemoFirebase(() => {
     if (!user || !firestore) return null;
@@ -40,6 +46,11 @@ export default function PayoutsPage() {
   const { data: referrals } = useCollection<Referral>(referralsRef);
 
   const referralCount = referrals?.length ?? 0;
+
+  const sortedPayouts = useMemo(() => {
+    if (!payouts) return [];
+    return [...payouts].sort((a, b) => b.date.toMillis() - a.date.toMillis());
+  }, [payouts]);
 
   const handleSaveChanges = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -117,7 +128,7 @@ export default function PayoutsPage() {
           <CardDescription>Your complete history of commission payouts.</CardDescription>
         </CardHeader>
         <CardContent>
-          {payoutsLoading ? <div className="space-y-3"><Skeleton className="h-10 w-full" /><Skeleton className="h-10 w-full" /></div> : payouts && payouts.length > 0 ? (
+          {payoutsLoading ? <div className="space-y-3"><Skeleton className="h-10 w-full" /><Skeleton className="h-10 w-full" /></div> : sortedPayouts.length > 0 ? (
             <Table>
               <TableHeader>
                 <TableRow>
@@ -127,10 +138,10 @@ export default function PayoutsPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {payouts.sort((a,b) => b.date.toMillis() - a.date.toMillis()).map((payout) => (
+                {sortedPayouts.map((payout) => (
                   <TableRow key={payout.id}>
                     <TableCell className="font-medium text-green-600">${payout.amount.toFixed(2)}</TableCell>
-                    <TableCell>{format(payout.date.toDate(), 'PPpp')}</TableCell>
+                    <TableCell>{isHydrated ? format(payout.date.toDate(), 'PPpp') : '...'}</TableCell>
                     <TableCell className="text-right font-mono text-xs">
                       {payout.transactionId ? (
                         <Link href={`https://www.paypal.com/activity/payment/${payout.transactionId}`} target="_blank" rel="noopener noreferrer" className="flex items-center justify-end gap-2 hover:text-primary">

@@ -1,11 +1,10 @@
-
 'use client';
 
 import { StatCard } from "@/components/stat-card";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { format } from "date-fns";
-import { DollarSign, Users, BrainCircuit, ArrowRight, Loader2, TrendingUp, UserPlus, AlertCircle, HardDrive } from "lucide-react";
+import { DollarSign, Users, BrainCircuit, ArrowRight, TrendingUp, UserPlus, AlertCircle, HardDrive } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import Link from 'next/link';
 import { Button } from "@/components/ui/button";
@@ -14,7 +13,7 @@ import { useUser, useFirestore, useCollection, useMemoFirebase, useDoc } from "@
 import { collection, collectionGroup, doc, query, orderBy, limit } from "firebase/firestore";
 import { useAdmin } from "@/hooks/use-admin";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { useMemo } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { subscriptionTiers } from "@/lib/data";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -37,6 +36,11 @@ export default function DashboardPage() {
   const { user } = useUser();
   const firestore = useFirestore();
   const { isPlatformOwner, isLoading: isAdminLoading } = useAdmin();
+  const [isHydrated, setIsHydrated] = useState(false);
+
+  useEffect(() => {
+    setIsHydrated(true);
+  }, []);
 
   const recentReferralsQuery = useMemoFirebase(() => {
     if (!user || !firestore) return null;
@@ -200,7 +204,9 @@ export default function DashboardPage() {
                                                     {r.activationStatus}
                                                 </Badge>
                                             </TableCell>
-                                            <TableCell className="text-right text-muted-foreground">{r.date ? format(r.date.toDate(), 'MMM d') : 'N/A'}</TableCell>
+                                            <TableCell className="text-right text-muted-foreground">
+                                                {isHydrated && r.date ? format(r.date.toDate(), 'MMM d') : '...'}
+                                            </TableCell>
                                         </TableRow>
                                     ))}
                                 </TableBody>

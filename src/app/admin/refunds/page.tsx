@@ -1,5 +1,4 @@
-
-"use client";
+'use client';
 
 import { useMemo, useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
@@ -23,6 +22,11 @@ export default function AdminRefundsPage() {
   const { isPlatformOwner, isLoading: isAdminLoading } = useAdmin();
   const [processingId, setProcessingId] = useState<string | null>(null);
   const router = useRouter();
+  const [isHydrated, setIsHydrated] = useState(false);
+
+  useEffect(() => {
+    setIsHydrated(true);
+  }, []);
 
   useEffect(() => {
     if (!isAdminLoading && !isPlatformOwner) {
@@ -118,7 +122,9 @@ export default function AdminRefundsPage() {
                       <TableCell>{request.userEmail}</TableCell>
                       <TableCell>${(request.amount ?? 0).toFixed(2)}</TableCell>
                       <TableCell className="max-w-xs truncate">{request.reason}</TableCell>
-                      <TableCell>{request.requestedAt ? format(request.requestedAt.toDate(), 'PP') : 'N/A'}</TableCell>
+                      <TableCell>
+                        {isHydrated && request.requestedAt ? format(request.requestedAt.toDate(), 'PP') : '...'}
+                      </TableCell>
                       <TableCell className="text-right">
                         <Button 
                             variant="outline" 

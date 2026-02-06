@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,6 +8,7 @@ import type { Referral } from "@/lib/types";
 import { useUser, useFirestore, useCollection, useMemoFirebase } from "@/firebase";
 import { collection } from "firebase/firestore";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useState, useEffect, useMemo } from "react";
 
 function TableSkeleton() {
     return (
@@ -25,6 +25,11 @@ function TableSkeleton() {
 export default function ReferralsPage() {
   const { user } = useUser();
   const firestore = useFirestore();
+  const [isHydrated, setIsHydrated] = useState(false);
+
+  useEffect(() => {
+    setIsHydrated(true);
+  }, []);
 
   const referralsRef = useMemoFirebase(() => {
     if (!user || !firestore) return null;
@@ -33,6 +38,11 @@ export default function ReferralsPage() {
 
   const { data: referrals, isLoading: referralsLoading } = useCollection<Referral>(referralsRef);
   
+  const sortedReferrals = useMemo(() => {
+    if (!referrals) return [];
+    return [...referrals].sort((a, b) => (b.date?.toMillis() ?? 0) - (a.date?.toMillis() ?? 0));
+  }, [referrals]);
+
   return (
     <div className="space-y-8">
       <div>
@@ -50,7 +60,7 @@ export default function ReferralsPage() {
         <CardContent>
           {(referralsLoading || !referrals) ? (
             <TableSkeleton />
-          ) : referrals.length > 0 ? (
+          ) : sortedReferrals.length > 0 ? (
             <Table>
               <TableHeader>
                 <TableRow>
@@ -62,9 +72,7 @@ export default function ReferralsPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {referrals
-                  .sort((a, b) => (b.date?.toMillis() ?? 0) - (a.date?.toMillis() ?? 0))
-                  .map((referral) => (
+                {sortedReferrals.map((referral) => (
                   <TableRow key={referral.id}>
                     <TableCell className="font-medium">{referral.referredUserUsername}</TableCell>
                     <TableCell>{referral.planPurchased}</TableCell>
@@ -74,7 +82,9 @@ export default function ReferralsPage() {
                         {referral.activationStatus}
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-right">{referral.date ? format(referral.date.toDate(), 'MMM d, yyyy') : 'N/A'}</TableCell>
+                    <TableCell className="text-right">
+                        {isHydrated && referral.date ? format(referral.date.toDate(), 'MMM d, yyyy') : '...'}
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
