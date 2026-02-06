@@ -3,11 +3,16 @@
 import { Logo } from "@/components/logo";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { Suspense } from "react";
+import { Suspense, useState, useEffect } from "react";
 
 function FooterContent() {
   const searchParams = useSearchParams();
   const refCode = searchParams.get('ref');
+  const [year, setYear] = useState<number | null>(null);
+
+  useEffect(() => {
+    setYear(new Date().getFullYear());
+  }, []);
 
   const getLinkWithRef = (baseHref: string) => {
     if (!refCode) return baseHref;
@@ -78,7 +83,7 @@ function FooterContent() {
       </div>
       <div className="mt-8 border-t pt-8 flex flex-col sm:flex-row justify-between items-center gap-4">
         <p className="text-sm text-muted-foreground">
-          © {new Date().getFullYear()} Affiliate AI Host. All rights reserved.
+          © {year || '2025'} Affiliate AI Host. All rights reserved.
         </p>
       </div>
     </div>
