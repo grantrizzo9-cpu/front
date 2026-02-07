@@ -5,12 +5,11 @@ Your site is currently showing "Hello world" because a **Cloudflare Worker** is 
 ---
 
 ## 🛠️ Step 1: Kill the "Hello World" Interceptor (CRITICAL)
-Your screenshot shows you are in the **Workers** settings. This is what's blocking your site.
 1. Go to your **Cloudflare Dashboard**.
-2. Click **Workers & Pages** on the left sidebar.
-3. Look for the Worker named **"front"** (the one from your screenshot).
-4. Click on it, go to the **Settings** tab, then click **Triggers**.
-5. Look for **"Routes"** or **"Custom Domains"**. If you see `hostproai.com` listed there, **DELETE IT**.
+2. On the left sidebar, click **Workers & Pages**.
+3. Look for the Worker named **"front"** (the one from your screenshot). Click on it.
+4. Go to the **Settings** tab, then click **Triggers**.
+5. Look for **"Custom Domains"**. If you see `hostproai.com` listed there, **DELETE IT**.
 6. This "unplugs" the "Hello world" script from your domain.
 
 ---
