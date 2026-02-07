@@ -54,9 +54,10 @@ function LoginForm() {
       console.error("Login Error:", error.code, error.message);
       let description = "An unknown error occurred. Please try again.";
       
-      if (error.code === 'auth/unauthorized-domain') {
+      // Handle domain blocked error (usually referer blocked)
+      if (error.code === 'auth/unauthorized-domain' || error.message?.includes('requests-from-referer') || error.message?.includes('blocked')) {
           setUnauthorizedDomain(window.location.hostname);
-          return; // Don't show toast, we show the alert instead
+          return; 
       }
 
       if (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found') {
@@ -82,10 +83,10 @@ function LoginForm() {
       {unauthorizedDomain && (
         <Alert variant="destructive" className="border-red-500 bg-red-50">
           <ShieldAlert className="h-4 w-4" />
-          <AlertTitle className="font-bold">Domain Not Authorized</AlertTitle>
+          <AlertTitle className="font-bold">Domain Security Block</AlertTitle>
           <AlertDescription className="text-xs space-y-2">
-            <p>Firebase is blocking login because this domain is not whitelisted.</p>
-            <p className="font-semibold underline">Action Required:</p>
+            <p>Firebase is blocking access because this domain is not whitelisted.</p>
+            <p className="font-semibold underline">Required Action:</p>
             <ol className="list-decimal list-inside space-y-1">
               <li>Go to <strong>Firebase Console</strong>.</li>
               <li>Navigate to <strong>Auth > Settings > Authorized Domains</strong>.</li>
