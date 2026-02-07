@@ -12,29 +12,28 @@ Run these three commands in your terminal to make sure GitHub has your professio
 
 ---
 
-## ☁️ Step 2: The "Pages" Connection (The Final Click)
-This is the most important part. Go back to your Cloudflare Dashboard:
+## ⚙️ Step 2: The Build Settings (Your Screenshot)
+In the Cloudflare screen you are looking at right now, enter these exact settings:
 
-1. Click **Workers & Pages** on the left sidebar.
-2. **LOOK CLOSELY:** You will see two tabs at the top: "Workers" and **"Pages"**.
-3. Click the **Pages** tab (it has a blue document icon).
-4. You should see a project there (likely named **"front"**). Click on it.
-5. Go to the **Custom domains** tab at the top.
-6. Click the blue **"Set up a custom domain"** button.
-7. Type in `hostproai.com` and click **Continue**.
-8. Cloudflare will ask you to "Activate" or "Finish setup"—click the button to confirm.
+1.  **Framework preset:** Select **Next.js** from the dropdown.
+2.  **Build command:** `npm run build`
+3.  **Build output directory:** `.next`
+4.  **Root directory:** Leave as `/` (default).
+5.  Click **Save and Deploy** at the bottom.
 
 ---
 
-## 🔐 Step 3: Firebase Authorization
-1. Go to [Firebase Console](https://console.firebase.google.com/).
-2. Select your project.
-3. Click **Authentication** -> **Settings** -> **Authorized domains**.
-4. Click **Add domain** and type `hostproai.com`.
+## 🔐 Step 3: Connect Your Domain
+Once the build finishes (it will take about 2 minutes):
+
+1.  Click the **Custom domains** tab at the top of your project page.
+2.  Click the blue **"Set up a custom domain"** button.
+3.  Type in `hostproai.com` and click **Continue**.
+4.  Cloudflare will ask you to "Activate" or "Finish setup"—click the button to confirm.
 
 ---
 
 ### ✅ Success Check
-Once Step 2 is finished, visit `hostproai.com`. You will no longer see "Hello world." Instead, you will see your professional **Affiliate AI Host** landing page!
+Visit `hostproai.com`. You will no longer see "Hello world." Instead, you will see your professional **Affiliate AI Host** landing page!
 
 © 2025 Affiliate AI Host. Final Sync v1.2.0.
