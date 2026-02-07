@@ -9,7 +9,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { subscriptionTiers } from "@/lib/data";
-import { Loader2, Users, ShieldAlert, ShieldCheck, ExternalLink, RefreshCcw } from "lucide-react";
+import { Loader2, Users, ShieldAlert, ExternalLink, RefreshCcw } from "lucide-react";
 import { useAuth, useFirestore } from "@/firebase";
 import { createUserWithEmailAndPassword, updateProfile, User } from "firebase/auth";
 import { doc, getDoc, writeBatch, serverTimestamp, collection } from "firebase/firestore";
@@ -138,7 +138,9 @@ function SignupFormComponent() {
         } catch (error: any) {
             console.error("Signup error:", error.code, error.message);
             
-            if (error.message?.toLowerCase().includes('referer-blocked') || error.message?.toLowerCase().includes('offline')) {
+            if (error.message?.toLowerCase().includes('referer-blocked') || 
+                error.code === 'auth/requests-from-referer-blocked' ||
+                error.message?.toLowerCase().includes('offline')) {
                 setApiKeyBlocked(true);
                 setIsProcessing(false);
                 return;
@@ -155,7 +157,7 @@ function SignupFormComponent() {
         }
     };
 
-    const gcpConsoleUrl = `https://console.cloud.google.com/apis/credentials/key/${firebaseConfig.apiKey}?project=${firebaseConfig.projectId}`;
+    const gcpCredentialsUrl = `https://console.cloud.google.com/apis/credentials?project=${firebaseConfig.projectId}`;
     
     return (
         <div className="space-y-6">
@@ -164,19 +166,27 @@ function SignupFormComponent() {
                     <ShieldAlert className="h-5 w-5 text-amber-600" />
                     <AlertTitle className="font-bold text-red-800">Connection Failed (Offline/Blocked)</AlertTitle>
                     <AlertDescription className="text-sm space-y-3 text-red-700">
-                        <p>Firebase is reporting "offline" because your <strong>Google Cloud API Key</strong> is blocking requests from Render.</p>
-                        <div className="bg-white/50 p-3 rounded border border-red-200">
-                            <p className="font-semibold text-xs uppercase tracking-wider mb-1">Required Action:</p>
-                            <ol className="list-decimal list-inside space-y-1 text-xs">
-                                <li>Click <strong>"Open API Settings"</strong>.</li>
+                        <p>Firebase is reporting "offline" because your <strong>Google Cloud API Key</strong> is blocking requests from Render (Referer Blocked).</p>
+                        <div className="bg-white/50 p-3 rounded border border-red-200 text-xs">
+                            <p className="font-semibold uppercase tracking-wider mb-1">Required Action:</p>
+                            <ol className="list-decimal list-inside space-y-1">
+                                <li>Click <strong>"Open API Credentials"</strong> below.</li>
+                                <li>Click on your <strong>API Key</strong> (e.g. Browser key).</li>
                                 <li>Find <strong>"Website restrictions"</strong>.</li>
                                 <li>Add <code>https://{window.location.hostname}/*</code></li>
                                 <li>Click <strong>Save</strong>.</li>
                             </ol>
                         </div>
-                        <Button asChild variant="default" className="w-full bg-amber-600">
-                            <a href={gcpConsoleUrl} target="_blank" rel="noopener noreferrer">Open API Settings <ExternalLink className="ml-2 h-4 w-4" /></a>
-                        </Button>
+                        <div className="flex flex-col gap-2">
+                            <Button asChild variant="default" className="w-full bg-amber-600">
+                                <a href={gcpCredentialsUrl} target="_blank" rel="noopener noreferrer">
+                                    Open API Credentials <ExternalLink className="ml-2 h-4 w-4" />
+                                </a>
+                            </Button>
+                            <Button onClick={() => window.location.reload()} variant="outline" size="sm" className="bg-white text-amber-800">
+                                <RefreshCcw className="mr-2 h-3 w-3" /> Refresh Page
+                            </Button>
+                        </div>
                     </AlertDescription>
                 </Alert>
             )}
@@ -186,7 +196,7 @@ function SignupFormComponent() {
                     <ShieldAlert className="h-4 w-4" />
                     <AlertTitle className="font-bold">Domain Security Block</AlertTitle>
                     <AlertDescription className="text-xs space-y-2">
-                        <p>Firebase is blocking access because <strong>{unauthorizedDomain}</strong> is not yet authorized.</p>
+                        <p>Firebase is blocking access because <strong>{unauthorizedDomain}</strong> is not authorized.</p>
                         <p className="font-semibold underline">Final Action Required:</p>
                         <ol className="list-decimal list-inside space-y-1">
                             <li>Go to <strong>Firebase Console</strong>.</li>
@@ -199,7 +209,7 @@ function SignupFormComponent() {
 
             <Card className="shadow-xl">
                 <CardHeader>
-                    <CardTitle className="font-headline text-2xl">Create Your Account</CardTitle>
+                    <CardTitle className="font-headline text-2xl text-red-600">Create Your Account</CardTitle>
                     <CardDescription>
                         You're creating an account for the <strong>{plan.name}</strong> plan.
                     </CardDescription>
@@ -227,7 +237,7 @@ function SignupFormComponent() {
                                 <span>You were referred by: <span className="font-semibold">{referralCode}</span></span>
                             </div>
                         )}
-                        <Button type="submit" className="w-full h-12 text-lg font-bold" disabled={!isFormValid || isProcessing}>
+                        <Button type="submit" className="w-full h-12 text-lg font-bold bg-blue-600 hover:bg-blue-700 shadow-lg" disabled={!isFormValid || isProcessing}>
                             {isProcessing ? <Loader2 className="animate-spin" /> : "Create Account & Proceed"}
                         </Button>
                     </form>

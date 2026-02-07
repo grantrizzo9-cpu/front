@@ -10,7 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/firebase";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { useState, useEffect, Suspense } from "react";
-import { Loader2, ShieldAlert, ExternalLink, RefreshCcw, Lock, WifiOff } from "lucide-react";
+import { Loader2, ShieldAlert, ExternalLink, RefreshCcw, Lock } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { firebaseConfig } from "@/firebase/config";
 
@@ -91,7 +91,8 @@ function LoginForm() {
     }
   };
 
-  const gcpConsoleUrl = `https://console.cloud.google.com/apis/credentials/key/${firebaseConfig.apiKey}?project=${firebaseConfig.projectId}`;
+  // Link directly to the Credentials list in GCP
+  const gcpCredentialsUrl = `https://console.cloud.google.com/apis/credentials?project=${firebaseConfig.projectId}`;
 
   return (
     <div className="space-y-6">
@@ -100,11 +101,12 @@ function LoginForm() {
           <ShieldAlert className="h-5 w-5 text-amber-600" />
           <AlertTitle className="font-bold text-red-800">Security Connection Blocked</AlertTitle>
           <AlertDescription className="text-sm space-y-3 text-red-700">
-            <p>Your browser is reporting "offline" because your <strong>Google Cloud API Key</strong> is blocking this domain.</p>
-            <div className="bg-white/50 p-3 rounded border border-red-200">
-                <p className="font-semibold text-xs uppercase tracking-wider mb-1">Required Fix (2 minutes):</p>
-                <ol className="list-decimal list-inside space-y-1 text-xs">
-                    <li>Click <strong>"Open API Settings"</strong> below.</li>
+            <p>Firebase is reporting "offline" because your <strong>Google Cloud API Key</strong> is blocking this domain (Referer Blocked).</p>
+            <div className="bg-white/50 p-3 rounded border border-red-200 text-xs">
+                <p className="font-semibold uppercase tracking-wider mb-1">Required Fix (2 minutes):</p>
+                <ol className="list-decimal list-inside space-y-1">
+                    <li>Click <strong>"Open API Credentials"</strong> below.</li>
+                    <li>Click on the <strong>API Key</strong> (usually "Browser key").</li>
                     <li>Scroll to <strong>"Website restrictions"</strong>.</li>
                     <li>Add <code>https://{window.location.hostname}/*</code></li>
                     <li>Click <strong>Save</strong> at the bottom.</li>
@@ -112,8 +114,8 @@ function LoginForm() {
             </div>
             <div className="flex flex-col gap-2">
                 <Button asChild variant="default" className="bg-amber-600 hover:bg-amber-700 text-white">
-                    <a href={gcpConsoleUrl} target="_blank" rel="noopener noreferrer">
-                        Open API Settings <ExternalLink className="ml-2 h-4 w-4" />
+                    <a href={gcpCredentialsUrl} target="_blank" rel="noopener noreferrer">
+                        Open API Credentials <ExternalLink className="ml-2 h-4 w-4" />
                     </a>
                 </Button>
                 <Button onClick={handleRefresh} variant="ghost" size="sm" className="text-amber-800">
