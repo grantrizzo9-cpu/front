@@ -3,19 +3,17 @@
 import { Header } from '@/components/header';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowRight, TrendingUp, Zap, Sparkles, Globe, Cpu, HelpCircle } from 'lucide-react';
-import Image from 'next/image';
+import { ArrowRight, TrendingUp, Sparkles, Globe, Cpu, HelpCircle } from 'lucide-react';
 import Link from 'next/link';
 import { Footer } from '@/components/footer';
-import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { useSearchParams } from 'next/navigation';
 import { PricingCards } from './pricing/pricing-cards';
 import { Suspense, useState, useEffect } from 'react';
 import {
   Accordion,
-  AccordionContent,
   AccordionItem,
   AccordionTrigger,
+  AccordionContent,
 } from "@/components/ui/accordion";
 
 function HomeInner() {
