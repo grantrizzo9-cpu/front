@@ -1,36 +1,40 @@
-# Affiliate AI Host - Core Restoration Guide (v1.2.0)
+# Affiliate AI Host - Final Launch Guide (v1.2.0)
 
-Your site was showing "Hello world" because a **Cloudflare Worker** was intercepting your domain. You have successfully deleted that interceptor. Now, follow these final steps to go live.
-
----
-
-## ✅ Step 1: Kill the "Hello World" Interceptor (DONE)
-You have already deleted `hostproai.com` from the **Worker** triggers. Great job!
+You have successfully deleted the "Hello World" Worker! Now, we just need to tell Cloudflare to show your **real website code** on your domain.
 
 ---
 
-## ☁️ Step 2: Set up Cloudflare Pages (The Real Site)
-Now you need to make sure the **Pages** version is active:
-1. Go back to the **Workers & Pages** overview in Cloudflare.
-2. Click the **Pages** tab (it has a blue document icon, next to the Workers tab).
-3. Click on your **"front"** project (the Pages one).
-4. Go to the **Custom domains** tab.
-5. Click **Set up a custom domain** and add `hostproai.com`.
-6. Follow the instructions to finish the DNS setup.
-
----
-
-## 🚀 Step 3: Sync Your Code
-Run these in your terminal to ensure the latest professional landing page is ready:
+## 🚀 Step 1: Sync Your Final Code
+Run these three commands in your terminal to make sure GitHub has your professional landing page:
 1. `git add .`
-2. `git commit -m "Restore System v1.2.0"`
+2. `git commit -m "Final System Sync v1.2.0"`
 3. `git push origin main`
 
 ---
 
-## 🔐 Step 4: Authorize Domain in Firebase
-1. Go to [Firebase Console](https://console.firebase.google.com/).
-2. Click **Authentication** -> **Settings** -> **Authorized domains**.
-3. Add `hostproai.com`.
+## ☁️ Step 2: The "Pages" Connection (The Final Click)
+This is the most important part. Go back to your Cloudflare Dashboard:
 
-© 2025 Affiliate AI Host. Core Restored.
+1. Click **Workers & Pages** on the left sidebar.
+2. **LOOK CLOSELY:** You will see two tabs at the top: "Workers" and **"Pages"**.
+3. Click the **Pages** tab (it has a blue document icon).
+4. You should see a project there (likely named **"front"**). Click on it.
+5. Go to the **Custom domains** tab at the top.
+6. Click the blue **"Set up a custom domain"** button.
+7. Type in `hostproai.com` and click **Continue**.
+8. Cloudflare will ask you to "Activate" or "Finish setup"—click the button to confirm.
+
+---
+
+## 🔐 Step 3: Firebase Authorization
+1. Go to [Firebase Console](https://console.firebase.google.com/).
+2. Select your project.
+3. Click **Authentication** -> **Settings** -> **Authorized domains**.
+4. Click **Add domain** and type `hostproai.com`.
+
+---
+
+### ✅ Success Check
+Once Step 2 is finished, visit `hostproai.com`. You will no longer see "Hello world." Instead, you will see your professional **Affiliate AI Host** landing page!
+
+© 2025 Affiliate AI Host. Final Sync v1.2.0.
