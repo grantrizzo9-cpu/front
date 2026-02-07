@@ -5,26 +5,26 @@ Your site is currently showing "Hello world" because a **Cloudflare Worker** is 
 ---
 
 ## 🛠️ Step 1: Kill the "Hello World" Interceptor (CRITICAL)
-1. Go to your **Cloudflare Dashboard**.
-2. On the left sidebar, click **Workers & Pages**.
-3. Look for the Worker named **"front"** (the one from your screenshot). Click on it.
-4. Go to the **Settings** tab inside that worker.
-5. Click on the **Triggers** sub-tab.
-6. Look for the section named **"Custom Domains"**. 
-7. If you see `hostproai.com` listed there, click **...** and select **DELETE**.
-8. This "unplugs" the "Hello world" script from your domain.
+Based on your dashboard screenshot:
+1. Click on the project named **"front"** (the one with the blue lightning bolt icon).
+2. On the left sidebar, click **Settings**.
+3. Click on the **Triggers** tab.
+4. Look for the section named **"Custom Domains"**. 
+5. You will see `hostproai.com` listed there. Click the **three dots (...)** next to it and select **DELETE**.
+6. This "unplugs" the "Hello world" script from your domain.
 
 ---
 
 ## ☁️ Step 2: Set up Cloudflare Pages (The Real Site)
-1. In the same **Workers & Pages** section, click the **Pages** tab (not Workers).
-2. Click **Connect to Git** and select your `front` repository.
-3. **Build Settings**:
+Once the Worker is unplugged, you need to make sure the **Pages** version is active:
+1. Go back to the **Workers & Pages** overview.
+2. Click the **Pages** tab (next to the Workers tab).
+3. Click **Connect to Git** and select your `front` repository.
+4. **Build Settings**:
    - **Framework preset**: `Next.js`
    - **Build command**: `npm run build`
    - **Build output directory**: `.next`
-   - **Deploy command**: (KEEP THIS COMPLETELY EMPTY)
-4. Go to the **Custom domains** tab of this **Pages** project and add `hostproai.com`.
+5. Go to the **Custom domains** tab of this **Pages** project and add `hostproai.com`.
 
 ---
 

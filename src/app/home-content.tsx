@@ -35,8 +35,6 @@ function HomeInner() {
     return `${url.pathname}${url.search}${hash ? '#' + hash : ''}`;
   };
 
-  const signupLink = getLinkWithRef('/pricing');
-
   const blogPosts = [
     { title: "Why Daily Payouts are the New Industry Standard", excerpt: "Traditional net-30 and net-60 payouts are killing your cash flow.", date: "Nov 12, 2024", category: "Market Analysis", slug: "daily-payouts", icon: <TrendingUp className="h-5 w-5" /> },
     { title: "The AI Edge: Automating Your Conversion Funnels", excerpt: "Leveraging LLMs to generate copy is now a requirement.", date: "Nov 10, 2024", category: "Technical Guide", slug: "ai-edge", icon: <Cpu className="h-5 w-5" /> },
@@ -151,7 +149,7 @@ function HomeInner() {
             </h2>
             <div className="flex flex-col sm:flex-row justify-center gap-6">
               <Button size="lg" className="h-16 px-12 text-xl font-bold rounded-2xl bg-blue-600 hover:bg-blue-700" asChild>
-                <Link href={signupLink}>Start Your 3-Day Trial</Link>
+                <Link href={getLinkWithRef('/pricing')}>Start Your 3-Day Trial</Link>
               </Button>
               <Button size="lg" variant="outline" className="h-16 px-12 text-xl font-bold rounded-2xl border-slate-700" asChild>
                 <Link href={getLinkWithRef('/about')}>Meet the Founders</Link>
