@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Header } from '@/components/header';
@@ -7,6 +8,8 @@ import { ArrowLeft, Calendar, User, Clock } from 'lucide-react';
 import Link from 'next/link';
 import { use, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
+
+export const runtime = 'edge';
 
 const insightsContent: Record<string, any> = {
   'daily-payouts': {

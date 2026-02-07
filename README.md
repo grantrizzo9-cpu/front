@@ -1,39 +1,40 @@
-# Affiliate AI Host - Final Launch Guide (v1.2.0)
 
-You have successfully deleted the "Hello World" Worker! Now, we just need to tell Cloudflare to show your **real website code** on your domain.
+# Affiliate AI Host - Final Launch Guide (v1.2.1)
+
+Your build was blocked by the **Edge Runtime** requirement. I have fixed the code. Now, you just need to re-trigger the build and finish the setup.
 
 ---
 
-## 🚀 Step 1: Sync Your Final Code
-Run these three commands in your terminal to make sure GitHub has your professional landing page:
+## 🚀 Step 1: Sync the Fixes
+Run these three commands in your terminal to send the Edge Runtime fixes to GitHub:
 1. `git add .`
-2. `git commit -m "Final System Sync v1.2.0"`
+2. `git commit -m "Fix Edge Runtime for Cloudflare v1.2.1"`
 3. `git push origin main`
 
 ---
 
-## ⚙️ Step 2: The Build Settings (Your Screenshot)
-In the Cloudflare screen you are looking at right now, enter these exact settings:
+## ⚙️ Step 2: The Build Settings
+Go back to your **Cloudflare Pages** project and ensure these settings are entered exactly:
 
 1.  **Framework preset:** Select **Next.js** from the dropdown.
-2.  **Build command:** `npm run build`
-3.  **Build output directory:** `.next`
-4.  **Root directory:** Leave as `/` (default).
-5.  Click **Save and Deploy** at the bottom.
+2.  **Build command:** `npx @cloudflare/next-on-pages@1` (Cloudflare might auto-fill this).
+3.  **Build output directory:** `.vercel/output` (Cloudflare will auto-fill this for Next.js).
+4.  **Root directory:** `/` (default).
+5.  Click **Save and Deploy**.
 
 ---
 
 ## 🔐 Step 3: Connect Your Domain
-Once the build finishes (it will take about 2 minutes):
+Once the build says **"Success"**:
 
 1.  Click the **Custom domains** tab at the top of your project page.
 2.  Click the blue **"Set up a custom domain"** button.
 3.  Type in `hostproai.com` and click **Continue**.
-4.  Cloudflare will ask you to "Activate" or "Finish setup"—click the button to confirm.
+4.  Activate/Finish setup as requested.
 
 ---
 
 ### ✅ Success Check
-Visit `hostproai.com`. You will no longer see "Hello world." Instead, you will see your professional **Affiliate AI Host** landing page!
+Visit `hostproai.com`. You will see your professional **Affiliate AI Host** platform with the v1.2.1 watermark in the footer.
 
-© 2025 Affiliate AI Host. Final Sync v1.2.0.
+© 2025 Affiliate AI Host. Final Sync v1.2.1.

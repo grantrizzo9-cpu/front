@@ -2,6 +2,8 @@
 import { NextResponse } from 'next/server';
 import { subscriptionTiers } from '@/lib/data';
 
+export const runtime = 'edge';
+
 // --- SAFER DEFAULTS ---
 // The application now defaults to using the SANDBOX environment.
 // To use your live PayPal account, you must set PAYPAL_SANDBOX="false" in your deployment environment variables (e.g., in Railway or Netlify).
@@ -30,7 +32,7 @@ async function getPayPalAccessToken() {
     }
 
 
-    const auth = Buffer.from(`${clientId}:${clientSecret}`).toString("base64");
+    const auth = btoa(`${clientId}:${clientSecret}`);
     const response = await fetch(`${PAYPAL_API_BASE}/v1/oauth2/token`, {
         method: "POST",
         body: "grant_type=client_credentials",
@@ -143,9 +145,9 @@ export async function POST(request: Request) {
     
     let debugMessage = e.message;
     if (e.message.includes('authentication failed')) {
-        debugMessage = `The PayPal credentials for the ${environment} environment are incorrect. Please verify your 'PAYPAL_${environment}_CLIENT_ID' and 'PAYPAL_${environment}_CLIENT_SECRET' variables in your Railway project settings.`;
+        debugMessage = `The PayPal credentials for the ${environment} environment are incorrect. Please verify your 'PAYPAL_${environment}_CLIENT_ID' and 'PAYPAL_${environment}_CLIENT_SECRET' variables in your deployment settings.`;
     } else if (e.message.includes('not configured')) {
-        debugMessage = `The PayPal credentials for the ${environment} environment are missing or contain placeholder text. Please ensure 'PAYPAL_${environment}_CLIENT_ID' and 'PAYPAL_${environment}_CLIENT_SECRET' are set correctly in your Railway project settings.`;
+        debugMessage = `The PayPal credentials for the ${environment} environment are missing or contain placeholder text. Please ensure 'PAYPAL_${environment}_CLIENT_ID' and 'PAYPAL_${environment}_CLIENT_SECRET' are set correctly in your deployment settings.`;
     }
     
     return NextResponse.json({ success: false, error: "A critical server error occurred while contacting PayPal.", debug: debugMessage }, { status: 500 });
