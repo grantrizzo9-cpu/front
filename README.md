@@ -4,23 +4,23 @@ Your app is now optimized for **Cloudflare Pages** and **Render**. Follow these 
 
 ---
 
-## 🚀 Scenario A: Deploying to Render
+## ⚡ Scenario A: Deploying to Cloudflare Pages (RECOMMENDED)
+If your build failed with `Error: Output directory "next" not found`:
+
+1.  In the Cloudflare Dashboard, go to your **Pages Project > Settings > Build & deployments**.
+2.  Click **"Edit output directory"**.
+3.  Change it from `next` to `.vercel/output` (include the dot).
+4.  **Save** and **Retry build**.
+
+---
+
+## 🚀 Scenario B: Deploying to Render
 If you are seeing a login error on your Render domain (`front-h603.onrender.com`):
 
 1.  Go to the [Firebase Console](https://console.firebase.google.com/).
 2.  Navigate to **Build > Authentication > Settings > Authorized Domains**.
 3.  Click **"Add domain"** and paste: `front-h603.onrender.com`.
 4.  **Push the fix**: Run the commands in Step 1 below to enable the "Security Recovery" dashboard.
-
----
-
-## ⚡ Scenario B: Deploying to Cloudflare Pages
-If your build failed with `Output directory "next" not found`:
-
-1.  In the Cloudflare Dashboard, go to your **Pages Project > Settings > Build & deployments**.
-2.  Click **"Edit output directory"**.
-3.  Change it from `next` to `.vercel/output` (include the dot).
-4.  **Retry build**.
 
 ---
 
