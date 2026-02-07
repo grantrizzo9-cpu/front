@@ -8,9 +8,11 @@ Your site is currently showing "Hello world" because a **Cloudflare Worker** is 
 1. Go to your **Cloudflare Dashboard**.
 2. On the left sidebar, click **Workers & Pages**.
 3. Look for the Worker named **"front"** (the one from your screenshot). Click on it.
-4. Go to the **Settings** tab, then click **Triggers**.
-5. Look for **"Custom Domains"**. If you see `hostproai.com` listed there, **DELETE IT**.
-6. This "unplugs" the "Hello world" script from your domain.
+4. Go to the **Settings** tab inside that worker.
+5. Click on the **Triggers** sub-tab.
+6. Look for the section named **"Custom Domains"**. 
+7. If you see `hostproai.com` listed there, click **...** and select **DELETE**.
+8. This "unplugs" the "Hello world" script from your domain.
 
 ---
 
