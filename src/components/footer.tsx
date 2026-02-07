@@ -83,7 +83,7 @@ function FooterContent() {
       </div>
       <div className="mt-8 border-t pt-8 flex flex-col sm:flex-row justify-between items-center gap-4">
         <p className="text-sm text-muted-foreground">
-          © {year || '2025'} Affiliate AI Host. All rights reserved. <span className="ml-2 opacity-30">v1.2.1-FIXED</span>
+          © {year || '2025'} Affiliate AI Host. All rights reserved. <span className="ml-2 opacity-30">v1.2.2-FINAL</span>
         </p>
       </div>
     </div>
