@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, Suspense, useEffect } from 'react';
@@ -10,7 +9,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { subscriptionTiers } from "@/lib/data";
-import { Loader2, Users, AlertCircle, ShieldCheck } from "lucide-react";
+import { Loader2, Users, ShieldAlert, ShieldCheck } from "lucide-react";
 import { useAuth, useFirestore } from "@/firebase";
 import { createUserWithEmailAndPassword, updateProfile, User } from "firebase/auth";
 import { doc, getDoc, writeBatch, serverTimestamp, collection } from "firebase/firestore";
@@ -28,7 +27,7 @@ function SignupFormComponent() {
     const [password, setPassword] = useState('');
     const [isProcessing, setIsProcessing] = useState(false);
     const [errors, setErrors] = useState({ username: '', email: '', password: '' });
-    const [isOffline, setIsOffline] = useState(false);
+    const [unauthorizedDomain, setUnauthorizedDomain] = useState<string | null>(null);
 
     const [planId, setPlanId] = useState('starter');
     const [referralCode, setReferralCode] = useState<string | null>(null);
@@ -114,7 +113,7 @@ function SignupFormComponent() {
     const handleSignup = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setIsProcessing(true);
-        setIsOffline(false);
+        setUnauthorizedDomain(null);
         
         const finalUsername = username.toLowerCase();
         const params = new URLSearchParams(window.location.search);
@@ -134,82 +133,89 @@ function SignupFormComponent() {
             await postSignupFlow(userCredential.user, finalUsername, refCodeFromUrl);
 
         } catch (error: any) {
-            console.error("Signup error:", error);
+            console.error("Signup error:", error.code, error.message);
             let description = error.message || "An unknown error occurred.";
             
-            if (description.includes("offline") || description.includes("network-request-failed") || description.includes("failed-precondition") || description.includes("permission-denied")) {
-                setIsOffline(true);
-                description = "Database Connection Blocked: Your domain 'hostproai.com' is registered but not yet whitelisted in Google Cloud (README Step 2).";
+            if (error.code === 'auth/unauthorized-domain') {
+                setUnauthorizedDomain(window.location.hostname);
+                setIsProcessing(false);
+                return;
             }
 
-            toast({ variant: "destructive", title: "Action Required", description: description });
+            toast({ variant: "destructive", title: "Signup Failed", description: description });
             setIsProcessing(false);
         }
     };
     
     return (
-        <Card className="shadow-xl">
-            <CardHeader>
-                <CardTitle className="font-headline text-2xl">Create Your Account</CardTitle>
-                <CardDescription>
-                    You're creating an account for the <strong>{plan.name}</strong> plan.
-                </CardDescription>
-            </CardHeader>
-            <CardContent>
-                {isOffline && (
-                    <Alert variant="destructive" className="mb-6 border-red-500 bg-red-50 dark:bg-red-950">
-                        <AlertCircle className="h-4 w-4" />
-                        <AlertTitle className="font-bold">Domain Security Block</AlertTitle>
-                        <AlertDescription className="text-xs space-y-2">
-                            <p>Great job! You've completed <strong>Step 1</strong> (Authorized Domains).</p>
-                            <p>However, the <strong>Database</strong> is still blocking <strong>hostproai.com</strong> because of API Key restrictions.</p>
-                            <p className="font-semibold underline">Final Action Required:</p>
-                            <p>Once your Google Cloud account is active, follow <strong>Step 2</strong> in the README to whitelist this domain in the API Credentials section.</p>
-                        </AlertDescription>
-                    </Alert>
-                )}
-                
-                {!isOffline && (
-                    <div className="mb-6 p-3 bg-green-50 border border-green-200 rounded-lg flex items-center gap-2 text-xs text-green-700">
-                        <ShieldCheck className="h-4 w-4" />
-                        <span>Authorized Domain Check: hostproai.com is active (Step 1 complete).</span>
-                    </div>
-                )}
+        <div className="space-y-6">
+            {unauthorizedDomain && (
+                <Alert variant="destructive" className="border-red-500 bg-red-50">
+                    <ShieldAlert className="h-4 w-4" />
+                    <AlertTitle className="font-bold">Domain Security Block</AlertTitle>
+                    <AlertDescription className="text-xs space-y-2">
+                        <p>Firebase is blocking access because <strong>{unauthorizedDomain}</strong> is not yet authorized.</p>
+                        <p className="font-semibold underline">Final Action Required:</p>
+                        <ol className="list-decimal list-inside space-y-1">
+                            <li>Go to <strong>Firebase Console</strong>.</li>
+                            <li>Navigate to <strong>Auth > Settings > Authorized Domains</strong>.</li>
+                            <li>Add <code>{unauthorizedDomain}</code> to the list.</li>
+                        </ol>
+                        <p className="pt-2 italic text-[10px]">Note: Changes take a few seconds to apply.</p>
+                    </AlertDescription>
+                </Alert>
+            )}
 
-                <form className="space-y-4" onSubmit={handleSignup}>
-                    <div className="space-y-2">
-                        <Label htmlFor="username">Username</Label>
-                        <Input id="username" value={username} onChange={(e) => setUsername(e.target.value)} required disabled={isProcessing} />
-                        {errors.username && <p className="text-sm text-destructive mt-1">{errors.username}</p>}
-                    </div>
-                    <div className="space-y-2">
-                        <Label htmlFor="email">Email</Label>
-                        <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required disabled={isProcessing} />
-                        {errors.email && <p className="text-sm text-destructive mt-1">{errors.email}</p>}
-                    </div>
-                    <div className="space-y-2">
-                        <Label htmlFor="password">Password (min. 6 characters)</Label>
-                        <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required disabled={isProcessing} />
-                        {errors.password && <p className="text-sm text-destructive mt-1">{errors.password}</p>}
-                    </div>
-                    {referralCode && (
-                        <div className="flex items-center gap-3 text-sm text-primary border border-primary/20 bg-primary/5 p-3 rounded-lg">
-                            <Users className="h-5 w-5 flex-shrink-0" />
-                            <span>You were referred by: <span className="font-semibold">{referralCode}</span></span>
+            <Card className="shadow-xl">
+                <CardHeader>
+                    <CardTitle className="font-headline text-2xl">Create Your Account</CardTitle>
+                    <CardDescription>
+                        You're creating an account for the <strong>{plan.name}</strong> plan.
+                    </CardDescription>
+                </CardHeader>
+                <CardContent>
+                    {!unauthorizedDomain && (
+                        <div className="mb-6 p-3 bg-green-50 border border-green-200 rounded-lg flex items-center gap-2 text-xs text-green-700">
+                            <ShieldCheck className="h-4 w-4" />
+                            <span>Security Check: Current domain is active.</span>
                         </div>
                     )}
-                    <Button type="submit" className="w-full h-12 text-lg font-bold" disabled={!isFormValid || isProcessing}>
-                        {isProcessing ? <Loader2 className="animate-spin" /> : "Create Account & Proceed"}
-                    </Button>
-                </form>
-            </CardContent>
-            <CardFooter>
-                 <div className="mt-4 text-center text-sm w-full">
-                    Already have an account?{" "}
-                    <Link href="/login" className="text-primary hover:underline font-bold">Log in</Link>
-                </div>
-            </CardFooter>
-        </Card>
+
+                    <form className="space-y-4" onSubmit={handleSignup}>
+                        <div className="space-y-2">
+                            <Label htmlFor="username">Username</Label>
+                            <Input id="username" value={username} onChange={(e) => setUsername(e.target.value)} required disabled={isProcessing} />
+                            {errors.username && <p className="text-sm text-destructive mt-1">{errors.username}</p>}
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="email">Email</Label>
+                            <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required disabled={isProcessing} />
+                            {errors.email && <p className="text-sm text-destructive mt-1">{errors.email}</p>}
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="password">Password (min. 6 characters)</Label>
+                            <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required disabled={isProcessing} />
+                            {errors.password && <p className="text-sm text-destructive mt-1">{errors.password}</p>}
+                        </div>
+                        {referralCode && (
+                            <div className="flex items-center gap-3 text-sm text-primary border border-primary/20 bg-primary/5 p-3 rounded-lg">
+                                <Users className="h-5 w-5 flex-shrink-0" />
+                                <span>You were referred by: <span className="font-semibold">{referralCode}</span></span>
+                            </div>
+                        )}
+                        <Button type="submit" className="w-full h-12 text-lg font-bold" disabled={!isFormValid || isProcessing}>
+                            {isProcessing ? <Loader2 className="animate-spin" /> : "Create Account & Proceed"}
+                        </Button>
+                    </form>
+                </CardContent>
+                <CardFooter>
+                    <div className="mt-4 text-center text-sm w-full">
+                        Already have an account?{" "}
+                        <Link href="/login" className="text-primary hover:underline font-bold">Log in</Link>
+                    </div>
+                </CardFooter>
+            </Card>
+        </div>
     );
 }
 

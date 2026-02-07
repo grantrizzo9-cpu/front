@@ -68,9 +68,11 @@ function getFirebase(): FirebaseServices | null {
 
 export function FirebaseClientProvider({ children }: { children: ReactNode }) {
   const [isHydrated, setIsHydrated] = useState(false);
+  const [currentHostname, setCurrentHostname] = useState<string>('');
 
   useEffect(() => {
     setIsHydrated(true);
+    setCurrentHostname(window.location.hostname);
   }, []);
 
   // Use useMemo to get services only after hydration to prevent mismatch
@@ -100,10 +102,10 @@ export function FirebaseClientProvider({ children }: { children: ReactNode }) {
                     Connection Blocked
                 </AlertTitle>
                 <AlertDescription className="mt-2 text-sm text-left">
-                    Your domain <strong>hostproai.com</strong> must be authorized in your Firebase security settings.
+                    The domain <strong>{currentHostname}</strong> must be authorized in your Firebase security settings.
                     <br/><br/>
                     <strong>Required Step:</strong>
-                    <p className="mt-2">Go to <strong>Firebase Console > Auth > Settings > Authorized Domains</strong> and add <code>hostproai.com</code>.</p>
+                    <p className="mt-2">Go to <strong>Firebase Console > Auth > Settings > Authorized Domains</strong> and add <code>{currentHostname}</code>.</p>
                 </AlertDescription>
             </Alert>
         </div>
