@@ -1,7 +1,7 @@
 
 # Affiliate AI Host - Final Launch Guide (v1.2.1)
 
-Your build was blocked by the **Edge Runtime** requirement. I have fixed the code. Now, you just need to re-trigger the build and finish the setup.
+Your build was blocked by the **Edge Runtime** requirement. I have applied the actual code fixes to your files. Now, you just need to re-trigger the build and finish the setup.
 
 ---
 
@@ -17,8 +17,8 @@ Run these three commands in your terminal to send the Edge Runtime fixes to GitH
 Go back to your **Cloudflare Pages** project and ensure these settings are entered exactly:
 
 1.  **Framework preset:** Select **Next.js** from the dropdown.
-2.  **Build command:** `npx @cloudflare/next-on-pages@1` (Cloudflare might auto-fill this).
-3.  **Build output directory:** `.vercel/output` (Cloudflare will auto-fill this for Next.js).
+2.  **Build command:** `npx @cloudflare/next-on-pages@1`
+3.  **Build output directory:** `.vercel/output`
 4.  **Root directory:** `/` (default).
 5.  Click **Save and Deploy**.
 
@@ -35,6 +35,6 @@ Once the build says **"Success"**:
 ---
 
 ### ✅ Success Check
-Visit `hostproai.com`. You will see your professional **Affiliate AI Host** platform with the v1.2.1 watermark in the footer.
+Visit `hostproai.com`. You will see your professional **Affiliate AI Host** platform with the **v1.2.1-FIXED** watermark in the footer.
 
 © 2025 Affiliate AI Host. Final Sync v1.2.1.
