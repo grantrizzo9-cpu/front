@@ -1,4 +1,7 @@
-
+/**
+ * Firebase Configuration (v1.2.2)
+ * Prioritizes environment variables for production environments like Render and Cloudflare.
+ */
 export const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || "AIzaSyCVM8NoXlgZXbvYohxzLJaje4gU7sK4qdA",
   authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || "rent-a-host-a55fd.firebaseapp.com",

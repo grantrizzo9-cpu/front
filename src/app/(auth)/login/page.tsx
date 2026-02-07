@@ -1,4 +1,3 @@
-
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -11,7 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/firebase";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { useState, useEffect, Suspense } from "react";
-import { Loader2, ShieldAlert, ExternalLink, RefreshCcw } from "lucide-react";
+import { Loader2, ShieldAlert, ExternalLink, RefreshCcw, Lock } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { firebaseConfig } from "@/firebase/config";
 
@@ -60,7 +59,8 @@ function LoginForm() {
       console.error("Login Error:", error.code, error.message);
       
       // Detection for API Key restrictions (Google Cloud Console)
-      if (error.message?.toLowerCase().includes('requests-from-referer-blocked')) {
+      // This is the error seen in the user's screenshot
+      if (error.message?.toLowerCase().includes('requests-from-referer-blocked') || error.code === 'auth/requests-from-referer-blocked') {
           setApiKeyBlocked(true);
           return;
       }
@@ -90,13 +90,14 @@ function LoginForm() {
     }
   };
 
+  // Construct the direct link to GCP Console for this API Key
   const gcpConsoleUrl = `https://console.cloud.google.com/apis/credentials/key/${firebaseConfig.apiKey}?project=${firebaseConfig.projectId}`;
 
   return (
     <div className="space-y-6">
       {/* CASE 1: Firebase Auth Domain Block */}
       {unauthorizedDomain && !apiKeyBlocked && (
-        <Alert variant="destructive" className="border-red-500 bg-red-50 shadow-lg">
+        <Alert variant="destructive" className="border-red-500 bg-red-50 shadow-lg animate-in slide-in-from-top-2 duration-300">
           <ShieldAlert className="h-5 w-5" />
           <AlertTitle className="font-bold text-red-800">Domain Not Whitelisted</AlertTitle>
           <AlertDescription className="text-sm space-y-3 text-red-700">
@@ -116,20 +117,20 @@ function LoginForm() {
         </Alert>
       )}
 
-      {/* CASE 2: Google Cloud API Key Referer Block (The "Final Boss" of errors) */}
+      {/* CASE 2: Google Cloud API Key Referer Block (The orange/amber box for GCP restrictions) */}
       {apiKeyBlocked && (
-        <Alert variant="destructive" className="border-amber-500 bg-amber-50 shadow-lg">
+        <Alert variant="destructive" className="border-amber-500 bg-amber-50 shadow-lg animate-in slide-in-from-top-2 duration-300">
           <ShieldAlert className="h-5 w-5 text-amber-600" />
           <AlertTitle className="font-bold text-amber-800">API Key Restriction Error</AlertTitle>
           <AlertDescription className="text-sm space-y-3 text-amber-700">
-            <p>The domain is authorized in Firebase, but your <strong>Google Cloud API Key</strong> is restricting access.</p>
+            <p>Your domain is authorized in Firebase, but your <strong>Google Cloud API Key</strong> is manually restricted.</p>
             <div className="bg-white/50 p-3 rounded border border-amber-200">
                 <p className="font-semibold text-xs uppercase tracking-wider mb-1">How to fix (2 minutes):</p>
                 <ol className="list-decimal list-inside space-y-1 text-xs">
-                    <li>Click the link below to open your API Key settings.</li>
-                    <li>Scroll to <strong>Website restrictions</strong>.</li>
+                    <li>Click <strong>"Open API Settings"</strong> below.</li>
+                    <li>Scroll down to <strong>"Website restrictions"</strong>.</li>
                     <li>Add <code>https://{window.location.hostname}/*</code> to the list.</li>
-                    <li><strong>Save</strong> and wait 60 seconds.</li>
+                    <li>Click <strong>Save</strong> at the bottom.</li>
                 </ol>
             </div>
             <div className="flex flex-col gap-2">
@@ -146,9 +147,12 @@ function LoginForm() {
         </Alert>
       )}
 
-      <Card className="shadow-xl">
+      <Card className="shadow-xl border-t-4 border-t-red-600">
         <CardHeader>
-          <CardTitle className="font-headline text-2xl text-red-600">Access Your Account</CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle className="font-headline text-2xl text-red-600">Access Your Account</CardTitle>
+            <Lock className="h-5 w-5 text-muted-foreground/30" />
+          </div>
           <CardDescription>Log in to manage your affiliate dashboard.</CardDescription>
         </CardHeader>
         <CardContent>
@@ -166,11 +170,11 @@ function LoginForm() {
               </div>
               <Input id="password" name="password" type="password" required disabled={isLoading}/>
             </div>
-            <Button type="submit" className="w-full h-12 text-lg font-bold bg-blue-600 hover:bg-blue-700" disabled={isLoading}>
+            <Button type="submit" className="w-full h-12 text-lg font-bold bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-200" disabled={isLoading}>
               {isLoading ? <Loader2 className="animate-spin" /> : "Log In"}
             </Button>
           </form>
-          <div className="mt-4 text-center text-sm">
+          <div className="mt-6 text-center text-sm text-muted-foreground">
             Don't have an account?{" "}
             <Link href={getLinkWithRef('/signup')} className="text-primary hover:underline font-bold">
               Sign up

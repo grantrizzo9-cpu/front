@@ -18,10 +18,9 @@ If your build failed with `Error: Output directory "next" not found`:
 ## 🚀 Scenario B: Deploying to Render
 If you are seeing a login error on your Render domain (`front-h603.onrender.com`):
 
-1.  Go to the [Firebase Console](https://console.firebase.google.com/).
-2.  Navigate to **Build > Authentication > Settings > Authorized Domains**.
-3.  Click **"Add domain"** and paste: `front-h603.onrender.com`.
-4.  **Final Step (API Restrictions)**: If login still fails, click the **red alert box** on your login page. It will take you to Google Cloud where you need to add your domain to the **API Key Restrictions**.
+1.  **Step 1 (Firebase)**: Go to [Firebase Console](https://console.firebase.google.com/) > **Authentication > Settings > Authorized Domains**.
+2.  Click **"Add domain"** and paste: `front-h603.onrender.com`.
+3.  **Step 2 (Google Cloud)**: If login still says "referer blocked" (like in your screenshot), click the **orange alert box** that now appears on your login page. It will take you to Google Cloud where you need to add `https://front-h603.onrender.com/*` to your **API Key Website Restrictions**.
 
 ---
 
