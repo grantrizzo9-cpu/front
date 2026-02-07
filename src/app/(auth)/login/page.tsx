@@ -91,7 +91,6 @@ function LoginForm() {
     }
   };
 
-  // Link directly to the Credentials list in GCP
   const gcpCredentialsUrl = `https://console.cloud.google.com/apis/credentials?project=${firebaseConfig.projectId}`;
 
   return (
@@ -103,10 +102,10 @@ function LoginForm() {
           <AlertDescription className="text-sm space-y-3 text-red-700">
             <p>Firebase is reporting "offline" because your <strong>Google Cloud API Key</strong> is blocking this domain (Referer Blocked).</p>
             <div className="bg-white/50 p-3 rounded border border-red-200 text-xs">
-                <p className="font-semibold uppercase tracking-wider mb-1">Required Fix (2 minutes):</p>
+                <p className="font-semibold uppercase tracking-wider mb-1">Final Fix Required:</p>
                 <ol className="list-decimal list-inside space-y-1">
-                    <li>Click <strong>"Open API Credentials"</strong> below.</li>
-                    <li>Click on the <strong>API Key</strong> (usually "Browser key").</li>
+                    <li>Go to the <strong>Google Cloud Credentials</strong> tab you have open.</li>
+                    <li>Click on the <strong>"Browser key"</strong> (the one you see in your screenshot).</li>
                     <li>Scroll to <strong>"Website restrictions"</strong>.</li>
                     <li>Add <code>https://{window.location.hostname}/*</code></li>
                     <li>Click <strong>Save</strong> at the bottom.</li>
