@@ -1,3 +1,4 @@
+
 # Affiliate AI Host - Ultimate Deployment Guide (v1.2.2)
 
 Your app is now optimized for **Cloudflare Pages** and **Render**. Follow these final steps to go live.
@@ -20,7 +21,7 @@ If you are seeing a login error on your Render domain (`front-h603.onrender.com`
 1.  Go to the [Firebase Console](https://console.firebase.google.com/).
 2.  Navigate to **Build > Authentication > Settings > Authorized Domains**.
 3.  Click **"Add domain"** and paste: `front-h603.onrender.com`.
-4.  **Push the fix**: Run the commands in Step 1 below to enable the "Security Recovery" dashboard.
+4.  **Final Step (API Restrictions)**: If login still fails, click the **red alert box** on your login page. It will take you to Google Cloud where you need to add your domain to the **API Key Restrictions**.
 
 ---
 
@@ -32,8 +33,5 @@ Run these commands in your terminal here in Studio to sync the Version 1.2.2 fix
 3. `git push origin main`
 
 ---
-
-## 🛠️ TROUBLESHOOTING
-If login still fails, check the red alert box on the Login page—it will show the exact hostname you need to authorize.
 
 © 2025 Affiliate AI Host. Final Sync v1.2.2.

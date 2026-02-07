@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -10,8 +11,9 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/firebase";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { useState, useEffect, Suspense } from "react";
-import { Loader2, ShieldAlert } from "lucide-react";
+import { Loader2, ShieldAlert, ExternalLink, RefreshCcw } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { firebaseConfig } from "@/firebase/config";
 
 function LoginForm() {
   const router = useRouter();
@@ -21,6 +23,7 @@ function LoginForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [isHydrated, setIsHydrated] = useState(false);
   const [unauthorizedDomain, setUnauthorizedDomain] = useState<string | null>(null);
+  const [apiKeyBlocked, setApiKeyBlocked] = useState(false);
 
   useEffect(() => {
     setIsHydrated(true);
@@ -35,10 +38,13 @@ function LoginForm() {
     return `${url.pathname}${url.search}`;
   };
 
+  const handleRefresh = () => window.location.reload();
+
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setIsLoading(true);
     setUnauthorizedDomain(null);
+    setApiKeyBlocked(false);
     const formData = new FormData(event.currentTarget);
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
@@ -52,18 +58,24 @@ function LoginForm() {
       router.push("/dashboard");
     } catch (error: any) {
       console.error("Login Error:", error.code, error.message);
-      let description = "An unknown error occurred. Please try again.";
       
-      // Handle domain blocked error (usually referer blocked)
-      if (error.code === 'auth/unauthorized-domain' || error.message?.includes('requests-from-referer') || error.message?.includes('blocked')) {
+      // Detection for API Key restrictions (Google Cloud Console)
+      if (error.message?.toLowerCase().includes('requests-from-referer-blocked')) {
+          setApiKeyBlocked(true);
+          return;
+      }
+
+      // Detection for Firebase Authorized Domains
+      if (error.code === 'auth/unauthorized-domain' || error.message?.includes('unauthorized domain')) {
           setUnauthorizedDomain(window.location.hostname);
           return; 
       }
 
+      let description = "An unknown error occurred. Please try again.";
       if (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found') {
-        description = "Invalid email or password. If you've signed up before, you can also reset your password.";
+        description = "Invalid email or password.";
       } else if (error.code === 'auth/too-many-requests') {
-        description = "Access to this account has been temporarily disabled due to many failed login attempts. You can reset your password or try again later.";
+        description = "Too many failed attempts. Try again later.";
       } else if (error.message) {
         description = error.message;
       }
@@ -78,21 +90,58 @@ function LoginForm() {
     }
   };
 
+  const gcpConsoleUrl = `https://console.cloud.google.com/apis/credentials/key/${firebaseConfig.apiKey}?project=${firebaseConfig.projectId}`;
+
   return (
     <div className="space-y-6">
-      {unauthorizedDomain && (
-        <Alert variant="destructive" className="border-red-500 bg-red-50">
-          <ShieldAlert className="h-4 w-4" />
-          <AlertTitle className="font-bold">Domain Security Block</AlertTitle>
-          <AlertDescription className="text-xs space-y-2">
-            <p>Firebase is blocking access because this domain is not whitelisted.</p>
-            <p className="font-semibold underline">Required Action:</p>
-            <ol className="list-decimal list-inside space-y-1">
-              <li>Go to <strong>Firebase Console</strong>.</li>
-              <li>Navigate to <strong>Auth > Settings > Authorized Domains</strong>.</li>
-              <li>Add <code>{unauthorizedDomain}</code> to the list.</li>
-            </ol>
-            <p className="pt-2">Then refresh this page and try again.</p>
+      {/* CASE 1: Firebase Auth Domain Block */}
+      {unauthorizedDomain && !apiKeyBlocked && (
+        <Alert variant="destructive" className="border-red-500 bg-red-50 shadow-lg">
+          <ShieldAlert className="h-5 w-5" />
+          <AlertTitle className="font-bold text-red-800">Domain Not Whitelisted</AlertTitle>
+          <AlertDescription className="text-sm space-y-3 text-red-700">
+            <p>Firebase is blocking access because this domain is missing from your "Authorized Domains" list.</p>
+            <div className="bg-white/50 p-3 rounded border border-red-200">
+                <p className="font-semibold text-xs uppercase tracking-wider mb-1">Required Action:</p>
+                <ol className="list-decimal list-inside space-y-1 text-xs">
+                    <li>Go to <strong>Firebase Console > Auth > Settings</strong>.</li>
+                    <li>In <strong>Authorized Domains</strong>, click "Add domain".</li>
+                    <li>Paste: <code>{unauthorizedDomain}</code></li>
+                </ol>
+            </div>
+            <Button onClick={handleRefresh} variant="outline" size="sm" className="w-full bg-white">
+                <RefreshCcw className="mr-2 h-3 w-3" /> I've added it, refresh page
+            </Button>
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {/* CASE 2: Google Cloud API Key Referer Block (The "Final Boss" of errors) */}
+      {apiKeyBlocked && (
+        <Alert variant="destructive" className="border-amber-500 bg-amber-50 shadow-lg">
+          <ShieldAlert className="h-5 w-5 text-amber-600" />
+          <AlertTitle className="font-bold text-amber-800">API Key Restriction Error</AlertTitle>
+          <AlertDescription className="text-sm space-y-3 text-amber-700">
+            <p>The domain is authorized in Firebase, but your <strong>Google Cloud API Key</strong> is restricting access.</p>
+            <div className="bg-white/50 p-3 rounded border border-amber-200">
+                <p className="font-semibold text-xs uppercase tracking-wider mb-1">How to fix (2 minutes):</p>
+                <ol className="list-decimal list-inside space-y-1 text-xs">
+                    <li>Click the link below to open your API Key settings.</li>
+                    <li>Scroll to <strong>Website restrictions</strong>.</li>
+                    <li>Add <code>https://{window.location.hostname}/*</code> to the list.</li>
+                    <li><strong>Save</strong> and wait 60 seconds.</li>
+                </ol>
+            </div>
+            <div className="flex flex-col gap-2">
+                <Button asChild variant="default" className="bg-amber-600 hover:bg-amber-700 text-white">
+                    <a href={gcpConsoleUrl} target="_blank" rel="noopener noreferrer">
+                        Open API Settings <ExternalLink className="ml-2 h-4 w-4" />
+                    </a>
+                </Button>
+                <Button onClick={handleRefresh} variant="ghost" size="sm" className="text-amber-800">
+                    <RefreshCcw className="mr-2 h-3 w-3" /> Refresh Page
+                </Button>
+            </div>
           </AlertDescription>
         </Alert>
       )}
@@ -111,7 +160,7 @@ function LoginForm() {
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <Label htmlFor="password">Password</Label>
-                <Link href={getLinkWithRef('/forgot-password')} name="forgot-password-link" className="text-sm text-muted-foreground hover:text-primary">
+                <Link href={getLinkWithRef('/forgot-password')} className="text-sm text-muted-foreground hover:text-primary">
                   Forgot password?
                 </Link>
               </div>
