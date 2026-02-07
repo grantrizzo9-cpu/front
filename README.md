@@ -1,29 +1,39 @@
-# Affiliate AI Host - Deployment Recovery (v1.2.2)
+# Affiliate AI Host - Ultimate Deployment Guide (v1.2.2)
 
-Your app is running on **Render**, but login is failing because the new domain needs to be authorized in your Firebase backend.
+Your app is now optimized for **Cloudflare Pages** and **Render**. Follow these final steps to go live.
 
 ---
 
-## 🛠️ Step 1: Authorize Your New Domain
+## 🚀 Scenario A: Deploying to Render
+If you are seeing a login error on your Render domain (`front-h603.onrender.com`):
+
 1.  Go to the [Firebase Console](https://console.firebase.google.com/).
-2.  Select your project: `rent-a-host-a55fd`.
-3.  Navigate to **Build > Authentication > Settings**.
-4.  Click on the **Authorized Domains** tab.
-5.  Click **"Add domain"** and paste your Render domain: `front-h603.onrender.com`.
-6.  Click **Add**.
+2.  Navigate to **Build > Authentication > Settings > Authorized Domains**.
+3.  Click **"Add domain"** and paste: `front-h603.onrender.com`.
+4.  **Push the fix**: Run the commands in Step 1 below to enable the "Security Recovery" dashboard.
 
 ---
 
-## 🚀 Step 2: Push the Final Code Fix
-I have updated your code to catch this error automatically. Run these commands in your terminal to sync the fixes:
+## ⚡ Scenario B: Deploying to Cloudflare Pages
+If your build failed with `Output directory "next" not found`:
+
+1.  In the Cloudflare Dashboard, go to your **Pages Project > Settings > Build & deployments**.
+2.  Click **"Edit output directory"**.
+3.  Change it from `next` to `.vercel/output` (include the dot).
+4.  **Retry build**.
+
+---
+
+## ✅ Step 1: Sync the Final Code Fixes
+Run these commands in your terminal here in Studio to sync the Version 1.2.2 fixes:
 
 1. `git add .`
-2. `git commit -m "Handle unauthorized domains v1.2.2"`
+2. `git commit -m "Deployment Recovery v1.2.2"`
 3. `git push origin main`
 
 ---
 
-## ✅ SUCCESS CHECK
-Once you add the domain to Firebase, the login error will disappear. You will be able to log in with `rentapog@gmail.com` and access your dashboard.
+## 🛠️ TROUBLESHOOTING
+If login still fails, check the red alert box on the Login page—it will show the exact hostname you need to authorize.
 
-© 2025 Affiliate AI Host. Recovery Sync v1.2.2.
+© 2025 Affiliate AI Host. Final Sync v1.2.2.
