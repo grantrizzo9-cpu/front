@@ -1,30 +1,22 @@
 # Affiliate AI Host - Core Restoration Guide (v1.2.0)
 
-Your site is currently showing "Hello world" because a **Cloudflare Worker** is intercepting your domain. Follow these exact steps to kill the interceptor and go live.
+Your site was showing "Hello world" because a **Cloudflare Worker** was intercepting your domain. You have successfully deleted that interceptor. Now, follow these final steps to go live.
 
 ---
 
-## 🛠️ Step 1: Kill the "Hello World" Interceptor (CRITICAL)
-Based on your dashboard screenshot:
-1. Click on the project named **"front"** (the one with the blue lightning bolt icon).
-2. On the left sidebar, click **Settings**.
-3. Click on the **Triggers** tab.
-4. Look for the section named **"Custom Domains"**. 
-5. You will see `hostproai.com` listed there. Click the **three dots (...)** next to it and select **DELETE**.
-6. This "unplugs" the "Hello world" script from your domain.
+## ✅ Step 1: Kill the "Hello World" Interceptor (DONE)
+You have already deleted `hostproai.com` from the **Worker** triggers. Great job!
 
 ---
 
 ## ☁️ Step 2: Set up Cloudflare Pages (The Real Site)
-Once the Worker is unplugged, you need to make sure the **Pages** version is active:
-1. Go back to the **Workers & Pages** overview.
-2. Click the **Pages** tab (next to the Workers tab).
-3. Click **Connect to Git** and select your `front` repository.
-4. **Build Settings**:
-   - **Framework preset**: `Next.js`
-   - **Build command**: `npm run build`
-   - **Build output directory**: `.next`
-5. Go to the **Custom domains** tab of this **Pages** project and add `hostproai.com`.
+Now you need to make sure the **Pages** version is active:
+1. Go back to the **Workers & Pages** overview in Cloudflare.
+2. Click the **Pages** tab (it has a blue document icon, next to the Workers tab).
+3. Click on your **"front"** project (the Pages one).
+4. Go to the **Custom domains** tab.
+5. Click **Set up a custom domain** and add `hostproai.com`.
+6. Follow the instructions to finish the DNS setup.
 
 ---
 
