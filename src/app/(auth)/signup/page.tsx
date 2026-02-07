@@ -9,12 +9,13 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { subscriptionTiers } from "@/lib/data";
-import { Loader2, Users, ShieldAlert, ShieldCheck } from "lucide-react";
+import { Loader2, Users, ShieldAlert, ShieldCheck, ExternalLink, RefreshCcw } from "lucide-react";
 import { useAuth, useFirestore } from "@/firebase";
 import { createUserWithEmailAndPassword, updateProfile, User } from "firebase/auth";
 import { doc, getDoc, writeBatch, serverTimestamp, collection } from "firebase/firestore";
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { firebaseConfig } from "@/firebase/config";
 
 function SignupFormComponent() {
     const router = useRouter();
@@ -28,6 +29,7 @@ function SignupFormComponent() {
     const [isProcessing, setIsProcessing] = useState(false);
     const [errors, setErrors] = useState({ username: '', email: '', password: '' });
     const [unauthorizedDomain, setUnauthorizedDomain] = useState<string | null>(null);
+    const [apiKeyBlocked, setApiKeyBlocked] = useState(false);
 
     const [planId, setPlanId] = useState('starter');
     const [referralCode, setReferralCode] = useState<string | null>(null);
@@ -114,6 +116,7 @@ function SignupFormComponent() {
         e.preventDefault();
         setIsProcessing(true);
         setUnauthorizedDomain(null);
+        setApiKeyBlocked(false);
         
         const finalUsername = username.toLowerCase();
         const params = new URLSearchParams(window.location.search);
@@ -134,22 +137,51 @@ function SignupFormComponent() {
 
         } catch (error: any) {
             console.error("Signup error:", error.code, error.message);
-            let description = error.message || "An unknown error occurred.";
             
+            if (error.message?.toLowerCase().includes('referer-blocked') || error.message?.toLowerCase().includes('offline')) {
+                setApiKeyBlocked(true);
+                setIsProcessing(false);
+                return;
+            }
+
             if (error.code === 'auth/unauthorized-domain') {
                 setUnauthorizedDomain(window.location.hostname);
                 setIsProcessing(false);
                 return;
             }
 
-            toast({ variant: "destructive", title: "Signup Failed", description: description });
+            toast({ variant: "destructive", title: "Signup Failed", description: error.message });
             setIsProcessing(false);
         }
     };
+
+    const gcpConsoleUrl = `https://console.cloud.google.com/apis/credentials/key/${firebaseConfig.apiKey}?project=${firebaseConfig.projectId}`;
     
     return (
         <div className="space-y-6">
-            {unauthorizedDomain && (
+            {apiKeyBlocked && (
+                <Alert variant="destructive" className="border-amber-500 bg-amber-50 shadow-lg">
+                    <ShieldAlert className="h-5 w-5 text-amber-600" />
+                    <AlertTitle className="font-bold text-red-800">Connection Failed (Offline/Blocked)</AlertTitle>
+                    <AlertDescription className="text-sm space-y-3 text-red-700">
+                        <p>Firebase is reporting "offline" because your <strong>Google Cloud API Key</strong> is blocking requests from Render.</p>
+                        <div className="bg-white/50 p-3 rounded border border-red-200">
+                            <p className="font-semibold text-xs uppercase tracking-wider mb-1">Required Action:</p>
+                            <ol className="list-decimal list-inside space-y-1 text-xs">
+                                <li>Click <strong>"Open API Settings"</strong>.</li>
+                                <li>Find <strong>"Website restrictions"</strong>.</li>
+                                <li>Add <code>https://{window.location.hostname}/*</code></li>
+                                <li>Click <strong>Save</strong>.</li>
+                            </ol>
+                        </div>
+                        <Button asChild variant="default" className="w-full bg-amber-600">
+                            <a href={gcpConsoleUrl} target="_blank" rel="noopener noreferrer">Open API Settings <ExternalLink className="ml-2 h-4 w-4" /></a>
+                        </Button>
+                    </AlertDescription>
+                </Alert>
+            )}
+
+            {unauthorizedDomain && !apiKeyBlocked && (
                 <Alert variant="destructive" className="border-red-500 bg-red-50">
                     <ShieldAlert className="h-4 w-4" />
                     <AlertTitle className="font-bold">Domain Security Block</AlertTitle>
@@ -161,7 +193,6 @@ function SignupFormComponent() {
                             <li>Navigate to <strong>Auth > Settings > Authorized Domains</strong>.</li>
                             <li>Add <code>{unauthorizedDomain}</code> to the list.</li>
                         </ol>
-                        <p className="pt-2 italic text-[10px]">Note: Changes take a few seconds to apply.</p>
                     </AlertDescription>
                 </Alert>
             )}
@@ -174,13 +205,6 @@ function SignupFormComponent() {
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
-                    {!unauthorizedDomain && (
-                        <div className="mb-6 p-3 bg-green-50 border border-green-200 rounded-lg flex items-center gap-2 text-xs text-green-700">
-                            <ShieldCheck className="h-4 w-4" />
-                            <span>Security Check: Current domain is active.</span>
-                        </div>
-                    )}
-
                     <form className="space-y-4" onSubmit={handleSignup}>
                         <div className="space-y-2">
                             <Label htmlFor="username">Username</Label>

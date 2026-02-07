@@ -10,7 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/firebase";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { useState, useEffect, Suspense } from "react";
-import { Loader2, ShieldAlert, ExternalLink, RefreshCcw, Lock } from "lucide-react";
+import { Loader2, ShieldAlert, ExternalLink, RefreshCcw, Lock, WifiOff } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { firebaseConfig } from "@/firebase/config";
 
@@ -59,8 +59,9 @@ function LoginForm() {
       console.error("Login Error:", error.code, error.message);
       
       // Detection for API Key restrictions (Google Cloud Console)
-      // This is the error seen in the user's screenshot
-      if (error.message?.toLowerCase().includes('requests-from-referer-blocked') || error.code === 'auth/requests-from-referer-blocked') {
+      if (error.message?.toLowerCase().includes('requests-from-referer-blocked') || 
+          error.code === 'auth/requests-from-referer-blocked' ||
+          error.message?.toLowerCase().includes('offline')) {
           setApiKeyBlocked(true);
           return;
       }
@@ -90,46 +91,22 @@ function LoginForm() {
     }
   };
 
-  // Construct the direct link to GCP Console for this API Key
   const gcpConsoleUrl = `https://console.cloud.google.com/apis/credentials/key/${firebaseConfig.apiKey}?project=${firebaseConfig.projectId}`;
 
   return (
     <div className="space-y-6">
-      {/* CASE 1: Firebase Auth Domain Block */}
-      {unauthorizedDomain && !apiKeyBlocked && (
-        <Alert variant="destructive" className="border-red-500 bg-red-50 shadow-lg animate-in slide-in-from-top-2 duration-300">
-          <ShieldAlert className="h-5 w-5" />
-          <AlertTitle className="font-bold text-red-800">Domain Not Whitelisted</AlertTitle>
-          <AlertDescription className="text-sm space-y-3 text-red-700">
-            <p>Firebase is blocking access because this domain is missing from your "Authorized Domains" list.</p>
-            <div className="bg-white/50 p-3 rounded border border-red-200">
-                <p className="font-semibold text-xs uppercase tracking-wider mb-1">Required Action:</p>
-                <ol className="list-decimal list-inside space-y-1 text-xs">
-                    <li>Go to <strong>Firebase Console > Auth > Settings</strong>.</li>
-                    <li>In <strong>Authorized Domains</strong>, click "Add domain".</li>
-                    <li>Paste: <code>{unauthorizedDomain}</code></li>
-                </ol>
-            </div>
-            <Button onClick={handleRefresh} variant="outline" size="sm" className="w-full bg-white">
-                <RefreshCcw className="mr-2 h-3 w-3" /> I've added it, refresh page
-            </Button>
-          </AlertDescription>
-        </Alert>
-      )}
-
-      {/* CASE 2: Google Cloud API Key Referer Block (The orange/amber box for GCP restrictions) */}
       {apiKeyBlocked && (
         <Alert variant="destructive" className="border-amber-500 bg-amber-50 shadow-lg animate-in slide-in-from-top-2 duration-300">
           <ShieldAlert className="h-5 w-5 text-amber-600" />
-          <AlertTitle className="font-bold text-amber-800">API Key Restriction Error</AlertTitle>
-          <AlertDescription className="text-sm space-y-3 text-amber-700">
-            <p>Your domain is authorized in Firebase, but your <strong>Google Cloud API Key</strong> is manually restricted.</p>
-            <div className="bg-white/50 p-3 rounded border border-amber-200">
-                <p className="font-semibold text-xs uppercase tracking-wider mb-1">How to fix (2 minutes):</p>
+          <AlertTitle className="font-bold text-red-800">Security Connection Blocked</AlertTitle>
+          <AlertDescription className="text-sm space-y-3 text-red-700">
+            <p>Your browser is reporting "offline" because your <strong>Google Cloud API Key</strong> is blocking this domain.</p>
+            <div className="bg-white/50 p-3 rounded border border-red-200">
+                <p className="font-semibold text-xs uppercase tracking-wider mb-1">Required Fix (2 minutes):</p>
                 <ol className="list-decimal list-inside space-y-1 text-xs">
                     <li>Click <strong>"Open API Settings"</strong> below.</li>
-                    <li>Scroll down to <strong>"Website restrictions"</strong>.</li>
-                    <li>Add <code>https://{window.location.hostname}/*</code> to the list.</li>
+                    <li>Scroll to <strong>"Website restrictions"</strong>.</li>
+                    <li>Add <code>https://{window.location.hostname}/*</code></li>
                     <li>Click <strong>Save</strong> at the bottom.</li>
                 </ol>
             </div>
@@ -140,9 +117,30 @@ function LoginForm() {
                     </a>
                 </Button>
                 <Button onClick={handleRefresh} variant="ghost" size="sm" className="text-amber-800">
-                    <RefreshCcw className="mr-2 h-3 w-3" /> Refresh Page
+                    <RefreshCcw className="mr-2 h-3 w-3" /> I've saved it, refresh page
                 </Button>
             </div>
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {unauthorizedDomain && !apiKeyBlocked && (
+        <Alert variant="destructive" className="border-red-500 bg-red-50 shadow-lg animate-in slide-in-from-top-2 duration-300">
+          <ShieldAlert className="h-5 w-5" />
+          <AlertTitle className="font-bold text-red-800">Domain Not Whitelisted</AlertTitle>
+          <AlertDescription className="text-sm space-y-3 text-red-700">
+            <p>Firebase Auth is blocking access because this domain is missing from your "Authorized Domains".</p>
+            <div className="bg-white/50 p-3 rounded border border-red-200">
+                <p className="font-semibold text-xs uppercase tracking-wider mb-1">Required Action:</p>
+                <ol className="list-decimal list-inside space-y-1 text-xs">
+                    <li>Go to <strong>Firebase Console > Auth > Settings</strong>.</li>
+                    <li>In <strong>Authorized Domains</strong>, click "Add domain".</li>
+                    <li>Paste: <code>{unauthorizedDomain}</code></li>
+                </ol>
+            </div>
+            <Button onClick={handleRefresh} variant="outline" size="sm" className="w-full bg-white">
+                <RefreshCcw className="mr-2 h-3 w-3" /> Refresh Page
+            </Button>
           </AlertDescription>
         </Alert>
       )}
