@@ -7,18 +7,20 @@ import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/firebase";
+import { useAuth, useFirestore } from "@/firebase";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { useState, useEffect, Suspense } from "react";
-import { Loader2, ShieldAlert, ExternalLink, RefreshCcw, Lock, Clock } from "lucide-react";
+import { Loader2, ShieldAlert, ExternalLink, RefreshCcw, Lock, Clock, Trash2 } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { firebaseConfig } from "@/firebase/config";
+import { terminate, clearIndexedDbPersistence } from "firebase/firestore";
 
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { toast } = useToast();
   const auth = useAuth();
+  const firestore = useFirestore();
   const [isLoading, setIsLoading] = useState(false);
   const [isHydrated, setIsHydrated] = useState(false);
   const [unauthorizedDomain, setUnauthorizedDomain] = useState<string | null>(null);
@@ -37,7 +39,17 @@ function LoginForm() {
     return `${url.pathname}${url.search}`;
   };
 
-  const handleRefresh = () => window.location.reload();
+  const handleHardReset = async () => {
+      setIsLoading(true);
+      try {
+          await terminate(firestore);
+          await clearIndexedDbPersistence(firestore);
+          toast({ title: "Cache Cleared", description: "Reloading application..." });
+          window.location.reload();
+      } catch (e) {
+          window.location.reload();
+      }
+  };
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -96,21 +108,24 @@ function LoginForm() {
       {apiKeyBlocked && (
         <Alert variant="destructive" className="border-amber-500 bg-amber-50 shadow-lg animate-in slide-in-from-top-2 duration-300">
           <ShieldAlert className="h-5 w-5 text-amber-600" />
-          <AlertTitle className="font-bold text-red-800">Security Propagation in Progress</AlertTitle>
+          <AlertTitle className="font-bold text-red-800">Security Sync in Progress</AlertTitle>
           <AlertDescription className="text-sm space-y-3 text-red-700">
-            <p>You have updated your Google Cloud settings, but it can take <strong>2–5 minutes</strong> for Google's servers to sync.</p>
+            <p>Google Cloud settings can take <strong>2–5 minutes</strong> to sync globally. If you just clicked Save, please wait.</p>
             <div className="bg-white/50 p-3 rounded border border-red-200 text-xs space-y-2">
-                <p className="font-semibold uppercase tracking-wider flex items-center gap-1"><Clock className="h-3 w-3"/> Please Wait:</p>
-                <p>If you just clicked "Save" in Google Cloud, please wait 2 minutes and refresh this page. If it still fails, ensure the key ends in <code>...qdA</code>.</p>
+                <p className="font-semibold uppercase tracking-wider flex items-center gap-1"><Clock className="h-3 w-3"/> Verification Check:</p>
+                <ul className="list-disc list-inside space-y-1">
+                    <li>Confirm API Key ends in: <code>...{firebaseConfig.apiKey.slice(-4)}</code></li>
+                    <li>Confirm Entry: <code>https://{window.location.hostname}/*</code></li>
+                </ul>
             </div>
             <div className="flex flex-col gap-2">
                 <Button asChild variant="default" className="bg-amber-600 hover:bg-amber-700 text-white">
                     <a href={gcpCredentialsUrl} target="_blank" rel="noopener noreferrer">
-                        Verify API Key Settings <ExternalLink className="ml-2 h-4 w-4" />
+                        Check API Key Settings <ExternalLink className="ml-2 h-4 w-4" />
                     </a>
                 </Button>
-                <Button onClick={handleRefresh} variant="ghost" size="sm" className="text-amber-800 font-bold">
-                    <RefreshCcw className="mr-2 h-3 w-3" /> Refresh Page Now
+                <Button onClick={handleHardReset} variant="outline" size="sm" className="bg-white text-amber-800 border-amber-200 font-bold">
+                    <Trash2 className="mr-2 h-3 w-3" /> Clear Cache & Refresh
                 </Button>
             </div>
           </AlertDescription>
@@ -131,7 +146,7 @@ function LoginForm() {
                     <li>Paste: <code>{unauthorizedDomain}</code></li>
                 </ol>
             </div>
-            <Button onClick={handleRefresh} variant="outline" size="sm" className="w-full bg-white">
+            <Button onClick={handleHardReset} variant="outline" size="sm" className="w-full bg-white">
                 <RefreshCcw className="mr-2 h-3 w-3" /> Refresh Page
             </Button>
           </AlertDescription>

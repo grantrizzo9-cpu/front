@@ -9,10 +9,10 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { subscriptionTiers } from "@/lib/data";
-import { Loader2, Users, ShieldAlert, ExternalLink, RefreshCcw, Clock } from "lucide-react";
+import { Loader2, Users, ShieldAlert, ExternalLink, RefreshCcw, Clock, Trash2 } from "lucide-react";
 import { useAuth, useFirestore } from "@/firebase";
 import { createUserWithEmailAndPassword, updateProfile, User } from "firebase/auth";
-import { doc, getDoc, writeBatch, serverTimestamp, collection } from "firebase/firestore";
+import { doc, getDoc, writeBatch, serverTimestamp, collection, terminate, clearIndexedDbPersistence } from "firebase/firestore";
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { firebaseConfig } from "@/firebase/config";
@@ -59,6 +59,18 @@ function SignupFormComponent() {
     }, [username, email, password]);
     
     const isFormValid = username.length > 2 && /^\S+@\S+\.\S+$/.test(email) && password.length >= 6;
+
+    const handleHardReset = async () => {
+        setIsProcessing(true);
+        try {
+            await terminate(firestore);
+            await clearIndexedDbPersistence(firestore);
+            toast({ title: "Connection Reset", description: "Hard reloading app..." });
+            window.location.reload();
+        } catch (e) {
+            window.location.reload();
+        }
+    };
 
     const postSignupFlow = async (user: User, finalUsername: string, refCode: string | null) => {
         const batch = writeBatch(firestore);
@@ -168,21 +180,21 @@ function SignupFormComponent() {
                     <AlertDescription className="text-sm space-y-3 text-red-700">
                         <p>Google Cloud settings can take <strong>2–5 minutes</strong> to update. If you just clicked Save, please wait.</p>
                         <div className="bg-white/50 p-3 rounded border border-red-200 text-xs space-y-2">
-                            <p className="font-semibold uppercase tracking-wider flex items-center gap-1"><Clock className="h-3 w-3"/> Required Action:</p>
+                            <p className="font-semibold uppercase tracking-wider flex items-center gap-1"><Clock className="h-3 w-3"/> Action Checklist:</p>
                             <ol className="list-decimal list-inside space-y-1">
                                 <li>Verify Key: <code>...{firebaseConfig.apiKey.slice(-4)}</code></li>
-                                <li>Add: <code>https://{window.location.hostname}/*</code> to Website restrictions.</li>
-                                <li>Wait 2 minutes and refresh.</li>
+                                <li>Add: <code>https://{window.location.hostname}/*</code></li>
+                                <li>Click <strong>Save</strong> in Google Cloud.</li>
                             </ol>
                         </div>
                         <div className="flex flex-col gap-2">
                             <Button asChild variant="default" className="w-full bg-amber-600 hover:bg-amber-700">
                                 <a href={gcpCredentialsUrl} target="_blank" rel="noopener noreferrer">
-                                    Open API Settings <ExternalLink className="ml-2 h-4 w-4" />
+                                    Open API Key Settings <ExternalLink className="ml-2 h-4 w-4" />
                                 </a>
                             </Button>
-                            <Button onClick={() => window.location.reload()} variant="outline" size="sm" className="bg-white text-amber-800">
-                                <RefreshCcw className="mr-2 h-3 w-3" /> Refresh Now
+                            <Button onClick={handleHardReset} variant="outline" size="sm" className="bg-white text-amber-800 border-amber-200 font-bold">
+                                <Trash2 className="mr-2 h-3 w-3" /> Clear Cache & Refresh
                             </Button>
                         </div>
                     </AlertDescription>

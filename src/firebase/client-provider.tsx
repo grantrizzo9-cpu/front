@@ -12,7 +12,7 @@ import {
 } from 'firebase/firestore';
 import { firebaseConfig } from '@/firebase/config';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { CloudOff, ShieldAlert, Loader2, RefreshCcw } from 'lucide-react';
+import { CloudOff, ShieldAlert, Loader2, RefreshCcw, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import type { FirebaseServices } from '@/firebase';
 
@@ -23,7 +23,7 @@ let cachedApp: FirebaseApp | undefined;
 let cachedAuth: Auth | undefined;
 let cachedFirestore: Firestore | undefined;
 
-function getFirebase(): FirebaseServices | null {
+async function getFirebase(): Promise<FirebaseServices | null> {
   if (typeof window === 'undefined') return null;
 
   try {
@@ -42,14 +42,16 @@ function getFirebase(): FirebaseServices | null {
       cachedAuth = getAuth(cachedApp);
     }
     
-    // V1.2.4: Aggressive Cache Disabling
-    // We use initializeFirestore instead of getFirestore to ensure no local persistence
     if (!cachedFirestore) {
       cachedFirestore = initializeFirestore(cachedApp, {
           ignoreUndefinedProperties: true,
-          // By NOT calling enableIndexedDbPersistence, and ensuring we don't 
-          // have a persistent cache, we force live network requests.
       });
+      // V1.2.5: Forcibly clear any old offline persistence on first boot
+      try {
+          await clearIndexedDbPersistence(cachedFirestore);
+      } catch (e) {
+          console.warn("Persistence clear failed (expected if not enabled):", e);
+      }
     }
 
     return { 
@@ -66,26 +68,30 @@ function getFirebase(): FirebaseServices | null {
 export function FirebaseClientProvider({ children }: { children: ReactNode }) {
   const [isHydrated, setIsHydrated] = useState(false);
   const [currentHostname, setCurrentHostname] = useState<string>('');
+  const [firebaseServices, setFirebaseServices] = useState<FirebaseServices | null>(null);
+  const [isInitializing, setIsInitializing] = useState(true);
 
   useEffect(() => {
     setIsHydrated(true);
     setCurrentHostname(window.location.hostname);
+    
+    getFirebase().then(services => {
+        setFirebaseServices(services);
+        setIsInitializing(false);
+    });
   }, []);
 
-  const firebaseServices = useMemo(() => {
-    if (!isHydrated) return null;
-    return getFirebase();
-  }, [isHydrated]);
-
   const handleHardReset = async () => {
-      if (cachedFirestore) {
-          await terminate(cachedFirestore);
-          await clearIndexedDbPersistence(cachedFirestore);
+      if (firebaseServices?.firestore) {
+          await terminate(firebaseServices.firestore);
+          await clearIndexedDbPersistence(firebaseServices.firestore);
+          window.location.reload();
+      } else {
           window.location.reload();
       }
   };
 
-  if (!isHydrated) {
+  if (!isHydrated || isInitializing) {
     return (
       <div className="flex h-screen w-screen items-center justify-center bg-background">
         <Loader2 className="animate-spin text-primary h-8 w-8" />
@@ -101,14 +107,11 @@ export function FirebaseClientProvider({ children }: { children: ReactNode }) {
             <Alert variant="destructive">
                 <AlertTitle className="text-lg font-bold flex items-center justify-center gap-2">
                     <ShieldAlert className="h-5 w-5" />
-                    Connection Blocked
+                    Configuration Missing
                 </AlertTitle>
                 <AlertDescription className="mt-2 text-sm text-left space-y-4">
-                    <p>The domain <strong>{currentHostname}</strong> must be authorized in your Firebase security settings.</p>
-                    <div className="bg-white/10 p-3 rounded text-xs font-mono">
-                        Required: Firebase Console > Auth > Settings > Authorized Domains
-                    </div>
-                    <Button onClick={() => window.location.reload()} variant="outline" className="w-full bg-white text-black">
+                    <p>Firebase is not initialized. Please ensure your environment variables are set in Render.</p>
+                    <Button onClick={handleHardReset} variant="outline" className="w-full bg-white text-black">
                         <RefreshCcw className="mr-2 h-4 w-4" /> Try Reconnecting
                     </Button>
                 </AlertDescription>
