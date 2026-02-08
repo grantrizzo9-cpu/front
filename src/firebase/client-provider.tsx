@@ -5,13 +5,15 @@ import { FirebaseProvider } from '@/firebase/provider';
 import { initializeApp, getApps, getApp, FirebaseApp } from 'firebase/app';
 import { getAuth, Auth } from 'firebase/auth';
 import { 
-  getFirestore, 
   initializeFirestore, 
-  Firestore
+  Firestore,
+  terminate,
+  clearIndexedDbPersistence
 } from 'firebase/firestore';
 import { firebaseConfig } from '@/firebase/config';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { CloudOff, ShieldAlert, Loader2 } from 'lucide-react';
+import { CloudOff, ShieldAlert, Loader2, RefreshCcw } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import type { FirebaseServices } from '@/firebase';
 
 /**
@@ -40,11 +42,13 @@ function getFirebase(): FirebaseServices | null {
       cachedAuth = getAuth(cachedApp);
     }
     
-    // V1.2.3: Persistence DISABLED to fix Render 'Offline' loop
+    // V1.2.4: Aggressive Cache Disabling
+    // We use initializeFirestore instead of getFirestore to ensure no local persistence
     if (!cachedFirestore) {
       cachedFirestore = initializeFirestore(cachedApp, {
           ignoreUndefinedProperties: true,
-          // localCache is disabled to force live connection
+          // By NOT calling enableIndexedDbPersistence, and ensuring we don't 
+          // have a persistent cache, we force live network requests.
       });
     }
 
@@ -73,6 +77,14 @@ export function FirebaseClientProvider({ children }: { children: ReactNode }) {
     return getFirebase();
   }, [isHydrated]);
 
+  const handleHardReset = async () => {
+      if (cachedFirestore) {
+          await terminate(cachedFirestore);
+          await clearIndexedDbPersistence(cachedFirestore);
+          window.location.reload();
+      }
+  };
+
   if (!isHydrated) {
     return (
       <div className="flex h-screen w-screen items-center justify-center bg-background">
@@ -91,11 +103,14 @@ export function FirebaseClientProvider({ children }: { children: ReactNode }) {
                     <ShieldAlert className="h-5 w-5" />
                     Connection Blocked
                 </AlertTitle>
-                <AlertDescription className="mt-2 text-sm text-left">
-                    The domain <strong>{currentHostname}</strong> must be authorized in your Firebase security settings.
-                    <br/><br/>
-                    <strong>Required Step:</strong>
-                    <p className="mt-2">Go to <strong>Firebase Console > Auth > Settings > Authorized Domains</strong> and add <code>{currentHostname}</code>.</p>
+                <AlertDescription className="mt-2 text-sm text-left space-y-4">
+                    <p>The domain <strong>{currentHostname}</strong> must be authorized in your Firebase security settings.</p>
+                    <div className="bg-white/10 p-3 rounded text-xs font-mono">
+                        Required: Firebase Console > Auth > Settings > Authorized Domains
+                    </div>
+                    <Button onClick={() => window.location.reload()} variant="outline" className="w-full bg-white text-black">
+                        <RefreshCcw className="mr-2 h-4 w-4" /> Try Reconnecting
+                    </Button>
                 </AlertDescription>
             </Alert>
         </div>

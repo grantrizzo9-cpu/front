@@ -9,7 +9,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { subscriptionTiers } from "@/lib/data";
-import { Loader2, Users, ShieldAlert, ExternalLink, RefreshCcw } from "lucide-react";
+import { Loader2, Users, ShieldAlert, ExternalLink, RefreshCcw, Clock } from "lucide-react";
 import { useAuth, useFirestore } from "@/firebase";
 import { createUserWithEmailAndPassword, updateProfile, User } from "firebase/auth";
 import { doc, getDoc, writeBatch, serverTimestamp, collection } from "firebase/firestore";
@@ -162,29 +162,27 @@ function SignupFormComponent() {
     return (
         <div className="space-y-6">
             {apiKeyBlocked && (
-                <Alert variant="destructive" className="border-amber-500 bg-amber-50 shadow-lg">
+                <Alert variant="destructive" className="border-amber-500 bg-amber-50 shadow-lg animate-in slide-in-from-top-2 duration-300">
                     <ShieldAlert className="h-5 w-5 text-amber-600" />
-                    <AlertTitle className="font-bold text-red-800">Connection Failed (Offline/Blocked)</AlertTitle>
+                    <AlertTitle className="font-bold text-red-800">Security Sync in Progress</AlertTitle>
                     <AlertDescription className="text-sm space-y-3 text-red-700">
-                        <p>Firebase is reporting "offline" because your <strong>Google Cloud API Key</strong> is blocking requests from Render (Referer Blocked).</p>
-                        <div className="bg-white/50 p-3 rounded border border-red-200 text-xs">
-                            <p className="font-semibold uppercase tracking-wider mb-1">Required Action:</p>
+                        <p>Google Cloud settings can take <strong>2–5 minutes</strong> to update. If you just clicked Save, please wait.</p>
+                        <div className="bg-white/50 p-3 rounded border border-red-200 text-xs space-y-2">
+                            <p className="font-semibold uppercase tracking-wider flex items-center gap-1"><Clock className="h-3 w-3"/> Required Action:</p>
                             <ol className="list-decimal list-inside space-y-1">
-                                <li>Click <strong>"Open API Credentials"</strong> below.</li>
-                                <li>Click on your <strong>API Key</strong> (e.g. Browser key).</li>
-                                <li>Find <strong>"Website restrictions"</strong>.</li>
-                                <li>Add <code>https://{window.location.hostname}/*</code></li>
-                                <li>Click <strong>Save</strong>.</li>
+                                <li>Verify Key: <code>...{firebaseConfig.apiKey.slice(-4)}</code></li>
+                                <li>Add: <code>https://{window.location.hostname}/*</code> to Website restrictions.</li>
+                                <li>Wait 2 minutes and refresh.</li>
                             </ol>
                         </div>
                         <div className="flex flex-col gap-2">
-                            <Button asChild variant="default" className="w-full bg-amber-600">
+                            <Button asChild variant="default" className="w-full bg-amber-600 hover:bg-amber-700">
                                 <a href={gcpCredentialsUrl} target="_blank" rel="noopener noreferrer">
-                                    Open API Credentials <ExternalLink className="ml-2 h-4 w-4" />
+                                    Open API Settings <ExternalLink className="ml-2 h-4 w-4" />
                                 </a>
                             </Button>
                             <Button onClick={() => window.location.reload()} variant="outline" size="sm" className="bg-white text-amber-800">
-                                <RefreshCcw className="mr-2 h-3 w-3" /> Refresh Page
+                                <RefreshCcw className="mr-2 h-3 w-3" /> Refresh Now
                             </Button>
                         </div>
                     </AlertDescription>
