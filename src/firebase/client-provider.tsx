@@ -43,14 +43,18 @@ async function getFirebase(): Promise<FirebaseServices | null> {
     }
     
     if (!cachedFirestore) {
+      // V1.2.6: Enable Long Polling. This is critical for Render environments
+      // where standard WebSockets might be throttled or blocked.
       cachedFirestore = initializeFirestore(cachedApp, {
           ignoreUndefinedProperties: true,
+          experimentalForceLongPolling: true, 
       });
-      // V1.2.5: Forcibly clear any old offline persistence on first boot
+
+      // Force clear any old persistence that might be "remembering" an offline state
       try {
           await clearIndexedDbPersistence(cachedFirestore);
       } catch (e) {
-          console.warn("Persistence clear failed (expected if not enabled):", e);
+          console.warn("Persistence clear failed (normal if not enabled):", e);
       }
     }
 
@@ -67,13 +71,11 @@ async function getFirebase(): Promise<FirebaseServices | null> {
 
 export function FirebaseClientProvider({ children }: { children: ReactNode }) {
   const [isHydrated, setIsHydrated] = useState(false);
-  const [currentHostname, setCurrentHostname] = useState<string>('');
   const [firebaseServices, setFirebaseServices] = useState<FirebaseServices | null>(null);
   const [isInitializing, setIsInitializing] = useState(true);
 
   useEffect(() => {
     setIsHydrated(true);
-    setCurrentHostname(window.location.hostname);
     
     getFirebase().then(services => {
         setFirebaseServices(services);
@@ -83,8 +85,12 @@ export function FirebaseClientProvider({ children }: { children: ReactNode }) {
 
   const handleHardReset = async () => {
       if (firebaseServices?.firestore) {
-          await terminate(firebaseServices.firestore);
-          await clearIndexedDbPersistence(firebaseServices.firestore);
+          try {
+              await terminate(firebaseServices.firestore);
+              await clearIndexedDbPersistence(firebaseServices.firestore);
+          } catch (e) {
+              console.error("Reset error:", e);
+          }
           window.location.reload();
       } else {
           window.location.reload();
@@ -110,9 +116,9 @@ export function FirebaseClientProvider({ children }: { children: ReactNode }) {
                     Configuration Missing
                 </AlertTitle>
                 <AlertDescription className="mt-2 text-sm text-left space-y-4">
-                    <p>Firebase is not initialized. Please ensure your environment variables are set in Render.</p>
-                    <Button onClick={handleHardReset} variant="outline" className="w-full bg-white text-black">
-                        <RefreshCcw className="mr-2 h-4 w-4" /> Try Reconnecting
+                    <p>Firebase is not initialized. Please ensure your environment variables are set correctly.</p>
+                    <Button onClick={handleHardReset} variant="outline" className="w-full bg-white text-black font-bold">
+                        <RefreshCcw className="mr-2 h-4 w-4" /> Reset Connection & Retry
                     </Button>
                 </AlertDescription>
             </Alert>

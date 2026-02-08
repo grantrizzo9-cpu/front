@@ -10,7 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth, useFirestore } from "@/firebase";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { useState, useEffect, Suspense } from "react";
-import { Loader2, ShieldAlert, ExternalLink, RefreshCcw, Lock, Clock, Trash2 } from "lucide-react";
+import { Loader2, ShieldAlert, ExternalLink, RefreshCcw, Lock, Clock, Trash2, Globe } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { firebaseConfig } from "@/firebase/config";
 import { terminate, clearIndexedDbPersistence } from "firebase/firestore";
@@ -42,8 +42,10 @@ function LoginForm() {
   const handleHardReset = async () => {
       setIsLoading(true);
       try {
-          await terminate(firestore);
-          await clearIndexedDbPersistence(firestore);
+          if (firestore) {
+              await terminate(firestore);
+              await clearIndexedDbPersistence(firestore);
+          }
           toast({ title: "Cache Cleared", description: "Reloading application..." });
           window.location.reload();
       } catch (e) {
@@ -70,9 +72,10 @@ function LoginForm() {
     } catch (error: any) {
       console.error("Login Error:", error.code, error.message);
       
-      if (error.message?.toLowerCase().includes('requests-from-referer-blocked') || 
+      if (error.message?.toLowerCase().includes('referer-blocked') || 
           error.code === 'auth/requests-from-referer-blocked' ||
-          error.message?.toLowerCase().includes('offline')) {
+          error.message?.toLowerCase().includes('offline') ||
+          error.code === 'unavailable') {
           setApiKeyBlocked(true);
           return;
       }
@@ -108,20 +111,21 @@ function LoginForm() {
       {apiKeyBlocked && (
         <Alert variant="destructive" className="border-amber-500 bg-amber-50 shadow-lg animate-in slide-in-from-top-2 duration-300">
           <ShieldAlert className="h-5 w-5 text-amber-600" />
-          <AlertTitle className="font-bold text-red-800">Security Sync in Progress</AlertTitle>
+          <AlertTitle className="font-bold text-red-800">Connection Failed (Offline/Blocked)</AlertTitle>
           <AlertDescription className="text-sm space-y-3 text-red-700">
-            <p>Google Cloud settings can take <strong>2–5 minutes</strong> to sync globally. If you just clicked Save, please wait.</p>
+            <p>Firebase is reporting "offline" because your Google Cloud API Key is blocking requests from Render (Referer Blocked).</p>
             <div className="bg-white/50 p-3 rounded border border-red-200 text-xs space-y-2">
-                <p className="font-semibold uppercase tracking-wider flex items-center gap-1"><Clock className="h-3 w-3"/> Verification Check:</p>
+                <p className="font-semibold uppercase tracking-wider flex items-center gap-1"><Clock className="h-3 w-3"/> Verification Checklist:</p>
                 <ul className="list-disc list-inside space-y-1">
                     <li>Confirm API Key ends in: <code>...{firebaseConfig.apiKey.slice(-4)}</code></li>
-                    <li>Confirm Entry: <code>https://{window.location.hostname}/*</code></li>
+                    <li>Add Entry: <code>https://{window.location.hostname}/*</code></li>
+                    <li><strong>Wait 2–5 minutes</strong> for Google to sync after clicking Save.</li>
                 </ul>
             </div>
             <div className="flex flex-col gap-2">
-                <Button asChild variant="default" className="bg-amber-600 hover:bg-amber-700 text-white">
+                <Button asChild variant="default" className="bg-amber-600 hover:bg-amber-700 text-white font-bold">
                     <a href={gcpCredentialsUrl} target="_blank" rel="noopener noreferrer">
-                        Check API Key Settings <ExternalLink className="ml-2 h-4 w-4" />
+                        Open API Key Settings <ExternalLink className="ml-2 h-4 w-4" />
                     </a>
                 </Button>
                 <Button onClick={handleHardReset} variant="outline" size="sm" className="bg-white text-amber-800 border-amber-200 font-bold">
@@ -133,20 +137,19 @@ function LoginForm() {
       )}
 
       {unauthorizedDomain && !apiKeyBlocked && (
-        <Alert variant="destructive" className="border-red-500 bg-red-50 shadow-lg animate-in slide-in-from-top-2 duration-300">
-          <ShieldAlert className="h-5 w-5" />
+        <Alert variant="destructive" className="border-red-500 bg-red-50 shadow-lg">
+          <Globe className="h-5 w-5 text-red-600" />
           <AlertTitle className="font-bold text-red-800">Domain Not Whitelisted</AlertTitle>
           <AlertDescription className="text-sm space-y-3 text-red-700">
-            <p>Firebase Auth is blocking access because this domain is missing from your "Authorized Domains".</p>
+            <p>Firebase Auth requires this domain to be authorized in the console.</p>
             <div className="bg-white/50 p-3 rounded border border-red-200">
-                <p className="font-semibold text-xs uppercase tracking-wider mb-1">Required Action:</p>
                 <ol className="list-decimal list-inside space-y-1 text-xs">
                     <li>Go to <strong>Firebase Console > Auth > Settings</strong>.</li>
-                    <li>In <strong>Authorized Domains</strong>, click "Add domain".</li>
+                    <li>Click "Add domain".</li>
                     <li>Paste: <code>{unauthorizedDomain}</code></li>
                 </ol>
             </div>
-            <Button onClick={handleHardReset} variant="outline" size="sm" className="w-full bg-white">
+            <Button onClick={handleHardReset} variant="outline" size="sm" className="w-full bg-white font-bold">
                 <RefreshCcw className="mr-2 h-3 w-3" /> Refresh Page
             </Button>
           </AlertDescription>

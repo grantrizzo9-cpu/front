@@ -9,7 +9,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { subscriptionTiers } from "@/lib/data";
-import { Loader2, Users, ShieldAlert, ExternalLink, RefreshCcw, Clock, Trash2 } from "lucide-react";
+import { Loader2, Users, ShieldAlert, ExternalLink, RefreshCcw, Clock, Trash2, Globe } from "lucide-react";
 import { useAuth, useFirestore } from "@/firebase";
 import { createUserWithEmailAndPassword, updateProfile, User } from "firebase/auth";
 import { doc, getDoc, writeBatch, serverTimestamp, collection, terminate, clearIndexedDbPersistence } from "firebase/firestore";
@@ -63,8 +63,10 @@ function SignupFormComponent() {
     const handleHardReset = async () => {
         setIsProcessing(true);
         try {
-            await terminate(firestore);
-            await clearIndexedDbPersistence(firestore);
+            if (firestore) {
+                await terminate(firestore);
+                await clearIndexedDbPersistence(firestore);
+            }
             toast({ title: "Connection Reset", description: "Hard reloading app..." });
             window.location.reload();
         } catch (e) {
@@ -152,7 +154,8 @@ function SignupFormComponent() {
             
             if (error.message?.toLowerCase().includes('referer-blocked') || 
                 error.code === 'auth/requests-from-referer-blocked' ||
-                error.message?.toLowerCase().includes('offline')) {
+                error.message?.toLowerCase().includes('offline') ||
+                error.code === 'unavailable') {
                 setApiKeyBlocked(true);
                 setIsProcessing(false);
                 return;
@@ -176,19 +179,19 @@ function SignupFormComponent() {
             {apiKeyBlocked && (
                 <Alert variant="destructive" className="border-amber-500 bg-amber-50 shadow-lg animate-in slide-in-from-top-2 duration-300">
                     <ShieldAlert className="h-5 w-5 text-amber-600" />
-                    <AlertTitle className="font-bold text-red-800">Security Sync in Progress</AlertTitle>
+                    <AlertTitle className="font-bold text-red-800">Connection Failed (Offline/Blocked)</AlertTitle>
                     <AlertDescription className="text-sm space-y-3 text-red-700">
-                        <p>Google Cloud settings can take <strong>2–5 minutes</strong> to update. If you just clicked Save, please wait.</p>
+                        <p>Render is having trouble connecting to Firebase via WebSockets. We have enabled "Long Polling" to fix this.</p>
                         <div className="bg-white/50 p-3 rounded border border-red-200 text-xs space-y-2">
                             <p className="font-semibold uppercase tracking-wider flex items-center gap-1"><Clock className="h-3 w-3"/> Action Checklist:</p>
                             <ol className="list-decimal list-inside space-y-1">
-                                <li>Verify Key: <code>...{firebaseConfig.apiKey.slice(-4)}</code></li>
-                                <li>Add: <code>https://{window.location.hostname}/*</code></li>
-                                <li>Click <strong>Save</strong> in Google Cloud.</li>
+                                <li>Verify Key ends in: <code>...{firebaseConfig.apiKey.slice(-4)}</code></li>
+                                <li>Add: <code>https://{window.location.hostname}/*</code> to Website restrictions.</li>
+                                <li><strong>Wait 5 minutes</strong> for Google Cloud to sync.</li>
                             </ol>
                         </div>
                         <div className="flex flex-col gap-2">
-                            <Button asChild variant="default" className="w-full bg-amber-600 hover:bg-amber-700">
+                            <Button asChild variant="default" className="w-full bg-amber-600 hover:bg-amber-700 font-bold">
                                 <a href={gcpCredentialsUrl} target="_blank" rel="noopener noreferrer">
                                     Open API Key Settings <ExternalLink className="ml-2 h-4 w-4" />
                                 </a>
@@ -202,17 +205,22 @@ function SignupFormComponent() {
             )}
 
             {unauthorizedDomain && !apiKeyBlocked && (
-                <Alert variant="destructive" className="border-red-500 bg-red-50">
-                    <ShieldAlert className="h-4 w-4" />
-                    <AlertTitle className="font-bold">Domain Security Block</AlertTitle>
-                    <AlertDescription className="text-xs space-y-2">
+                <Alert variant="destructive" className="border-red-500 bg-red-50 shadow-lg">
+                    <Globe className="h-4 w-4 text-red-600" />
+                    <AlertTitle className="font-bold text-red-800">Domain Security Block</AlertTitle>
+                    <AlertDescription className="text-xs space-y-2 text-red-700">
                         <p>Firebase is blocking access because <strong>{unauthorizedDomain}</strong> is not authorized.</p>
-                        <p className="font-semibold underline">Final Action Required:</p>
-                        <ol className="list-decimal list-inside space-y-1">
-                            <li>Go to <strong>Firebase Console</strong>.</li>
-                            <li>Navigate to <strong>Auth > Settings > Authorized Domains</strong>.</li>
-                            <li>Add <code>{unauthorizedDomain}</code> to the list.</li>
-                        </ol>
+                        <div className="bg-white/50 p-3 rounded border border-red-200">
+                            <p className="font-semibold underline">Final Action Required:</p>
+                            <ol className="list-decimal list-inside space-y-1">
+                                <li>Go to <strong>Firebase Console</strong>.</li>
+                                <li>Navigate to <strong>Auth > Settings > Authorized Domains</strong>.</li>
+                                <li>Add <code>{unauthorizedDomain}</code> to the list.</li>
+                            </ol>
+                        </div>
+                        <Button onClick={handleHardReset} variant="outline" size="sm" className="w-full bg-white font-bold">
+                            <RefreshCcw className="mr-2 h-3 w-3" /> Refresh Page
+                        </Button>
                     </AlertDescription>
                 </Alert>
             )}
