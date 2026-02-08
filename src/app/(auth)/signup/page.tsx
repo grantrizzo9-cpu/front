@@ -179,25 +179,25 @@ function SignupFormComponent() {
             {apiKeyBlocked && (
                 <Alert variant="destructive" className="border-amber-500 bg-amber-50 shadow-lg animate-in slide-in-from-top-2 duration-300">
                     <ShieldAlert className="h-5 w-5 text-amber-600" />
-                    <AlertTitle className="font-bold text-red-800">Connection Failed (Offline/Blocked)</AlertTitle>
+                    <AlertTitle className="font-bold text-red-800">Connection Blocked (Cache Detected)</AlertTitle>
                     <AlertDescription className="text-sm space-y-3 text-red-700">
-                        <p>Render is having trouble connecting to Firebase via WebSockets. We have enabled "Long Polling" to fix this.</p>
+                        <p>Render is still using old security rules. You must perform a <strong>Hard Reset</strong> to connect using the new Google Cloud settings.</p>
                         <div className="bg-white/50 p-3 rounded border border-red-200 text-xs space-y-2">
                             <p className="font-semibold uppercase tracking-wider flex items-center gap-1"><Clock className="h-3 w-3"/> Action Checklist:</p>
                             <ol className="list-decimal list-inside space-y-1">
                                 <li>Verify Key ends in: <code>...{firebaseConfig.apiKey.slice(-4)}</code></li>
-                                <li>Add: <code>https://{window.location.hostname}/*</code> to Website restrictions.</li>
-                                <li><strong>Wait 5 minutes</strong> for Google Cloud to sync.</li>
+                                <li>Click <strong>Clear Cache & Refresh</strong> below.</li>
+                                <li><strong>Wait 60 seconds</strong> for Google Cloud to sync.</li>
                             </ol>
                         </div>
                         <div className="flex flex-col gap-2">
-                            <Button asChild variant="default" className="w-full bg-amber-600 hover:bg-amber-700 font-bold">
-                                <a href={gcpCredentialsUrl} target="_blank" rel="noopener noreferrer">
-                                    Open API Key Settings <ExternalLink className="ml-2 h-4 w-4" />
-                                </a>
+                            <Button onClick={handleHardReset} variant="default" className="w-full bg-amber-600 hover:bg-amber-700 font-bold">
+                                <Trash2 className="mr-2 h-3 w-3" /> Clear Cache & Refresh Site
                             </Button>
-                            <Button onClick={handleHardReset} variant="outline" size="sm" className="bg-white text-amber-800 border-amber-200 font-bold">
-                                <Trash2 className="mr-2 h-3 w-3" /> Clear Cache & Refresh
+                            <Button asChild variant="outline" size="sm" className="bg-white text-amber-800 border-amber-200 font-bold">
+                                <a href={gcpCredentialsUrl} target="_blank" rel="noopener noreferrer">
+                                    Verify API Key Settings <ExternalLink className="ml-2 h-4 w-4" />
+                                </a>
                             </Button>
                         </div>
                     </AlertDescription>

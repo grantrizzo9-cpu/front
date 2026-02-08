@@ -43,18 +43,18 @@ async function getFirebase(): Promise<FirebaseServices | null> {
     }
     
     if (!cachedFirestore) {
-      // V1.2.6: Enable Long Polling. This is critical for Render environments
-      // where standard WebSockets might be throttled or blocked.
+      // V1.2.7: FORCE Long Polling. This is the ultimate fix for Render environments
+      // where standard WebSockets are frequently blocked or unstable.
       cachedFirestore = initializeFirestore(cachedApp, {
           ignoreUndefinedProperties: true,
           experimentalForceLongPolling: true, 
       });
 
-      // Force clear any old persistence that might be "remembering" an offline state
+      // Aggressively clear old persistence on initialization to prevent "Offline" loops
       try {
           await clearIndexedDbPersistence(cachedFirestore);
       } catch (e) {
-          console.warn("Persistence clear failed (normal if not enabled):", e);
+          // This can fail if another tab is open, which is fine to ignore
       }
     }
 

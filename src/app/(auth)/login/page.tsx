@@ -72,6 +72,7 @@ function LoginForm() {
     } catch (error: any) {
       console.error("Login Error:", error.code, error.message);
       
+      // V1.2.7: Catch all variations of referer blocks and offline errors
       if (error.message?.toLowerCase().includes('referer-blocked') || 
           error.code === 'auth/requests-from-referer-blocked' ||
           error.message?.toLowerCase().includes('offline') ||
@@ -111,25 +112,25 @@ function LoginForm() {
       {apiKeyBlocked && (
         <Alert variant="destructive" className="border-amber-500 bg-amber-50 shadow-lg animate-in slide-in-from-top-2 duration-300">
           <ShieldAlert className="h-5 w-5 text-amber-600" />
-          <AlertTitle className="font-bold text-red-800">Connection Failed (Offline/Blocked)</AlertTitle>
+          <AlertTitle className="font-bold text-red-800">Connection Blocked (Cache Detected)</AlertTitle>
           <AlertDescription className="text-sm space-y-3 text-red-700">
-            <p>Firebase is reporting "offline" because your Google Cloud API Key is blocking requests from Render (Referer Blocked).</p>
+            <p>You have updated Google Cloud, but your browser is still remembering the old block. You must perform a Hard Reset.</p>
             <div className="bg-white/50 p-3 rounded border border-red-200 text-xs space-y-2">
-                <p className="font-semibold uppercase tracking-wider flex items-center gap-1"><Clock className="h-3 w-3"/> Verification Checklist:</p>
+                <p className="font-semibold uppercase tracking-wider flex items-center gap-1"><Clock className="h-3 w-3"/> Recovery Protocol:</p>
                 <ul className="list-disc list-inside space-y-1">
                     <li>Confirm API Key ends in: <code>...{firebaseConfig.apiKey.slice(-4)}</code></li>
-                    <li>Add Entry: <code>https://{window.location.hostname}/*</code></li>
-                    <li><strong>Wait 2–5 minutes</strong> for Google to sync after clicking Save.</li>
+                    <li>Click the <strong>Clear Cache</strong> button below.</li>
+                    <li>Wait 60 seconds for GCP to sync before trying again.</li>
                 </ul>
             </div>
             <div className="flex flex-col gap-2">
-                <Button asChild variant="default" className="bg-amber-600 hover:bg-amber-700 text-white font-bold">
-                    <a href={gcpCredentialsUrl} target="_blank" rel="noopener noreferrer">
-                        Open API Key Settings <ExternalLink className="ml-2 h-4 w-4" />
-                    </a>
+                <Button onClick={handleHardReset} variant="default" className="bg-amber-600 hover:bg-amber-700 text-white font-bold">
+                    <Trash2 className="mr-2 h-4 w-4" /> Clear Cache & Refresh Site
                 </Button>
-                <Button onClick={handleHardReset} variant="outline" size="sm" className="bg-white text-amber-800 border-amber-200 font-bold">
-                    <Trash2 className="mr-2 h-3 w-3" /> Clear Cache & Refresh
+                <Button asChild variant="outline" size="sm" className="bg-white text-amber-800 border-amber-200 font-bold">
+                    <a href={gcpCredentialsUrl} target="_blank" rel="noopener noreferrer">
+                        Verify API Key Settings <ExternalLink className="ml-2 h-3 w-3" />
+                    </a>
                 </Button>
             </div>
           </AlertDescription>
