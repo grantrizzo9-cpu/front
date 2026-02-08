@@ -7,8 +7,6 @@ import { getAuth, Auth } from 'firebase/auth';
 import { 
   getFirestore, 
   initializeFirestore, 
-  persistentLocalCache, 
-  persistentMultipleTabManager,
   Firestore
 } from 'firebase/firestore';
 import { firebaseConfig } from '@/firebase/config';
@@ -42,17 +40,12 @@ function getFirebase(): FirebaseServices | null {
       cachedAuth = getAuth(cachedApp);
     }
     
+    // V1.2.3: Persistence DISABLED to fix Render 'Offline' loop
     if (!cachedFirestore) {
-      try {
-        cachedFirestore = initializeFirestore(cachedApp, {
-            ignoreUndefinedProperties: true,
-            localCache: persistentLocalCache({
-              tabManager: persistentMultipleTabManager(),
-            }),
-        });
-      } catch (e: any) {
-        cachedFirestore = getFirestore(cachedApp);
-      }
+      cachedFirestore = initializeFirestore(cachedApp, {
+          ignoreUndefinedProperties: true,
+          // localCache is disabled to force live connection
+      });
     }
 
     return { 
@@ -75,13 +68,11 @@ export function FirebaseClientProvider({ children }: { children: ReactNode }) {
     setCurrentHostname(window.location.hostname);
   }, []);
 
-  // Use useMemo to get services only after hydration to prevent mismatch
   const firebaseServices = useMemo(() => {
     if (!isHydrated) return null;
     return getFirebase();
   }, [isHydrated]);
 
-  // Pass 1: Server-side and Initial Client Render (Identical)
   if (!isHydrated) {
     return (
       <div className="flex h-screen w-screen items-center justify-center bg-background">
@@ -90,7 +81,6 @@ export function FirebaseClientProvider({ children }: { children: ReactNode }) {
     );
   }
 
-  // Pass 2: Client-side after hydration
   if (!firebaseServices) {
     return (
       <div className="flex h-screen w-screen items-center justify-center p-4 bg-background">
