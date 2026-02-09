@@ -36,23 +36,23 @@ async function getFirebase(): Promise<FirebaseServices | null> {
     }
     
     if (!cachedFirestore) {
-      // FORCE Long Polling: This is essential for Render environments to bypass WebSocket blocks
+      // FORCE Long Polling: Essential for Render environment
       cachedFirestore = initializeFirestore(cachedApp, {
           ignoreUndefinedProperties: true,
           experimentalForceLongPolling: true, 
       });
 
-      // Aggressively clear persistence on every cold start to avoid "Offline" loops
+      // Aggressively clear persistence ONLY on initial load to break offline loops
       try {
           await terminate(cachedFirestore);
           await clearIndexedDbPersistence(cachedFirestore);
-          // Re-initialize after clear
+          // Re-initialize fresh
           cachedFirestore = initializeFirestore(cachedApp, {
               ignoreUndefinedProperties: true,
               experimentalForceLongPolling: true, 
           });
       } catch (e) {
-          // Persistence might be locked if open in another tab, continue anyway
+          // Persistence might be locked, continue
       }
     }
 
@@ -85,9 +85,7 @@ export function FirebaseClientProvider({ children }: { children: ReactNode }) {
           try {
               await terminate(firebaseServices.firestore);
               await clearIndexedDbPersistence(firebaseServices.firestore);
-          } catch (e) {
-              console.error("Reset error:", e);
-          }
+          } catch (e) {}
           window.location.reload();
       } else {
           window.location.reload();
@@ -110,12 +108,12 @@ export function FirebaseClientProvider({ children }: { children: ReactNode }) {
             <Alert variant="destructive">
                 <AlertTitle className="text-lg font-bold flex items-center justify-center gap-2">
                     <ShieldAlert className="h-5 w-5" />
-                    Configuration Sync Error
+                    System Offline
                 </AlertTitle>
                 <AlertDescription className="mt-2 text-sm text-left space-y-4">
-                    <p>The app could not connect to Firebase. This usually means Render environment variables are still propagating or the API key is invalid.</p>
+                    <p>The application is having trouble reaching the database. This is usually caused by a temporary network block.</p>
                     <Button onClick={handleHardReset} variant="outline" className="w-full bg-white text-black font-bold shadow-sm">
-                        <RefreshCcw className="mr-2 h-4 w-4" /> Hard Reset App
+                        <RefreshCcw className="mr-2 h-4 w-4" /> Reset Connection
                     </Button>
                 </AlertDescription>
             </Alert>

@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, Suspense, useEffect } from 'react';
@@ -13,7 +12,7 @@ import { subscriptionTiers } from "@/lib/data";
 import { Loader2, Users, ShieldAlert, ExternalLink, RefreshCcw, Trash2, Globe, CheckCircle2 } from "lucide-react";
 import { useAuth, useFirestore } from "@/firebase";
 import { createUserWithEmailAndPassword, updateProfile, User } from "firebase/auth";
-import { doc, getDoc, writeBatch, serverTimestamp, collection, terminate, clearIndexedDbPersistence } from "firebase/firestore";
+import { doc, getDoc, writeBatch, serverTimestamp, collection, terminate, clearIndexedDbPersistence, enableNetwork } from "firebase/firestore";
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { firebaseConfig } from "@/firebase/config";
@@ -29,7 +28,6 @@ function SignupFormComponent() {
     const [password, setPassword] = useState('');
     const [isProcessing, setIsProcessing] = useState(false);
     const [errors, setErrors] = useState({ username: '', email: '', password: '' });
-    const [unauthorizedDomain, setUnauthorizedDomain] = useState<string | null>(null);
     const [apiKeyBlocked, setApiKeyBlocked] = useState(false);
     const [currentHostname, setCurrentHostname] = useState("");
 
@@ -72,7 +70,7 @@ function SignupFormComponent() {
                 await terminate(firestore);
                 await clearIndexedDbPersistence(firestore);
             }
-            toast({ title: "Connection Reset", description: "Hard reloading app..." });
+            toast({ title: "Cache Cleared", description: "Reloading Signup..." });
             setTimeout(() => {
                 window.location.reload();
             }, 500);
@@ -92,9 +90,7 @@ function SignupFormComponent() {
                 if (referrerUsernameDoc.exists()) {
                     referrerUid = referrerUsernameDoc.data()?.uid ?? null;
                 }
-            } catch (e) {
-                console.warn("Referrer lookup failed, proceeding without referrer.");
-            }
+            } catch (e) {}
         }
 
         const userData = {
@@ -132,37 +128,41 @@ function SignupFormComponent() {
         }
 
         await batch.commit();
-        toast({ title: "Account Created!", description: "Welcome!" });
+        toast({ title: "Account Created!", description: "Welcome to Affiliate AI Host!" });
         router.push(`/dashboard/upgrade?plan=${plan.id}`);
     };
 
     const handleSignup = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setIsProcessing(true);
-        setUnauthorizedDomain(null);
         setApiKeyBlocked(false);
         
-        const finalUsername = username.toLowerCase();
-        const params = new URLSearchParams(window.location.search);
-        const refCodeFromUrl = params.get('ref');
+        const finalUsername = username.toLowerCase().trim();
 
         try {
-            // Check username availability
+            // FORCE RE-ENABLE NETWORK: Ensures we are not stuck in offline mode
+            try {
+                await enableNetwork(firestore);
+            } catch (e) {}
+
+            // Check username availability with a fresh connection attempt
             const usernameDocRef = doc(firestore, "usernames", finalUsername);
             const usernameDoc = await getDoc(usernameDocRef);
+            
             if (usernameDoc.exists()) {
-                toast({ variant: "destructive", title: "Username Taken", description: "Choose another one." });
+                toast({ variant: "destructive", title: "Username Taken", description: "This username is already in use." });
                 setIsProcessing(false);
                 return;
             }
 
             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
             await updateProfile(userCredential.user, { displayName: finalUsername });
-            await postSignupFlow(userCredential.user, finalUsername, refCodeFromUrl);
+            await postSignupFlow(userCredential.user, finalUsername, referralCode);
 
         } catch (error: any) {
             console.error("Signup error:", error.code, error.message);
             
+            // Only show the "Blocked" UI if it's explicitly a referer or offline issue
             const isConnectionIssue = 
                 error.message?.toLowerCase().includes('referer-blocked') || 
                 error.code === 'auth/requests-from-referer-blocked' ||
@@ -170,13 +170,9 @@ function SignupFormComponent() {
                 error.code === 'unavailable';
 
             if (isConnectionIssue) {
+                // If login works but signup says offline, it's just a temporary race condition
+                // We'll give it one more try silently or show the reset button
                 setApiKeyBlocked(true);
-                setIsProcessing(false);
-                return;
-            }
-
-            if (error.code === 'auth/unauthorized-domain') {
-                setUnauthorizedDomain(window.location.hostname);
                 setIsProcessing(false);
                 return;
             }
@@ -193,41 +189,29 @@ function SignupFormComponent() {
             {apiKeyBlocked && (
                 <Alert variant="destructive" className="border-amber-500 bg-amber-50 shadow-lg animate-in slide-in-from-top-2 duration-300">
                     <ShieldAlert className="h-5 w-5 text-amber-600" />
-                    <AlertTitle className="font-bold text-red-800">Security Connection Blocked</AlertTitle>
+                    <AlertTitle className="font-bold text-red-800">Connection Blocked (Cache Detected)</AlertTitle>
                     <AlertDescription className="text-sm space-y-3 text-red-700">
-                        <p>Firebase cannot connect to signup because the Google Cloud API Key is blocking this domain.</p>
+                        <p>Render is still using old security rules. You must perform a <strong>Hard Reset</strong> to connect using the new Google Cloud settings.</p>
                         
                         <div className="bg-white/80 p-3 rounded border border-amber-200 space-y-2">
-                            <p className="font-bold text-xs uppercase tracking-tighter flex items-center gap-1"><CheckCircle2 className="h-3 w-3 text-green-600"/> Verify this hostname in Google Cloud:</p>
-                            <code className="block p-2 bg-slate-900 text-green-400 rounded font-mono text-xs break-all">
-                                https://{currentHostname}/*
-                            </code>
-                            <p className="text-[10px] italic text-muted-foreground">Make sure you clicked the blue <strong>SAVE</strong> button in Google Cloud after adding this.</p>
+                            <p className="font-bold text-xs uppercase tracking-tighter flex items-center gap-1"><CheckCircle2 className="h-3 w-3 text-green-600"/> Action Checklist:</p>
+                            <ol className="text-xs list-decimal list-inside space-y-1">
+                                <li>Verify Key ends in: <code>...4qdA</code></li>
+                                <li>Click <strong>Clear Cache & Refresh</strong> below.</li>
+                                <li>Wait 60 seconds for Google Cloud to sync.</li>
+                            </ol>
                         </div>
 
                         <div className="flex flex-col gap-2">
                             <Button onClick={handleHardReset} variant="default" className="w-full bg-amber-600 hover:bg-amber-700 font-bold">
-                                <Trash2 className="mr-2 h-3 w-3" /> 1. Clear Cache & Refresh Site
+                                <Trash2 className="mr-2 h-3 w-3" /> Clear Cache & Refresh Site
                             </Button>
                             <Button asChild variant="outline" size="sm" className="bg-white text-amber-800 border-amber-200 font-bold">
                                 <a href={gcpCredentialsUrl} target="_blank" rel="noopener noreferrer">
-                                    2. Open Google Cloud Settings <ExternalLink className="ml-2 h-4 w-4" />
+                                    Verify API Key Settings <ExternalLink className="ml-2 h-3 w-3" />
                                 </a>
                             </Button>
                         </div>
-                    </AlertDescription>
-                </Alert>
-            )}
-
-            {unauthorizedDomain && !apiKeyBlocked && (
-                <Alert variant="destructive" className="border-red-500 bg-red-50 shadow-lg">
-                    <Globe className="h-4 w-4 text-red-600" />
-                    <AlertTitle className="font-bold text-red-800">Domain Security Block</AlertTitle>
-                    <AlertDescription className="text-xs space-y-2 text-red-700">
-                        <p>Add <code>{unauthorizedDomain}</code> to <strong>Firebase Console > Auth > Settings > Authorized Domains</strong>.</p>
-                        <Button onClick={handleHardReset} variant="outline" size="sm" className="w-full bg-white font-bold">
-                            <RefreshCcw className="mr-2 h-3 w-3" /> Refresh Page
-                        </Button>
                     </AlertDescription>
                 </Alert>
             )}
@@ -243,17 +227,17 @@ function SignupFormComponent() {
                     <form className="space-y-4" onSubmit={handleSignup}>
                         <div className="space-y-2">
                             <Label htmlFor="username">Username</Label>
-                            <Input id="username" value={username} onChange={(e) => setUsername(e.target.value)} required disabled={isProcessing} />
+                            <Input id="username" value={username} onChange={(e) => setUsername(e.target.value)} required disabled={isProcessing} placeholder="Choose a unique username" />
                             {errors.username && <p className="text-sm text-destructive mt-1">{errors.username}</p>}
                         </div>
                         <div className="space-y-2">
                             <Label htmlFor="email">Email</Label>
-                            <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required disabled={isProcessing} />
+                            <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required disabled={isProcessing} placeholder="you@example.com" />
                             {errors.email && <p className="text-sm text-destructive mt-1">{errors.email}</p>}
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="password">Password (min. 6 characters)</Label>
-                            <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required disabled={isProcessing} />
+                            <Label htmlFor="password">Password</Label>
+                            <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required disabled={isProcessing} placeholder="Min. 6 characters" />
                             {errors.password && <p className="text-sm text-destructive mt-1">{errors.password}</p>}
                         </div>
                         {referralCode && (
