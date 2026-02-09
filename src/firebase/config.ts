@@ -1,5 +1,5 @@
 /**
- * Firebase Configuration (v1.2.8)
+ * Firebase Configuration (v1.2.9)
  * Prioritizes environment variables from Render/Cloudflare.
  */
 export const firebaseConfig = {
@@ -14,7 +14,9 @@ export const firebaseConfig = {
 
 // Diagnostic logging for deployment verification
 if (typeof window !== 'undefined') {
-    const key = firebaseConfig.apiKey;
-    console.log("Firebase initialized with API Key (last 4):", key ? key.slice(-4) : "MISSING");
-    console.log("Current Domain Hostname:", window.location.hostname);
+    console.log("--- FIREBASE DIAGNOSTICS ---");
+    console.log("API Key (last 4):", firebaseConfig.apiKey ? firebaseConfig.apiKey.slice(-4) : "MISSING");
+    console.log("Current Hostname:", window.location.hostname);
+    console.log("Current Origin:", window.location.origin);
+    console.log("----------------------------");
 }

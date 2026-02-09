@@ -42,11 +42,17 @@ async function getFirebase(): Promise<FirebaseServices | null> {
           experimentalForceLongPolling: true, 
       });
 
-      // Clear persistence on cold start if possible
+      // Aggressively clear persistence on every cold start to avoid "Offline" loops
       try {
+          await terminate(cachedFirestore);
           await clearIndexedDbPersistence(cachedFirestore);
+          // Re-initialize after clear
+          cachedFirestore = initializeFirestore(cachedApp, {
+              ignoreUndefinedProperties: true,
+              experimentalForceLongPolling: true, 
+          });
       } catch (e) {
-          // Ignore if already open in another tab
+          // Persistence might be locked if open in another tab, continue anyway
       }
     }
 

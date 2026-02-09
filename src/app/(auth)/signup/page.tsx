@@ -9,7 +9,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { subscriptionTiers } from "@/lib/data";
-import { Loader2, Users, ShieldAlert, ExternalLink, RefreshCcw, Clock, Trash2, Globe } from "lucide-react";
+import { Loader2, Users, ShieldAlert, ExternalLink, RefreshCcw, Clock, Trash2, Globe, CheckCircle2 } from "lucide-react";
 import { useAuth, useFirestore } from "@/firebase";
 import { createUserWithEmailAndPassword, updateProfile, User } from "firebase/auth";
 import { doc, getDoc, writeBatch, serverTimestamp, collection, terminate, clearIndexedDbPersistence } from "firebase/firestore";
@@ -30,6 +30,7 @@ function SignupFormComponent() {
     const [errors, setErrors] = useState({ username: '', email: '', password: '' });
     const [unauthorizedDomain, setUnauthorizedDomain] = useState<string | null>(null);
     const [apiKeyBlocked, setApiKeyBlocked] = useState(false);
+    const [currentHostname, setCurrentHostname] = useState("");
 
     const [planId, setPlanId] = useState('starter');
     const [referralCode, setReferralCode] = useState<string | null>(null);
@@ -40,6 +41,7 @@ function SignupFormComponent() {
         const ref = params.get('ref');
         if (plan) setPlanId(plan);
         if (ref) setReferralCode(ref);
+        setCurrentHostname(window.location.hostname);
     }, []);
     
     const plan = subscriptionTiers.find(p => p.id === planId) || subscriptionTiers[0];
@@ -68,7 +70,9 @@ function SignupFormComponent() {
                 await clearIndexedDbPersistence(firestore);
             }
             toast({ title: "Connection Reset", description: "Hard reloading app..." });
-            window.location.reload();
+            setTimeout(() => {
+                window.location.reload();
+            }, 500);
         } catch (e) {
             window.location.reload();
         }
@@ -181,24 +185,25 @@ function SignupFormComponent() {
             {apiKeyBlocked && (
                 <Alert variant="destructive" className="border-amber-500 bg-amber-50 shadow-lg animate-in slide-in-from-top-2 duration-300">
                     <ShieldAlert className="h-5 w-5 text-amber-600" />
-                    <AlertTitle className="font-bold text-red-800">Connection Failed (Offline/Blocked)</AlertTitle>
+                    <AlertTitle className="font-bold text-red-800">Security Connection Blocked</AlertTitle>
                     <AlertDescription className="text-sm space-y-3 text-red-700">
-                        <p>Render is reporting "offline" because your Google Cloud API Key is blocking requests (Referer Blocked).</p>
-                        <div className="bg-white/50 p-3 rounded border border-red-200 text-xs space-y-2">
-                            <p className="font-semibold uppercase tracking-wider flex items-center gap-1"><Clock className="h-3 w-3"/> Required Action:</p>
-                            <ol className="list-decimal list-inside space-y-1">
-                                <li>Verify API Key ends in: <code>...{firebaseConfig.apiKey.slice(-4)}</code></li>
-                                <li>Add <code>https://{window.location.hostname}/*</code> to Website Restrictions in GCP.</li>
-                                <li>Click <strong>Clear Cache & Refresh</strong> below.</li>
-                            </ol>
+                        <p>Firebase cannot connect because the Google Cloud API Key is blocking this domain.</p>
+                        
+                        <div className="bg-white/80 p-3 rounded border border-amber-200 space-y-2">
+                            <p className="font-bold text-xs uppercase tracking-tighter flex items-center gap-1"><CheckCircle2 className="h-3 w-3 text-green-600"/> Verify this hostname in Google Cloud:</p>
+                            <code className="block p-2 bg-slate-900 text-green-400 rounded font-mono text-xs break-all">
+                                https://{currentHostname}/*
+                            </code>
+                            <p className="text-[10px] italic text-muted-foreground">CRITICAL: You must click the blue <strong>SAVE</strong> button in Google Cloud after adding this.</p>
                         </div>
+
                         <div className="flex flex-col gap-2">
                             <Button onClick={handleHardReset} variant="default" className="w-full bg-amber-600 hover:bg-amber-700 font-bold">
-                                <Trash2 className="mr-2 h-3 w-3" /> Clear Cache & Refresh Site
+                                <Trash2 className="mr-2 h-3 w-3" /> 1. Clear Cache & Refresh Site
                             </Button>
                             <Button asChild variant="outline" size="sm" className="bg-white text-amber-800 border-amber-200 font-bold">
                                 <a href={gcpCredentialsUrl} target="_blank" rel="noopener noreferrer">
-                                    Open API Credentials <ExternalLink className="ml-2 h-4 w-4" />
+                                    2. Open Google Cloud Settings <ExternalLink className="ml-2 h-4 w-4" />
                                 </a>
                             </Button>
                         </div>

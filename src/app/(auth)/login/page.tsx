@@ -10,7 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth, useFirestore } from "@/firebase";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { useState, useEffect, Suspense } from "react";
-import { Loader2, ShieldAlert, ExternalLink, RefreshCcw, Lock, Clock, Trash2, Globe } from "lucide-react";
+import { Loader2, ShieldAlert, ExternalLink, RefreshCcw, Lock, Clock, Trash2, Globe, CheckCircle2 } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { firebaseConfig } from "@/firebase/config";
 import { terminate, clearIndexedDbPersistence } from "firebase/firestore";
@@ -25,9 +25,11 @@ function LoginForm() {
   const [isHydrated, setIsHydrated] = useState(false);
   const [unauthorizedDomain, setUnauthorizedDomain] = useState<string | null>(null);
   const [apiKeyBlocked, setApiKeyBlocked] = useState(false);
+  const [currentHostname, setCurrentHostname] = useState("");
 
   useEffect(() => {
     setIsHydrated(true);
+    setCurrentHostname(window.location.hostname);
   }, []);
 
   const refCode = isHydrated ? searchParams.get('ref') : null;
@@ -47,7 +49,9 @@ function LoginForm() {
               await clearIndexedDbPersistence(firestore);
           }
           toast({ title: "Cache Cleared", description: "Reloading application..." });
-          window.location.reload();
+          setTimeout(() => {
+              window.location.reload();
+          }, 500);
       } catch (e) {
           window.location.reload();
       }
@@ -102,26 +106,25 @@ function LoginForm() {
       {apiKeyBlocked && (
         <Alert variant="destructive" className="border-amber-500 bg-amber-50 shadow-lg animate-in slide-in-from-top-2 duration-300">
           <ShieldAlert className="h-5 w-5 text-amber-600" />
-          <AlertTitle className="font-bold text-red-800">Connection Failed (Offline/Blocked)</AlertTitle>
+          <AlertTitle className="font-bold text-red-800">Security Connection Blocked</AlertTitle>
           <AlertDescription className="text-sm space-y-3 text-red-700">
-            <p>Firebase is reporting "offline" because your Google Cloud API Key is blocking requests from Render (Referer Blocked).</p>
-            <div className="bg-white/50 p-3 rounded border border-red-200 text-xs space-y-2">
-                <p className="font-semibold uppercase tracking-wider flex items-center gap-1"><Clock className="h-3 w-3"/> Required Action:</p>
-                <ol className="list-decimal list-inside space-y-1">
-                    <li>Click "Open API Credentials" below.</li>
-                    <li>Click on your API Key (e.g. <strong>Browser key</strong>).</li>
-                    <li>Find <strong>"Website restrictions"</strong>.</li>
-                    <li>Add <code>https://{window.location.hostname}/*</code></li>
-                    <li>Click <strong>Save</strong>.</li>
-                </ol>
+            <p>Your browser is reporting "offline" because the Google Cloud API Key is blocking this domain.</p>
+            
+            <div className="bg-white/80 p-3 rounded border border-amber-200 space-y-2">
+                <p className="font-bold text-xs uppercase tracking-tighter flex items-center gap-1"><CheckCircle2 className="h-3 w-3 text-green-600"/> Verify this hostname in Google Cloud:</p>
+                <code className="block p-2 bg-slate-900 text-green-400 rounded font-mono text-xs break-all">
+                    https://{currentHostname}/*
+                </code>
+                <p className="text-[10px] italic text-muted-foreground">Make sure you clicked the blue <strong>SAVE</strong> button in Google Cloud after adding this.</p>
             </div>
+
             <div className="flex flex-col gap-2">
                 <Button onClick={handleHardReset} variant="default" className="bg-amber-600 hover:bg-amber-700 text-white font-bold">
-                    <Trash2 className="mr-2 h-4 w-4" /> Clear Cache & Refresh Site
+                    <Trash2 className="mr-2 h-4 w-4" /> 1. Clear Cache & Refresh Site
                 </Button>
                 <Button asChild variant="outline" size="sm" className="bg-white text-amber-800 border-amber-200 font-bold">
                     <a href={gcpCredentialsUrl} target="_blank" rel="noopener noreferrer">
-                        Open API Credentials <ExternalLink className="ml-2 h-3 w-3" />
+                        2. Open Google Cloud Settings <ExternalLink className="ml-2 h-3 w-3" />
                     </a>
                 </Button>
             </div>
@@ -132,7 +135,7 @@ function LoginForm() {
       {unauthorizedDomain && !apiKeyBlocked && (
         <Alert variant="destructive" className="border-red-500 bg-red-50 shadow-lg">
           <Globe className="h-5 w-5 text-red-600" />
-          <AlertTitle className="font-bold text-red-800">Domain Not Whitelisted</AlertTitle>
+          <AlertTitle className="font-bold text-red-800">Domain Not Authorized</AlertTitle>
           <AlertDescription className="text-sm space-y-3 text-red-700">
             <p>You must authorize this domain in the Firebase Console.</p>
             <div className="bg-white/50 p-3 rounded border border-red-200">
