@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo, type ReactNode, useState, useEffect } from 'react';
+import React, { type ReactNode, useState, useEffect } from 'react';
 import { FirebaseProvider } from '@/firebase/provider';
 import { initializeApp, getApps, getApp, FirebaseApp } from 'firebase/app';
 import { getAuth, Auth } from 'firebase/auth';
@@ -12,13 +12,10 @@ import {
 } from 'firebase/firestore';
 import { firebaseConfig } from '@/firebase/config';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { CloudOff, ShieldAlert, Loader2, RefreshCcw, Trash2 } from 'lucide-react';
+import { CloudOff, ShieldAlert, Loader2, RefreshCcw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import type { FirebaseServices } from '@/firebase';
 
-/**
- * Singleton Pattern for Firebase Services
- */
 let cachedApp: FirebaseApp | undefined;
 let cachedAuth: Auth | undefined;
 let cachedFirestore: Firestore | undefined;
@@ -34,27 +31,22 @@ async function getFirebase(): Promise<FirebaseServices | null> {
       cachedApp = initializeApp(firebaseConfig);
     }
     
-    if (cachedApp.options.apiKey?.includes('REPLACE_WITH')) {
-      return null;
-    }
-
     if (!cachedAuth) {
       cachedAuth = getAuth(cachedApp);
     }
     
     if (!cachedFirestore) {
-      // V1.2.7: FORCE Long Polling. This is the ultimate fix for Render environments
-      // where standard WebSockets are frequently blocked or unstable.
+      // FORCE Long Polling: This is essential for Render environments to bypass WebSocket blocks
       cachedFirestore = initializeFirestore(cachedApp, {
           ignoreUndefinedProperties: true,
           experimentalForceLongPolling: true, 
       });
 
-      // Aggressively clear old persistence on initialization to prevent "Offline" loops
+      // Clear persistence on cold start if possible
       try {
           await clearIndexedDbPersistence(cachedFirestore);
       } catch (e) {
-          // This can fail if another tab is open, which is fine to ignore
+          // Ignore if already open in another tab
       }
     }
 
@@ -76,7 +68,6 @@ export function FirebaseClientProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     setIsHydrated(true);
-    
     getFirebase().then(services => {
         setFirebaseServices(services);
         setIsInitializing(false);
@@ -113,12 +104,12 @@ export function FirebaseClientProvider({ children }: { children: ReactNode }) {
             <Alert variant="destructive">
                 <AlertTitle className="text-lg font-bold flex items-center justify-center gap-2">
                     <ShieldAlert className="h-5 w-5" />
-                    Configuration Missing
+                    Configuration Sync Error
                 </AlertTitle>
                 <AlertDescription className="mt-2 text-sm text-left space-y-4">
-                    <p>Firebase is not initialized. Please ensure your environment variables are set correctly.</p>
-                    <Button onClick={handleHardReset} variant="outline" className="w-full bg-white text-black font-bold">
-                        <RefreshCcw className="mr-2 h-4 w-4" /> Reset Connection & Retry
+                    <p>The app could not connect to Firebase. This usually means Render environment variables are still propagating or the API key is invalid.</p>
+                    <Button onClick={handleHardReset} variant="outline" className="w-full bg-white text-black font-bold shadow-sm">
+                        <RefreshCcw className="mr-2 h-4 w-4" /> Hard Reset App
                     </Button>
                 </AlertDescription>
             </Alert>

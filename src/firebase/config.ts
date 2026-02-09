@@ -1,6 +1,6 @@
 /**
- * Firebase Configuration (v1.2.3)
- * Prioritizes environment variables for production environments like Render and Cloudflare.
+ * Firebase Configuration (v1.2.8)
+ * Prioritizes environment variables from Render/Cloudflare.
  */
 export const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || "AIzaSyCVM8NoXlgZXbvYohxzLJaje4gU7sK4qdA",
@@ -14,5 +14,7 @@ export const firebaseConfig = {
 
 // Diagnostic logging for deployment verification
 if (typeof window !== 'undefined') {
-    console.log("Firebase initialized with API Key (last 4):", firebaseConfig.apiKey.slice(-4));
+    const key = firebaseConfig.apiKey;
+    console.log("Firebase initialized with API Key (last 4):", key ? key.slice(-4) : "MISSING");
+    console.log("Current Domain Hostname:", window.location.hostname);
 }

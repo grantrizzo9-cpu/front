@@ -64,19 +64,18 @@ function LoginForm() {
 
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      toast({
-        title: "Login Successful",
-        description: "Redirecting to your dashboard...",
-      });
+      toast({ title: "Login Successful", description: "Redirecting..." });
       router.push("/dashboard");
     } catch (error: any) {
       console.error("Login Error:", error.code, error.message);
       
-      // V1.2.7: Catch all variations of referer blocks and offline errors
-      if (error.message?.toLowerCase().includes('referer-blocked') || 
+      const isConnectionIssue = 
+          error.message?.toLowerCase().includes('referer-blocked') || 
           error.code === 'auth/requests-from-referer-blocked' ||
           error.message?.toLowerCase().includes('offline') ||
-          error.code === 'unavailable') {
+          error.code === 'unavailable';
+
+      if (isConnectionIssue) {
           setApiKeyBlocked(true);
           return;
       }
@@ -86,19 +85,10 @@ function LoginForm() {
           return; 
       }
 
-      let description = "An unknown error occurred. Please try again.";
-      if (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found') {
-        description = "Invalid email or password.";
-      } else if (error.code === 'auth/too-many-requests') {
-        description = "Too many failed attempts. Try again later.";
-      } else if (error.message) {
-        description = error.message;
-      }
-      
       toast({
         variant: "destructive",
         title: "Login Failed",
-        description: description,
+        description: error.message || "Invalid credentials.",
       });
     } finally {
         setIsLoading(false);
@@ -112,16 +102,18 @@ function LoginForm() {
       {apiKeyBlocked && (
         <Alert variant="destructive" className="border-amber-500 bg-amber-50 shadow-lg animate-in slide-in-from-top-2 duration-300">
           <ShieldAlert className="h-5 w-5 text-amber-600" />
-          <AlertTitle className="font-bold text-red-800">Connection Blocked (Cache Detected)</AlertTitle>
+          <AlertTitle className="font-bold text-red-800">Connection Failed (Offline/Blocked)</AlertTitle>
           <AlertDescription className="text-sm space-y-3 text-red-700">
-            <p>You have updated Google Cloud, but your browser is still remembering the old block. You must perform a Hard Reset.</p>
+            <p>Firebase is reporting "offline" because your Google Cloud API Key is blocking requests from Render (Referer Blocked).</p>
             <div className="bg-white/50 p-3 rounded border border-red-200 text-xs space-y-2">
-                <p className="font-semibold uppercase tracking-wider flex items-center gap-1"><Clock className="h-3 w-3"/> Recovery Protocol:</p>
-                <ul className="list-disc list-inside space-y-1">
-                    <li>Confirm API Key ends in: <code>...{firebaseConfig.apiKey.slice(-4)}</code></li>
-                    <li>Click the <strong>Clear Cache</strong> button below.</li>
-                    <li>Wait 60 seconds for GCP to sync before trying again.</li>
-                </ul>
+                <p className="font-semibold uppercase tracking-wider flex items-center gap-1"><Clock className="h-3 w-3"/> Required Action:</p>
+                <ol className="list-decimal list-inside space-y-1">
+                    <li>Click "Open API Credentials" below.</li>
+                    <li>Click on your API Key (e.g. <strong>Browser key</strong>).</li>
+                    <li>Find <strong>"Website restrictions"</strong>.</li>
+                    <li>Add <code>https://{window.location.hostname}/*</code></li>
+                    <li>Click <strong>Save</strong>.</li>
+                </ol>
             </div>
             <div className="flex flex-col gap-2">
                 <Button onClick={handleHardReset} variant="default" className="bg-amber-600 hover:bg-amber-700 text-white font-bold">
@@ -129,7 +121,7 @@ function LoginForm() {
                 </Button>
                 <Button asChild variant="outline" size="sm" className="bg-white text-amber-800 border-amber-200 font-bold">
                     <a href={gcpCredentialsUrl} target="_blank" rel="noopener noreferrer">
-                        Verify API Key Settings <ExternalLink className="ml-2 h-3 w-3" />
+                        Open API Credentials <ExternalLink className="ml-2 h-3 w-3" />
                     </a>
                 </Button>
             </div>
@@ -142,12 +134,12 @@ function LoginForm() {
           <Globe className="h-5 w-5 text-red-600" />
           <AlertTitle className="font-bold text-red-800">Domain Not Whitelisted</AlertTitle>
           <AlertDescription className="text-sm space-y-3 text-red-700">
-            <p>Firebase Auth requires this domain to be authorized in the console.</p>
+            <p>You must authorize this domain in the Firebase Console.</p>
             <div className="bg-white/50 p-3 rounded border border-red-200">
                 <ol className="list-decimal list-inside space-y-1 text-xs">
                     <li>Go to <strong>Firebase Console > Auth > Settings</strong>.</li>
-                    <li>Click "Add domain".</li>
-                    <li>Paste: <code>{unauthorizedDomain}</code></li>
+                    <li>Click "Authorized Domains".</li>
+                    <li>Add: <code>{unauthorizedDomain}</code></li>
                 </ol>
             </div>
             <Button onClick={handleHardReset} variant="outline" size="sm" className="w-full bg-white font-bold">
@@ -180,7 +172,7 @@ function LoginForm() {
               </div>
               <Input id="password" name="password" type="password" required disabled={isLoading}/>
             </div>
-            <Button type="submit" className="w-full h-12 text-lg font-bold bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-200" disabled={isLoading}>
+            <Button type="submit" className="w-full h-12 text-lg font-bold bg-blue-600 hover:bg-blue-700 shadow-lg" disabled={isLoading}>
               {isLoading ? <Loader2 className="animate-spin" /> : "Log In"}
             </Button>
           </form>

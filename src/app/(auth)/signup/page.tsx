@@ -121,8 +121,7 @@ function SignupFormComponent() {
         }
 
         await batch.commit();
-
-        toast({ title: "Account Created!", description: "Welcome! We're redirecting you to activate your plan." });
+        toast({ title: "Account Created!", description: "Welcome!" });
         router.push(`/dashboard/upgrade?plan=${plan.id}`);
     };
 
@@ -140,7 +139,7 @@ function SignupFormComponent() {
             const usernameDocRef = doc(firestore, "usernames", finalUsername);
             const usernameDoc = await getDoc(usernameDocRef);
             if (usernameDoc.exists()) {
-                toast({ variant: "destructive", title: "Username Taken", description: "This username is already in use. Please choose another one." });
+                toast({ variant: "destructive", title: "Username Taken", description: "Choose another one." });
                 setIsProcessing(false);
                 return;
             }
@@ -152,10 +151,13 @@ function SignupFormComponent() {
         } catch (error: any) {
             console.error("Signup error:", error.code, error.message);
             
-            if (error.message?.toLowerCase().includes('referer-blocked') || 
+            const isConnectionIssue = 
+                error.message?.toLowerCase().includes('referer-blocked') || 
                 error.code === 'auth/requests-from-referer-blocked' ||
                 error.message?.toLowerCase().includes('offline') ||
-                error.code === 'unavailable') {
+                error.code === 'unavailable';
+
+            if (isConnectionIssue) {
                 setApiKeyBlocked(true);
                 setIsProcessing(false);
                 return;
@@ -179,15 +181,15 @@ function SignupFormComponent() {
             {apiKeyBlocked && (
                 <Alert variant="destructive" className="border-amber-500 bg-amber-50 shadow-lg animate-in slide-in-from-top-2 duration-300">
                     <ShieldAlert className="h-5 w-5 text-amber-600" />
-                    <AlertTitle className="font-bold text-red-800">Connection Blocked (Cache Detected)</AlertTitle>
+                    <AlertTitle className="font-bold text-red-800">Connection Failed (Offline/Blocked)</AlertTitle>
                     <AlertDescription className="text-sm space-y-3 text-red-700">
-                        <p>Render is still using old security rules. You must perform a <strong>Hard Reset</strong> to connect using the new Google Cloud settings.</p>
+                        <p>Render is reporting "offline" because your Google Cloud API Key is blocking requests (Referer Blocked).</p>
                         <div className="bg-white/50 p-3 rounded border border-red-200 text-xs space-y-2">
-                            <p className="font-semibold uppercase tracking-wider flex items-center gap-1"><Clock className="h-3 w-3"/> Action Checklist:</p>
+                            <p className="font-semibold uppercase tracking-wider flex items-center gap-1"><Clock className="h-3 w-3"/> Required Action:</p>
                             <ol className="list-decimal list-inside space-y-1">
-                                <li>Verify Key ends in: <code>...{firebaseConfig.apiKey.slice(-4)}</code></li>
+                                <li>Verify API Key ends in: <code>...{firebaseConfig.apiKey.slice(-4)}</code></li>
+                                <li>Add <code>https://{window.location.hostname}/*</code> to Website Restrictions in GCP.</li>
                                 <li>Click <strong>Clear Cache & Refresh</strong> below.</li>
-                                <li><strong>Wait 60 seconds</strong> for Google Cloud to sync.</li>
                             </ol>
                         </div>
                         <div className="flex flex-col gap-2">
@@ -196,7 +198,7 @@ function SignupFormComponent() {
                             </Button>
                             <Button asChild variant="outline" size="sm" className="bg-white text-amber-800 border-amber-200 font-bold">
                                 <a href={gcpCredentialsUrl} target="_blank" rel="noopener noreferrer">
-                                    Verify API Key Settings <ExternalLink className="ml-2 h-4 w-4" />
+                                    Open API Credentials <ExternalLink className="ml-2 h-4 w-4" />
                                 </a>
                             </Button>
                         </div>
@@ -209,15 +211,7 @@ function SignupFormComponent() {
                     <Globe className="h-4 w-4 text-red-600" />
                     <AlertTitle className="font-bold text-red-800">Domain Security Block</AlertTitle>
                     <AlertDescription className="text-xs space-y-2 text-red-700">
-                        <p>Firebase is blocking access because <strong>{unauthorizedDomain}</strong> is not authorized.</p>
-                        <div className="bg-white/50 p-3 rounded border border-red-200">
-                            <p className="font-semibold underline">Final Action Required:</p>
-                            <ol className="list-decimal list-inside space-y-1">
-                                <li>Go to <strong>Firebase Console</strong>.</li>
-                                <li>Navigate to <strong>Auth > Settings > Authorized Domains</strong>.</li>
-                                <li>Add <code>{unauthorizedDomain}</code> to the list.</li>
-                            </ol>
-                        </div>
+                        <p>Add <code>{unauthorizedDomain}</code> to <strong>Firebase Console > Auth > Settings > Authorized Domains</strong>.</p>
                         <Button onClick={handleHardReset} variant="outline" size="sm" className="w-full bg-white font-bold">
                             <RefreshCcw className="mr-2 h-3 w-3" /> Refresh Page
                         </Button>
@@ -279,14 +273,6 @@ function SignupLoadingSkeleton() {
           <Skeleton className="h-4 w-3/4" />
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="space-y-2">
-              <Skeleton className="h-4 w-1/4" />
-              <Skeleton className="h-10 w-full" />
-          </div>
-          <div className="space-y-2">
-              <Skeleton className="h-4 w-1/4" />
-              <Skeleton className="h-10 w-full" />
-          </div>
           <div className="space-y-2">
               <Skeleton className="h-4 w-1/4" />
               <Skeleton className="h-10 w-full" />
