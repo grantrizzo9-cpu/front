@@ -7,8 +7,7 @@ import { getAuth, Auth } from 'firebase/auth';
 import { 
   initializeFirestore, 
   Firestore,
-  terminate,
-  clearIndexedDbPersistence
+  enableNetwork
 } from 'firebase/firestore';
 import { firebaseConfig } from '@/firebase/config';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -41,19 +40,11 @@ async function getFirebase(): Promise<FirebaseServices | null> {
           ignoreUndefinedProperties: true,
           experimentalForceLongPolling: true, 
       });
-
-      // Aggressively clear persistence ONLY on initial load to break offline loops
+      
+      // Ensure the client is marked as "online" immediately
       try {
-          await terminate(cachedFirestore);
-          await clearIndexedDbPersistence(cachedFirestore);
-          // Re-initialize fresh
-          cachedFirestore = initializeFirestore(cachedApp, {
-              ignoreUndefinedProperties: true,
-              experimentalForceLongPolling: true, 
-          });
-      } catch (e) {
-          // Persistence might be locked, continue
-      }
+          await enableNetwork(cachedFirestore);
+      } catch (e) {}
     }
 
     return { 
@@ -80,16 +71,8 @@ export function FirebaseClientProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
-  const handleHardReset = async () => {
-      if (firebaseServices?.firestore) {
-          try {
-              await terminate(firebaseServices.firestore);
-              await clearIndexedDbPersistence(firebaseServices.firestore);
-          } catch (e) {}
-          window.location.reload();
-      } else {
-          window.location.reload();
-      }
+  const handleHardReset = () => {
+      window.location.reload();
   };
 
   if (!isHydrated || isInitializing) {
