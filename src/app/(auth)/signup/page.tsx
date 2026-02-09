@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, Suspense, useEffect } from 'react';
@@ -9,7 +10,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { subscriptionTiers } from "@/lib/data";
-import { Loader2, Users, ShieldAlert, ExternalLink, RefreshCcw, Clock, Trash2, Globe, CheckCircle2 } from "lucide-react";
+import { Loader2, Users, ShieldAlert, ExternalLink, RefreshCcw, Trash2, Globe, CheckCircle2 } from "lucide-react";
 import { useAuth, useFirestore } from "@/firebase";
 import { createUserWithEmailAndPassword, updateProfile, User } from "firebase/auth";
 import { doc, getDoc, writeBatch, serverTimestamp, collection, terminate, clearIndexedDbPersistence } from "firebase/firestore";
@@ -41,7 +42,9 @@ function SignupFormComponent() {
         const ref = params.get('ref');
         if (plan) setPlanId(plan);
         if (ref) setReferralCode(ref);
-        setCurrentHostname(window.location.hostname);
+        if (typeof window !== 'undefined') {
+            setCurrentHostname(window.location.hostname);
+        }
     }, []);
     
     const plan = subscriptionTiers.find(p => p.id === planId) || subscriptionTiers[0];
@@ -84,9 +87,13 @@ function SignupFormComponent() {
         
         let referrerUid: string | null = null;
         if (refCode) {
-            const referrerUsernameDoc = await getDoc(doc(firestore, "usernames", refCode.toLowerCase()));
-            if (referrerUsernameDoc.exists()) {
-                referrerUid = referrerUsernameDoc.data()?.uid ?? null;
+            try {
+                const referrerUsernameDoc = await getDoc(doc(firestore, "usernames", refCode.toLowerCase()));
+                if (referrerUsernameDoc.exists()) {
+                    referrerUid = referrerUsernameDoc.data()?.uid ?? null;
+                }
+            } catch (e) {
+                console.warn("Referrer lookup failed, proceeding without referrer.");
             }
         }
 
@@ -140,6 +147,7 @@ function SignupFormComponent() {
         const refCodeFromUrl = params.get('ref');
 
         try {
+            // Check username availability
             const usernameDocRef = doc(firestore, "usernames", finalUsername);
             const usernameDoc = await getDoc(usernameDocRef);
             if (usernameDoc.exists()) {
@@ -187,14 +195,14 @@ function SignupFormComponent() {
                     <ShieldAlert className="h-5 w-5 text-amber-600" />
                     <AlertTitle className="font-bold text-red-800">Security Connection Blocked</AlertTitle>
                     <AlertDescription className="text-sm space-y-3 text-red-700">
-                        <p>Firebase cannot connect because the Google Cloud API Key is blocking this domain.</p>
+                        <p>Firebase cannot connect to signup because the Google Cloud API Key is blocking this domain.</p>
                         
                         <div className="bg-white/80 p-3 rounded border border-amber-200 space-y-2">
                             <p className="font-bold text-xs uppercase tracking-tighter flex items-center gap-1"><CheckCircle2 className="h-3 w-3 text-green-600"/> Verify this hostname in Google Cloud:</p>
                             <code className="block p-2 bg-slate-900 text-green-400 rounded font-mono text-xs break-all">
                                 https://{currentHostname}/*
                             </code>
-                            <p className="text-[10px] italic text-muted-foreground">CRITICAL: You must click the blue <strong>SAVE</strong> button in Google Cloud after adding this.</p>
+                            <p className="text-[10px] italic text-muted-foreground">Make sure you clicked the blue <strong>SAVE</strong> button in Google Cloud after adding this.</p>
                         </div>
 
                         <div className="flex flex-col gap-2">
