@@ -10,7 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth, useFirestore } from "@/firebase";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { useState, useEffect, Suspense } from "react";
-import { Loader2, ShieldAlert, ExternalLink, RefreshCcw, Lock, Clock, Trash2, Globe, CheckCircle2 } from "lucide-react";
+import { Loader2, ShieldAlert, ExternalLink, RefreshCcw, Lock, Trash2, Globe, CheckCircle2, Info } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { firebaseConfig } from "@/firebase/config";
 import { terminate, clearIndexedDbPersistence } from "firebase/firestore";
@@ -25,11 +25,11 @@ function LoginForm() {
   const [isHydrated, setIsHydrated] = useState(false);
   const [unauthorizedDomain, setUnauthorizedDomain] = useState<string | null>(null);
   const [apiKeyBlocked, setApiKeyBlocked] = useState(false);
-  const [currentHostname, setCurrentHostname] = useState("");
+  const [currentOrigin, setCurrentOrigin] = useState("");
 
   useEffect(() => {
     setIsHydrated(true);
-    setCurrentHostname(window.location.hostname);
+    setCurrentOrigin(window.location.origin);
   }, []);
 
   const refCode = isHydrated ? searchParams.get('ref') : null;
@@ -104,50 +104,32 @@ function LoginForm() {
   return (
     <div className="space-y-6">
       {apiKeyBlocked && (
-        <Alert variant="destructive" className="border-amber-500 bg-amber-50 shadow-lg animate-in slide-in-from-top-2 duration-300">
+        <Alert variant="destructive" className="border-amber-500 bg-amber-50 shadow-lg">
           <ShieldAlert className="h-5 w-5 text-amber-600" />
-          <AlertTitle className="font-bold text-red-800">Security Connection Blocked</AlertTitle>
-          <AlertDescription className="text-sm space-y-3 text-red-700">
-            <p>Your browser is reporting "offline" because the Google Cloud API Key is blocking this domain.</p>
+          <AlertTitle className="font-bold text-red-800 uppercase tracking-tighter">Connection Blocked</AlertTitle>
+          <AlertDescription className="text-sm space-y-4 text-red-700">
+            <p>Your <strong>Google Cloud API Key</strong> is blocking this site. This happens when the key was deleted or the domain isn't whitelisted.</p>
             
-            <div className="bg-white/80 p-3 rounded border border-amber-200 space-y-2">
-                <p className="font-bold text-xs uppercase tracking-tighter flex items-center gap-1"><CheckCircle2 className="h-3 w-3 text-green-600"/> Verify this hostname in Google Cloud:</p>
-                <code className="block p-2 bg-slate-900 text-green-400 rounded font-mono text-xs break-all">
-                    https://{currentHostname}/*
+            <div className="bg-white/80 p-4 rounded-xl border border-amber-200 space-y-3">
+                <p className="font-bold text-xs uppercase flex items-center gap-1"><Info className="h-3 w-3"/> Required Whitelist Entry:</p>
+                <code className="block p-3 bg-slate-900 text-green-400 rounded-lg font-mono text-xs break-all shadow-inner">
+                    {currentOrigin}/*
                 </code>
-                <p className="text-[10px] italic text-muted-foreground">Make sure you clicked the blue <strong>SAVE</strong> button in Google Cloud after adding this.</p>
+                <p className="text-[10px] italic text-muted-foreground leading-tight">
+                    In GCP Credentials, click your <strong>API Key</strong> (NOT Client ID), find "Website restrictions", click "ADD", and paste the code above.
+                </p>
             </div>
 
             <div className="flex flex-col gap-2">
-                <Button onClick={handleHardReset} variant="default" className="bg-amber-600 hover:bg-amber-700 text-white font-bold">
-                    <Trash2 className="mr-2 h-4 w-4" /> 1. Clear Cache & Refresh Site
+                <Button onClick={handleHardReset} variant="default" className="bg-amber-600 hover:bg-amber-700 text-white font-bold h-12">
+                    <Trash2 className="mr-2 h-4 w-4" /> 1. Clear Cache & Retry
                 </Button>
-                <Button asChild variant="outline" size="sm" className="bg-white text-amber-800 border-amber-200 font-bold">
+                <Button asChild variant="outline" size="sm" className="bg-white text-amber-800 border-amber-200 font-bold h-10">
                     <a href={gcpCredentialsUrl} target="_blank" rel="noopener noreferrer">
-                        2. Open Google Cloud Settings <ExternalLink className="ml-2 h-3 w-3" />
+                        2. Go to GCP Credentials <ExternalLink className="ml-2 h-3 w-3" />
                     </a>
                 </Button>
             </div>
-          </AlertDescription>
-        </Alert>
-      )}
-
-      {unauthorizedDomain && !apiKeyBlocked && (
-        <Alert variant="destructive" className="border-red-500 bg-red-50 shadow-lg">
-          <Globe className="h-5 w-5 text-red-600" />
-          <AlertTitle className="font-bold text-red-800">Domain Not Authorized</AlertTitle>
-          <AlertDescription className="text-sm space-y-3 text-red-700">
-            <p>You must authorize this domain in the Firebase Console.</p>
-            <div className="bg-white/50 p-3 rounded border border-red-200">
-                <ol className="list-decimal list-inside space-y-1 text-xs">
-                    <li>Go to <strong>Firebase Console > Auth > Settings</strong>.</li>
-                    <li>Click "Authorized Domains".</li>
-                    <li>Add: <code>{unauthorizedDomain}</code></li>
-                </ol>
-            </div>
-            <Button onClick={handleHardReset} variant="outline" size="sm" className="w-full bg-white font-bold">
-                <RefreshCcw className="mr-2 h-3 w-3" /> Refresh Page
-            </Button>
           </AlertDescription>
         </Alert>
       )}

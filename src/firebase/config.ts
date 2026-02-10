@@ -1,11 +1,9 @@
 /**
- * Firebase Configuration (v1.3.5)
- * Prioritizes environment variables from Render/Cloudflare.
+ * Firebase Configuration (v1.3.6)
+ * Includes enhanced diagnostic logging for Render/Custom Domain debugging.
  */
 export const firebaseConfig = {
-  // IMPORTANT: Since you deleted your old key, you must paste the NEW key from Google Cloud 
-  // into your Render Environment Variables as NEXT_PUBLIC_FIREBASE_API_KEY
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || "REPLACE_WITH_NEW_KEY_IF_NOT_IN_ENV",
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || "REPLACE_WITH_NEW_KEY",
   authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || "rent-a-host-a55fd.firebaseapp.com",
   projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "rent-a-host-a55fd",
   storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || "rent-a-host-a55fd.firebasestorage.app",
@@ -14,10 +12,14 @@ export const firebaseConfig = {
   measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID || "G-8YBHMBD5QG"
 };
 
-// Diagnostic logging for deployment verification
+// Advanced Diagnostics
 if (typeof window !== 'undefined') {
-    console.log("--- FIREBASE DIAGNOSTICS v1.3.5 ---");
-    console.log("API Key Status:", firebaseConfig.apiKey.includes("REPLACE") ? "MISSING/DEFAULT" : "ACTIVE (" + firebaseConfig.apiKey.slice(-4) + ")");
-    console.log("Current Hostname:", window.location.hostname);
-    console.log("-----------------------------------");
+    const keyStatus = firebaseConfig.apiKey.includes("REPLACE") ? "⚠️ MISSING (REPLACE_WITH_NEW_KEY)" : "✅ ACTIVE";
+    const last4 = !firebaseConfig.apiKey.includes("REPLACE") ? firebaseConfig.apiKey.slice(-4) : "N/A";
+    
+    console.log("%c--- FIREBASE DIAGNOSTICS v1.3.6 ---", "color: #2563eb; font-weight: bold; font-size: 12px;");
+    console.log(`API Key: ${keyStatus} (Ends in: ${last4})`);
+    console.log(`Current Hostname: ${window.location.hostname}`);
+    console.log(`Current Origin: ${window.location.origin}`);
+    console.log("%c-----------------------------------", "color: #2563eb; font-weight: bold;");
 }

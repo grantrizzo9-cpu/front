@@ -9,7 +9,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { subscriptionTiers } from "@/lib/data";
-import { Loader2, Users, RefreshCcw, ShieldAlert, CheckCircle2, ExternalLink } from "lucide-react";
+import { Loader2, Users, RefreshCcw, ShieldAlert, CheckCircle2, ExternalLink, Info } from "lucide-react";
 import { useAuth, useFirestore } from "@/firebase";
 import { createUserWithEmailAndPassword, updateProfile, User } from "firebase/auth";
 import { doc, getDoc, writeBatch, serverTimestamp, collection, terminate, clearIndexedDbPersistence, enableNetwork } from "firebase/firestore";
@@ -29,7 +29,7 @@ function SignupFormComponent() {
     const [isProcessing, setIsProcessing] = useState(false);
     const [errors, setErrors] = useState({ username: '', email: '', password: '' });
     const [isOffline, setIsOffline] = useState(false);
-    const [currentHostname, setCurrentHostname] = useState("");
+    const [currentOrigin, setCurrentOrigin] = useState("");
 
     const [planId, setPlanId] = useState('starter');
     const [referralCode, setReferralCode] = useState<string | null>(null);
@@ -40,7 +40,7 @@ function SignupFormComponent() {
         const ref = params.get('ref');
         if (plan) setPlanId(plan);
         if (ref) setReferralCode(ref);
-        setCurrentHostname(window.location.hostname);
+        setCurrentOrigin(window.location.origin);
     }, []);
     
     const plan = subscriptionTiers.find(p => p.id === planId) || subscriptionTiers[0];
@@ -78,7 +78,6 @@ function SignupFormComponent() {
     };
 
     const postSignupFlow = async (user: User, finalUsername: string, refCode: string | null) => {
-        // Attempt to enable network before batch commit
         try { await enableNetwork(firestore); } catch (e) {}
 
         const batch = writeBatch(firestore);
@@ -95,7 +94,7 @@ function SignupFormComponent() {
         }
 
         const userData = {
-            id: user.uid, email: user.email, username: finalUsername, referredBy: referrerUid, isAffiliate: true, createdAt: serverTimestamp(),
+            id: user.uid, uid: user.uid, email: user.email, username: finalUsername, referredBy: referrerUid, isAffiliate: true, createdAt: serverTimestamp(),
             subscription: {
                 tierId: plan.id,
                 status: 'inactive' as const,
@@ -128,7 +127,6 @@ function SignupFormComponent() {
             batch.set(referralDocRef, referralData);
         }
 
-        // AUTO-RETRY LOGIC for Batch Commit
         let retries = 3;
         while (retries > 0) {
             try {
@@ -140,7 +138,7 @@ function SignupFormComponent() {
                 console.warn(`Batch commit failed, retrying... (${retries} left)`, err.message);
                 retries--;
                 if (retries === 0) throw err;
-                await new Promise(r => setTimeout(r, 2000)); // Wait 2s before retry
+                await new Promise(r => setTimeout(r, 2000));
             }
         }
     };
@@ -153,20 +151,6 @@ function SignupFormComponent() {
         const finalUsername = username.toLowerCase().trim();
 
         try {
-            // Direct attempt to check username
-            const usernameDocRef = doc(firestore, "usernames", finalUsername);
-            try {
-                const usernameDoc = await getDoc(usernameDocRef);
-                if (usernameDoc.exists()) {
-                    toast({ variant: "destructive", title: "Username Taken", description: "This username is already in use." });
-                    setIsProcessing(false);
-                    return;
-                }
-            } catch (err: any) {
-                // Ignore pre-check failures, the batch commit will catch duplicates
-                console.warn("Username pre-check skipped due to connection warm-up.");
-            }
-
             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
             await updateProfile(userCredential.user, { displayName: finalUsername });
             await postSignupFlow(userCredential.user, finalUsername, referralCode);
@@ -186,12 +170,7 @@ function SignupFormComponent() {
                 return;
             }
 
-            let errorMessage = error.message;
-            if (error.code === 'auth/email-already-in-use') {
-                errorMessage = "This email is already registered. Please log in.";
-            }
-
-            toast({ variant: "destructive", title: "Signup Failed", description: errorMessage });
+            toast({ variant: "destructive", title: "Signup Failed", description: error.message });
             setIsProcessing(false);
         }
     };
@@ -203,24 +182,27 @@ function SignupFormComponent() {
             {isOffline && (
                 <Alert variant="destructive" className="border-amber-500 bg-amber-50 shadow-lg">
                     <ShieldAlert className="h-5 w-5 text-amber-600" />
-                    <AlertTitle className="font-bold text-red-800">Domain Whitelist Required</AlertTitle>
-                    <AlertDescription className="text-sm space-y-3 text-red-700">
-                        <p>Since you are visiting from your custom domain, you must add it to your Google Cloud API Key whitelist.</p>
+                    <AlertTitle className="font-bold text-red-800 uppercase tracking-tighter">API Key Blocked</AlertTitle>
+                    <AlertDescription className="text-sm space-y-4 text-red-700">
+                        <p>Your Google Cloud API Key is blocking requests from this site. Since you are using <strong>hostproai.com</strong>, you must add it to the whitelist.</p>
                         
-                        <div className="bg-white/80 p-3 rounded border border-amber-200 space-y-2">
-                            <p className="font-bold text-xs uppercase tracking-tighter flex items-center gap-1"><CheckCircle2 className="h-3 w-3 text-green-600"/> Add this entry to GCP:</p>
-                            <code className="block p-2 bg-slate-900 text-green-400 rounded font-mono text-xs break-all">
-                                https://{currentHostname}/*
+                        <div className="bg-white/80 p-4 rounded-xl border border-amber-200 space-y-3 shadow-inner">
+                            <p className="font-bold text-xs uppercase flex items-center gap-1"><Info className="h-3 w-3"/> Copy this Origin:</p>
+                            <code className="block p-3 bg-slate-900 text-green-400 rounded-lg font-mono text-xs break-all">
+                                {currentOrigin}/*
                             </code>
+                            <p className="text-[10px] italic text-muted-foreground leading-tight">
+                                Go to GCP -> Credentials -> <strong>API Key</strong> (NOT Client ID) -> Website restrictions -> Paste above.
+                            </p>
                         </div>
 
                         <div className="flex flex-col gap-2">
-                            <Button onClick={handleHardReset} variant="default" className="bg-amber-600 hover:bg-amber-700 text-white font-bold">
-                                1. Clear Cache & Refresh
+                            <Button onClick={handleHardReset} variant="default" className="bg-amber-600 hover:bg-amber-700 text-white font-bold h-12">
+                                1. Clear Cache & Retry
                             </Button>
-                            <Button asChild variant="outline" size="sm" className="bg-white text-amber-800 border-amber-200 font-bold">
+                            <Button asChild variant="outline" size="sm" className="bg-white text-amber-800 border-amber-200 font-bold h-10">
                                 <a href={gcpCredentialsUrl} target="_blank" rel="noopener noreferrer">
-                                    2. Open Google Cloud Settings <ExternalLink className="ml-2 h-3 w-3" />
+                                    2. Open GCP Settings <ExternalLink className="ml-2 h-3 w-3" />
                                 </a>
                             </Button>
                         </div>
