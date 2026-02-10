@@ -1,5 +1,5 @@
 
-# Affiliate AI Host - Ultimate Recovery Guide (v1.2.8)
+# Affiliate AI Host - Ultimate Recovery Guide (v1.3.3)
 
 Your platform is now fully synchronized with Render environment variables and Google Cloud security settings.
 
@@ -9,18 +9,17 @@ Your platform is now fully synchronized with Render environment variables and Go
 Run these commands in your terminal to apply the connection fix:
 
 1. `git add .`
-2. `git commit -m "Final Connection Sync v1.2.8"`
+2. `git commit -m "Zero-Block Signup Fix v1.3.3"`
 3. `git push origin main`
 
 ---
 
 ## 🛠️ Step 2: Clear the "Offline" Cache
-If your login still says "offline" after the rebuild:
+If your login or signup still says "offline" after the rebuild:
 
-1.  Refresh your Render site.
-2.  An **orange alert box** will appear.
-3.  Click the **"Clear Cache & Refresh Site"** button. 
-4.  This is required because browsers "remember" the failed connection from before you fixed the settings in Google Cloud.
+1.  Refresh your site.
+2.  Look for the tiny **"Still saying offline? Click here"** link at the bottom of the form.
+3.  Click it to force a fresh connection.
 
 ---
 
@@ -31,4 +30,4 @@ Ensure the API Key you whitelisted in Google Cloud matches the one shown in your
 
 ---
 
-© 2025 Affiliate AI Host. Final Sync v1.2.8.
+© 2025 Affiliate AI Host. Final Sync v1.3.3.
