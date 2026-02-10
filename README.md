@@ -1,39 +1,36 @@
 
-# Affiliate AI Host - Final Connection Guide (v1.3.4)
+# Affiliate AI Host - New Key Recovery Guide (v1.3.5)
 
-Your platform is ready. To complete the setup, you must ensure your **Custom Domain** is whitelisted in Google Cloud.
+You have deleted your original API key. Follow these steps to restore service.
 
 ---
 
-## ✅ Step 1: Sync the Code
-Run these commands in your terminal to apply the multi-domain fix:
+## ✅ Step 1: Create & Whitelist New Key
+1.  Open [Google Cloud Credentials](https://console.cloud.google.com/apis/credentials).
+2.  Click **+ Create credentials** -> **API Key**.
+3.  Click **Edit** on the new key.
+4.  Under **Website restrictions**, add these as TWO SEPARATE entries:
+    *   `https://hostproai.com/*`
+    *   `https://front-h603.onrender.com/*`
+5.  Click **SAVE**.
+
+---
+
+## 🔑 Step 2: Update Render Environment
+1.  Copy the **New API Key** string.
+2.  Go to your **Render Dashboard** -> **Environment**.
+3.  Update `NEXT_PUBLIC_FIREBASE_API_KEY` with the new key.
+4.  Save and wait for Render to redeploy.
+
+---
+
+## 🛠️ Step 3: Sync the Code
+Run these commands in your terminal to apply the v1.3.5 diagnostics:
 
 1. `git add .`
-2. `git commit -m "Custom Domain Sync v1.3.4"`
+2. `git commit -m "New Key Recovery v1.3.5"`
 3. `git push origin main`
 
 ---
 
-## 🔒 Step 2: Whitelist Your Custom Domain
-If you are visiting **hostproai.com**, Google Cloud will block it unless it's explicitly in your list.
-
-1.  Open [Google Cloud Credentials](https://console.cloud.google.com/apis/credentials).
-2.  Click on your **API Key** (e.g. Browser key).
-3.  Under **Website restrictions**, ensure BOTH of these are present:
-    *   `https://front-h603.onrender.com/*`
-    *   `https://hostproai.com/*`  <-- **ADD THIS ONE NOW**
-4.  Click the **Blue SAVE Button**.
-5.  Wait **5 minutes** for Google's global network to update.
-
----
-
-## 🛠️ Step 3: Clear the Browser Cache
-Google Cloud changes take time to propagate. If Signup still says "offline":
-
-1.  Refresh your site.
-2.  Click the **"Still saying offline? Click here"** link at the bottom of the Signup form.
-3.  This forces a fresh connection using your new whitelist.
-
----
-
-© 2025 Affiliate AI Host. Custom Domain Sync v1.3.4.
+© 2025 Affiliate AI Host. New Key Recovery Sync v1.3.5.
