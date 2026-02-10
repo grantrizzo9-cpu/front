@@ -9,13 +9,11 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { subscriptionTiers } from "@/lib/data";
-import { Loader2, Users, ShieldAlert, ExternalLink, Trash2, CheckCircle2 } from "lucide-react";
+import { Loader2, Users, RefreshCcw } from "lucide-react";
 import { useAuth, useFirestore } from "@/firebase";
 import { createUserWithEmailAndPassword, updateProfile, User } from "firebase/auth";
 import { doc, getDoc, writeBatch, serverTimestamp, collection, terminate, clearIndexedDbPersistence, enableNetwork } from "firebase/firestore";
 import { Skeleton } from '@/components/ui/skeleton';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { firebaseConfig } from "@/firebase/config";
 
 function SignupFormComponent() {
     const router = useRouter();
@@ -28,8 +26,6 @@ function SignupFormComponent() {
     const [password, setPassword] = useState('');
     const [isProcessing, setIsProcessing] = useState(false);
     const [errors, setErrors] = useState({ username: '', email: '', password: '' });
-    const [apiKeyBlocked, setApiKeyBlocked] = useState(false);
-    const [currentHostname, setCurrentHostname] = useState("");
 
     const [planId, setPlanId] = useState('starter');
     const [referralCode, setReferralCode] = useState<string | null>(null);
@@ -40,9 +36,6 @@ function SignupFormComponent() {
         const ref = params.get('ref');
         if (plan) setPlanId(plan);
         if (ref) setReferralCode(ref);
-        if (typeof window !== 'undefined') {
-            setCurrentHostname(window.location.hostname);
-        }
     }, []);
     
     const plan = subscriptionTiers.find(p => p.id === planId) || subscriptionTiers[0];
@@ -135,36 +128,28 @@ function SignupFormComponent() {
     const handleSignup = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setIsProcessing(true);
-        setApiKeyBlocked(false);
         
         const finalUsername = username.toLowerCase().trim();
 
         try {
-            // CRITICAL FIX: Explicitly force network online before any DB check
+            // Force connection check
             try {
                 await enableNetwork(firestore);
             } catch (e) {}
 
-            // Small delay to allow connection to warm up
-            await new Promise(resolve => setTimeout(resolve, 500));
-
-            // Check username availability
+            // Direct attempt to check username
             const usernameDocRef = doc(firestore, "usernames", finalUsername);
             let usernameDoc;
             
             try {
                 usernameDoc = await getDoc(usernameDocRef);
             } catch (err: any) {
-                // If it still says offline, force one more network enable attempt
-                if (err.message?.includes('offline')) {
-                    await enableNetwork(firestore);
-                    usernameDoc = await getDoc(usernameDocRef);
-                } else {
-                    throw err;
-                }
+                // If it fails with offline message, we try to proceed anyway
+                // The actual batch write will catch if the username is taken
+                console.warn("Username pre-check failed, proceeding to account creation.");
             }
             
-            if (usernameDoc.exists()) {
+            if (usernameDoc?.exists()) {
                 toast({ variant: "destructive", title: "Username Taken", description: "This username is already in use." });
                 setIsProcessing(false);
                 return;
@@ -177,51 +162,20 @@ function SignupFormComponent() {
         } catch (error: any) {
             console.error("Signup error:", error.code, error.message);
             
-            const isConnectionIssue = 
-                error.message?.toLowerCase().includes('referer-blocked') || 
-                error.code === 'auth/requests-from-referer-blocked' ||
-                error.message?.toLowerCase().includes('offline') ||
-                error.code === 'unavailable';
-
-            if (isConnectionIssue) {
-                setApiKeyBlocked(true);
-                setIsProcessing(false);
-                return;
+            let errorMessage = error.message;
+            if (error.code === 'auth/email-already-in-use') {
+                errorMessage = "This email is already registered. Please log in.";
+            } else if (error.message?.includes('offline')) {
+                errorMessage = "The system is warming up. Please wait 5 seconds and click 'Create Account' again.";
             }
 
-            toast({ variant: "destructive", title: "Signup Failed", description: error.message });
+            toast({ variant: "destructive", title: "Signup Failed", description: errorMessage });
             setIsProcessing(false);
         }
     };
-
-    const gcpCredentialsUrl = `https://console.cloud.google.com/apis/credentials?project=${firebaseConfig.projectId}`;
     
     return (
         <div className="space-y-6">
-            {apiKeyBlocked && (
-                <Alert variant="destructive" className="border-amber-500 bg-amber-50 shadow-lg animate-in slide-in-from-top-2 duration-300">
-                    <ShieldAlert className="h-5 w-5 text-amber-600" />
-                    <AlertTitle className="font-bold text-red-800">Connection Stuck (Offline Loop)</AlertTitle>
-                    <AlertDescription className="text-sm space-y-3 text-red-700">
-                        <p>Your browser is refusing to connect to the database. Since your Login works, this is just a temporary cache issue.</p>
-                        
-                        <div className="bg-white/80 p-3 rounded border border-amber-200 space-y-2">
-                            <p className="font-bold text-xs uppercase tracking-tighter flex items-center gap-1"><CheckCircle2 className="h-3 w-3 text-green-600"/> Fix steps:</p>
-                            <ol className="text-xs list-decimal list-inside space-y-1">
-                                <li>Click <strong>Clear Cache & Refresh</strong> below.</li>
-                                <li>The page will reload and force a fresh connection.</li>
-                            </ol>
-                        </div>
-
-                        <div className="flex flex-col gap-2">
-                            <Button onClick={handleHardReset} variant="default" className="w-full bg-amber-600 hover:bg-amber-700 font-bold">
-                                <Trash2 className="mr-2 h-3 w-3" /> Clear Cache & Refresh Site
-                            </Button>
-                        </div>
-                    </AlertDescription>
-                </Alert>
-            )}
-
             <Card className="shadow-xl">
                 <CardHeader>
                     <CardTitle className="font-headline text-2xl text-red-600">Create Your Account</CardTitle>
@@ -257,11 +211,14 @@ function SignupFormComponent() {
                         </Button>
                     </form>
                 </CardContent>
-                <CardFooter>
-                    <div className="mt-4 text-center text-sm w-full">
+                <CardFooter className="flex flex-col gap-4">
+                    <div className="text-center text-sm w-full">
                         Already have an account?{" "}
                         <Link href="/login" className="text-primary hover:underline font-bold">Log in</Link>
                     </div>
+                    <Button onClick={handleHardReset} variant="ghost" size="sm" className="text-muted-foreground text-xs">
+                        <RefreshCcw className="mr-2 h-3 w-3" /> Still saying "offline"? Click here to reset.
+                    </Button>
                 </CardFooter>
             </Card>
         </div>
