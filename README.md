@@ -1,33 +1,39 @@
 
-# Affiliate AI Host - Ultimate Recovery Guide (v1.3.3)
+# Affiliate AI Host - Final Connection Guide (v1.3.4)
 
-Your platform is now fully synchronized with Render environment variables and Google Cloud security settings.
+Your platform is ready. To complete the setup, you must ensure your **Custom Domain** is whitelisted in Google Cloud.
 
 ---
 
 ## ✅ Step 1: Sync the Code
-Run these commands in your terminal to apply the connection fix:
+Run these commands in your terminal to apply the multi-domain fix:
 
 1. `git add .`
-2. `git commit -m "Zero-Block Signup Fix v1.3.3"`
+2. `git commit -m "Custom Domain Sync v1.3.4"`
 3. `git push origin main`
 
 ---
 
-## 🛠️ Step 2: Clear the "Offline" Cache
-If your login or signup still says "offline" after the rebuild:
+## 🔒 Step 2: Whitelist Your Custom Domain
+If you are visiting **hostproai.com**, Google Cloud will block it unless it's explicitly in your list.
+
+1.  Open [Google Cloud Credentials](https://console.cloud.google.com/apis/credentials).
+2.  Click on your **API Key** (e.g. Browser key).
+3.  Under **Website restrictions**, ensure BOTH of these are present:
+    *   `https://front-h603.onrender.com/*`
+    *   `https://hostproai.com/*`  <-- **ADD THIS ONE NOW**
+4.  Click the **Blue SAVE Button**.
+5.  Wait **5 minutes** for Google's global network to update.
+
+---
+
+## 🛠️ Step 3: Clear the Browser Cache
+Google Cloud changes take time to propagate. If Signup still says "offline":
 
 1.  Refresh your site.
-2.  Look for the tiny **"Still saying offline? Click here"** link at the bottom of the form.
-3.  Click it to force a fresh connection.
+2.  Click the **"Still saying offline? Click here"** link at the bottom of the Signup form.
+3.  This forces a fresh connection using your new whitelist.
 
 ---
 
-## 🔒 Step 3: Verify the Key
-Ensure the API Key you whitelisted in Google Cloud matches the one shown in your Browser Console (F12):
-- **Whitelisted Key**: The one ending in `...4qdA`.
-- **Render Variable**: `NEXT_PUBLIC_FIREBASE_API_KEY` should be that exact key.
-
----
-
-© 2025 Affiliate AI Host. Final Sync v1.3.3.
+© 2025 Affiliate AI Host. Custom Domain Sync v1.3.4.

@@ -9,11 +9,13 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { subscriptionTiers } from "@/lib/data";
-import { Loader2, Users, RefreshCcw } from "lucide-react";
+import { Loader2, Users, RefreshCcw, ShieldAlert, CheckCircle2, ExternalLink } from "lucide-react";
 import { useAuth, useFirestore } from "@/firebase";
 import { createUserWithEmailAndPassword, updateProfile, User } from "firebase/auth";
 import { doc, getDoc, writeBatch, serverTimestamp, collection, terminate, clearIndexedDbPersistence, enableNetwork } from "firebase/firestore";
 import { Skeleton } from '@/components/ui/skeleton';
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { firebaseConfig } from "@/firebase/config";
 
 function SignupFormComponent() {
     const router = useRouter();
@@ -26,6 +28,8 @@ function SignupFormComponent() {
     const [password, setPassword] = useState('');
     const [isProcessing, setIsProcessing] = useState(false);
     const [errors, setErrors] = useState({ username: '', email: '', password: '' });
+    const [isOffline, setIsOffline] = useState(false);
+    const [currentHostname, setCurrentHostname] = useState("");
 
     const [planId, setPlanId] = useState('starter');
     const [referralCode, setReferralCode] = useState<string | null>(null);
@@ -36,6 +40,7 @@ function SignupFormComponent() {
         const ref = params.get('ref');
         if (plan) setPlanId(plan);
         if (ref) setReferralCode(ref);
+        setCurrentHostname(window.location.hostname);
     }, []);
     
     const plan = subscriptionTiers.find(p => p.id === planId) || subscriptionTiers[0];
@@ -73,6 +78,9 @@ function SignupFormComponent() {
     };
 
     const postSignupFlow = async (user: User, finalUsername: string, refCode: string | null) => {
+        // Attempt to enable network before batch commit
+        try { await enableNetwork(firestore); } catch (e) {}
+
         const batch = writeBatch(firestore);
         const userDocRef = doc(firestore, "users", user.uid);
         
@@ -120,39 +128,43 @@ function SignupFormComponent() {
             batch.set(referralDocRef, referralData);
         }
 
-        await batch.commit();
-        toast({ title: "Account Created!", description: "Welcome to Affiliate AI Host!" });
-        router.push(`/dashboard/upgrade?plan=${plan.id}`);
+        // AUTO-RETRY LOGIC for Batch Commit
+        let retries = 3;
+        while (retries > 0) {
+            try {
+                await batch.commit();
+                toast({ title: "Account Created!", description: "Welcome to Affiliate AI Host!" });
+                router.push(`/dashboard/upgrade?plan=${plan.id}`);
+                return;
+            } catch (err: any) {
+                console.warn(`Batch commit failed, retrying... (${retries} left)`, err.message);
+                retries--;
+                if (retries === 0) throw err;
+                await new Promise(r => setTimeout(r, 2000)); // Wait 2s before retry
+            }
+        }
     };
 
     const handleSignup = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setIsProcessing(true);
+        setIsOffline(false);
         
         const finalUsername = username.toLowerCase().trim();
 
         try {
-            // Force connection check
-            try {
-                await enableNetwork(firestore);
-            } catch (e) {}
-
             // Direct attempt to check username
             const usernameDocRef = doc(firestore, "usernames", finalUsername);
-            let usernameDoc;
-            
             try {
-                usernameDoc = await getDoc(usernameDocRef);
+                const usernameDoc = await getDoc(usernameDocRef);
+                if (usernameDoc.exists()) {
+                    toast({ variant: "destructive", title: "Username Taken", description: "This username is already in use." });
+                    setIsProcessing(false);
+                    return;
+                }
             } catch (err: any) {
-                // If it fails with offline message, we try to proceed anyway
-                // The actual batch write will catch if the username is taken
-                console.warn("Username pre-check failed, proceeding to account creation.");
-            }
-            
-            if (usernameDoc?.exists()) {
-                toast({ variant: "destructive", title: "Username Taken", description: "This username is already in use." });
-                setIsProcessing(false);
-                return;
+                // Ignore pre-check failures, the batch commit will catch duplicates
+                console.warn("Username pre-check skipped due to connection warm-up.");
             }
 
             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
@@ -162,20 +174,60 @@ function SignupFormComponent() {
         } catch (error: any) {
             console.error("Signup error:", error.code, error.message);
             
+            const isConnectionIssue = 
+                error.message?.toLowerCase().includes('referer-blocked') || 
+                error.code === 'auth/requests-from-referer-blocked' ||
+                error.message?.toLowerCase().includes('offline') ||
+                error.code === 'unavailable';
+
+            if (isConnectionIssue) {
+                setIsOffline(true);
+                setIsProcessing(false);
+                return;
+            }
+
             let errorMessage = error.message;
             if (error.code === 'auth/email-already-in-use') {
                 errorMessage = "This email is already registered. Please log in.";
-            } else if (error.message?.includes('offline')) {
-                errorMessage = "The system is warming up. Please wait 5 seconds and click 'Create Account' again.";
             }
 
             toast({ variant: "destructive", title: "Signup Failed", description: errorMessage });
             setIsProcessing(false);
         }
     };
+
+    const gcpCredentialsUrl = `https://console.cloud.google.com/apis/credentials?project=${firebaseConfig.projectId}`;
     
     return (
         <div className="space-y-6">
+            {isOffline && (
+                <Alert variant="destructive" className="border-amber-500 bg-amber-50 shadow-lg">
+                    <ShieldAlert className="h-5 w-5 text-amber-600" />
+                    <AlertTitle className="font-bold text-red-800">Domain Whitelist Required</AlertTitle>
+                    <AlertDescription className="text-sm space-y-3 text-red-700">
+                        <p>Since you are visiting from your custom domain, you must add it to your Google Cloud API Key whitelist.</p>
+                        
+                        <div className="bg-white/80 p-3 rounded border border-amber-200 space-y-2">
+                            <p className="font-bold text-xs uppercase tracking-tighter flex items-center gap-1"><CheckCircle2 className="h-3 w-3 text-green-600"/> Add this entry to GCP:</p>
+                            <code className="block p-2 bg-slate-900 text-green-400 rounded font-mono text-xs break-all">
+                                https://{currentHostname}/*
+                            </code>
+                        </div>
+
+                        <div className="flex flex-col gap-2">
+                            <Button onClick={handleHardReset} variant="default" className="bg-amber-600 hover:bg-amber-700 text-white font-bold">
+                                1. Clear Cache & Refresh
+                            </Button>
+                            <Button asChild variant="outline" size="sm" className="bg-white text-amber-800 border-amber-200 font-bold">
+                                <a href={gcpCredentialsUrl} target="_blank" rel="noopener noreferrer">
+                                    2. Open Google Cloud Settings <ExternalLink className="ml-2 h-3 w-3" />
+                                </a>
+                            </Button>
+                        </div>
+                    </AlertDescription>
+                </Alert>
+            )}
+
             <Card className="shadow-xl">
                 <CardHeader>
                     <CardTitle className="font-headline text-2xl text-red-600">Create Your Account</CardTitle>
