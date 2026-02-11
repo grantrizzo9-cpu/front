@@ -1,45 +1,37 @@
 
-# Affiliate AI Host - Firebase Hosting Launch Guide (v1.3.8)
+# Affiliate AI Host - Firebase Hosting Launch Guide (v1.3.9)
 
-Your domain is connected! Follow these steps to resolve the authentication error and push your code live to `hostproai.com`.
-
----
-
-## 🛠️ Step 1: Fix the Authentication Error
-The error "Failed to authenticate" means you need to link your terminal to your Google account.
-
-1.  **Run Login**:
-    `firebase login --no-localhost`
-2.  **Copy the Link**: The terminal will give you a long URL. Copy it and open it in your browser.
-3.  **Authorize**: Log in with your Google account and grant permissions.
-4.  **Paste the Code**: You will get an authorization code. Paste it back into your terminal and press Enter.
+Your domain `hostproai.com` is connected! Follow these steps to finish the terminal login and push your code live.
 
 ---
 
-## 🚀 Step 2: Prepare your API Key
-Since you are no longer using Render, you must ensure your **New API Key** is active in the code.
+## 🛠️ Step 1: Complete the Terminal Login
+You are currently at the prompt: `? Enable Gemini in Firebase features? (Y/n)`
 
-1.  Ensure your **Google Cloud Console** allows `https://hostproai.com/*` in the "Website restrictions" for your API Key.
-2.  Check `src/firebase/config.ts` to ensure the key is correctly referenced.
-
----
-
-## 🏗️ Step 3: Deploy to hostproai.com
-Once logged in, run these commands in your terminal:
-
-1.  **Select Project**:
-    `firebase use rent-a-host-a55fd`
-2.  **Deploy**:
-    `firebase deploy`
+1.  **Answer**: Type `Y` and press **Enter**.
+2.  **Authorize**: The terminal will provide a long URL. **Copy and open it** in your browser.
+3.  **Permission**: Sign in with your Google account and click **Allow**.
+4.  **Code**: Copy the **Authorization Code** provided by Google.
+5.  **Paste**: Go back to your terminal, paste the code, and press **Enter**.
 
 ---
 
-## 🔑 Troubleshooting "Site Not Found"
-If you see "Site Not Found" after deploying:
-1.  Check the Firebase Console -> Hosting to see if the deploy was successful.
-2.  Wait 2-5 minutes for the global cache to update.
-3.  Ensure your domain is verified in the Firebase Hosting dashboard.
+## 🏗️ Step 2: Set Project Context
+Once the terminal says "Success! Logged in", run this command:
+`firebase use rent-a-host-a55fd`
 
 ---
 
-© 2025 Affiliate AI Host. Firebase Hosting Sync v1.3.8.
+## 🚀 Step 3: Deploy to hostproai.com
+Run the final command to upload your site:
+`firebase deploy`
+
+---
+
+## 🔑 Troubleshooting
+- **Site Not Found**: If you still see this after `firebase deploy` says "Complete", wait 2 minutes for the global cache to update.
+- **API Key**: Ensure you have pasted your **New API Key** into `src/firebase/config.ts` if you haven't already.
+
+---
+
+© 2025 Affiliate AI Host. Firebase Hosting Sync v1.3.9.
