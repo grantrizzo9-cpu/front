@@ -1,6 +1,7 @@
+
 /**
- * Firebase Configuration (v1.3.6)
- * Includes enhanced diagnostic logging for Render/Custom Domain debugging.
+ * Firebase Configuration (v1.3.7)
+ * Optimized for Firebase Hosting deployment.
  */
 export const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || "REPLACE_WITH_NEW_KEY",
@@ -17,9 +18,9 @@ if (typeof window !== 'undefined') {
     const keyStatus = firebaseConfig.apiKey.includes("REPLACE") ? "⚠️ MISSING (REPLACE_WITH_NEW_KEY)" : "✅ ACTIVE";
     const last4 = !firebaseConfig.apiKey.includes("REPLACE") ? firebaseConfig.apiKey.slice(-4) : "N/A";
     
-    console.log("%c--- FIREBASE DIAGNOSTICS v1.3.6 ---", "color: #2563eb; font-weight: bold; font-size: 12px;");
+    console.log("%c--- FIREBASE HOSTING DIAGNOSTICS v1.3.7 ---", "color: #f59e0b; font-weight: bold; font-size: 12px;");
+    console.log(`Project: ${firebaseConfig.projectId}`);
     console.log(`API Key: ${keyStatus} (Ends in: ${last4})`);
     console.log(`Current Hostname: ${window.location.hostname}`);
-    console.log(`Current Origin: ${window.location.origin}`);
-    console.log("%c-----------------------------------", "color: #2563eb; font-weight: bold;");
+    console.log("%c------------------------------------------", "color: #f59e0b; font-weight: bold;");
 }

@@ -1,36 +1,32 @@
 
-# Affiliate AI Host - New Key Recovery Guide (v1.3.5)
+# Affiliate AI Host - Firebase Hosting Launch Guide (v1.3.7)
 
-You have deleted your original API key. Follow these steps to restore service.
-
----
-
-## ✅ Step 1: Create & Whitelist New Key
-1.  Open [Google Cloud Credentials](https://console.cloud.google.com/apis/credentials).
-2.  Click **+ Create credentials** -> **API Key**.
-3.  Click **Edit** on the new key.
-4.  Under **Website restrictions**, add these as TWO SEPARATE entries:
-    *   `https://hostproai.com/*`
-    *   `https://front-h603.onrender.com/*`
-5.  Click **SAVE**.
+Your domain is connected! Follow these steps to replace the "Site Not Found" page with your actual app.
 
 ---
 
-## 🔑 Step 2: Update Render Environment
-1.  Copy the **New API Key** string.
-2.  Go to your **Render Dashboard** -> **Environment**.
-3.  Update `NEXT_PUBLIC_FIREBASE_API_KEY` with the new key.
-4.  Save and wait for Render to redeploy.
+## 🚀 Step 1: Prepare your Environment
+1.  Ensure your local `.env` file has the **New API Key** you created.
+2.  The API Key should be in `NEXT_PUBLIC_FIREBASE_API_KEY`.
+
+## 🛠️ Step 2: Deploy to Firebase
+Run these commands in your terminal to push your code to the live domain:
+
+1.  **Login to Firebase**:
+    `firebase login`
+2.  **Initialize (if not done)**:
+    `firebase use --add` (Select your project: `rent-a-host-a55fd`)
+3.  **Deploy**:
+    `firebase deploy`
 
 ---
 
-## 🛠️ Step 3: Sync the Code
-Run these commands in your terminal to apply the v1.3.5 diagnostics:
-
-1. `git add .`
-2. `git commit -m "New Key Recovery v1.3.5"`
-3. `git push origin main`
+## 🔑 Step 3: API Key Whitelist (Custom Domain)
+Since you are now on Firebase Hosting, ensure your API Key in [Google Cloud Credentials](https://console.cloud.google.com/apis/credentials) allows:
+*   `https://hostproai.com/*`
+*   `https://rent-a-host-a55fd.web.app/*`
+*   `https://rent-a-host-a55fd.firebaseapp.com/*`
 
 ---
 
-© 2025 Affiliate AI Host. New Key Recovery Sync v1.3.5.
+© 2025 Affiliate AI Host. Firebase Hosting Sync v1.3.7.
