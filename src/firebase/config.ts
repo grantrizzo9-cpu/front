@@ -1,7 +1,9 @@
 
 /**
- * Firebase Configuration (v1.3.7)
+ * Firebase Configuration (v1.4.1)
  * Optimized for Firebase Hosting deployment.
+ * 
+ * IMPORTANT: Ensure the apiKey is updated with your new GCP key.
  */
 export const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || "REPLACE_WITH_NEW_KEY",
@@ -18,7 +20,7 @@ if (typeof window !== 'undefined') {
     const keyStatus = firebaseConfig.apiKey.includes("REPLACE") ? "⚠️ MISSING (REPLACE_WITH_NEW_KEY)" : "✅ ACTIVE";
     const last4 = !firebaseConfig.apiKey.includes("REPLACE") ? firebaseConfig.apiKey.slice(-4) : "N/A";
     
-    console.log("%c--- FIREBASE HOSTING DIAGNOSTICS v1.3.7 ---", "color: #f59e0b; font-weight: bold; font-size: 12px;");
+    console.log("%c--- FIREBASE HOSTING DIAGNOSTICS v1.4.1 ---", "color: #f59e0b; font-weight: bold; font-size: 12px;");
     console.log(`Project: ${firebaseConfig.projectId}`);
     console.log(`API Key: ${keyStatus} (Ends in: ${last4})`);
     console.log(`Current Hostname: ${window.location.hostname}`);
