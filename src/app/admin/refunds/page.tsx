@@ -83,7 +83,7 @@ export default function AdminRefundsPage() {
       <div className="grid gap-4 md:grid-cols-2">
         <StatCard
           title="Total Refunded"
-          value={(!isAuthorized || requestsLoading) ? "..." : `$${totalRefunded.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+          value={(!isAuthorized || requestsLoading) ? "..." : `$${totalRefunded.toLocaleString('en-AU', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
           icon={<DollarSign className="h-5 w-5 text-muted-foreground" />}
           description="Total amount processed for refunds."
         />
