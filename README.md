@@ -1,33 +1,33 @@
 
-# Affiliate AI Host - Final Launch Guide (v1.4.1)
+# Affiliate AI Host - New Project Launch Guide (v1.4.3)
 
-You are logged in! Follow these final steps to go live at `hostproai.com`.
+Your project is now configured for `hostproai-cc2e3`. Follow these steps to go live.
 
 ---
 
-## 🛠️ Step 1: Enable Web Frameworks
-Firebase needs to be told to handle Next.js automatically. Run this command:
+## 🛠️ Step 1: Set Project Context
+In the terminal, run this command to point to your new project:
+`firebase use hostproai-cc2e3`
+
+---
+
+## 🛠️ Step 2: Enable Web Frameworks
+Firebase needs to be told to handle Next.js automatically:
 `firebase experiments:enable webframeworks`
 
 ---
 
-## 🏗️ Step 2: Set Project Context
-Ensure the terminal is targeting the correct project:
-`firebase use rent-a-host-a55fd`
+## 🔑 Step 3: Update Your API Key
+1. Go to your **Firebase Console** -> **Project Settings**.
+2. Copy your **Web API Key**, **App ID**, and **Messaging Sender ID**.
+3. Open `src/firebase/config.ts` and paste them into the corresponding fields.
 
 ---
 
-## 🔑 Step 3: Check Your API Key
-Since you are no longer using Render, you must paste your **New API Key** (the one you created in Google Cloud) directly into the code.
-1. Open `src/firebase/config.ts` in the file explorer.
-2. Replace `"REPLACE_WITH_NEW_KEY"` with your actual key string.
-
----
-
-## 🚀 Step 4: Deploy to hostproai.com
-Run the final command to build and upload your site:
+## 🚀 Step 4: Deploy
+Run the final command to build and upload:
 `firebase deploy`
 
 ---
 
-© 2025 Affiliate AI Host. Final Deploy Sync v1.4.1.
+© 2025 Affiliate AI Host. Project Migration Sync v1.4.3.
