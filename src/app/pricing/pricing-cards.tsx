@@ -1,4 +1,3 @@
-
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -28,7 +27,6 @@ export function PricingCards() {
     return link;
   };
 
-  // HYDRATION GUARD: Prevents link mismatch during SSR
   if (!isHydrated) {
     return <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3 w-full"><Loader2 className="animate-spin mx-auto h-8 w-8 text-primary" /></div>;
   }
@@ -52,7 +50,7 @@ export function PricingCards() {
             <CardTitle className="font-headline text-2xl">{tier.name}</CardTitle>
             <div className="flex items-baseline gap-1">
               <span className="text-4xl font-bold">${tier.price.toFixed(2)}</span>
-              <span className="text-muted-foreground">AUD / day</span>
+              <span className="text-muted-foreground font-semibold">AUD / day</span>
             </div>
             <CardDescription>{tier.description}</CardDescription>
           </CardHeader>
@@ -67,8 +65,8 @@ export function PricingCards() {
             </ul>
           </CardContent>
           <CardFooter>
-            <Button asChild className="w-full" variant={tier.isMostPopular ? "default" : "outline"}>
-              <Link href={getSignupLink(tier.id)}>Get Started</Link>
+            <Button asChild className="w-full h-12 text-lg font-bold" variant={tier.isMostPopular ? "default" : "outline"}>
+              <Link href={getSignupLink(tier.id)}>Get Started (AUD)</Link>
             </Button>
           </CardFooter>
         </Card>

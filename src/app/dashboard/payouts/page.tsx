@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
@@ -65,8 +64,8 @@ export default function PayoutsPage() {
   return (
     <div className="space-y-8 animate-in fade-in duration-300">
       <div>
-        <h1 className="text-3xl font-bold font-headline heading-red">Payouts</h1>
-        <p className="text-muted-foreground">Manage your payout settings and history.</p>
+        <h1 className="text-3xl font-bold font-headline heading-red">Payouts (AUD)</h1>
+        <p className="text-muted-foreground">Manage your payout settings and history in Australian Dollars.</p>
       </div>
 
        {isAdmin ? (
@@ -75,7 +74,7 @@ export default function PayoutsPage() {
                     <ShieldCheck className="h-8 w-8 text-blue-600 flex-shrink-0" />
                     <div>
                         <CardTitle className="text-blue-800">Admin Payouts Unlocked</CardTitle>
-                        <CardDescription className="text-blue-700">As an admin, your payouts are automatically enabled.</CardDescription>
+                        <CardDescription className="text-blue-700">As an admin, your AUD payouts are automatically enabled.</CardDescription>
                     </div>
                 </CardHeader>
             </Card>
@@ -85,7 +84,7 @@ export default function PayoutsPage() {
                     <PartyPopper className="h-8 w-8 text-green-600 flex-shrink-0" />
                     <div>
                         <CardTitle className="text-green-800">Payouts Unlocked!</CardTitle>
-                        <CardDescription className="text-green-700">Congratulations on getting {referralCount} referrals!</CardDescription>
+                        <CardDescription className="text-green-700">Congratulations on getting {referralCount} referrals! You are now eligible for AUD payouts.</CardDescription>
                     </div>
                 </CardHeader>
             </Card>
@@ -96,7 +95,7 @@ export default function PayoutsPage() {
                     <div>
                         <CardTitle className="text-amber-800">Activate Your Payouts</CardTitle>
                         <CardDescription className="text-amber-700">
-                            You have {referralCount} of 2 required referrals to start earning recurring commissions.
+                            You have {referralCount} of 2 required referrals to start earning recurring AUD commissions.
                         </CardDescription>
                     </div>
                 </CardHeader>
@@ -107,7 +106,7 @@ export default function PayoutsPage() {
         <form onSubmit={handleSaveChanges}>
           <CardHeader>
             <CardTitle>Payout Information</CardTitle>
-            <CardDescription>Commissions are sent to this PayPal email daily.</CardDescription>
+            <CardDescription>AUD commissions are sent to this PayPal email daily.</CardDescription>
           </CardHeader>
           <CardContent>
             {isUserDataLoading ? <Skeleton className="h-10 w-full" /> : (
@@ -125,15 +124,15 @@ export default function PayoutsPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Payout History</CardTitle>
-          <CardDescription>Your complete history of commission payouts.</CardDescription>
+          <CardTitle>Payout History (AUD)</CardTitle>
+          <CardDescription>Your complete history of commission payouts in Australian Dollars.</CardDescription>
         </CardHeader>
         <CardContent>
           {payoutsLoading ? <div className="space-y-3"><Skeleton className="h-10 w-full" /><Skeleton className="h-10 w-full" /></div> : sortedPayouts.length > 0 ? (
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Amount</TableHead>
+                  <TableHead>Amount (AUD)</TableHead>
                   <TableHead>Date</TableHead>
                   <TableHead className="text-right">Transaction ID</TableHead>
                 </TableRow>
@@ -141,7 +140,7 @@ export default function PayoutsPage() {
               <TableBody>
                 {sortedPayouts.map((payout) => (
                   <TableRow key={payout.id}>
-                    <TableCell className="font-medium text-green-600">${payout.amount.toFixed(2)}</TableCell>
+                    <TableCell className="font-medium text-green-600">${payout.amount.toFixed(2)} AUD</TableCell>
                     <TableCell>{isHydrated ? format(payout.date.toDate(), 'PPpp') : '...'}</TableCell>
                     <TableCell className="text-right font-mono text-xs">
                       {payout.transactionId ? (

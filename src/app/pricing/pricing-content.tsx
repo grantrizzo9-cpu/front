@@ -13,10 +13,10 @@ export function PricingContent() {
         <section className="py-20 md:py-32">
           <div className="container text-center">
             <h1 className="font-headline text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl heading-red">
-              Find the Perfect Plan
+              Find the Perfect Plan (AUD)
             </h1>
             <p className="mt-6 max-w-2xl mx-auto text-lg text-muted-foreground md:text-xl">
-              All plans start with a 3-day trial. A one-time activation fee, equal to one day's price, is required to get started. This admin fee goes to the platform owner.
+              All plans are priced in <strong>Australian Dollars (AUD)</strong> and start with a 3-day trial. A one-time activation fee, equal to one day's price, is required to get started.
             </p>
           </div>
         </section>

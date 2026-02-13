@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -48,14 +47,14 @@ export default function ReferralsPage() {
     <div className="space-y-8">
       <div>
         <h1 className="text-3xl font-bold font-headline heading-red">Your Referrals</h1>
-        <p className="text-muted-foreground">A complete list of every user you've referred.</p>
+        <p className="text-muted-foreground">A complete list of every user you've referred. Commissions are shown in AUD.</p>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>All Referrals</CardTitle>
+          <CardTitle>All Referrals (AUD)</CardTitle>
           <CardDescription>
-            Commissions are paid on recurring payments after the user activates and completes their trial.
+            Commissions are paid in AUD on recurring payments after the user activates and completes their trial.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -67,7 +66,7 @@ export default function ReferralsPage() {
                 <TableRow>
                   <TableHead>Username</TableHead>
                   <TableHead>Plan</TableHead>
-                  <TableHead>Commission</TableHead>
+                  <TableHead>Commission (AUD)</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead className="text-right">Date</TableHead>
                 </TableRow>
@@ -77,7 +76,7 @@ export default function ReferralsPage() {
                   <TableRow key={referral.id}>
                     <TableCell className="font-medium">{referral.referredUserUsername}</TableCell>
                     <TableCell>{referral.planPurchased}</TableCell>
-                    <TableCell>${(referral.commission || 0).toFixed(2)}</TableCell>
+                    <TableCell>${(referral.commission || 0).toFixed(2)} AUD</TableCell>
                     <TableCell>
                       <Badge variant={referral.activationStatus === 'activated' ? 'default' : 'secondary'} className={referral.activationStatus === 'activated' ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800'}>
                         {referral.activationStatus}

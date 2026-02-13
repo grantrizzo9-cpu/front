@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useMemo, useState, useEffect } from "react";
@@ -70,22 +69,21 @@ export default function AdminRefundsPage() {
     );
   }, [refundRequests]);
 
-  // Shell-First: Instant structural render
   const isAuthorized = isPlatformOwner || isAdminLoading;
 
   return (
     <div className="space-y-8 animate-in fade-in duration-300">
       <div>
-        <h1 className="text-3xl font-bold font-headline heading-red">Manage Refunds</h1>
-        <p className="text-muted-foreground">Review and process user refund requests.</p>
+        <h1 className="text-3xl font-bold font-headline heading-red">Manage Refunds (AUD)</h1>
+        <p className="text-muted-foreground">Review and process user refund requests in Australian Dollars.</p>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
         <StatCard
-          title="Total Refunded"
-          value={(!isAuthorized || requestsLoading) ? "..." : `$${totalRefunded.toLocaleString('en-AU', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+          title="Total Refunded (AUD)"
+          value={(!isAuthorized || requestsLoading) ? "..." : `$${totalRefunded.toLocaleString('en-AU', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} AUD`}
           icon={<DollarSign className="h-5 w-5 text-muted-foreground" />}
-          description="Total amount processed for refunds."
+          description="Total amount processed for refunds in Australian Dollars."
         />
       </div>
 
@@ -110,7 +108,7 @@ export default function AdminRefundsPage() {
                   <TableRow>
                     <TableHead>Username</TableHead>
                     <TableHead>Email</TableHead>
-                    <TableHead>Amount</TableHead>
+                    <TableHead>Amount (AUD)</TableHead>
                     <TableHead>Reason</TableHead>
                     <TableHead>Date</TableHead>
                     <TableHead className="text-right">Action</TableHead>
@@ -121,7 +119,7 @@ export default function AdminRefundsPage() {
                     <TableRow key={request.id}>
                       <TableCell className="font-medium">{request.userUsername}</TableCell>
                       <TableCell>{request.userEmail}</TableCell>
-                      <TableCell>${(request.amount ?? 0).toFixed(2)}</TableCell>
+                      <TableCell>${(request.amount ?? 0).toFixed(2)} AUD</TableCell>
                       <TableCell className="max-w-xs truncate">{request.reason}</TableCell>
                       <TableCell>
                         {isHydrated && request.requestedAt ? format(request.requestedAt.toDate(), 'PP') : '...'}

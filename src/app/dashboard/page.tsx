@@ -1,4 +1,3 @@
-
 'use client';
 
 import { StatCard } from "@/components/stat-card";
@@ -109,7 +108,6 @@ export default function DashboardPage() {
     return { totalStorage: total, usedStorage: 4.72, usagePercentage: total > 0 ? (4.72 / total) * 100 : 0 };
   }, [userTier]);
 
-  // HYDRATION GUARD
   if (!isHydrated) {
     return <div className="flex h-full w-full items-center justify-center p-12"><Loader2 className="animate-spin h-8 w-8 text-primary" /></div>;
   }
@@ -120,7 +118,7 @@ export default function DashboardPage() {
             <div className="space-y-6 border-b border-dashed pb-8">
                 <div>
                     <h1 className="text-3xl font-bold font-headline heading-red">Admin Dashboard</h1>
-                    <p className="text-muted-foreground">Global Platform Overview</p>
+                    <p className="text-muted-foreground">Global Platform Overview (AUD)</p>
                 </div>
 
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -132,8 +130,8 @@ export default function DashboardPage() {
                         </>
                     ) : (
                         <>
-                            <StatCard title="Total Platform Revenue" value={`$${platformStats.platformRevenue.toFixed(2)}`} icon={<TrendingUp className="text-blue-600" />} />
-                            <StatCard title="Total Payouts" value={`$${platformStats.totalAffiliatePayouts.toFixed(2)}`} icon={<DollarSign className="text-blue-600" />} />
+                            <StatCard title="Total Platform Revenue" value={`$${platformStats.platformRevenue.toFixed(2)} AUD`} icon={<TrendingUp className="text-blue-600" />} />
+                            <StatCard title="Total Payouts" value={`$${platformStats.totalAffiliatePayouts.toFixed(2)} AUD`} icon={<DollarSign className="text-blue-600" />} />
                             <StatCard title="Active Referrals" value={`${platformStats.totalPlatformReferrals}`} icon={<UserPlus className="text-blue-600" />} />
                         </>
                     )}
@@ -144,7 +142,7 @@ export default function DashboardPage() {
         <div className="space-y-6">
             <div>
                 <h1 className="text-3xl font-bold font-headline heading-red">My Dashboard</h1>
-                <p className="text-muted-foreground">Your affiliate progress and usage statistics.</p>
+                <p className="text-muted-foreground">Your affiliate progress and usage statistics (AUD).</p>
             </div>
 
             {!isUserDataLoading && userData?.subscription?.status === 'inactive' && !isPlatformOwner && (
@@ -168,7 +166,7 @@ export default function DashboardPage() {
                     </>
                 ) : (
                     <>
-                        <StatCard title="Total Earnings" value={`$${personalStats?.totalCommission.toFixed(2) || '0.00'}`} icon={<DollarSign className="text-blue-600" />} />
+                        <StatCard title="Total Earnings" value={`$${personalStats?.totalCommission.toFixed(2) || '0.00'} AUD`} icon={<DollarSign className="text-blue-600" />} />
                         <StatCard title="Total Referrals" value={`${personalStats?.totalReferrals || '0'}`} icon={<Users className="text-blue-600" />} />
                         <Card>
                             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -180,7 +178,7 @@ export default function DashboardPage() {
                                 <Progress value={storageStats.usagePercentage} className="mt-2 h-1.5 bg-slate-100" />
                             </CardContent>
                         </Card>
-                        <StatCard title="Unpaid Commissions" value={`$${personalStats?.unpaidCommissions.toFixed(2) || '0.00'}`} icon={<DollarSign className="text-green-600" />} />
+                        <StatCard title="Unpaid Commissions" value={`$${personalStats?.unpaidCommissions.toFixed(2) || '0.00'} AUD`} icon={<DollarSign className="text-green-600" />} />
                     </>
                 )}
             </div>

@@ -119,8 +119,8 @@ export default function RequestRefundPage() {
   return (
     <div className="space-y-8 max-w-3xl animate-in fade-in duration-300">
       <div>
-        <h1 className="text-3xl font-bold font-headline heading-red">Request a Refund</h1>
-        <p className="text-muted-foreground">Submit a refund request or view the status of your existing requests.</p>
+        <h1 className="text-3xl font-bold font-headline heading-red">Request a Refund (AUD)</h1>
+        <p className="text-muted-foreground">Submit a refund request or view the status of your existing requests in Australian Dollars.</p>
       </div>
       
       {isLoadingData ? (
@@ -135,8 +135,8 @@ export default function RequestRefundPage() {
             {refundRequests && refundRequests.length > 0 && (
                 <Card>
                     <CardHeader>
-                        <CardTitle>Your Refund Requests</CardTitle>
-                        <CardDescription>A history of all your submitted refund requests.</CardDescription>
+                        <CardTitle>Your Refund Requests (AUD)</CardTitle>
+                        <CardDescription>A history of all your submitted refund requests in Australian Dollars.</CardDescription>
                     </CardHeader>
                     <CardContent>
                         <Table>
@@ -179,7 +179,7 @@ export default function RequestRefundPage() {
                     <CardHeader>
                         <CardTitle>New Refund Request</CardTitle>
                         <CardDescription>
-                        Your refund will be for your initial one-day payment. Please provide a reason below.
+                        Your refund will be for your initial one-day payment in AUD. Please provide a reason below.
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
@@ -204,7 +204,7 @@ export default function RequestRefundPage() {
                         ) : (
                             <>
                             <ShieldQuestion className="mr-2" />
-                            Submit Refund Request
+                            Submit Refund Request (AUD)
                             </>
                         )}
                         </Button>

@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -29,8 +28,8 @@ export default function AdminDashboardPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-3xl font-bold font-headline">Admin: Packages</h1>
-        <p className="text-muted-foreground">A complete overview of all subscription packages and their features.</p>
+        <h1 className="text-3xl font-bold font-headline">Admin: Packages (AUD)</h1>
+        <p className="text-muted-foreground">A complete overview of all subscription packages and their features in AUD.</p>
       </div>
 
       <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
@@ -40,7 +39,7 @@ export default function AdminDashboardPage() {
               <CardTitle className="font-headline text-xl">{tier.name}</CardTitle>
               <div className="flex items-baseline gap-1">
                 <span className="text-3xl font-bold">${tier.price.toFixed(2)}</span>
-                <span className="text-muted-foreground">AUD / day</span>
+                <span className="text-muted-foreground font-semibold">AUD / day</span>
               </div>
               <CardDescription>{tier.description}</CardDescription>
             </CardHeader>

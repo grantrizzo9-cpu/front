@@ -1,6 +1,7 @@
 import type { SubscriptionTier, Referral, Payout, AdminPayout } from './types';
 
 // --- IMPORTANT PAYPAL SETUP ---
+// Ensure these Plan IDs correspond to plans created in AUD currency in your PayPal dashboard.
 export const subscriptionTiers: SubscriptionTier[] = [
   {
     id: 'starter',
