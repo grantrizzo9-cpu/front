@@ -35,13 +35,10 @@ async function getFirebase(): Promise<FirebaseServices | null> {
     }
     
     if (!cachedFirestore) {
-      // FORCE Long Polling: Essential for Render environment
       cachedFirestore = initializeFirestore(cachedApp, {
           ignoreUndefinedProperties: true,
-          experimentalForceLongPolling: true, 
       });
       
-      // Ensure the client is marked as "online" immediately
       try {
           await enableNetwork(cachedFirestore);
       } catch (e) {}
@@ -75,7 +72,11 @@ export function FirebaseClientProvider({ children }: { children: ReactNode }) {
       window.location.reload();
   };
 
-  if (!isHydrated || isInitializing) {
+  if (!isHydrated) {
+    return null;
+  }
+
+  if (isInitializing) {
     return (
       <div className="flex h-screen w-screen items-center justify-center bg-background">
         <Loader2 className="animate-spin text-primary h-8 w-8" />
@@ -91,12 +92,12 @@ export function FirebaseClientProvider({ children }: { children: ReactNode }) {
             <Alert variant="destructive">
                 <AlertTitle className="text-lg font-bold flex items-center justify-center gap-2">
                     <ShieldAlert className="h-5 w-5" />
-                    System Offline
+                    Connection Error
                 </AlertTitle>
                 <AlertDescription className="mt-2 text-sm text-left space-y-4">
-                    <p>The application is having trouble reaching the database. This is usually caused by a temporary network block.</p>
+                    <p>Failed to connect to Firebase. Check your API key in src/firebase/config.ts.</p>
                     <Button onClick={handleHardReset} variant="outline" className="w-full bg-white text-black font-bold shadow-sm">
-                        <RefreshCcw className="mr-2 h-4 w-4" /> Reset Connection
+                        <RefreshCcw className="mr-2 h-4 w-4" /> Reload App
                     </Button>
                 </AlertDescription>
             </Alert>

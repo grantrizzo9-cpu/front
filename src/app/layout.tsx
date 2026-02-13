@@ -2,6 +2,8 @@ import type { Metadata } from 'next';
 import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
 import { FirebaseClientProvider } from '@/firebase';
+import { Suspense } from 'react';
+import { Loader2 } from 'lucide-react';
 
 export const metadata: Metadata = {
   title: 'Affiliate AI Host',
@@ -16,12 +18,6 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        {/* 
-          SITE VERIFICATION: 
-          Paste your site verification meta tag here.
-          For example, from Google Search Console:
-          <meta name="google-site-verification" content="Your_Verification_Code" />
-        */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
@@ -30,9 +26,11 @@ export default function RootLayout({
         />
       </head>
       <body className="font-body antialiased">
-        <FirebaseClientProvider>
-          {children}
-        </FirebaseClientProvider>
+        <Suspense fallback={<div className="flex h-screen w-screen items-center justify-center"><Loader2 className="animate-spin h-8 w-8 text-primary" /></div>}>
+          <FirebaseClientProvider>
+            {children}
+          </FirebaseClientProvider>
+        </Suspense>
         <Toaster />
       </body>
     </html>
