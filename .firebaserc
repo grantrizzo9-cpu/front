@@ -1,5 +1,7 @@
 {
   "projects": {
-    "default": "rent-a-host-a55fd"
-  }
+    "default": "hostproai-cc2e3"
+  },
+  "targets": {},
+  "etags": {}
 }
