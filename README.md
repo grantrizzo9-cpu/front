@@ -30,7 +30,7 @@ Firebase needs this to handle the Next.js build automatically:
 ---
 
 ## 🔑 Step 4: Update Your API Key
-1. Go to your **Google Cloud Console** -> **APIs & Services** -> **Credentials**.
+1. Go to your **** -> **APIs & Services** -> **Credentials**.
 2. Copy your **API Key**.
 3. Open `src/firebase/config.ts` and paste it into the `apiKey` field.
 
