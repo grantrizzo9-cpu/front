@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { useState, Suspense, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
@@ -78,8 +78,6 @@ function SignupFormComponent() {
     };
 
     const postSignupFlow = async (user: User, finalUsername: string, refCode: string | null) => {
-        try { await enableNetwork(firestore); } catch (e) {}
-
         let referrerUid: string | null = null;
         if (refCode) {
             try {
@@ -92,60 +90,52 @@ function SignupFormComponent() {
             }
         }
 
-        let retries = 3;
-        while (retries > 0) {
-            try {
-                const batch = writeBatch(firestore);
-                const userDocRef = doc(firestore, "users", user.uid);
+        try {
+            const batch = writeBatch(firestore);
+            const userDocRef = doc(firestore, "users", user.uid);
 
-                const userData = {
-                    id: user.uid, uid: user.uid, email: user.email, username: finalUsername, referredBy: referrerUid, isAffiliate: true, createdAt: serverTimestamp(),
-                    subscription: {
-                        tierId: plan.id,
-                        status: 'inactive' as const,
-                        startDate: serverTimestamp(),
-                        endDate: null,
-                    },
-                    paypalEmail: '', customDomain: null
+            const userData = {
+                id: user.uid, uid: user.uid, email: user.email, username: finalUsername, referredBy: referrerUid, isAffiliate: true, createdAt: serverTimestamp(),
+                subscription: {
+                    tierId: plan.id,
+                    status: 'inactive' as const,
+                    startDate: serverTimestamp(),
+                    endDate: null,
+                },
+                paypalEmail: '', customDomain: null
+            };
+            batch.set(userDocRef, userData);
+
+            const usernameDocForWriteRef = doc(firestore, "usernames", finalUsername);
+            batch.set(usernameDocForWriteRef, { uid: user.uid });
+
+            if (referrerUid) {
+                const referralDocRef = doc(collection(firestore, 'users', referrerUid, 'referrals'), user.uid);
+                const referralData = {
+                    id: user.uid,
+                    affiliateId: referrerUid,
+                    referredUserId: user.uid,
+                    referredUserUsername: finalUsername,
+                    referredUserEmail: user.email || '',
+                    planPurchased: plan.name,
+                    grossSale: 0,
+                    commission: 0,
+                    status: 'unpaid' as const,
+                    activationStatus: 'pending' as const,
+                    date: serverTimestamp(),
+                    subscriptionId: user.uid,
                 };
-                batch.set(userDocRef, userData);
-
-                const usernameDocForWriteRef = doc(firestore, "usernames", finalUsername);
-                batch.set(usernameDocForWriteRef, { uid: user.uid });
-
-                if (referrerUid) {
-                    const referralDocRef = doc(collection(firestore, 'users', referrerUid, 'referrals'), user.uid);
-                    const referralData = {
-                        id: user.uid,
-                        affiliateId: referrerUid,
-                        referredUserId: user.uid,
-                        referredUserUsername: finalUsername,
-                        referredUserEmail: user.email || '',
-                        planPurchased: plan.name,
-                        grossSale: 0,
-                        commission: 0,
-                        status: 'unpaid' as const,
-                        activationStatus: 'pending' as const,
-                        date: serverTimestamp(),
-                        subscriptionId: user.uid,
-                    };
-                    batch.set(referralDocRef, referralData);
-                }
-
-                await batch.commit();
-                
-                toast({ title: "Account Created!", description: "Welcome to Affiliate AI Host!" });
-                router.push(`/dashboard/upgrade?plan=${plan.id}`);
-                return; 
-
-            } catch (err: any) {
-                console.warn(`Batch commit failed, retrying... (${retries} left)`, err.message);
-                retries--;
-                if (retries === 0) {
-                    throw err;
-                }
-                await new Promise(r => setTimeout(r, 2000));
+                batch.set(referralDocRef, referralData);
             }
+
+            await batch.commit();
+            
+            toast({ title: "Account Created!", description: "Welcome to Affiliate AI Host!" });
+            router.push(`/dashboard/upgrade?plan=${plan.id}`);
+
+        } catch (err: any) {
+            console.error("Batch commit failed", err);
+            throw err; // Propagate error to handleSignup
         }
     };
 
@@ -157,6 +147,7 @@ function SignupFormComponent() {
         const finalUsername = username.toLowerCase().trim();
 
         try {
+            await enableNetwork(firestore);
             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
             await updateProfile(userCredential.user, { displayName: finalUsername });
             await postSignupFlow(userCredential.user, finalUsername, referralCode);
