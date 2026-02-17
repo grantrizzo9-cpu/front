@@ -176,7 +176,12 @@ function SignupFormComponent() {
                 return;
             }
 
-            toast({ variant: "destructive", title: "Signup Failed", description: error.message });
+            let description = error.message;
+            if (error.code === 'auth/email-already-in-use') {
+                description = "This email address is already registered. Please use a different email or log in.";
+            }
+
+            toast({ variant: "destructive", title: "Signup Failed", description: description });
             setIsProcessing(false);
         }
     };
