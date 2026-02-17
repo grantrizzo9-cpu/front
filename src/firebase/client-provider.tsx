@@ -14,7 +14,6 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { CloudOff, ShieldAlert, Loader2, RefreshCcw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import type { FirebaseServices } from '@/firebase';
-import { initializeAppCheck, ReCaptchaV3Provider } from "firebase/app-check";
 
 let cachedApp: FirebaseApp | undefined;
 let cachedAuth: Auth | undefined;
@@ -43,13 +42,6 @@ async function getFirebase(): Promise<FirebaseServices | null> {
       try {
           await enableNetwork(cachedFirestore);
       } catch (e) {}
-    }
-
-    if (process.env.NEXT_PUBLIC_RECAPTCHA_KEY) {
-      initializeAppCheck(cachedApp, {
-        provider: new ReCaptchaV3Provider(process.env.NEXT_PUBLIC_RECAPTCHA_KEY),
-        isTokenAutoRefreshEnabled: true
-      });
     }
 
     return { 
