@@ -80,9 +80,6 @@ function SignupFormComponent() {
     const postSignupFlow = async (user: User, finalUsername: string, refCode: string | null) => {
         try { await enableNetwork(firestore); } catch (e) {}
 
-        const batch = writeBatch(firestore);
-        const userDocRef = doc(firestore, "users", user.uid);
-        
         let referrerUid: string | null = null;
         if (refCode) {
             try {
@@ -90,54 +87,63 @@ function SignupFormComponent() {
                 if (referrerUsernameDoc.exists()) {
                     referrerUid = referrerUsernameDoc.data()?.uid ?? null;
                 }
-            } catch (e) {}
-        }
-
-        const userData = {
-            id: user.uid, uid: user.uid, email: user.email, username: finalUsername, referredBy: referrerUid, isAffiliate: true, createdAt: serverTimestamp(),
-            subscription: {
-                tierId: plan.id,
-                status: 'inactive' as const,
-                startDate: serverTimestamp(),
-                endDate: null,
-            },
-            paypalEmail: '', customDomain: null
-        };
-        batch.set(userDocRef, userData);
-
-        const usernameDocForWriteRef = doc(firestore, "usernames", finalUsername);
-        batch.set(usernameDocForWriteRef, { uid: user.uid });
-
-        if (referrerUid) {
-            const referralDocRef = doc(collection(firestore, 'users', referrerUid, 'referrals'), user.uid);
-            const referralData = {
-                id: user.uid,
-                affiliateId: referrerUid,
-                referredUserId: user.uid,
-                referredUserUsername: finalUsername,
-                referredUserEmail: user.email || '',
-                planPurchased: plan.name,
-                grossSale: 0,
-                commission: 0,
-                status: 'unpaid' as const,
-                activationStatus: 'pending' as const,
-                date: serverTimestamp(),
-                subscriptionId: user.uid,
-            };
-            batch.set(referralDocRef, referralData);
+            } catch (e) {
+                console.warn("Could not fetch referrer UID", e);
+            }
         }
 
         let retries = 3;
         while (retries > 0) {
             try {
+                const batch = writeBatch(firestore);
+                const userDocRef = doc(firestore, "users", user.uid);
+
+                const userData = {
+                    id: user.uid, uid: user.uid, email: user.email, username: finalUsername, referredBy: referrerUid, isAffiliate: true, createdAt: serverTimestamp(),
+                    subscription: {
+                        tierId: plan.id,
+                        status: 'inactive' as const,
+                        startDate: serverTimestamp(),
+                        endDate: null,
+                    },
+                    paypalEmail: '', customDomain: null
+                };
+                batch.set(userDocRef, userData);
+
+                const usernameDocForWriteRef = doc(firestore, "usernames", finalUsername);
+                batch.set(usernameDocForWriteRef, { uid: user.uid });
+
+                if (referrerUid) {
+                    const referralDocRef = doc(collection(firestore, 'users', referrerUid, 'referrals'), user.uid);
+                    const referralData = {
+                        id: user.uid,
+                        affiliateId: referrerUid,
+                        referredUserId: user.uid,
+                        referredUserUsername: finalUsername,
+                        referredUserEmail: user.email || '',
+                        planPurchased: plan.name,
+                        grossSale: 0,
+                        commission: 0,
+                        status: 'unpaid' as const,
+                        activationStatus: 'pending' as const,
+                        date: serverTimestamp(),
+                        subscriptionId: user.uid,
+                    };
+                    batch.set(referralDocRef, referralData);
+                }
+
                 await batch.commit();
+                
                 toast({ title: "Account Created!", description: "Welcome to Affiliate AI Host!" });
                 router.push(`/dashboard/upgrade?plan=${plan.id}`);
-                return;
+                return; 
+
             } catch (err: any) {
                 console.warn(`Batch commit failed, retrying... (${retries} left)`, err.message);
                 retries--;
-                if (retries === 0) throw err;
+                if (retries === 0) {
+                    throw err;
+                }
                 await new Promise(r => setTimeout(r, 2000));
             }
         }
