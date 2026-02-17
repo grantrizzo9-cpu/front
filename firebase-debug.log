@@ -140,3 +140,46 @@
 [debug] [2026-02-17T07:38:43.983Z] >>> [apiv2][query] GET https://firebasehosting.googleapis.com/v1beta1/projects/hostproai-cc2e3/sites/hostproai-cc2e3 [none]
 [debug] [2026-02-17T07:38:45.253Z] <<< [apiv2][status] GET https://firebasehosting.googleapis.com/v1beta1/projects/hostproai-cc2e3/sites/hostproai-cc2e3 200
 [debug] [2026-02-17T07:38:45.254Z] <<< [apiv2][body] GET https://firebasehosting.googleapis.com/v1beta1/projects/hostproai-cc2e3/sites/hostproai-cc2e3 {"name":"projects/hostproai-cc2e3/sites/hostproai-cc2e3","defaultUrl":"https://hostproai-cc2e3.web.app","appId":"1:1064836095248:web:6bb7259313f2f048e19995","type":"DEFAULT_SITE"}
+[debug] [2026-02-17T07:40:57.876Z] ----------------------------------------------------------------------
+[debug] [2026-02-17T07:40:57.880Z] Command:       /nix/store/ws50yvm6vzlzf7jzz6n7xh4szddrack1-nodejs-20.19.1/bin/node /nix/store/gm9mcvzb17vv8cla08khrg29vxn3sq4r-firebase-tools-15.1.0/lib/node_modules/firebase-tools/lib/bin/firebase.js deploy
+[debug] [2026-02-17T07:40:57.881Z] CLI Version:   15.1.0
+[debug] [2026-02-17T07:40:57.881Z] Platform:      linux
+[debug] [2026-02-17T07:40:57.881Z] Node Version:  v20.19.1
+[debug] [2026-02-17T07:40:57.881Z] Time:          Tue Feb 17 2026 07:40:57 GMT+0000 (Coordinated Universal Time)
+[debug] [2026-02-17T07:40:57.881Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2026-02-17T07:41:01.036Z] No OAuth tokens found
+[debug] [2026-02-17T07:41:01.037Z] No OAuth tokens found
+[error] Failed to fetch Firebase Project from current Studio Workspace: Unable to refresh auth: not yet authenticated.
+[debug] [2026-02-17T07:41:01.042Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2026-02-17T07:41:01.043Z] > authorizing via signed-in user (rentapog@gmail.com)
+[debug] [2026-02-17T07:41:01.043Z] [iam] checking project hostproai-cc2e3 for permissions ["firebase.projects.get","firebasehosting.sites.update"]
+[debug] [2026-02-17T07:41:01.044Z] No OAuth tokens found
+[debug] [2026-02-17T07:41:01.044Z] No OAuth tokens found
+[debug] [2026-02-17T07:41:01.044Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2026-02-17T07:41:01.044Z] > authorizing via signed-in user (rentapog@gmail.com)
+[debug] [2026-02-17T07:41:01.046Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/hostproai-cc2e3:testIamPermissions [none]
+[debug] [2026-02-17T07:41:01.046Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/hostproai-cc2e3:testIamPermissions x-goog-quota-user=projects/hostproai-cc2e3
+[debug] [2026-02-17T07:41:01.046Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/hostproai-cc2e3:testIamPermissions {"permissions":["firebase.projects.get","firebasehosting.sites.update"]}
+[debug] [2026-02-17T07:41:01.861Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/hostproai-cc2e3:testIamPermissions 200
+[debug] [2026-02-17T07:41:01.862Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/hostproai-cc2e3:testIamPermissions {"permissions":["firebase.projects.get","firebasehosting.sites.update"]}
+[debug] [2026-02-17T07:41:01.863Z] No OAuth tokens found
+[debug] [2026-02-17T07:41:01.863Z] No OAuth tokens found
+[debug] [2026-02-17T07:41:01.863Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2026-02-17T07:41:01.863Z] > authorizing via signed-in user (rentapog@gmail.com)
+[debug] [2026-02-17T07:41:01.866Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/hostproai-cc2e3 [none]
+[debug] [2026-02-17T07:41:02.120Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/hostproai-cc2e3 200
+[debug] [2026-02-17T07:41:02.121Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/hostproai-cc2e3 {"projectId":"hostproai-cc2e3","projectNumber":"1064836095248","displayName":"hostproai","name":"projects/hostproai-cc2e3","resources":{"hostingSite":"hostproai-cc2e3"},"state":"ACTIVE","etag":"1_4ec0d41b-8414-46e6-9d67-9ecc5ceac890"}
+[debug] [2026-02-17T07:41:07.993Z] defaultcredentials: no credential available.
+[debug] [2026-02-17T07:41:07.994Z] No OAuth tokens found
+[debug] [2026-02-17T07:41:07.994Z] No OAuth tokens found
+[debug] [2026-02-17T07:41:07.994Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2026-02-17T07:41:07.996Z] > authorizing via signed-in user (rentapog@gmail.com)
+[debug] [2026-02-17T07:41:07.996Z] >>> [apiv2][query] GET https://firebasehosting.googleapis.com/v1beta1/projects/hostproai-cc2e3/sites pageToken=&pageSize=10
+[debug] [2026-02-17T07:41:09.399Z] <<< [apiv2][status] GET https://firebasehosting.googleapis.com/v1beta1/projects/hostproai-cc2e3/sites 200
+[debug] [2026-02-17T07:41:09.404Z] <<< [apiv2][body] GET https://firebasehosting.googleapis.com/v1beta1/projects/hostproai-cc2e3/sites {"sites":[{"name":"projects/hostproai-cc2e3/sites/hostproai-cc2e3","defaultUrl":"https://hostproai-cc2e3.web.app","appId":"1:1064836095248:web:6bb7259313f2f048e19995","type":"DEFAULT_SITE"}]}
+[debug] [2026-02-17T07:41:09.408Z] No OAuth tokens found
+[debug] [2026-02-17T07:41:09.408Z] No OAuth tokens found
+[debug] [2026-02-17T07:41:09.408Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2026-02-17T07:41:09.412Z] > authorizing via signed-in user (rentapog@gmail.com)
+[debug] [2026-02-17T07:41:09.413Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/-/webApps/1:1064836095248:web:6bb7259313f2f048e19995/config [none]
