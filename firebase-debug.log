@@ -1357,3 +1357,97 @@ Import trace for requested module:
 [debug] [2026-02-18T13:45:18.451Z] Error: ENOENT: no such file or directory, open '/home/user/front/.next/server/middleware-manifest.json'
 [error] 
 [error] Error: An unexpected error has occurred.
+[debug] [2026-02-18T13:47:31.666Z] ----------------------------------------------------------------------
+[debug] [2026-02-18T13:47:31.668Z] Command:       /nix/store/ws50yvm6vzlzf7jzz6n7xh4szddrack1-nodejs-20.19.1/bin/node /nix/store/gm9mcvzb17vv8cla08khrg29vxn3sq4r-firebase-tools-15.1.0/lib/node_modules/firebase-tools/lib/bin/firebase.js deploy
+[debug] [2026-02-18T13:47:31.669Z] CLI Version:   15.1.0
+[debug] [2026-02-18T13:47:31.669Z] Platform:      linux
+[debug] [2026-02-18T13:47:31.669Z] Node Version:  v20.19.1
+[debug] [2026-02-18T13:47:31.669Z] Time:          Wed Feb 18 2026 13:47:31 GMT+0000 (Coordinated Universal Time)
+[debug] [2026-02-18T13:47:31.669Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2026-02-18T13:47:33.373Z] No OAuth tokens found
+[debug] [2026-02-18T13:47:33.374Z] No OAuth tokens found
+[error] Failed to fetch Firebase Project from current Studio Workspace: Unable to refresh auth: not yet authenticated.
+[debug] [2026-02-18T13:47:33.378Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2026-02-18T13:47:33.379Z] > authorizing via signed-in user (rentapog@gmail.com)
+[debug] [2026-02-18T13:47:33.379Z] [iam] checking project hostproai-cc2e3 for permissions ["firebase.projects.get","firebasehosting.sites.update"]
+[debug] [2026-02-18T13:47:33.379Z] No OAuth tokens found
+[debug] [2026-02-18T13:47:33.380Z] No OAuth tokens found
+[debug] [2026-02-18T13:47:33.380Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2026-02-18T13:47:33.380Z] > authorizing via signed-in user (rentapog@gmail.com)
+[debug] [2026-02-18T13:47:33.382Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/hostproai-cc2e3:testIamPermissions [none]
+[debug] [2026-02-18T13:47:33.382Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/hostproai-cc2e3:testIamPermissions x-goog-quota-user=projects/hostproai-cc2e3
+[debug] [2026-02-18T13:47:33.382Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/hostproai-cc2e3:testIamPermissions {"permissions":["firebase.projects.get","firebasehosting.sites.update"]}
+[debug] [2026-02-18T13:47:34.193Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/hostproai-cc2e3:testIamPermissions 200
+[debug] [2026-02-18T13:47:34.194Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/hostproai-cc2e3:testIamPermissions {"permissions":["firebase.projects.get","firebasehosting.sites.update"]}
+[debug] [2026-02-18T13:47:34.196Z] No OAuth tokens found
+[debug] [2026-02-18T13:47:34.196Z] No OAuth tokens found
+[debug] [2026-02-18T13:47:34.196Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2026-02-18T13:47:34.196Z] > authorizing via signed-in user (rentapog@gmail.com)
+[debug] [2026-02-18T13:47:34.197Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/hostproai-cc2e3 [none]
+[debug] [2026-02-18T13:47:34.442Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/hostproai-cc2e3 200
+[debug] [2026-02-18T13:47:34.443Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/hostproai-cc2e3 {"projectId":"hostproai-cc2e3","projectNumber":"1064836095248","displayName":"hostproai","name":"projects/hostproai-cc2e3","resources":{"hostingSite":"hostproai-cc2e3"},"state":"ACTIVE","etag":"1_b8e312d5-1444-4431-9768-ce18df62c639"}
+[debug] [2026-02-18T13:47:40.878Z] defaultcredentials: no credential available.
+[debug] [2026-02-18T13:47:40.879Z] No OAuth tokens found
+[debug] [2026-02-18T13:47:40.879Z] No OAuth tokens found
+[debug] [2026-02-18T13:47:40.879Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2026-02-18T13:47:40.880Z] > authorizing via signed-in user (rentapog@gmail.com)
+[debug] [2026-02-18T13:47:40.881Z] >>> [apiv2][query] GET https://firebasehosting.googleapis.com/v1beta1/projects/hostproai-cc2e3/sites pageToken=&pageSize=10
+[debug] [2026-02-18T13:47:42.346Z] <<< [apiv2][status] GET https://firebasehosting.googleapis.com/v1beta1/projects/hostproai-cc2e3/sites 200
+[debug] [2026-02-18T13:47:42.346Z] <<< [apiv2][body] GET https://firebasehosting.googleapis.com/v1beta1/projects/hostproai-cc2e3/sites {"sites":[{"name":"projects/hostproai-cc2e3/sites/hostproai-cc2e3","defaultUrl":"https://hostproai-cc2e3.web.app","appId":"1:1064836095248:web:6bb7259313f2f048e19995","type":"DEFAULT_SITE"}]}
+[debug] [2026-02-18T13:47:42.347Z] No OAuth tokens found
+[debug] [2026-02-18T13:47:42.347Z] No OAuth tokens found
+[debug] [2026-02-18T13:47:42.347Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2026-02-18T13:47:42.347Z] > authorizing via signed-in user (rentapog@gmail.com)
+[debug] [2026-02-18T13:47:42.348Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/-/webApps/1:1064836095248:web:6bb7259313f2f048e19995/config [none]
+[debug] [2026-02-18T13:47:43.503Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/-/webApps/1:1064836095248:web:6bb7259313f2f048e19995/config 200
+[debug] [2026-02-18T13:47:43.503Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/-/webApps/1:1064836095248:web:6bb7259313f2f048e19995/config {"projectId":"hostproai-cc2e3","appId":"1:1064836095248:web:6bb7259313f2f048e19995","storageBucket":"hostproai-cc2e3.firebasestorage.app","apiKey":"AIzaSyDO4NxDXHOpuY2ZqvqbS9Gablqpx5P83m0","authDomain":"hostproai-cc2e3.firebaseapp.com","messagingSenderId":"1064836095248","measurementId":"G-RZDJPE4E26","projectNumber":"1064836095248","version":"2"}
+[info] 
+   Thank you for trying our early preview of Next.js support on Firebase Hosting.
+   During the preview, support is best-effort and breaking changes can be expected. Proceed with caution.
+   The integration is known to work with Next.js version 12 - 15.0. You may encounter errors.
+
+   Documentation: https://firebase.google.com/docs/hosting/frameworks/nextjs
+   File a bug: https://github.com/firebase/firebase-tools/issues/new?template=bug_report.md
+   Submit a feature request: https://github.com/firebase/firebase-tools/issues/new?template=feature_request.md
+
+   We'd love to learn from you. Express your interest in helping us shape the future of Firebase Hosting: https://goo.gle/41enW5X
+
+[debug] [2026-02-18T13:47:57.826Z] No OAuth tokens found
+[debug] [2026-02-18T13:47:57.830Z] No OAuth tokens found
+[debug] [2026-02-18T13:47:57.830Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2026-02-18T13:47:57.830Z] > authorizing via signed-in user (rentapog@gmail.com)
+[debug] [2026-02-18T13:47:57.831Z] >>> [apiv2][query] GET https://firebasehosting.googleapis.com/v1beta1/projects/hostproai-cc2e3/sites/hostproai-cc2e3 [none]
+[debug] [2026-02-18T13:47:59.183Z] <<< [apiv2][status] GET https://firebasehosting.googleapis.com/v1beta1/projects/hostproai-cc2e3/sites/hostproai-cc2e3 200
+[debug] [2026-02-18T13:47:59.183Z] <<< [apiv2][body] GET https://firebasehosting.googleapis.com/v1beta1/projects/hostproai-cc2e3/sites/hostproai-cc2e3 {"name":"projects/hostproai-cc2e3/sites/hostproai-cc2e3","defaultUrl":"https://hostproai-cc2e3.web.app","appId":"1:1064836095248:web:6bb7259313f2f048e19995","type":"DEFAULT_SITE"}
+[info]    ▲ Next.js 15.1.11
+   - Environments: .env.local
+
+
+[info]    Creating an optimized production build ...
+
+[info] Failed to compile.
+
+
+[info] ./app/(auth)/layout.tsx
+Error:   x Expected ',', got ';'
+   ,-[/home/user/front/app/(auth)/layout.tsx:1:1]
+ 1 | ('use client';
+   :              ^
+ 2 | 
+ 3 | import { Logo } from "@/components/logo";
+   `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./app/(auth)/layout.tsx
+
+
+[info] 
+> Build failed because of webpack errors
+
+[debug] [2026-02-18T13:48:20.846Z] Error: ENOENT: no such file or directory, open '/home/user/front/.next/server/middleware-manifest.json'
+[error] 
+[error] Error: An unexpected error has occurred.
