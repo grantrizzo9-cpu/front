@@ -1,7 +1,7 @@
 'use client';
 
 import React, { type ReactNode, useState, useEffect } from 'react';
-import { FirebaseProvider } from '@/firebase/provider';
+import { FirebaseProvider } from './provider';
 import { initializeApp, getApps, getApp, FirebaseApp } from 'firebase/app';
 import { getAuth, Auth } from 'firebase/auth';
 import { 
@@ -9,11 +9,11 @@ import {
   Firestore,
   enableNetwork
 } from 'firebase/firestore';
-import { firebaseConfig } from '@/firebase/config';
+import { firebaseConfig } from './config';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { CloudOff, ShieldAlert, Loader2, RefreshCcw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import type { FirebaseServices } from '@/firebase';
+import type { FirebaseServices } from './';
 
 let cachedApp: FirebaseApp | undefined;
 let cachedAuth: Auth | undefined;
