@@ -23,7 +23,7 @@
 
   # This is the configuration for the IDX preview.
   # Last attempt to fix the environment.
-  idx.dev.previews = {
+  idx.previews
     web = {
       title = "Web App";
       manager = "web";
